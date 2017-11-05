@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var sidebarContent: ListView
 
     /**
-     * Sidebar that slides from the left (the second part of drawer)
+     * Sidebar that opens from the left (the second part of drawer)
      */
     private lateinit var sidebar: Sidebar
 
