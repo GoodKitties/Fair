@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="Theme">
+        <attr name="activity_background" format="color" />
+        <attr name="card_background" format="color" />
+        <attr name="fontColor" format="color" />
+        <attr name="tintColor" format="color" />
+        <attr name="list_background" format="color" />
+    </declare-styleable>
+</resources>

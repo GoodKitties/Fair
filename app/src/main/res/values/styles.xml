@@ -1,11 +1,29 @@
 <resources>
 
-    <!-- Base application theme. -->
+    <style name="Ripple" />
+
+    <style name="Ripple.Item">
+        <item name="android:background">?android:selectableItemBackground</item>
+    </style>
+
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorAccent">@color/md_deep_orange_A400</item>
+
+        <!--<item name="activity_background">#312322</item>-->
+        <!--<item name="card_background">#402c2c</item>-->
+        <!--<item name="android:colorBackground">#402c2c</item>-->
+        <!--<item name="md_background_color">#402c2c</item>-->
+        <!--<item name="list_background">#261a1a</item>-->
+        <!--<item name="bs_bottomSheetStyle">@style/BottomSheet.StyleDialog.Night_Red</item>-->
+        <!--<item name="fontColor">#defff7ed</item> &lt;!&ndash; 87% white &ndash;&gt;-->
+        <!--<item name="tintColor">#8affebcf</item> &lt;!&ndash; 54% white &ndash;&gt;-->
+        <!--<item name="android:windowBackground">@null</item>-->
+        <!--<item name="android:alertDialogStyle">@style/AlertDialog.AppCompat</item>-->
+        <!--<item name="tp_selectionColor">?android:colorAccent</item>-->
+        <!--<item name="tp_textColor">?attr/fontColor</item>-->
+        <!--<item name="tp_backgroundColor">?attr/card_background</item>-->
     </style>
 
 </resources>

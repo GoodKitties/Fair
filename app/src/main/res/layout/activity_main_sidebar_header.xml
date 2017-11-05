@@ -8,7 +8,7 @@
     android:orientation="vertical">
 
     <RelativeLayout
-        android:id="@+id/back"
+        android:id="@+id/sidebar_header_area"
         android:layout_width="match_parent"
         android:layout_height="160dp"
         android:background="@color/md_light_blue_500"
@@ -19,8 +19,8 @@
             android:layout_height="match_parent"
             android:layout_marginTop="-20dp"
             android:padding="57dp"
-            android:theme="@style/Ripple.List"
-            android:src="@drawable/logo"/>
+            android:theme="@style/Ripple.Item"
+            android:src="@drawable/sidebar_logo"/>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -44,7 +44,7 @@
                 android:layout_marginStart="-27dp"
                 android:layout_marginLeft="-27dp"
                 android:padding="16dp"
-                android:text="@string/placeholder_short"
+                android:text="@string/guest"
                 android:textColor="#fff"
                 android:textSize="18sp"
                 android:textStyle="bold|italic" />
@@ -106,7 +106,7 @@
         </LinearLayout>
     </LinearLayout>
 
-    <RelativeLayout
+    <!--RelativeLayout
         android:id="@+id/profile_click"
         android:layout_width="match_parent"
         android:layout_height="48dp"
@@ -568,5 +568,5 @@
             android:tint="?attr/tintColor"
             android:visibility="gone"
             app:srcCompat="@drawable/close"/>
-    </RelativeLayout>
+    </RelativeLayout-->
 </LinearLayout>
