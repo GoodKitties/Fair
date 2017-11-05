@@ -1,3 +1,13 @@
 <resources>
+    <!-- placeholders -->
+    <string name="placeholder_long" translatable="false">Sample placeholder text</string>
+    <string name="placeholder_short" translatable="false">Placeholder</string>
+
     <string name="app_name">Fair</string>
+    <string name="my_profile">My Profile</string>
+    <string name="my_diary">My Diary</string>
+    <string name="refresh">Refresh</string>
+    <string name="search">Search</string>
+    <string name="hello_plus_comma">Hello,</string>
+    <string name="add_an_account">Add an account</string>
 </resources>

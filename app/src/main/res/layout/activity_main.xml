@@ -2,17 +2,60 @@
 <android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="dybr.kanedias.com.fair.MainActivity">
 
-    <TextView
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/content_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/standard_toolbar_height"
+                android:minHeight="@dimen/standard_toolbar_height"
+                android:title="@string/app_name">
+            </android.support.v7.widget.Toolbar>
+
+            <android.support.design.widget.TabLayout
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:theme="@style/Theme.AppCompat"
+                android:id="@+id/sliding_tabs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:tabMode="scrollable"/>
+
+        </android.support.design.widget.AppBarLayout>
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/toolbar_search_suggestions"
+            android:layout_width="256dp"
+            android:layout_height="316dp"
+            android:visibility="gone"
+            android:layout_below="@id/header"
+            app:elevation="8dp"/>
+
+    </android.support.design.widget.CoordinatorLayout>
+
+
+    <android.support.design.widget.NavigationView
+        android:id="@+id/navigation"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:menu="@menu/main_navigation_items" />
 
 </android.support.v4.widget.DrawerLayout>
