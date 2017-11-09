@@ -11,4 +11,6 @@
     <string name="hello_plus_comma">Hello,</string>
     <string name="add_an_account">Add an account</string>
     <string name="guest">Guest</string>
+    <string name="open">Open</string>
+    <string name="close">Close</string>
 </resources>

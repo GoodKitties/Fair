@@ -29,7 +29,7 @@ Prerequisites
   do it as Linux kernel contributing guide commands - first line is short
   description, second is empty, third and all rest - full description of
   changes. Use issue you created previously in the first line as with hash sign
-  for GitLab to be able to link them together. You never know when this may be
+  for GitHub to be able to link them together. You never know when this may be
   useful. Like this: `Implement basic UI. Fixes #1`
 
 * Create a merge-request from your fork against the main Fair repo. Wait for

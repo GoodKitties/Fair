@@ -1,10 +1,12 @@
 package dybr.kanedias.com.fair
 
+import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
+import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuInflater
@@ -61,14 +63,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        var header = layoutInflater.inflate(R.layout.activity_main_sidebar_header, sidebarContent, false)
+        // init drawer and sidebar
+        val header = layoutInflater.inflate(R.layout.activity_main_sidebar_header, sidebarContent, false)
 
         sidebarContent.dividerHeight = 0
         sidebarContent.descendantFocusability = ListView.FOCUS_BEFORE_DESCENDANTS
         sidebarContent.addHeaderView(header)
         sidebarContent.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, mutableListOf(1, 2, 3))
-
         sidebar = Sidebar(this)
+
+        // cross-join drawer and menu item in header
+        val drawerToggle = ActionBarDrawerToggle(this, drawer, toolbar, R.string.open, R.string.close)
+        drawer.addDrawerListener(drawerToggle)
+        drawerToggle.syncState()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

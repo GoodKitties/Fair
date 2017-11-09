@@ -81,6 +81,7 @@
     <color name="md_grey_600">#757575</color>
     <color name="md_grey_700">#616161</color>
     <color name="md_grey_800">#424242</color>
+    <color name="md_grey_850">#303030</color>
     <color name="md_grey_900">#212121</color>
     <color name="md_indigo_200">#9fa8da</color>
     <color name="md_indigo_300">#7986cb</color>
