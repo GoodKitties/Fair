@@ -1,14 +1,14 @@
 package dybr.kanedias.com.fair.entities
 
+import dybr.kanedias.com.fair.entities.db.Account
+
 /**
- *
+ * Auth static entity providing info about user login status
  *
  * @author Kanedias
  *
  * Created on 05.11.17
  */
-class Auth {
-    companion object {
-        var user: String? = null
-    }
+object Auth {
+    var user: Account? = null
 }
