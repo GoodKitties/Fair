@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
         sidebarContent.dividerHeight = 0
         sidebarContent.descendantFocusability = ListView.FOCUS_BEFORE_DESCENDANTS
         sidebarContent.addHeaderView(header)
-        sidebarContent.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, mutableListOf(1, 2, 3))
+        sidebarContent.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, emptyList<Int>())
         sidebar = Sidebar(this)
 
         // cross-join drawer and menu item in header

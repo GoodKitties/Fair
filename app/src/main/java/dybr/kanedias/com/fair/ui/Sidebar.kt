@@ -37,6 +37,9 @@ class Sidebar(parent: AppCompatActivity) {
     @BindView(R.id.accounts_area)
     lateinit var accountsArea: LinearLayout
 
+    @BindView(R.id.add_account_row)
+    lateinit var addAccountRow: LinearLayout
+
     /**
      * Sidebar header up/down image (to the right of welcome text)
      */
@@ -52,6 +55,11 @@ class Sidebar(parent: AppCompatActivity) {
             collapse(accountsArea)
             flipAnimator(true, headerFlip).start()
         }
+    }
+
+    @OnClick(R.id.add_account_row)
+    fun addAccount() {
+
     }
 
     /**
