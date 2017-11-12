@@ -1,0 +1,38 @@
+<resources>
+    <!-- placeholders -->
+    <string name="app_name">Fair</string>
+    <string name="my_profile">Мой профиль</string>
+    <string name="my_diary">Мой дневник</string>
+    <string name="refresh">Обновить</string>
+    <string name="search">Поиск</string>
+    <string name="hello_plus_comma">Привет,</string>
+    <string name="add_an_account">Добавить аккаунт</string>
+    <string name="guest">Гость</string>
+    <string name="open">Открыть</string>
+    <string name="close">Закрыть</string>
+    <string name="inbox">Почта</string>
+    <string name="settings">Настройки</string>
+    <string name="go_to">Перейти к…</string>
+    <string name="register_new_account">Регистрация нового аккаунта</string>
+    <string name="email">E-Mail</string>
+    <string name="password">Пароль</string>
+    <string name="confirm_password">Подтвердите пароль</string>
+    <string name="enter">Вход</string>
+    <string name="invalid_email">Некорректный E-Mail!</string>
+    <string name="passwords_not_match">Пароли не совпадают! А должны</string>
+    <string name="invalid_password">Некорректный пароль!</string>
+    <string name="should_not_be_empty">Не должно быть пустым!</string>
+    <string name="register">Регистрация</string>
+    <string name="namespace_example"><![CDATA[dybr.ru/<address>]]></string>
+    <string name="username">Никнейм</string>
+    <string name="checking_in_progress">Проверка…</string>
+    <string name="checking_nickname">Проверка ника…</string>
+    <string name="nickname_already_taken">Ник уже занят!</string>
+    <string name="error_connecting">Ошибка подключения</string>
+    <string name="unexpected_website_error">Неожиданная ошибка сайта</string>
+    <string name="checking_email">Проверка E-Mail…</string>
+    <string name="checking_namespace">Проверка адреса…</string>
+    <string name="email_already_registered">Такой E-Mail уже зарегистрирован!</string>
+    <string name="namespace_already_taken">Такой адрес уже занят!</string>
+    <string name="congrats_diary_registered">Поздравления, успешно зарегистрированы!</string>
+</resources>

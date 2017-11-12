@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         sidebarContent.descendantFocusability = ListView.FOCUS_BEFORE_DESCENDANTS
         sidebarContent.addHeaderView(header)
         sidebarContent.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, emptyList<Int>())
-        sidebar = Sidebar(this)
+        sidebar = Sidebar(drawer, this)
 
         // cross-join drawer and menu item in header
         val drawerToggle = ActionBarDrawerToggle(this, drawer, toolbar, R.string.open, R.string.close)

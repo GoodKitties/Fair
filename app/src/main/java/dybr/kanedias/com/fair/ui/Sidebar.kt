@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.FragmentTransaction
 import android.support.v4.view.animation.FastOutSlowInInterpolator
+import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.ImageView
@@ -22,13 +23,14 @@ import dybr.kanedias.com.fair.R
  *
  * Created on 05.11.17
  */
-class Sidebar(parent: AppCompatActivity) {
+class Sidebar(drawer: DrawerLayout, parent: AppCompatActivity) {
 
     init {
         ButterKnife.bind(this, parent)
     }
 
     private val context = parent
+    private val drawer = drawer
 
     /**
      * Sidebar header
@@ -64,12 +66,11 @@ class Sidebar(parent: AppCompatActivity) {
 
     @OnClick(R.id.add_account_row)
     fun addAccount() {
-        val accFragment = AddAccountFragment()
+        drawer.closeDrawers()
         context.supportFragmentManager.beginTransaction()
                 .addToBackStack("Showing account fragment")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                //.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
-                .replace(R.id.main_drawer_layout, accFragment)
+                .replace(R.id.main_drawer_layout, AddAccountFragment())
                 .commit()
     }
 
