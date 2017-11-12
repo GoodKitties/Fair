@@ -15,7 +15,7 @@ android:
     - tools
 
     # The BuildTools version used
-    - build-tools-26.1.1
+    - build-tools-26.0.2
 
     # The SDK version used
     - android-27
@@ -23,7 +23,13 @@ android:
     # Additional components
     - extra-google-m2repository
     - extra-android-m2repository
+  licenses:
+      - 'android-sdk-license-.+'
+      - 'google-gdk-license-.+'
 
+notifications:
+  email: false
+  slack: dybr:5YSJx3VJQnNNlz5MR6XaUwhc
 
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
