@@ -3,6 +3,7 @@ package dybr.kanedias.com.fair.ui
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
+import android.app.FragmentTransaction
 import android.support.v4.view.animation.FastOutSlowInInterpolator
 import android.support.v7.app.AppCompatActivity
 import android.view.View
@@ -12,6 +13,8 @@ import android.widget.RelativeLayout
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
+import com.afollestad.materialdialogs.MaterialDialog
+import dybr.kanedias.com.fair.AddAccountFragment
 import dybr.kanedias.com.fair.R
 
 /**
@@ -24,6 +27,8 @@ class Sidebar(parent: AppCompatActivity) {
     init {
         ButterKnife.bind(this, parent)
     }
+
+    private val context = parent
 
     /**
      * Sidebar header
@@ -59,7 +64,13 @@ class Sidebar(parent: AppCompatActivity) {
 
     @OnClick(R.id.add_account_row)
     fun addAccount() {
-
+        val accFragment = AddAccountFragment()
+        context.supportFragmentManager.beginTransaction()
+                .addToBackStack("Showing account fragment")
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                //.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+                .replace(R.id.main_drawer_layout, accFragment)
+                .commit()
     }
 
     /**

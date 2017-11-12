@@ -33,8 +33,10 @@ dependencies {
     implementation 'com.j256.ormlite:ormlite-android:5.0'                       // ORM for man pages
     implementation 'com.squareup.okhttp3:okhttp:3.8.1'                          // android http client
     implementation 'com.afollestad.material-dialogs:core:0.9.5.0'               // material design for dialogs
+    implementation 'com.github.WellingtonCosta.convalida:convalida:1.0.5'       // validation of text inputs
 
-    kapt 'com.jakewharton:butterknife-compiler:8.8.1'                           // Kotlin annotation processor
+    kapt 'com.jakewharton:butterknife-compiler:8.8.1'                           // Kotlin annotation processors
+    kapt 'com.github.WellingtonCosta.convalida:convalida-compiler:1.0.5'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
