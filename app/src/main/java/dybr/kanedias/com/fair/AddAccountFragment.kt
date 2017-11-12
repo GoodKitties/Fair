@@ -15,15 +15,11 @@ import butterknife.ButterKnife
 import butterknife.OnCheckedChanged
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
-import com.google.gson.Gson
 import convalida.library.Convalida
 import convalida.library.ConvalidaValidator
 import dybr.kanedias.com.fair.ui.LoginInputs
 import dybr.kanedias.com.fair.ui.RegisterInputs
-import okhttp3.Call
-import okhttp3.Callback
 import okhttp3.Request
-import okhttp3.Response
 import org.json.JSONObject
 import java.io.IOException
 
@@ -65,6 +61,9 @@ class AddAccountFragment : Fragment() {
         return root
     }
 
+    /**
+     * Show/hide additional register fields, change main button text
+     */
     @OnCheckedChanged(R.id.register_checkbox)
     fun switchToRegister(checked: Boolean) {
         if (checked) {
@@ -82,6 +81,9 @@ class AddAccountFragment : Fragment() {
         }
     }
 
+    /**
+     * Performs register/login call after all fields are validated
+     */
     @OnClick(R.id.confirm_button)
     fun confirm() {
         if (!validator.validateFields()) {
@@ -104,12 +106,27 @@ class AddAccountFragment : Fragment() {
         }
     }
 
+    /**
+     * Registration steps.
+     * These represent server-side sequence of operation.
+     *
+     * @see RegisterCallback
+     */
     enum class Step {
         CHECK_USERNAME,
         CHECK_EMAIL,
-        CHECK_NAMESPACE
+        CHECK_NAMESPACE,
     }
 
+    /**
+     * Pre-registration async checks and registration.
+     *
+     * Performs checks for username, email, address not to be taken.
+     * If something goes wrong, dismisses the dialog and shows toast about what has gone wrong.
+     * If all is successful, posts registration information, saves account and dismisses both dialog and fragment.
+     *
+     * Be sure to launch and pass progress dialog prior to launching this.
+     */
     inner class RegisterCallback(dialog: MaterialDialog): AsyncTask<Step, Step, Boolean>() {
 
         private val pd = dialog
@@ -118,6 +135,7 @@ class AddAccountFragment : Fragment() {
             val step = initial[0]!!
             publishProgress(step)
 
+            // initialize check urls/error strings
             val url = when (step) {
                 Step.CHECK_USERNAME -> "${Network.IDENTITY_ENDPOINT}/exists?name=${usernameInput.editText!!.text}"
                 Step.CHECK_EMAIL -> "${Network.USER_ENDPOINT}/exists?email=${emailInput.editText!!.text}"
@@ -128,14 +146,18 @@ class AddAccountFragment : Fragment() {
                 Step.CHECK_EMAIL -> R.string.email_already_registered
                 Step.CHECK_NAMESPACE -> R.string.namespace_already_taken
             })
+
             val req = Request.Builder().url(url).build()
             try {
+                // call it synchronously, we don't want callback hell here
                 val resp = Network.httpClient.newCall(req).execute()
                 if (!resp.isSuccessful) {
+                    // TODO: this normally shouldn't happen but it'd be good to test this!
                     makeToast(getString(R.string.unexpected_website_error))
                     return false
                 }
 
+                // body looks like { "result": true }
                 val json = JSONObject(resp.body()?.string())
                 val result = json.get("result") as Boolean
                 if (result) {
@@ -167,6 +189,7 @@ class AddAccountFragment : Fragment() {
         }
 
         override fun onProgressUpdate(vararg value: Step?) {
+            // update text of progress dialog to current step description
             when (value[0]!!) {
                 Step.CHECK_USERNAME -> pd.setContent(R.string.checking_nickname)
                 Step.CHECK_EMAIL -> pd.setContent(R.string.checking_email)
@@ -175,6 +198,7 @@ class AddAccountFragment : Fragment() {
         }
 
         override fun onPostExecute(result: Boolean?) {
+            // post success message and dismiss fragment if all went well
             if (result!!) {
                 makeToast(getString(R.string.congrats_diary_registered))
                 fragmentManager!!.popBackStack()

@@ -14,11 +14,15 @@ import android.widget.RelativeLayout
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
-import com.afollestad.materialdialogs.MaterialDialog
 import dybr.kanedias.com.fair.AddAccountFragment
+import dybr.kanedias.com.fair.MainActivity
 import dybr.kanedias.com.fair.R
 
 /**
+ * Sidebar views and controls.
+ * This represents sidebar that can be shown by dragging from the left of main window.
+ *
+ * @see MainActivity
  * @author Kanedias
  *
  * Created on 05.11.17
@@ -53,6 +57,10 @@ class Sidebar(drawer: DrawerLayout, parent: AppCompatActivity) {
     @BindView(R.id.header_flip)
     lateinit var headerFlip: ImageView
 
+    /**
+     * Hides/shows add-account button and list of saved logins
+     * Positioned just below the header of the sidebar
+     */
     @OnClick(R.id.sidebar_header_area)
     fun toggleHeader() {
         if (accountsArea.visibility == View.GONE) {
@@ -64,6 +72,9 @@ class Sidebar(drawer: DrawerLayout, parent: AppCompatActivity) {
         }
     }
 
+    /**
+     * Shows add-account fragment instead of main view
+     */
     @OnClick(R.id.add_account_row)
     fun addAccount() {
         drawer.closeDrawers()

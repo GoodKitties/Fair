@@ -14,6 +14,9 @@ import com.j256.ormlite.table.DatabaseTable
 @DatabaseTable(tableName = "account")
 class Account {
 
+    /**
+     * Inner id in the database, not used yet
+     */
     @DatabaseField(id = true, generatedId = true)
     var id: Long = 0
 
