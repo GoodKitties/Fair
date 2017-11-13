@@ -15,11 +15,15 @@ import butterknife.ButterKnife
 import butterknife.OnCheckedChanged
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
+import com.google.gson.Gson
 import convalida.library.Convalida
 import convalida.library.ConvalidaValidator
+import dybr.kanedias.com.fair.entities.Auth
+import dybr.kanedias.com.fair.entities.dto.RegisterRequest
 import dybr.kanedias.com.fair.ui.LoginInputs
 import dybr.kanedias.com.fair.ui.RegisterInputs
 import okhttp3.Request
+import okhttp3.RequestBody
 import org.json.JSONObject
 import java.io.IOException
 
@@ -153,11 +157,11 @@ class AddAccountFragment : Fragment() {
                 val resp = Network.httpClient.newCall(req).execute()
                 if (!resp.isSuccessful) {
                     // TODO: this normally shouldn't happen but it'd be good to test this!
-                    makeToast(getString(R.string.unexpected_website_error))
-                    return false
+                    throw IOException(getString(R.string.unexpected_website_error))
                 }
 
                 // body looks like { "result": true }
+                // no need in heavy-lifting through Gson
                 val json = JSONObject(resp.body()?.string())
                 val result = json.get("result") as Boolean
                 if (result) {
@@ -177,6 +181,9 @@ class AddAccountFragment : Fragment() {
             } catch (ioex: IOException) {
                 val errorText =  getString(R.string.error_connecting)
                 makeToast("$errorText: ${ioex.localizedMessage}")
+            } catch (isex: IllegalArgumentException) {
+                val errorText =  getString(R.string.error_in_website_answer)
+                makeToast("$errorText: ${isex.message}")
             } finally {
                 pd.dismiss()
             }
@@ -184,8 +191,45 @@ class AddAccountFragment : Fragment() {
             return false
         }
 
-        fun sendRegisterInfo() {
+        /**
+         * Send registration request and validate the result.
+         *
+         * This also sets session cookies in http client that are needed
+         * to call authenticated-only API functions.
+         */
+        private fun sendRegisterInfo() {
+            val regRequest = RegisterRequest(
+                    name = usernameInput.editText!!.text.toString(),
+                    email = emailInput.editText!!.text.toString(),
+                    uri = namespaceInput.editText!!.text.toString(),
+                    password = passwordInput.editText!!.text.toString(),
+                    confirmPassword = passwordInput.editText!!.text.toString(),
+                    title = usernameInput.editText!!.text.toString() // use same title as username for now
+            )
+            val body = RequestBody.create(Network.MIME_JSON, Gson().toJson(regRequest))
+            val req = Request.Builder().post(body).url(Network.REGISTER_ENDPOINT).build()
+            val resp = Network.httpClient.newCall(req).execute() // if it throws, we still catch it in [doInBackground]
+            if (!resp.isSuccessful) {
+                throw IOException(getString(R.string.unexpected_website_error))
+            }
 
+            // body looks like { "status": "OK" }
+            val json = JSONObject(resp.body()?.string())
+            val result = json.get("status") as String
+            if (result != "OK") {
+                throw IllegalStateException(getString(R.string.registration_failed))
+            }
+
+            // if we're here then we survived through registration checks
+            // and registration itself was successful, let's save what we have
+            saveAuth(regRequest)
+        }
+
+        /**
+         * Persist registration info in DB, set in [Auth]
+         */
+        private fun saveAuth(regRequest: RegisterRequest) {
+            TODO("Not so fast...")
         }
 
         override fun onProgressUpdate(vararg value: Step?) {

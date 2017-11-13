@@ -35,4 +35,6 @@
     <string name="email_already_registered">Такой E-Mail уже зарегистрирован!</string>
     <string name="namespace_already_taken">Такой адрес уже занят!</string>
     <string name="congrats_diary_registered">Поздравления, успешно зарегистрированы!</string>
+    <string name="registration_failed">Регистрация неуспешна :(</string>
+    <string name="error_in_website_answer">Ошибка в ответе от сайта</string>
 </resources>

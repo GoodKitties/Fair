@@ -33,9 +33,11 @@
     <string name="nickname_already_taken">Nickname already taken!</string>
     <string name="error_connecting">Error connecting</string>
     <string name="unexpected_website_error">Unexpected website error</string>
-    <string name="checking_email">Checking email...</string>
-    <string name="checking_namespace">Checking namespace...</string>
+    <string name="checking_email">Checking email…</string>
+    <string name="checking_namespace">Checking namespace…</string>
     <string name="email_already_registered">Email is already registered</string>
     <string name="namespace_already_taken">Namespace already taken</string>
     <string name="congrats_diary_registered">Congratulations, diary registered!</string>
+    <string name="registration_failed">Registration failed :(</string>
+    <string name="error_in_website_answer">Error in website answer</string>
 </resources>
