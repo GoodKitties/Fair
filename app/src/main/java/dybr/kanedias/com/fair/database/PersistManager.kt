@@ -8,6 +8,8 @@ import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
 import dybr.kanedias.com.fair.entities.db.Account
+import dybr.kanedias.com.fair.entities.db.Diary
+import dybr.kanedias.com.fair.entities.db.Identity
 
 import java.sql.SQLException
 
@@ -19,17 +21,14 @@ import java.sql.SQLException
 class PersistManager(context: Context) : OrmLiteSqliteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     // Dao fast access links
-    private var accDao: Dao<Account, Long>? = null
-        get() {
-            if (field == null) {
-                field = getDao(Account::class.java)
-            }
-            return field
-        }
+    val identityDao: Dao<Identity, Long> = getDao(Identity::class.java)
+    val accDao: Dao<Account, Long> = getDao(Account::class.java)
 
     override fun onCreate(db: SQLiteDatabase, connectionSource: ConnectionSource) {
         try {
             TableUtils.createTable<Account>(connectionSource, Account::class.java)
+            TableUtils.createTable<Identity>(connectionSource, Identity::class.java)
+            TableUtils.createTable<Diary>(connectionSource, Diary::class.java)
         } catch (e: SQLException) {
             Log.e(TAG, "error creating DB " + DATABASE_NAME)
             throw RuntimeException(e)
@@ -44,6 +43,8 @@ class PersistManager(context: Context) : OrmLiteSqliteOpenHelper(context, DATABA
     fun clearAllTables() {
         try {
             TableUtils.clearTable<Account>(DbProvider.helper.getConnectionSource(), Account::class.java)
+            TableUtils.clearTable<Identity>(DbProvider.helper.getConnectionSource(), Identity::class.java)
+            TableUtils.clearTable<Diary>(DbProvider.helper.getConnectionSource(), Diary::class.java)
         } catch (e: SQLException) {
             throw RuntimeException(e)
         }

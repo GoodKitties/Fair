@@ -1,38 +1,28 @@
 package dybr.kanedias.com.fair.entities.db
 
 import com.j256.ormlite.field.DatabaseField
-import com.j256.ormlite.field.ForeignCollectionField
 import com.j256.ormlite.table.DatabaseTable
 
 /**
- * Basic account class with persistence layer.
+ * Account class for logging in.
  *
  * @author Kanedias
  *
- * Created on 11.11.17
+ * Created on 14.11.17
  */
 @DatabaseTable(tableName = "account")
 class Account {
-
     /**
-     * Inner id in the database, not used yet
+     * Inner id in the database, not used
      */
-    @DatabaseField(id = true, generatedId = true)
+    @DatabaseField(generatedId = true)
     var id: Long = 0
 
     /**
-     * E-Mail (used as username) as in login field on dybr.ru
+     * E-Mail user when registered
      */
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false, unique = true)
     var email: String = ""
-
-    /**
-     * Chosen username
-     */
-    @DatabaseField(canBeNull = false)
-    var name: String = ""
-
-    // don't grab identities, don't need them yet
 
     /**
      * Password in plaintext. In Android all application data
@@ -41,4 +31,10 @@ class Account {
      */
     @DatabaseField(canBeNull = false)
     var password: String = ""
+
+    /**
+     * Whether this is current account for the app
+     */
+    @DatabaseField(canBeNull = false)
+    var current: Boolean = false
 }

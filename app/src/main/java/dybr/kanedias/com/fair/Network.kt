@@ -1,9 +1,10 @@
 package dybr.kanedias.com.fair
 
-import okhttp3.ConnectionPool
-import okhttp3.Dispatcher
-import okhttp3.MediaType
-import okhttp3.OkHttpClient
+import android.content.Context
+import com.franmontiel.persistentcookiejar.PersistentCookieJar
+import com.franmontiel.persistentcookiejar.cache.SetCookieCache
+import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
+import okhttp3.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -21,10 +22,18 @@ object Network {
 
     val MIME_JSON = MediaType.parse("application/json")
 
-    val httpClient = OkHttpClient.Builder()
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(5, TimeUnit.SECONDS)
-            .connectionPool(ConnectionPool())
-            .dispatcher(Dispatcher())
-            .build()
+    lateinit var httpClient: OkHttpClient
+
+    fun init(ctx: Context) {
+        val cookieJar = PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(ctx))
+        httpClient =  OkHttpClient.Builder()
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .connectionPool(ConnectionPool())
+                .cookieJar(cookieJar)
+                .dispatcher(Dispatcher())
+                .build()
+    }
+
+
 }

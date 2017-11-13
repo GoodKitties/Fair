@@ -17,6 +17,7 @@ class MainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         DbProvider.setHelper(this)
+        Network.init(this)
     }
 
     override fun onTerminate() {

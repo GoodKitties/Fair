@@ -18,7 +18,9 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.google.gson.Gson
 import convalida.library.Convalida
 import convalida.library.ConvalidaValidator
+import dybr.kanedias.com.fair.database.DbProvider
 import dybr.kanedias.com.fair.entities.Auth
+import dybr.kanedias.com.fair.entities.db.Account
 import dybr.kanedias.com.fair.entities.dto.RegisterRequest
 import dybr.kanedias.com.fair.ui.LoginInputs
 import dybr.kanedias.com.fair.ui.RegisterInputs
@@ -177,7 +179,7 @@ class AddAccountFragment : Fragment() {
                     return true
                 }
 
-                doInBackground(Step.values()[step.ordinal + 1])
+                return doInBackground(Step.values()[step.ordinal + 1])
             } catch (ioex: IOException) {
                 val errorText =  getString(R.string.error_connecting)
                 makeToast("$errorText: ${ioex.localizedMessage}")
@@ -229,7 +231,11 @@ class AddAccountFragment : Fragment() {
          * Persist registration info in DB, set in [Auth]
          */
         private fun saveAuth(regRequest: RegisterRequest) {
-            TODO("Not so fast...")
+            val acc = Account()
+            acc.email = regRequest.email
+            acc.password = regRequest.password
+            acc.current = true
+            DbProvider.helper.accDao.create(acc)
         }
 
         override fun onProgressUpdate(vararg value: Step?) {

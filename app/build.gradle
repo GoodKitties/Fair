@@ -33,6 +33,7 @@ dependencies {
     implementation 'com.jakewharton:butterknife:8.8.1'                          // Annotation processor
     implementation 'com.j256.ormlite:ormlite-android:5.0'                       // ORM for man pages
     implementation 'com.squareup.okhttp3:okhttp:3.8.1'                          // android http client
+    implementation 'com.github.franmontiel:PersistentCookieJar:v1.0.1'          // cookies addon for okhttp
     implementation 'com.afollestad.material-dialogs:core:0.9.5.0'               // material design for dialogs
     implementation 'com.github.WellingtonCosta.convalida:convalida:1.0.5'       // validation of text inputs
 
