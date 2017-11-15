@@ -21,6 +21,7 @@ import convalida.library.ConvalidaValidator
 import dybr.kanedias.com.fair.database.DbProvider
 import dybr.kanedias.com.fair.entities.Auth
 import dybr.kanedias.com.fair.entities.db.Account
+import dybr.kanedias.com.fair.entities.dto.LoginRequest
 import dybr.kanedias.com.fair.entities.dto.RegisterRequest
 import dybr.kanedias.com.fair.ui.LoginInputs
 import dybr.kanedias.com.fair.ui.RegisterInputs
@@ -28,6 +29,7 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import org.json.JSONObject
 import java.io.IOException
+import java.net.HttpURLConnection
 
 /**
  * @author Kanedias
@@ -58,7 +60,7 @@ class AddAccountFragment : Fragment() {
     @BindView(R.id.register_checkbox)
     lateinit var registerSwitch: CheckBox
 
-    lateinit var validator: ConvalidaValidator
+    private lateinit var validator: ConvalidaValidator
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val root = inflater.inflate(R.layout.fragment_create_account, container, false)
@@ -96,7 +98,7 @@ class AddAccountFragment : Fragment() {
             return
         }
 
-        var progressDialog = MaterialDialog.Builder(activity!!)
+        val progressDialog = MaterialDialog.Builder(activity!!)
                 .title(R.string.checking_in_progress)
                 .content(R.string.checking_in_progress)
                 .progress(true, 0)
@@ -105,10 +107,69 @@ class AddAccountFragment : Fragment() {
         progressDialog.show()
         if (registerSwitch.isChecked) {
             // send register query
-            progressDialog.setContent(R.string.checking_nickname)
             RegisterCallback(progressDialog).execute(Step.CHECK_USERNAME)
         } else {
             // send login query
+            LoginCallback(progressDialog).execute()
+        }
+    }
+
+    inner class LoginCallback(dialog: MaterialDialog): AsyncTask<Unit, Unit, Boolean>() {
+
+        private val pd = dialog
+
+        override fun doInBackground(vararg nothing: Unit?): Boolean {
+            val loginRequest = LoginRequest(
+                    email = emailInput.editText!!.text.toString(),
+                    password = passwordInput.editText!!.text.toString()
+            )
+            val body = RequestBody.create(Network.MIME_JSON, Gson().toJson(loginRequest))
+            val req = Request.Builder().post(body).url(Network.LOGIN_ENDPOINT).build()
+
+            try {
+                val resp = Network.httpClient.newCall(req).execute()
+
+                // unauthorized error is returned when smth is wrong with your input
+                if (resp.networkResponse()?.code() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                    makeToast(getString(R.string.invalid_credentials))
+                    return false
+                }
+
+                // we should have the cookie now
+                if (resp.isSuccessful && resp.header("Set-Cookie") != null) {
+                    saveAuth(loginRequest)
+                    return true
+                }
+
+            } catch (ioex: IOException) {
+                val errorText = getString(R.string.error_connecting)
+                makeToast("$errorText: ${ioex.localizedMessage}")
+            } finally {
+                pd.dismiss()
+            }
+
+            return false
+        }
+
+        /**
+         * Persist login info in DB, set in [Auth]
+         */
+        private fun saveAuth(loginRequest: LoginRequest) {
+            val acc = Account()
+            acc.email = loginRequest.email
+            acc.password = loginRequest.password
+            acc.current = true
+
+            DbProvider.helper.accDao.create(acc)
+            Auth.user = acc
+        }
+
+        override fun onPostExecute(result: Boolean?) {
+            // post success message and dismiss fragment if all went well
+            if (result!!) {
+                makeToast(getString(R.string.login_successful))
+                fragmentManager!!.popBackStack()
+            }
         }
     }
 
@@ -235,7 +296,9 @@ class AddAccountFragment : Fragment() {
             acc.email = regRequest.email
             acc.password = regRequest.password
             acc.current = true
+
             DbProvider.helper.accDao.create(acc)
+            Auth.user = acc
         }
 
         override fun onProgressUpdate(vararg value: Step?) {

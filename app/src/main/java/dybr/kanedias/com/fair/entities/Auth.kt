@@ -1,5 +1,6 @@
 package dybr.kanedias.com.fair.entities
 
+import dybr.kanedias.com.fair.entities.db.Account
 import dybr.kanedias.com.fair.entities.db.Identity
 
 /**
@@ -10,5 +11,5 @@ import dybr.kanedias.com.fair.entities.db.Identity
  * Created on 05.11.17
  */
 object Auth {
-    var user: Identity? = null
+    var user: Account? = null
 }

@@ -37,6 +37,8 @@
     <string name="congrats_diary_registered">Поздравления, успешно зарегистрированы!</string>
     <string name="registration_failed">Регистрация неуспешна :(</string>
     <string name="error_in_website_answer">Ошибка в ответе от сайта</string>
-    <string name="delete_account">Delete account</string>
-    <string name="are_you_sure">Are you sure?</string>
+    <string name="delete_account">Удалить аккаунт</string>
+    <string name="are_you_sure">Вы уверены?</string>
+    <string name="invalid_credentials">Неправильные логин/пароль!</string>
+    <string name="login_successful">Успешный вход</string>
 </resources>

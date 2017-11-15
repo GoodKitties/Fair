@@ -6,7 +6,6 @@ import android.animation.ValueAnimator
 import android.app.FragmentTransaction
 import android.support.v4.view.animation.FastOutSlowInInterpolator
 import android.support.v4.widget.DrawerLayout
-import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -19,6 +18,7 @@ import dybr.kanedias.com.fair.AddAccountFragment
 import dybr.kanedias.com.fair.MainActivity
 import dybr.kanedias.com.fair.R
 import dybr.kanedias.com.fair.database.DbProvider
+import dybr.kanedias.com.fair.entities.Auth
 
 /**
  * Sidebar views and controls.
@@ -29,7 +29,7 @@ import dybr.kanedias.com.fair.database.DbProvider
  *
  * Created on 05.11.17
  */
-class Sidebar(drawer: DrawerLayout, parent: AppCompatActivity) {
+class Sidebar(drawer: DrawerLayout, parent: MainActivity) {
 
     init {
         ButterKnife.bind(this, parent)
@@ -89,7 +89,7 @@ class Sidebar(drawer: DrawerLayout, parent: AppCompatActivity) {
         val allAccs = DbProvider.helper.accDao.queryForAll()
 
         // find accounts we didn't add yet and those that were deleted
-        for (idx in 0..accountsArea.childCount) {
+        for (idx in 0 until accountsArea.childCount) {
             val row = accountsArea.getChildAt(idx)
             val accName = row.findViewById<TextView>(R.id.account_name)
 
@@ -113,7 +113,15 @@ class Sidebar(drawer: DrawerLayout, parent: AppCompatActivity) {
             val accRemove = row.findViewById<ImageView>(R.id.account_remove)
 
             // Account row consists of account name and delete button to the right
+
+            // account name handler - switch to it
             accName.text = acc.name
+            accName.setOnClickListener({
+                Auth.user = acc
+                activity.reLogin()
+            })
+
+            // account deleter handler
             val deleteBuilder = DbProvider.helper.accDao.deleteBuilder()
             deleteBuilder.where().eq("name", acc.name)
             accRemove.setOnClickListener {

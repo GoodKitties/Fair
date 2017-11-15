@@ -93,4 +93,8 @@ class MainActivity : AppCompatActivity() {
 
         super.onBackPressed()
     }
+
+    fun reLogin() {
+
+    }
 }

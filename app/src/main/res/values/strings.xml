@@ -42,4 +42,6 @@
     <string name="error_in_website_answer">Error in website answer</string>
     <string name="delete_account">Delete account</string>
     <string name="are_you_sure">Are you sure?</string>
+    <string name="invalid_credentials">Invalid credentials!</string>
+    <string name="login_successful">Login successful</string>
 </resources>

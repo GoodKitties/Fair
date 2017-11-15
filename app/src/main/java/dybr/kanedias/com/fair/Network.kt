@@ -19,6 +19,7 @@ object Network {
     val IDENTITY_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/identity"
     val USER_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/user"
     val REGISTER_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/register"
+    val LOGIN_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/login"
 
     val MIME_JSON = MediaType.parse("application/json")
 
