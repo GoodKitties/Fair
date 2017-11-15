@@ -6,6 +6,11 @@ import com.j256.ormlite.table.DatabaseTable
 /**
  * Account class for logging in.
  *
+ * A distinction between this and [Identity] is that account
+ * holds only auth and basic naming info which is stored after registration or first login.
+ * The account itself is almost always immutable, whereas [Identity] is subject to change
+ * on favourite/subscribers additions.
+ *
  * @author Kanedias
  *
  * Created on 14.11.17
@@ -23,6 +28,12 @@ class Account {
      */
     @DatabaseField(canBeNull = false, unique = true)
     var email: String = ""
+
+    /**
+     * Chosen nickname
+     */
+    @DatabaseField(canBeNull = false, unique = true)
+    var name: String = ""
 
     /**
      * Password in plaintext. In Android all application data

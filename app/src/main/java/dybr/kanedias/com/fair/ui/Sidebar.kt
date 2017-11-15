@@ -10,13 +10,15 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.RelativeLayout
+import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
+import com.afollestad.materialdialogs.MaterialDialog
 import dybr.kanedias.com.fair.AddAccountFragment
 import dybr.kanedias.com.fair.MainActivity
 import dybr.kanedias.com.fair.R
+import dybr.kanedias.com.fair.database.DbProvider
 
 /**
  * Sidebar views and controls.
@@ -33,23 +35,15 @@ class Sidebar(drawer: DrawerLayout, parent: AppCompatActivity) {
         ButterKnife.bind(this, parent)
     }
 
-    private val context = parent
     private val drawer = drawer
-
-    /**
-     * Sidebar header
-     */
-    @BindView(R.id.sidebar_header_area)
-    lateinit var sidebarHeader: RelativeLayout
+    private val activity = parent
+    private val fragManager = parent.supportFragmentManager
 
     /**
      * Sidebar accounts area (bottom of header)
      */
     @BindView(R.id.accounts_area)
     lateinit var accountsArea: LinearLayout
-
-    @BindView(R.id.add_account_row)
-    lateinit var addAccountRow: LinearLayout
 
     /**
      * Sidebar header up/down image (to the right of welcome text)
@@ -58,7 +52,7 @@ class Sidebar(drawer: DrawerLayout, parent: AppCompatActivity) {
     lateinit var headerFlip: ImageView
 
     /**
-     * Hides/shows add-account button and list of saved logins
+     * Hides/shows add-account button and list of saved accounts
      * Positioned just below the header of the sidebar
      */
     @OnClick(R.id.sidebar_header_area)
@@ -78,11 +72,63 @@ class Sidebar(drawer: DrawerLayout, parent: AppCompatActivity) {
     @OnClick(R.id.add_account_row)
     fun addAccount() {
         drawer.closeDrawers()
-        context.supportFragmentManager.beginTransaction()
+        fragManager.beginTransaction()
                 .addToBackStack("Showing account fragment")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .replace(R.id.main_drawer_layout, AddAccountFragment())
                 .commit()
+
+        // refresh accounts whenever fragments change
+        fragManager.addOnBackStackChangedListener { updateAccountsArea() }
+    }
+
+    /**
+     * Update accounts area after possible account change
+     */
+    private fun updateAccountsArea() {
+        val allAccs = DbProvider.helper.accDao.queryForAll()
+
+        // find accounts we didn't add yet and those that were deleted
+        for (idx in 0..accountsArea.childCount) {
+            val row = accountsArea.getChildAt(idx)
+            val accName = row.findViewById<TextView>(R.id.account_name)
+
+            // skip add account button and misc controls
+            if (accName == null)
+                continue
+
+            val existingName = accName.text.toString()
+            val deleted = allAccs.removeAll { acc -> acc.name == existingName } // I hope there won't be HUNDREDS of them
+            if (!deleted) {
+                // it was deleted in DB, purge it in next event loop iteration
+                accountsArea.post { accountsArea.removeView(row) }
+            }
+        }
+
+        // now add remaining accounts
+        val inflater = activity.layoutInflater
+        for (acc in allAccs) {
+            val row = inflater.inflate(R.layout.activity_main_sidebar_account_row, accountsArea, true)
+            val accName = row.findViewById<TextView>(R.id.account_name)
+            val accRemove = row.findViewById<ImageView>(R.id.account_remove)
+
+            // Account row consists of account name and delete button to the right
+            accName.text = acc.name
+            val deleteBuilder = DbProvider.helper.accDao.deleteBuilder()
+            deleteBuilder.where().eq("name", acc.name)
+            accRemove.setOnClickListener {
+                // delete account confirmation dialog
+                MaterialDialog.Builder(activity)
+                        .title(R.string.delete_account)
+                        .content(R.string.are_you_sure)
+                        .positiveText(android.R.string.yes)
+                        .negativeText(android.R.string.no)
+                        .onPositive{ _, _ ->
+                            DbProvider.helper.accDao.delete(deleteBuilder.prepare())
+                            accountsArea.removeView(row)
+                        }.show()
+            }
+        }
     }
 
     /**

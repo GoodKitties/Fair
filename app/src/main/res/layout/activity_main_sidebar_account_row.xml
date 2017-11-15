@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:paddingStart="18dp"
+    android:paddingEnd="18dp"
+    android:layout_height="48dp">
+
+    <TextView
+        android:id="@+id/account_name"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:textColor="#fff"
+        android:gravity="center_vertical"
+        android:layout_alignParentBottom="true"
+        android:text="@string/placeholder_short"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:layout_width="36dp"
+        android:id="@+id/account_remove"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:padding="6dp"
+        android:layout_centerVertical="true"
+        android:src="@drawable/close"
+        android:tint="#fff"
+        android:layout_height="36dp" />
+
+</RelativeLayout>
