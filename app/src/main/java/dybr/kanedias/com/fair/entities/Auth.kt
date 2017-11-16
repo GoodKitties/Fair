@@ -11,5 +11,7 @@ import dybr.kanedias.com.fair.entities.db.Identity
  * Created on 05.11.17
  */
 object Auth {
-    var user: Account? = null
+    val guest = Account().apply { name = "Guest" }
+
+    var user = guest
 }

@@ -13,7 +13,13 @@ import android.view.MenuInflater
 import android.widget.*
 import butterknife.BindView
 import butterknife.ButterKnife
+import dybr.kanedias.com.fair.entities.Auth
+import dybr.kanedias.com.fair.misc.Android
 import dybr.kanedias.com.fair.ui.Sidebar
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.launch
+import java.io.IOException
 
 /**
  * Main activity with drawer and sliding tabs where most of user interaction happens.
@@ -94,7 +100,22 @@ class MainActivity : AppCompatActivity() {
         super.onBackPressed()
     }
 
+    /**
+     * Logs in with an account specified in [Auth.user]
+     */
     fun reLogin() {
-
+        launch(Android) {
+            try {
+                val success = async(CommonPool) { Network.login(Auth.user) }
+                if (success.await()) {
+                    Toast.makeText(this@MainActivity, R.string.login_successful, Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this@MainActivity, R.string.invalid_credentials, Toast.LENGTH_SHORT).show()
+                }
+            } catch (ioex: IOException) {
+                val errorText = getString(R.string.error_connecting)
+                Toast.makeText(this@MainActivity, "$errorText: ${ioex.localizedMessage}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }

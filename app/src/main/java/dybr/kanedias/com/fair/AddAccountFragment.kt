@@ -29,7 +29,6 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import org.json.JSONObject
 import java.io.IOException
-import java.net.HttpURLConnection
 
 /**
  * @author Kanedias
@@ -114,33 +113,35 @@ class AddAccountFragment : Fragment() {
         }
     }
 
+    /**
+     * Authentication task.
+     * If auth is successful, saves account and dismisses both dialog and fragment.
+     *
+     * Be sure to launch and pass progress dialog prior to launching this.
+     */
     inner class LoginCallback(dialog: MaterialDialog): AsyncTask<Unit, Unit, Boolean>() {
 
         private val pd = dialog
 
+        /**
+         * Just delegate auth to [Network.login] and handle the result
+         */
         override fun doInBackground(vararg nothing: Unit?): Boolean {
-            val loginRequest = LoginRequest(
-                    email = emailInput.editText!!.text.toString(),
-                    password = passwordInput.editText!!.text.toString()
-            )
-            val body = RequestBody.create(Network.MIME_JSON, Gson().toJson(loginRequest))
-            val req = Request.Builder().post(body).url(Network.LOGIN_ENDPOINT).build()
-
             try {
-                val resp = Network.httpClient.newCall(req).execute()
+                val acc = Account()
+                acc.apply {
+                    email = emailInput.editText!!.text.toString()
+                    password = passwordInput.editText!!.text.toString()
+                    current = true
+                }
 
-                // unauthorized error is returned when smth is wrong with your input
-                if (resp.networkResponse()?.code() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                if (!Network.login(acc)) {
                     makeToast(getString(R.string.invalid_credentials))
                     return false
                 }
 
-                // we should have the cookie now
-                if (resp.isSuccessful && resp.header("Set-Cookie") != null) {
-                    saveAuth(loginRequest)
-                    return true
-                }
-
+                saveAuth(acc)
+                return true
             } catch (ioex: IOException) {
                 val errorText = getString(R.string.error_connecting)
                 makeToast("$errorText: ${ioex.localizedMessage}")
@@ -154,12 +155,7 @@ class AddAccountFragment : Fragment() {
         /**
          * Persist login info in DB, set in [Auth]
          */
-        private fun saveAuth(loginRequest: LoginRequest) {
-            val acc = Account()
-            acc.email = loginRequest.email
-            acc.password = loginRequest.password
-            acc.current = true
-
+        private fun saveAuth(acc: Account) {
             DbProvider.helper.accDao.create(acc)
             Auth.user = acc
         }
@@ -198,6 +194,10 @@ class AddAccountFragment : Fragment() {
 
         private val pd = dialog
 
+        /**
+         * Recursive, does auth checks one by one. If all checks pass,
+         * calls [sendRegisterInfo]
+         */
         override fun doInBackground(vararg initial: Step?) : Boolean {
             val step = initial[0]!!
             publishProgress(step)
@@ -262,12 +262,12 @@ class AddAccountFragment : Fragment() {
          */
         private fun sendRegisterInfo() {
             val regRequest = RegisterRequest(
-                    name = usernameInput.editText!!.text.toString(),
-                    email = emailInput.editText!!.text.toString(),
-                    uri = namespaceInput.editText!!.text.toString(),
-                    password = passwordInput.editText!!.text.toString(),
-                    confirmPassword = passwordInput.editText!!.text.toString(),
-                    title = usernameInput.editText!!.text.toString() // use same title as username for now
+                name = usernameInput.editText!!.text.toString(),
+                email = emailInput.editText!!.text.toString(),
+                uri = namespaceInput.editText!!.text.toString(),
+                password = passwordInput.editText!!.text.toString(),
+                confirmPassword = passwordInput.editText!!.text.toString(),
+                title = usernameInput.editText!!.text.toString() // use same title as username for now
             )
             val body = RequestBody.create(Network.MIME_JSON, Gson().toJson(regRequest))
             val req = Request.Builder().post(body).url(Network.REGISTER_ENDPOINT).build()
@@ -293,10 +293,12 @@ class AddAccountFragment : Fragment() {
          */
         private fun saveAuth(regRequest: RegisterRequest) {
             val acc = Account()
-            acc.email = regRequest.email
-            acc.password = regRequest.password
-            acc.current = true
-
+            acc.apply {
+                name = regRequest.name
+                email = regRequest.email
+                password = regRequest.password
+                current = true
+            }
             DbProvider.helper.accDao.create(acc)
             Auth.user = acc
         }

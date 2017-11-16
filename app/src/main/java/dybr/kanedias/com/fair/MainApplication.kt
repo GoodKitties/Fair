@@ -2,10 +2,7 @@ package dybr.kanedias.com.fair
 
 import android.app.Application
 import dybr.kanedias.com.fair.database.DbProvider
-import okhttp3.ConnectionPool
-import okhttp3.Dispatcher
-import okhttp3.OkHttpClient
-import java.util.concurrent.TimeUnit
+import dybr.kanedias.com.fair.entities.Auth
 
 /**
  * Place to initialize all data prior to launching activities
@@ -18,6 +15,11 @@ class MainApplication : Application() {
         super.onCreate()
         DbProvider.setHelper(this)
         Network.init(this)
+
+        val acc = DbProvider.helper.accDao.queryBuilder().where().eq("current", true).queryForFirst()
+        if (acc != null && Network.cookiesNotExpired()) {
+            Auth.user = acc
+        }
     }
 
     override fun onTerminate() {

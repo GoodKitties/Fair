@@ -29,14 +29,8 @@ import dybr.kanedias.com.fair.entities.Auth
  *
  * Created on 05.11.17
  */
-class Sidebar(drawer: DrawerLayout, parent: MainActivity) {
+class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity) {
 
-    init {
-        ButterKnife.bind(this, parent)
-    }
-
-    private val drawer = drawer
-    private val activity = parent
     private val fragManager = parent.supportFragmentManager
 
     /**
@@ -50,6 +44,10 @@ class Sidebar(drawer: DrawerLayout, parent: MainActivity) {
      */
     @BindView(R.id.header_flip)
     lateinit var headerFlip: ImageView
+
+    init {
+        ButterKnife.bind(this, parent)
+    }
 
     /**
      * Hides/shows add-account button and list of saved accounts
@@ -106,7 +104,7 @@ class Sidebar(drawer: DrawerLayout, parent: MainActivity) {
         }
 
         // now add remaining accounts
-        val inflater = activity.layoutInflater
+        val inflater = parent.layoutInflater
         for (acc in allAccs) {
             val row = inflater.inflate(R.layout.activity_main_sidebar_account_row, accountsArea, true)
             val accName = row.findViewById<TextView>(R.id.account_name)
@@ -118,7 +116,8 @@ class Sidebar(drawer: DrawerLayout, parent: MainActivity) {
             accName.text = acc.name
             accName.setOnClickListener({
                 Auth.user = acc
-                activity.reLogin()
+                drawer.closeDrawers()
+                parent.reLogin()
             })
 
             // account deleter handler
@@ -126,7 +125,7 @@ class Sidebar(drawer: DrawerLayout, parent: MainActivity) {
             deleteBuilder.where().eq("name", acc.name)
             accRemove.setOnClickListener {
                 // delete account confirmation dialog
-                MaterialDialog.Builder(activity)
+                MaterialDialog.Builder(parent)
                         .title(R.string.delete_account)
                         .content(R.string.are_you_sure)
                         .positiveText(android.R.string.yes)
@@ -136,6 +135,17 @@ class Sidebar(drawer: DrawerLayout, parent: MainActivity) {
                             accountsArea.removeView(row)
                         }.show()
             }
+        }
+
+        // inflate guest account
+        val guestRow = inflater.inflate(R.layout.activity_main_sidebar_account_row, accountsArea, true)
+        guestRow.findViewById<ImageView>(R.id.account_remove).visibility = View.GONE
+        val guestName = guestRow.findViewById<TextView>(R.id.account_name)
+        guestName.text = parent.getString(R.string.guest)
+        guestName.setOnClickListener {
+            Auth.user = Auth.guest
+            drawer.closeDrawers()
+            parent.reLogin()
         }
     }
 
