@@ -48,4 +48,7 @@ class Account {
      */
     @DatabaseField(canBeNull = false)
     var current: Boolean = false
+
+    // current identity for this user
+    lateinit var identity: Identity
 }

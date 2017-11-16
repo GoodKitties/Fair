@@ -28,7 +28,7 @@ class Identity {
      */
     @SerializedName("_id")
     @DatabaseField(index = true, canBeNull = false)
-    var accountId: String = ""
+    var identityId: String = ""
 
     // not interested in updated/created timestamps
 
@@ -39,12 +39,34 @@ class Identity {
     var name: String = ""
 
     /**
-     * Main diary address (dybr.ru/<address>)
+     * Main diary
      */
     @DatabaseField(canBeNull = false, foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true)
     val diary: Diary = Diary()
 
+    /**
+     * Array of all assigned URIs (diary address paths) for this user.
+     */
     @SerializedName("uri")
     @DatabaseField(dataType = DataType.SERIALIZABLE)
     val uris: ArrayList<String> = ArrayList()
+
+    // non-db fields, retrieved on deserialization of API queries
+    val readers: List<PartialIdentity> = ArrayList()
+    val favorites: List<PartialIdentity> = ArrayList()
 }
+
+/**
+ * Identity that doesn't contain a diary.
+ * These are usually found in `readers` or `favourites` of main identity
+ */
+data class PartialIdentity(
+        @SerializedName("_id")
+        val identityId: String,
+
+        @SerializedName("name")
+        val name: String,
+
+        @SerializedName("uri")
+        val uris: List<String> = ArrayList()
+)

@@ -7,6 +7,7 @@ import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersisto
 import com.google.gson.Gson
 import dybr.kanedias.com.fair.entities.Auth
 import dybr.kanedias.com.fair.entities.db.Account
+import dybr.kanedias.com.fair.entities.db.Identity
 import dybr.kanedias.com.fair.entities.dto.LoginRequest
 import okhttp3.*
 import java.net.HttpURLConnection
@@ -24,6 +25,7 @@ object Network {
 
     val IDENTITY_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/identity"
     val USER_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/user"
+    val CURRENT_IDENTITY_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/current_identity"
     val REGISTER_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/register"
     val LOGIN_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/login"
 
@@ -66,7 +68,6 @@ object Network {
         )
         val body = RequestBody.create(MIME_JSON, Gson().toJson(loginRequest))
         val req = Request.Builder().post(body).url(LOGIN_ENDPOINT).build()
-
         val resp = Network.httpClient.newCall(req).execute()
 
         // unauthorized error is returned when smth is wrong with your input
@@ -79,7 +80,24 @@ object Network {
             return false
         }
 
+        // update account name with identity
+
         return true
+    }
+
+    /**
+     * Pull identity of current user. Better to do this right after registration or logging in.
+     * Http client should have relevant cookie at this point.
+     * @throws IOException on connection fail
+     */
+    fun pullIdentity(): Identity? {
+        val req = Request.Builder().url(CURRENT_IDENTITY_ENDPOINT).build()
+        val resp = Network.httpClient.newCall(req).execute()
+        if (resp.isSuccessful)
+            return null
+
+        // response is returned after execute call, body is not null
+        return Gson().fromJson(resp.body()!!.string(), Identity::class.java)
     }
 
 
