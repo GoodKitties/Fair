@@ -6,6 +6,7 @@ import android.animation.ValueAnimator
 import android.app.FragmentTransaction
 import android.support.v4.view.animation.FastOutSlowInInterpolator
 import android.support.v4.widget.DrawerLayout
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
@@ -34,22 +35,16 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
     private val fragManager = parent.supportFragmentManager
 
     /**
-     * Sidebar accounts area (bottom of header)
-     */
-    @BindView(R.id.accounts_area)
-    lateinit var accountsArea: LinearLayout
-
-    /**
      * Sidebar header up/down image (to the right of welcome text)
      */
     @BindView(R.id.header_flip)
     lateinit var headerFlip: ImageView
 
     /**
-     * Account list view that is visible if one clicks on sidebar header
+     * Sidebar accounts area (bottom of header)
      */
-    @BindView(R.id.accounts_list)
-    lateinit var accList: ListView
+    @BindView(R.id.accounts_area)
+    lateinit var accountsArea: LinearLayout
 
     @BindView(R.id.current_user_name)
     lateinit var currentUsername: TextView
@@ -94,42 +89,45 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
      * Update accounts area after possible account change
      */
     private fun updateAccountsArea() {
+        val inflater = parent.layoutInflater
+
+        // set welcome message to current user
         currentUsername.text = Auth.user.name
 
+        // update account area views
+        // remove previous accounts, they may be invalid
+        accountsArea.removeViews(1, accountsArea.childCount - 1)
+
+        // populate account list
         val allAccs = DbProvider.helper.accDao.queryForAll()
-        accList.adapter = object: ArrayAdapter<Account>(parent, R.layout.activity_main_sidebar_account_row, R.id.account_name, allAccs) {
+        for (acc in allAccs) {
+            val view = inflater.inflate(R.layout.activity_main_sidebar_account_row, accountsArea, false)
+            val accName = view.findViewById<TextView>(R.id.account_name)
+            val accRemove = view.findViewById<ImageView>(R.id.account_remove)
 
-            override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-                val view = super.getView(position, convertView, parent)
-                val acc = getItem(position)
-
-                val accName = view.findViewById<TextView>(R.id.account_name)
-                val accRemove = view.findViewById<ImageView>(R.id.account_remove)
-
-                accName.text = acc.name
-                accName.setOnClickListener {
-                    Auth.user = acc
-                    drawer.closeDrawers()
-                    this@Sidebar.parent.reLogin()
-                }
-
-                accRemove.setOnClickListener {
-                    // delete account confirmation dialog
-                    MaterialDialog.Builder(view.context)
-                            .title(R.string.delete_account)
-                            .content(R.string.are_you_sure)
-                            .positiveText(android.R.string.yes)
-                            .negativeText(android.R.string.no)
-                            .onPositive{ _, _ -> deleteAccount(acc) }
-                            .show()
-                }
-                return view
+            accName.text = acc.name
+            accName.setOnClickListener {
+                Auth.user = acc
+                drawer.closeDrawers()
+                this@Sidebar.parent.reLogin()
+                updateAccountsArea()
             }
+
+            accRemove.setOnClickListener {
+                // "delete account" confirmation dialog
+                MaterialDialog.Builder(view.context)
+                        .title(R.string.delete_account)
+                        .content(R.string.are_you_sure)
+                        .positiveText(android.R.string.yes)
+                        .negativeText(android.R.string.no)
+                        .onPositive{ _, _ -> deleteAccount(acc) }
+                        .show()
+            }
+            accountsArea.addView(view)
         }
 
         // inflate guest account
-        val inflater = parent.layoutInflater
-        val guestRow = inflater.inflate(R.layout.activity_main_sidebar_account_row, accList, false)
+        val guestRow = inflater.inflate(R.layout.activity_main_sidebar_account_row, accountsArea, false)
         guestRow.findViewById<ImageView>(R.id.account_remove).visibility = View.GONE
         val guestName = guestRow.findViewById<TextView>(R.id.account_name)
         guestName.text = parent.getString(R.string.guest)
@@ -138,21 +136,22 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
             drawer.closeDrawers()
             parent.reLogin()
         }
-        accList.addFooterView(guestRow)
+        accountsArea.addView(guestRow)
     }
 
     private fun deleteAccount(acc: Account) {
         // if we deleted current account, set it to guest
         if (Auth.user.name == acc.name) {
             Auth.user = Auth.guest
+
+            drawer.closeDrawers()
+            parent.reLogin()
         }
 
         // all accounts are present in the DB, inner id is set either on query
         // or in Register/Login persist step, see AddAccountFragment
         DbProvider.helper.accDao.delete(acc)
         updateAccountsArea()
-        drawer.closeDrawers()
-        parent.reLogin()
     }
 
     /**

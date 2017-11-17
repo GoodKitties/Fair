@@ -7,6 +7,7 @@ import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersisto
 import com.google.gson.Gson
 import dybr.kanedias.com.fair.entities.*
 import okhttp3.*
+import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.util.concurrent.TimeUnit
 import java.io.IOException
@@ -100,7 +101,8 @@ object Network {
 
         // response is returned after execute call, body is not null
         val body = resp.body()!!.string()
-        val identity = Gson().fromJson(body, Identity::class.java)
+        val identityObj = JSONObject(body).get("identity").toString() // stupid as hell
+        val identity = Gson().fromJson(identityObj, Identity::class.java)
         acc.apply {
             name = identity.name
             profile = identity

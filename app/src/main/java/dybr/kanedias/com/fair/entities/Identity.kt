@@ -54,7 +54,7 @@ class Identity {
      * Main diary
      */
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true)
-    var diary: Diary? = Diary()
+    var diary: Diary? = null
 
     /**
      * Readers (subscribers) of this profile
