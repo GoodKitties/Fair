@@ -79,7 +79,7 @@ object Network {
         }
 
         // without identity we won't know the name of the user
-        if (!populateProfile(acc)) {
+        if (!populateIdentity(acc)) {
             return false
         }
 
@@ -92,7 +92,7 @@ object Network {
      * @return true if account was successfully populated with current profile and identity, false otherwise
      * @throws IOException on connection fail
      */
-    fun populateProfile(acc: Account): Boolean {
+    fun populateIdentity(acc: Account): Boolean {
         val req = Request.Builder().url(CURRENT_IDENTITY_ENDPOINT).build()
         val resp = Network.httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
@@ -100,10 +100,10 @@ object Network {
 
         // response is returned after execute call, body is not null
         val body = resp.body()!!.string()
-        val respProfile = Gson().fromJson(body, Profile::class.java)
+        val identity = Gson().fromJson(body, Identity::class.java)
         acc.apply {
-            name = respProfile.identity.name
-            profile = respProfile
+            name = identity.name
+            profile = identity
         }
         return true
     }

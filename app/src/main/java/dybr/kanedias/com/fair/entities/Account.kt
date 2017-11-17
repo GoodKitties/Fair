@@ -53,5 +53,5 @@ class Account {
      * Current profile for this user.
      * Not saved in DB.
      */
-    lateinit var profile: Profile
+    lateinit var profile: Identity
 }

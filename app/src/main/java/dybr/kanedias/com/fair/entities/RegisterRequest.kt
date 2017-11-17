@@ -1,7 +1,5 @@
 package dybr.kanedias.com.fair.entities
 
-import com.google.gson.annotations.JsonAdapter
-
 /**
  * Register call request body.
  * All fields are necessary.

@@ -6,11 +6,25 @@ import com.j256.ormlite.field.DatabaseField
 import com.j256.ormlite.table.DatabaseTable
 
 /**
- * Basic identity class with persistence layer.
- *
+ * Identity is essentially a profile with readers/favorites, diary info, address and so on.
+ * Example (result of `current_identity` call):
+ * ```
+ * {
+ *   "identity": {
+ *     "_id": "5a088c8888c010001d9fb9f6",
+ *     "name": "Example",
+ *     "diary": {
+ *       "title": "Example title",
+ *       "_id": "5a088c8888c010001d9fb9f7"
+ *     },
+ *     "readers": [...],
+ *     "favorites": [...]
+ *   }
+ * }
+ * ```
  * @author Kanedias
  *
- * Created on 11.11.17
+ * Created on 17.11.17
  */
 @DatabaseTable(tableName = "identity")
 class Identity {
@@ -43,8 +57,18 @@ class Identity {
     var diary: Diary? = Diary()
 
     /**
+     * Readers (subscribers) of this profile
+     */
+    val readers: MutableList<@JvmSuppressWildcards Identity> = ArrayList()
+
+    /**
+     * Favorites (subscribed to) of this profile
+     */
+    val favorites: MutableList<Identity> = ArrayList()
+
+    /**
      * Array of all assigned URIs (diary address paths) for this user.
      */
     @SerializedName("uri")
-    var uris: ArrayList<String> = ArrayList()
+    var uris: MutableList<String> = ArrayList()
 }

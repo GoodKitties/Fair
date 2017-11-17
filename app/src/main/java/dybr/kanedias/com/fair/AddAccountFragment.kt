@@ -282,7 +282,7 @@ class AddAccountFragment : Fragment() {
             }
 
             // without identity we can't know current profile name
-            if (!Network.populateProfile(acc)) {
+            if (!Network.populateIdentity(acc)) {
                 makeToast(getString(R.string.profile_not_found))
                 return false
             }
