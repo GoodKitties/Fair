@@ -1,7 +1,7 @@
 package dybr.kanedias.com.fair.entities
 
-import dybr.kanedias.com.fair.entities.db.Account
-import dybr.kanedias.com.fair.entities.db.Identity
+import android.content.Context
+import dybr.kanedias.com.fair.R
 
 /**
  * Auth static entity providing info about user login status
@@ -11,7 +11,11 @@ import dybr.kanedias.com.fair.entities.db.Identity
  * Created on 05.11.17
  */
 object Auth {
-    val guest = Account().apply { name = "Guest" }
+    lateinit var guest: Account
+    lateinit var user: Account
 
-    var user = guest
+    fun init(ctx: Context) {
+        guest = Account().apply { name = ctx.getString(R.string.guest) }
+        user = guest
+    }
 }

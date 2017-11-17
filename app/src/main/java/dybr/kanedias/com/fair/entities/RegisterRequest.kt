@@ -1,4 +1,4 @@
-package dybr.kanedias.com.fair.entities.dto
+package dybr.kanedias.com.fair.entities
 
 import com.google.gson.annotations.JsonAdapter
 

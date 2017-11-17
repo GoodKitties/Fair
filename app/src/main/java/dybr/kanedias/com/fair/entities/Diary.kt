@@ -1,4 +1,4 @@
-package dybr.kanedias.com.fair.entities.db
+package dybr.kanedias.com.fair.entities
 
 import com.google.gson.annotations.SerializedName
 import com.j256.ormlite.field.DatabaseField

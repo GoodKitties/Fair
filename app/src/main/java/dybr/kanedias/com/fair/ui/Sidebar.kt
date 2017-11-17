@@ -18,7 +18,7 @@ import dybr.kanedias.com.fair.MainActivity
 import dybr.kanedias.com.fair.R
 import dybr.kanedias.com.fair.database.DbProvider
 import dybr.kanedias.com.fair.entities.Auth
-import dybr.kanedias.com.fair.entities.db.Account
+import dybr.kanedias.com.fair.entities.Account
 
 /**
  * Sidebar views and controls.
@@ -50,6 +50,9 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
      */
     @BindView(R.id.accounts_list)
     lateinit var accList: ListView
+
+    @BindView(R.id.current_user_name)
+    lateinit var currentUsername: TextView
 
     init {
         ButterKnife.bind(this, parent)
@@ -91,6 +94,8 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
      * Update accounts area after possible account change
      */
     private fun updateAccountsArea() {
+        currentUsername.text = Auth.user.name
+
         val allAccs = DbProvider.helper.accDao.queryForAll()
         accList.adapter = object: ArrayAdapter<Account>(parent, R.layout.activity_main_sidebar_account_row, R.id.account_name, allAccs) {
 
@@ -124,7 +129,7 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
 
         // inflate guest account
         val inflater = parent.layoutInflater
-        val guestRow = inflater.inflate(R.layout.activity_main_sidebar_account_row, accountsArea, true)
+        val guestRow = inflater.inflate(R.layout.activity_main_sidebar_account_row, accList, false)
         guestRow.findViewById<ImageView>(R.id.account_remove).visibility = View.GONE
         val guestName = guestRow.findViewById<TextView>(R.id.account_name)
         guestName.text = parent.getString(R.string.guest)

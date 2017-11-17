@@ -1,10 +1,8 @@
-package dybr.kanedias.com.fair.entities.db
+package dybr.kanedias.com.fair.entities
 
-import com.google.gson.annotations.JsonAdapter
 import com.google.gson.annotations.SerializedName
 import com.j256.ormlite.field.DataType
 import com.j256.ormlite.field.DatabaseField
-import com.j256.ormlite.field.ForeignCollectionField
 import com.j256.ormlite.table.DatabaseTable
 
 /**
@@ -41,32 +39,12 @@ class Identity {
     /**
      * Main diary
      */
-    @DatabaseField(canBeNull = false, foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true)
-    val diary: Diary = Diary()
+    @DatabaseField(canBeNull = true, foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true)
+    var diary: Diary? = Diary()
 
     /**
      * Array of all assigned URIs (diary address paths) for this user.
      */
     @SerializedName("uri")
-    @DatabaseField(dataType = DataType.SERIALIZABLE)
-    val uris: ArrayList<String> = ArrayList()
-
-    // non-db fields, retrieved on deserialization of API queries
-    val readers: List<PartialIdentity> = ArrayList()
-    val favorites: List<PartialIdentity> = ArrayList()
+    var uris: ArrayList<String> = ArrayList()
 }
-
-/**
- * Identity that doesn't contain a diary.
- * These are usually found in `readers` or `favourites` of main identity
- */
-data class PartialIdentity(
-        @SerializedName("_id")
-        val identityId: String,
-
-        @SerializedName("name")
-        val name: String,
-
-        @SerializedName("uri")
-        val uris: List<String> = ArrayList()
-)

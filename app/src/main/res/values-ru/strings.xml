@@ -41,4 +41,5 @@
     <string name="are_you_sure">Вы уверены?</string>
     <string name="invalid_credentials">Неправильные логин/пароль!</string>
     <string name="login_successful">Успешный вход</string>
+    <string name="profile_not_found">Профиль не найден!</string>
 </resources>

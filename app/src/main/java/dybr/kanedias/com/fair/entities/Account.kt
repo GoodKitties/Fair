@@ -1,4 +1,4 @@
-package dybr.kanedias.com.fair.entities.db
+package dybr.kanedias.com.fair.entities
 
 import com.j256.ormlite.field.DatabaseField
 import com.j256.ormlite.table.DatabaseTable
@@ -49,6 +49,9 @@ class Account {
     @DatabaseField(canBeNull = false)
     var current: Boolean = false
 
-    // current identity for this user
-    lateinit var identity: Identity
+    /**
+     * Current profile for this user.
+     * Not saved in DB.
+     */
+    lateinit var profile: Profile
 }

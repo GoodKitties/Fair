@@ -20,9 +20,8 @@ import convalida.library.Convalida
 import convalida.library.ConvalidaValidator
 import dybr.kanedias.com.fair.database.DbProvider
 import dybr.kanedias.com.fair.entities.Auth
-import dybr.kanedias.com.fair.entities.db.Account
-import dybr.kanedias.com.fair.entities.dto.LoginRequest
-import dybr.kanedias.com.fair.entities.dto.RegisterRequest
+import dybr.kanedias.com.fair.entities.Account
+import dybr.kanedias.com.fair.entities.RegisterRequest
 import dybr.kanedias.com.fair.ui.LoginInputs
 import dybr.kanedias.com.fair.ui.RegisterInputs
 import okhttp3.Request
@@ -152,14 +151,6 @@ class AddAccountFragment : Fragment() {
             return false
         }
 
-        /**
-         * Persist login info in DB, set in [Auth]
-         */
-        private fun saveAuth(acc: Account) {
-            DbProvider.helper.accDao.create(acc)
-            Auth.user = acc
-        }
-
         override fun onPostExecute(result: Boolean?) {
             // post success message and dismiss fragment if all went well
             if (result!!) {
@@ -233,20 +224,17 @@ class AddAccountFragment : Fragment() {
                 }
 
 
-                if (step.ordinal == Step.values().size - 1) {
-                    // this was the last step, verifications complete!
-                    // send actual register POST
-                    sendRegisterInfo()
-                    return true
+                if (step.ordinal != Step.values().size - 1) {
+                    // proceed to next step
+                    return doInBackground(Step.values()[step.ordinal + 1])
                 }
 
-                return doInBackground(Step.values()[step.ordinal + 1])
+                // this was the last step, verifications complete!
+                // send actual register POST
+                return sendRegisterInfo()
             } catch (ioex: IOException) {
                 val errorText =  getString(R.string.error_connecting)
                 makeToast("$errorText: ${ioex.localizedMessage}")
-            } catch (isex: IllegalArgumentException) {
-                val errorText =  getString(R.string.error_in_website_answer)
-                makeToast("$errorText: ${isex.message}")
             } finally {
                 pd.dismiss()
             }
@@ -260,14 +248,14 @@ class AddAccountFragment : Fragment() {
          * This also sets session cookies in http client that are needed
          * to call authenticated-only API functions.
          */
-        private fun sendRegisterInfo() {
+        private fun sendRegisterInfo(): Boolean {
             val regRequest = RegisterRequest(
-                name = usernameInput.editText!!.text.toString(),
-                email = emailInput.editText!!.text.toString(),
-                uri = namespaceInput.editText!!.text.toString(),
-                password = passwordInput.editText!!.text.toString(),
-                confirmPassword = passwordInput.editText!!.text.toString(),
-                title = usernameInput.editText!!.text.toString() // use same title as username for now
+                    name = usernameInput.editText!!.text.toString(),
+                    email = emailInput.editText!!.text.toString(),
+                    uri = namespaceInput.editText!!.text.toString(),
+                    password = passwordInput.editText!!.text.toString(),
+                    confirmPassword = passwordInput.editText!!.text.toString(),
+                    title = usernameInput.editText!!.text.toString() // use same title as username for now
             )
             val body = RequestBody.create(Network.MIME_JSON, Gson().toJson(regRequest))
             val req = Request.Builder().post(body).url(Network.REGISTER_ENDPOINT).build()
@@ -280,27 +268,27 @@ class AddAccountFragment : Fragment() {
             val json = JSONObject(resp.body()?.string())
             val result = json.get("status") as String
             if (result != "OK") {
-                throw IllegalStateException(getString(R.string.registration_failed))
+                makeToast(getString(R.string.registration_failed))
+                return false
             }
 
             // if we're here then we survived through registration checks
             // and registration itself was successful, let's save what we have
-            saveAuth(regRequest)
-        }
-
-        /**
-         * Persist registration info in DB, set in [Auth]
-         */
-        private fun saveAuth(regRequest: RegisterRequest) {
-            val acc = Account()
-            acc.apply {
+            val acc = Account().apply {
                 name = regRequest.name
                 email = regRequest.email
                 password = regRequest.password
                 current = true
             }
-            DbProvider.helper.accDao.create(acc)
-            Auth.user = acc
+
+            // without identity we can't know current profile name
+            if (!Network.populateProfile(acc)) {
+                makeToast(getString(R.string.profile_not_found))
+                return false
+            }
+
+            saveAuth(acc)
+            return true
         }
 
         override fun onProgressUpdate(vararg value: Step?) {
@@ -319,6 +307,15 @@ class AddAccountFragment : Fragment() {
                 fragmentManager!!.popBackStack()
             }
         }
+    }
+
+    /**
+     * Get identity, persist registration info in DB, set in [Auth].
+     * *This should be done in background thread*
+     */
+    private fun saveAuth(acc: Account) {
+        DbProvider.helper.accDao.create(acc)
+        Auth.user = acc
     }
 
     /**
