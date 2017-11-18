@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName
 import com.j256.ormlite.field.DataType
 import com.j256.ormlite.field.DatabaseField
 import com.j256.ormlite.table.DatabaseTable
+import java.util.*
 
 /**
  * Identity is essentially a profile with readers/favorites, diary info, address and so on.
@@ -26,40 +27,33 @@ import com.j256.ormlite.table.DatabaseTable
  *
  * Created on 17.11.17
  */
-@DatabaseTable(tableName = "identity")
 class Identity {
-
-    /**
-     * Inner id in the database, not used
-     */
-    @DatabaseField(generatedId = true)
-    var id: Long = 0
 
     /**
      * Server-side identity id
      */
     @SerializedName("_id")
-    @DatabaseField(index = true, canBeNull = false)
     var identityId: String = ""
 
-    // not interested in updated/created timestamps
+    // not interested in updated/created timestamps yet
+    // and it seems that they are subject to change, e.g. "changedAt" --> "changed" etc.
+    //var changedAt: Date? = null
+    //var createdAt: Date? = null
 
     /**
      * Chosen nickname
      */
-    @DatabaseField(canBeNull = false)
     var name: String = ""
 
     /**
      * Main diary
      */
-    @DatabaseField(canBeNull = true, foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true)
     var diary: Diary? = null
 
     /**
      * Readers (subscribers) of this profile
      */
-    val readers: MutableList<@JvmSuppressWildcards Identity> = ArrayList()
+    val readers: MutableList<Identity> = ArrayList()
 
     /**
      * Favorites (subscribed to) of this profile

@@ -18,7 +18,7 @@ class MainApplication : Application() {
         Auth.init(this)
 
         val acc = DbProvider.helper.accDao.queryBuilder().where().eq("current", true).queryForFirst()
-        if (acc != null && Network.cookiesExpired()) {
+        if (acc != null && !Network.cookiesInvalid()) {
             Auth.user = acc
         }
     }

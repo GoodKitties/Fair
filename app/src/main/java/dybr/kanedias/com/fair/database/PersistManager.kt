@@ -21,7 +21,6 @@ import java.sql.SQLException
 class PersistManager(context: Context) : OrmLiteSqliteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     // Dao fast access links
-    val identityDao: Dao<Identity, Long> = getDao(Identity::class.java)
     val accDao: Dao<Account, Long> = getDao(Account::class.java)
 
     override fun onCreate(db: SQLiteDatabase, connectionSource: ConnectionSource) {

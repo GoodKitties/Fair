@@ -43,7 +43,11 @@ object Network {
                 .build()
     }
 
-    fun cookiesExpired(): Boolean = cookieJar.loadForRequest(HttpUrl.parse(MAIN_DYBR_API_ENDPOINT)!!).isEmpty()
+    /**
+     * Check that cookies are not expired.
+     * The relevant cookies are "express:sess" and "express:sess.sig"
+     */
+    fun cookiesInvalid(): Boolean = cookieJar.loadForRequest(HttpUrl.parse(MAIN_DYBR_API_ENDPOINT)!!).isEmpty()
 
     /**
      * Logs in with specified account.
@@ -75,7 +79,7 @@ object Network {
         }
 
         // we should have the cookie now
-        if (!resp.isSuccessful || Network.cookiesExpired()) {
+        if (!resp.isSuccessful || Network.cookiesInvalid()) {
             return false
         }
 
@@ -88,8 +92,7 @@ object Network {
     }
 
     /**
-     * Pull profile of current user. Better to do this right after registration or logging in.
-     * Http client should have relevant cookie at this point.
+     * Pull profile of current user. Http client should have relevant cookie at this point.
      * @return true if account was successfully populated with current profile and identity, false otherwise
      * @throws IOException on connection fail
      */

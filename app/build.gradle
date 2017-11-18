@@ -36,6 +36,7 @@ dependencies {
     implementation 'com.github.franmontiel:PersistentCookieJar:v1.0.1'          // cookies addon for okhttp
     implementation 'com.afollestad.material-dialogs:core:0.9.5.0'               // material design for dialogs
     implementation 'com.github.WellingtonCosta.convalida:convalida:1.0.5'       // validation of text inputs
+    //implementation 'com.github.clans:fab:1.6.4'                                 // Floating action button with menu
 
     kapt 'com.jakewharton:butterknife-compiler:8.8.1'                           // Kotlin annotation processors
     kapt 'com.github.WellingtonCosta.convalida:convalida-compiler:1.0.5'

@@ -11,11 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.v4.view.ViewPager
-            android:id="@+id/content_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
         <android.support.design.widget.AppBarLayout
             android:id="@+id/header"
             android:layout_width="match_parent"
@@ -26,13 +21,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/standard_toolbar_height"
                 android:minHeight="@dimen/standard_toolbar_height"
-                android:title="@string/app_name">
+                android:title="@string/app_name"
+                app:layout_scrollFlags="scroll|snap|enterAlways">
             </android.support.v7.widget.Toolbar>
 
             <android.support.design.widget.TabLayout
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                android:theme="@style/Theme.AppCompat"
                 android:id="@+id/sliding_tabs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -40,13 +33,11 @@
 
         </android.support.design.widget.AppBarLayout>
 
-        <android.support.v7.widget.CardView
-            android:id="@+id/toolbar_search_suggestions"
-            android:layout_width="256dp"
-            android:layout_height="316dp"
-            android:visibility="gone"
-            android:layout_below="@id/header"
-            app:elevation="8dp"/>
+        <android.support.v4.view.ViewPager
+            android:id="@+id/content_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
     </android.support.design.widget.CoordinatorLayout>
 
