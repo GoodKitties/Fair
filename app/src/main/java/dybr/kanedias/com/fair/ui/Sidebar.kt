@@ -88,7 +88,7 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
     /**
      * Update accounts area after possible account change
      */
-    private fun updateAccountsArea() {
+    fun updateAccountsArea() {
         val inflater = parent.layoutInflater
 
         // set welcome message to current user

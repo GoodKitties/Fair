@@ -62,7 +62,7 @@ class ScrollAwareFabBehavior(context: Context, attrs: AttributeSet) : FloatingAc
 
                         override fun onAnimationEnd(view: View) {
                             mIsAnimatingOut = false
-                            view.visibility = View.GONE
+                            view.visibility = View.INVISIBLE
                         }
                     }).start()
         } else {
@@ -76,7 +76,7 @@ class ScrollAwareFabBehavior(context: Context, attrs: AttributeSet) : FloatingAc
 
                 override fun onAnimationEnd(animation: Animation) {
                     mIsAnimatingOut = false
-                    button.visibility = View.GONE
+                    button.visibility = View.INVISIBLE
                 }
 
                 override fun onAnimationRepeat(animation: Animation) {}

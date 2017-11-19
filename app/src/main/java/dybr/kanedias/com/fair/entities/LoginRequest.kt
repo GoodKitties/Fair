@@ -1,7 +1,7 @@
 package dybr.kanedias.com.fair.entities
 
 /**
- * Login call request body.
+ * Login call request body. Used in network API logging in procedure.
  * All fields are necessary.
  * Example:
  * ```

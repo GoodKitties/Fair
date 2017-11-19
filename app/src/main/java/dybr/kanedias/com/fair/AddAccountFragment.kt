@@ -58,11 +58,13 @@ class AddAccountFragment : Fragment() {
     @BindView(R.id.register_checkbox)
     lateinit var registerSwitch: CheckBox
 
+    private lateinit var activity: MainActivity
     private lateinit var validator: ConvalidaValidator
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val root = inflater.inflate(R.layout.fragment_create_account, container, false)
         ButterKnife.bind(this, root)
+        activity = context as MainActivity
         validator = Convalida.init(LoginInputs(this))
         return root
     }
@@ -156,6 +158,7 @@ class AddAccountFragment : Fragment() {
             if (result!!) {
                 makeToast(getString(R.string.login_successful))
                 fragmentManager!!.popBackStack()
+                activity.refreshTabs()
             }
         }
     }
@@ -305,6 +308,7 @@ class AddAccountFragment : Fragment() {
             if (result!!) {
                 makeToast(getString(R.string.congrats_diary_registered))
                 fragmentManager!!.popBackStack()
+                activity.refreshTabs()
             }
         }
     }

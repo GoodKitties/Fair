@@ -1,7 +1,7 @@
 package dybr.kanedias.com.fair.entities
 
 /**
- * Register call request body.
+ * Register call request body. Used in network API registration procedure.
  * All fields are necessary.
  * Example:
  * ```

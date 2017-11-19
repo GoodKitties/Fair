@@ -12,6 +12,7 @@ import java.net.HttpURLConnection
 import java.util.concurrent.TimeUnit
 import java.io.IOException
 
+
 /**
  * @author Kanedias
  *
@@ -26,6 +27,7 @@ object Network {
     val CURRENT_IDENTITY_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/current_identity"
     val REGISTER_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/register"
     val LOGIN_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/login"
+    val ENTRIES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/entries"
 
     val MIME_JSON = MediaType.parse("application/json")
 
@@ -113,5 +115,29 @@ object Network {
         return true
     }
 
+    /**
+     * Pull requested diary entries.
+     * Examples of urls to pass to this function:
+     * ```
+     * https://dybr.ru/api/identity/<your-identity-name>/favorites
+     * https://dybr.ru/api/entries/<someones-identity-name>
+     * ```
+     *
+     * @param endpointUrl full url of endpoint to pull from
+     */
+    fun getEntries(endpointUrl: String): List<DiaryEntry> {
+        val req = Request.Builder().url(endpointUrl).build()
+        val resp = Network.httpClient.newCall(req).execute()
+        if (!resp.isSuccessful)
+            return emptyList()
 
+        // response is returned after execute call, body is not null
+        val body = resp.body()!!.string()
+        val container = Gson().fromJson(body, EntryContainer::class.java)
+        return container.entries
+    }
+
+    private class EntryContainer {
+        lateinit var entries: List<DiaryEntry>
+    }
 }

@@ -1,8 +1,8 @@
 package dybr.kanedias.com.fair
 
-import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentStatePagerAdapter
@@ -13,6 +13,8 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import butterknife.BindView
 import butterknife.ButterKnife
@@ -20,10 +22,11 @@ import com.afollestad.materialdialogs.MaterialDialog
 import dybr.kanedias.com.fair.entities.Auth
 import dybr.kanedias.com.fair.misc.Android
 import dybr.kanedias.com.fair.ui.Sidebar
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.runBlocking
+import org.jetbrains.annotations.Nullable
 import java.io.IOException
 
 /**
@@ -33,6 +36,9 @@ import java.io.IOException
  * @author Kanedias
  */
 class MainActivity : AppCompatActivity() {
+
+    private val FAV_TAB = 0
+    private val MY_DIARY_TAB = 1
 
     /**
      * Actionbar header (where app title is written)
@@ -61,6 +67,12 @@ class MainActivity : AppCompatActivity() {
     lateinit var sidebarContent: ListView
 
     /**
+     * Floating button
+     */
+    @BindView(R.id.floating_button)
+    lateinit var actionButton: FloatingActionButton
+
+    /**
      * Sidebar that opens from the left (the second part of drawer)
      */
     private lateinit var sidebar: Sidebar
@@ -84,7 +96,7 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         // setup click listeners, adapters etc.
         setupUI()
-        // load user profile
+        // load user profile and initialize tabs
         loadProfile()
     }
 
@@ -111,9 +123,16 @@ class MainActivity : AppCompatActivity() {
         drawerToggle.syncState()
 
         // setup tabs
-
-        pager.adapter = tabAdapter
         tabs.setupWithViewPager(pager)
+        pager.addOnPageChangeListener(object: ViewPager.SimpleOnPageChangeListener() {
+            override fun onPageSelected(position: Int) {
+                // we can now add posts only in our own diary
+                when (position) {
+                    MY_DIARY_TAB -> actionButton.show()
+                    else -> actionButton.hide()
+                }
+            }
+        })
     }
 
 
@@ -131,6 +150,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         super.onBackPressed()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        progressDialog.dismiss()
     }
 
     /**
@@ -157,6 +181,10 @@ class MainActivity : AppCompatActivity() {
             }
 
             progressDialog.hide()
+
+            // main action, next interactions are held
+            // inside respective fragments in view pager
+            refreshTabs()
         }
     }
 
@@ -181,26 +209,41 @@ class MainActivity : AppCompatActivity() {
             }
 
             progressDialog.hide()
+            refreshTabs()
         }
+    }
+
+    fun refreshTabs() {
+        pager.adapter = tabAdapter
     }
 
     inner class TabAdapter: FragmentStatePagerAdapter(supportFragmentManager) {
 
         override fun getCount(): Int {
-            var totalTabs = 1 // first tab is favorite post wall
-            if (Auth.user.profile.diary != null) {
-                totalTabs++ // include tab for own diary
+            if (Auth.user === Auth.guest) {
+                // guest can't see anything without logging in yet.
+                return 0
             }
-            totalTabs += Auth.user.profile.favorites.size // favorites size
+            var totalTabs = 2 // first tab is favorite post wall, second is own diary
+            totalTabs += Auth.user.profile.favorites.size // add tabs for favorites
             return totalTabs
         }
 
         override fun getItem(position: Int): Fragment {
-            when (position) {
-                //1 ->
+            val ownFavEndpoint = "${Network.IDENTITY_ENDPOINT}/${Auth.user.profile.uris.last()}"
+            val ownDiaryEndpoint = "${Network.ENTRIES_ENDPOINT}/${Auth.user.profile.uris.last()}"
+            val selectedFavEndpoint = lazy { Auth.user.profile.favorites[position - 2].uris.last() }
+            return when(position) {
+                FAV_TAB -> PostListFragment().apply { uri = "$ownFavEndpoint/favorites" }
+                MY_DIARY_TAB -> PostListFragment().apply { uri = ownDiaryEndpoint }
+                else -> PostListFragment().apply { uri = "${Network.ENTRIES_ENDPOINT}/${selectedFavEndpoint.value}" }
             }
-            return Fragment()
         }
 
+        override fun getPageTitle(position: Int): CharSequence? = when (position) {
+            FAV_TAB -> getString(R.string.favorite)
+            MY_DIARY_TAB -> getString(R.string.my_diary)
+            else -> Auth.user.profile.favorites[position - 2].name
+        }
     }
 }
