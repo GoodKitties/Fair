@@ -17,7 +17,7 @@ class LoginInputs(parent: AddAccountFragment) {
     val email = parent.emailInput
 
     @JvmField
-    @PasswordValidation(errorMessage = R.string.invalid_password)
+    @PasswordValidation(errorMessage = R.string.should_not_be_empty)
     val password = parent.passwordInput
 
     // required for validator to work

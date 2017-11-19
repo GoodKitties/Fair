@@ -22,12 +22,16 @@ import dybr.kanedias.com.fair.database.DbProvider
 import dybr.kanedias.com.fair.entities.Auth
 import dybr.kanedias.com.fair.entities.Account
 import dybr.kanedias.com.fair.entities.RegisterRequest
+import dybr.kanedias.com.fair.misc.Android
 import dybr.kanedias.com.fair.ui.LoginInputs
 import dybr.kanedias.com.fair.ui.RegisterInputs
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.delay
 import okhttp3.Request
 import okhttp3.RequestBody
 import org.json.JSONObject
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 /**
  * @author Kanedias
@@ -59,13 +63,11 @@ class AddAccountFragment : Fragment() {
     lateinit var registerSwitch: CheckBox
 
     private lateinit var activity: MainActivity
-    private lateinit var validator: ConvalidaValidator
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val root = inflater.inflate(R.layout.fragment_create_account, container, false)
         ButterKnife.bind(this, root)
         activity = context as MainActivity
-        validator = Convalida.init(LoginInputs(this))
         return root
     }
 
@@ -79,13 +81,11 @@ class AddAccountFragment : Fragment() {
             confirmPasswordInput.visibility = View.VISIBLE
             usernameInput.visibility = View.VISIBLE
             namespaceInput.visibility = View.VISIBLE
-            validator = Convalida.init(RegisterInputs(this))
         } else {
             confirmButton.setText(R.string.enter)
             confirmPasswordInput.visibility = View.GONE
             usernameInput.visibility = View.GONE
             namespaceInput.visibility = View.GONE
-            validator = Convalida.init(LoginInputs(this))
         }
     }
 
@@ -94,12 +94,20 @@ class AddAccountFragment : Fragment() {
      */
     @OnClick(R.id.confirm_button)
     fun confirm() {
+        val validator = when (registerSwitch.isChecked) {
+            true -> Convalida.init(RegisterInputs(this))
+            false -> Convalida.init(LoginInputs(this))
+        }
+
         if (!validator.validateFields()) {
+            // don't allow network request if there are errors in form
+            // and hide errors after 3 seconds
+            async(Android) { delay(3, TimeUnit.SECONDS); validator.clearValidations() }
             return
         }
 
-        val progressDialog = MaterialDialog.Builder(activity!!)
-                .title(R.string.checking_in_progress)
+        val progressDialog = MaterialDialog.Builder(activity)
+                .title(R.string.please_wait)
                 .content(R.string.checking_in_progress)
                 .progress(true, 0)
                 .build()
