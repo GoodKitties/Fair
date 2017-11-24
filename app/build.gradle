@@ -5,14 +5,16 @@ apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 27
+
     defaultConfig {
         applicationId "dybr.kanedias.com.fair"
-        minSdkVersion 14
-        targetSdkVersion 25
+        targetSdkVersion 25 // device you test on
+        minSdkVersion 16    // device you allow your users to be on :)
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -28,6 +30,7 @@ dependencies {
     implementation "com.android.support:design:$supportLibVersion"              // Material design support lib
     implementation "com.android.support:appcompat-v7:$supportLibVersion"        // basic toolbars etc.
     implementation "com.android.support:cardview-v7:$supportLibVersion"         // snappy cardview for lists
+    implementation 'com.bartoszlipinski:recyclerviewheader2:2.0.1'              // headers for recycler views
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'     // no idea what is this...
     implementation 'com.google.code.gson:gson:2.8.0'                            // JSON (de)serializer
     implementation 'com.jakewharton:butterknife:8.8.1'                          // Annotation processor
@@ -36,7 +39,9 @@ dependencies {
     implementation 'com.github.franmontiel:PersistentCookieJar:v1.0.1'          // cookies addon for okhttp
     implementation 'com.afollestad.material-dialogs:core:0.9.5.0'               // material design for dialogs
     implementation 'com.github.WellingtonCosta.convalida:convalida:1.0.5'       // validation of text inputs
+    implementation 'ru.noties:markwon:1.0.1'                                    // markdown rendering
     //implementation 'com.github.clans:fab:1.6.4'                                 // Floating action button with menu
+
 
     kapt 'com.jakewharton:butterknife-compiler:8.8.1'                           // Kotlin annotation processors
     kapt 'com.github.WellingtonCosta.convalida:convalida-compiler:1.0.5'

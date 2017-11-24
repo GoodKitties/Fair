@@ -94,7 +94,7 @@ class PostListFragment: Fragment() {
 
             init {
                 ButterKnife.bind(this, iv)
-                iv.setOnClickListener {}
+                iv.setOnClickListener {} // TODO: show comments fragment
             }
 
         }

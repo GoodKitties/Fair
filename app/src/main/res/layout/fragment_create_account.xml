@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:animateLayoutChanges="true"
         android:orientation="vertical"
         android:padding="16dp"
         android:background="@color/md_grey_850"
@@ -100,7 +101,9 @@
                 android:id="@+id/acc_diary_title_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/diary_title"/>
+                android:hint="@string/diary_title"
+                android:nextFocusForward="@id/confirm_button"
+                android:nextFocusDown="@id/confirm_button"/>
 
         </android.support.design.widget.TextInputLayout>
 
@@ -110,7 +113,9 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:layout_marginTop="16dp"
-            android:text="@string/register_new_account"/>
+            android:text="@string/register_new_account"
+            android:nextFocusForward="@id/confirm_button"
+            android:nextFocusDown="@id/confirm_button"/>
 
         <Button
             android:id="@+id/confirm_button"

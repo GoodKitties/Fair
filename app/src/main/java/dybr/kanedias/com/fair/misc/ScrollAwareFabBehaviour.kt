@@ -21,6 +21,7 @@ import dybr.kanedias.com.fair.R
  *
  * Created on 18.11.17
  */
+@Suppress("UNUSED_PARAMETER") // these are instantiated by inflater
 class ScrollAwareFabBehavior(context: Context, attrs: AttributeSet) : FloatingActionButton.Behavior() {
 
     private var mIsAnimatingOut = false

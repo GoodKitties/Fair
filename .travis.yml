@@ -43,6 +43,8 @@ script:
   - ./gradlew assembleDebug
 
 after_success:
+  # push transifex source files
+  # script taken from Transifex + GitHub integration guide
   - pip install virtualenv
   - virtualenv ~/env
   - source ~/env/bin/activate

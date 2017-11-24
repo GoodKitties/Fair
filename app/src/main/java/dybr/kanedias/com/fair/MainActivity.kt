@@ -13,20 +13,19 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import butterknife.BindView
+import butterknife.OnClick
 import butterknife.ButterKnife
 import com.afollestad.materialdialogs.MaterialDialog
+import com.bartoszlipinski.recyclerviewheader2.RecyclerViewHeader
 import dybr.kanedias.com.fair.entities.Auth
 import dybr.kanedias.com.fair.misc.Android
 import dybr.kanedias.com.fair.ui.Sidebar
-import kotlinx.android.synthetic.main.activity_main.*
+import dybr.kanedias.com.fair.entities.DiaryEntry
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
-import org.jetbrains.annotations.Nullable
 import java.io.IOException
 
 /**
@@ -83,7 +82,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var progressDialog: MaterialDialog
 
     /**
-     * Tab adapter for [pager] - [tabs] synchronisation
+     * Tab adapter for [pager] <-> [tabs] synchronisation
      */
     private val tabAdapter = TabAdapter()
 
@@ -213,6 +212,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Refresh sliding tabs
+     */
     fun refreshTabs() {
         pager.adapter = tabAdapter
     }
@@ -229,7 +231,7 @@ class MainActivity : AppCompatActivity() {
             return totalTabs
         }
 
-        override fun getItem(position: Int): Fragment {
+        override fun getItem(position: Int): PostListFragment {
             val ownFavEndpoint = "${Network.IDENTITY_ENDPOINT}/${Auth.user.profile.uris.last()}"
             val ownDiaryEndpoint = "${Network.ENTRIES_ENDPOINT}/${Auth.user.profile.uris.last()}"
             val selectedFavEndpoint = lazy { Auth.user.profile.favorites[position - 2].uris.last() }
@@ -245,5 +247,23 @@ class MainActivity : AppCompatActivity() {
             MY_DIARY_TAB -> getString(R.string.my_diary)
             else -> Auth.user.profile.favorites[position - 2].name
         }
+    }
+
+    /**
+     * Add entry handler. Shows header view for adding diary entry.
+     * @see DiaryEntry
+     */
+    @OnClick(R.id.floating_button)
+    fun addEntry() {
+        val currFragment = tabAdapter.getItem(pager.currentItem)
+        if (currFragment.refresher.isRefreshing) {
+            // diary is not loaded yet
+            Toast.makeText(this, R.string.still_loading, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val header = layoutInflater.inflate(R.layout.fragment_post_list_add_item,
+                currFragment.postRibbon, false) as RecyclerViewHeader
+        header.attachTo(currFragment.postRibbon)
     }
 }

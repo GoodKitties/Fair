@@ -50,4 +50,6 @@
     <string name="action">Действие</string>
     <string name="favorite">Избранное</string>
     <string name="diary_title">Название дневника</string>
+    <string name="still_loading">Загрузка ещё не окончена…</string>
+    <string name="entry_content">Содержимое записи</string>
 </resources>

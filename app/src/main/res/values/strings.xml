@@ -53,4 +53,6 @@
     <string name="action">Action</string>
     <string name="favorite">Favorite</string>
     <string name="diary_title">Diary title</string>
+    <string name="still_loading">Still loading…</string>
+    <string name="entry_content">Entry content</string>
 </resources>
