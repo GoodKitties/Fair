@@ -10,9 +10,9 @@ import dybr.kanedias.com.fair.R
 /**
  * Validation helper class for registering.
  * This has to be upper-level class because of way how Convalida annotation processing works in inner classes.
+ * @see AddAccountFragment
  */
-class RegisterInputs(parent: AddAccountFragment) {
-    val parent = parent
+class RegisterInputs(private val parent: AddAccountFragment) {
 
     @JvmField
     @EmailValidation(R.string.invalid_email)
@@ -35,7 +35,5 @@ class RegisterInputs(parent: AddAccountFragment) {
     val namespace = parent.namespaceInput
 
     // required for validator to work
-    fun getString(id: Int): String {
-        return parent.getString(id)
-    }
+    fun getString(id: Int): String = parent.getString(id)
 }

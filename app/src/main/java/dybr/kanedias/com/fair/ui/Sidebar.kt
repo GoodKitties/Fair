@@ -46,6 +46,9 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
     @BindView(R.id.accounts_area)
     lateinit var accountsArea: LinearLayout
 
+    /**
+     * Label that shows current username near welcome text
+     */
     @BindView(R.id.current_user_name)
     lateinit var currentUsername: TextView
 
@@ -139,6 +142,10 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
         accountsArea.addView(guestRow)
     }
 
+    /**
+     * Delete account from local database, delete cookies and re-login as guest
+     * if it's current account that was deleted.
+     */
     private fun deleteAccount(acc: Account) {
         // if we deleted current account, set it to guest
         if (Auth.user.name == acc.name) {
@@ -155,8 +162,9 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
     }
 
     /**
-     * Returns created animator.
-     * Animates via slowly negating scaleY of target view
+     * Animates via slowly negating scaleY of target view. Used in arrow-like buttons
+     * to turn ⌄ in ⌃ and back.
+     * @return created animator
      */
     private fun flipAnimator(isFlipped: Boolean, v: View): ValueAnimator {
         val animator = ValueAnimator.ofFloat(if (isFlipped) -1f else 1f, if (isFlipped) 1f else -1f)
@@ -170,8 +178,8 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
     }
 
     /**
-     * Returns created animator.
-     * Animates via slowly changing target view height
+     * Animates via slowly changing target view height. Used to show/hide account list.
+     * @return created animator
      */
     private fun slideAnimator(start: Int, end: Int, v: View): ValueAnimator {
         val animator = ValueAnimator.ofInt(start, end)
@@ -191,7 +199,7 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
      * Expands target layout by making it visible and increasing its height
      * @see slideAnimator
      */
-    private fun expand(v: LinearLayout) {
+    private fun expand(v: View) {
         // set layout visible
         v.visibility = View.VISIBLE
 
@@ -207,7 +215,7 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
      * Collapses target layout by decreasing its height and making it gone
      * @see slideAnimator
      */
-    private fun collapse(v: LinearLayout) {
+    private fun collapse(v: View) {
         val finalHeight = v.height
         val animator = slideAnimator(finalHeight, 0, v)
 

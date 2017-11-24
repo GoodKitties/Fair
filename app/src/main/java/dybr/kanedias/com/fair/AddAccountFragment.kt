@@ -9,15 +9,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.EditText
 import android.widget.Toast
-import butterknife.BindView
-import butterknife.ButterKnife
-import butterknife.OnCheckedChanged
-import butterknife.OnClick
+import butterknife.*
 import com.afollestad.materialdialogs.MaterialDialog
 import com.google.gson.Gson
 import convalida.library.Convalida
-import convalida.library.ConvalidaValidator
 import dybr.kanedias.com.fair.database.DbProvider
 import dybr.kanedias.com.fair.entities.Auth
 import dybr.kanedias.com.fair.entities.Account
@@ -32,35 +29,49 @@ import okhttp3.RequestBody
 import org.json.JSONObject
 import java.io.IOException
 import java.util.concurrent.TimeUnit
+import dybr.kanedias.com.fair.ui.Sidebar
 
 /**
+ * Fragment responsible for adding account. Appears when you click "add account" in the sidebar.
+ * This may be either registration or logging in.
+ *
+ * @see Sidebar.addAccount
  * @author Kanedias
  *
  * Created on 11/11/2017.
  */
 class AddAccountFragment : Fragment() {
 
-    @BindView(R.id.account_email)
-    lateinit var emailInput: TextInputLayout
+    @BindView(R.id.acc_email_input)
+    lateinit var emailInput: EditText
 
-    @BindView(R.id.account_username)
-    lateinit var usernameInput: TextInputLayout
+    @BindView(R.id.acc_username_input)
+    lateinit var usernameInput: EditText
 
-    @BindView(R.id.account_password)
-    lateinit var passwordInput: TextInputLayout
+    @BindView(R.id.acc_password_input)
+    lateinit var passwordInput: EditText
 
-    // These fields are optional
-    @BindView(R.id.account_password_confirm)
-    lateinit var confirmPasswordInput: TextInputLayout
+    @BindView(R.id.acc_password_confirm_input)
+    lateinit var confirmPasswordInput: EditText
 
-    @BindView(R.id.account_namespace)
-    lateinit var namespaceInput: TextInputLayout
+    @BindView(R.id.acc_diary_address_input)
+    lateinit var namespaceInput: EditText
 
     @BindView(R.id.confirm_button)
     lateinit var confirmButton: Button
 
     @BindView(R.id.register_checkbox)
     lateinit var registerSwitch: CheckBox
+
+    @BindViews(
+            R.id.acc_email, R.id.acc_username,
+            R.id.acc_password, R.id.acc_password_confirm,
+            R.id.acc_diary_address, R.id.acc_diary_title
+    )
+    lateinit var regInputs: List<@JvmSuppressWildcards TextInputLayout>
+
+    @BindViews(R.id.acc_email, R.id.acc_password)
+    lateinit var loginInputs: List<@JvmSuppressWildcards TextInputLayout>
 
     private lateinit var activity: MainActivity
 
@@ -78,14 +89,11 @@ class AddAccountFragment : Fragment() {
     fun switchToRegister(checked: Boolean) {
         if (checked) {
             confirmButton.setText(R.string.register)
-            confirmPasswordInput.visibility = View.VISIBLE
-            usernameInput.visibility = View.VISIBLE
-            namespaceInput.visibility = View.VISIBLE
+            loginInputs.forEach { it -> it.visibility = View.GONE }
+            regInputs.forEach { it -> it.visibility = View.VISIBLE }
         } else {
-            confirmButton.setText(R.string.enter)
-            confirmPasswordInput.visibility = View.GONE
-            usernameInput.visibility = View.GONE
-            namespaceInput.visibility = View.GONE
+            regInputs.forEach { it -> it.visibility = View.GONE }
+            loginInputs.forEach { it -> it.visibility = View.VISIBLE }
         }
     }
 
@@ -139,8 +147,8 @@ class AddAccountFragment : Fragment() {
             try {
                 val acc = Account()
                 acc.apply {
-                    email = emailInput.editText!!.text.toString()
-                    password = passwordInput.editText!!.text.toString()
+                    email = emailInput.text.toString()
+                    password = passwordInput.text.toString()
                     current = true
                 }
 
@@ -206,9 +214,9 @@ class AddAccountFragment : Fragment() {
 
             // initialize check urls/error strings
             val url = when (step) {
-                Step.CHECK_USERNAME -> "${Network.IDENTITY_ENDPOINT}/exists?name=${usernameInput.editText!!.text}"
-                Step.CHECK_EMAIL -> "${Network.USER_ENDPOINT}/exists?email=${emailInput.editText!!.text}"
-                Step.CHECK_NAMESPACE -> "${Network.IDENTITY_ENDPOINT}/exists?uri=${namespaceInput.editText!!.text}"
+                Step.CHECK_USERNAME -> "${Network.IDENTITY_ENDPOINT}/exists?name=${usernameInput.text}"
+                Step.CHECK_EMAIL -> "${Network.USER_ENDPOINT}/exists?email=${emailInput.text}"
+                Step.CHECK_NAMESPACE -> "${Network.IDENTITY_ENDPOINT}/exists?uri=${namespaceInput.text}"
             }
             val possibleError = getString(when (step) {
                 Step.CHECK_USERNAME -> R.string.nickname_already_taken
@@ -261,12 +269,12 @@ class AddAccountFragment : Fragment() {
          */
         private fun sendRegisterInfo(): Boolean {
             val regRequest = RegisterRequest(
-                    name = usernameInput.editText!!.text.toString(),
-                    email = emailInput.editText!!.text.toString(),
-                    uri = namespaceInput.editText!!.text.toString(),
-                    password = passwordInput.editText!!.text.toString(),
-                    confirmPassword = passwordInput.editText!!.text.toString(),
-                    title = usernameInput.editText!!.text.toString() // use same title as username for now
+                    name = usernameInput.text.toString(),
+                    email = emailInput.text.toString(),
+                    uri = namespaceInput.text.toString(),
+                    password = passwordInput.text.toString(),
+                    confirmPassword = passwordInput.text.toString(),
+                    title = usernameInput.text.toString() // use same title as username for now
             )
             val body = RequestBody.create(Network.MIME_JSON, Gson().toJson(regRequest))
             val req = Request.Builder().post(body).url(Network.REGISTER_ENDPOINT).build()
@@ -334,7 +342,7 @@ class AddAccountFragment : Fragment() {
      * Be sure to call this function only if fragment is already attached to activity!
      */
     fun makeToast(text: String) {
-        activity!!.runOnUiThread { Toast.makeText(activity, text, Toast.LENGTH_SHORT).show() }
+        activity.runOnUiThread { Toast.makeText(activity, text, Toast.LENGTH_SHORT).show() }
     }
 
 }
