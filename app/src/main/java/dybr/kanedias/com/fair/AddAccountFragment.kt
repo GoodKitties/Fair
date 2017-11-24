@@ -57,6 +57,9 @@ class AddAccountFragment : Fragment() {
     @BindView(R.id.acc_diary_address_input)
     lateinit var namespaceInput: EditText
 
+    @BindView(R.id.acc_diary_title_input)
+    lateinit var titleInput: EditText
+
     @BindView(R.id.confirm_button)
     lateinit var confirmButton: Button
 
@@ -274,7 +277,7 @@ class AddAccountFragment : Fragment() {
                     uri = namespaceInput.text.toString(),
                     password = passwordInput.text.toString(),
                     confirmPassword = passwordInput.text.toString(),
-                    title = usernameInput.text.toString() // use same title as username for now
+                    title = titleInput.text.toString()
             )
             val body = RequestBody.create(Network.MIME_JSON, Gson().toJson(regRequest))
             val req = Request.Builder().post(body).url(Network.REGISTER_ENDPOINT).build()

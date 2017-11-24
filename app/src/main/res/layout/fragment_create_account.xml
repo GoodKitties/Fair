@@ -100,7 +100,7 @@
                 android:id="@+id/acc_diary_title_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/namespace_example"/>
+                android:hint="@string/diary_title"/>
 
         </android.support.design.widget.TextInputLayout>
 

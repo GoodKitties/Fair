@@ -1,9 +1,6 @@
 package dybr.kanedias.com.fair.ui
 
-import convalida.annotations.ConfirmPasswordValidation
-import convalida.annotations.EmailValidation
-import convalida.annotations.NotEmptyValidation
-import convalida.annotations.PasswordValidation
+import convalida.annotations.*
 import dybr.kanedias.com.fair.AddAccountFragment
 import dybr.kanedias.com.fair.R
 
@@ -31,8 +28,13 @@ class RegisterInputs(private val parent: AddAccountFragment) {
     val confirmPassword = parent.confirmPasswordInput
 
     @JvmField
-    @NotEmptyValidation(R.string.should_not_be_empty)
+    @PatternValidation(pattern = "[0-9a-z]+", errorMessage = R.string.should_only_contain_alphanumeric)
     val namespace = parent.namespaceInput
+
+    @JvmField
+    @NotEmptyValidation(R.string.should_not_be_empty)
+    val title = parent.titleInput
+
 
     // required for validator to work
     fun getString(id: Int): String = parent.getString(id)
