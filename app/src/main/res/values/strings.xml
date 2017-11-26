@@ -1,9 +1,12 @@
 <resources>
+    <!-- names, addresses -->
+    <string name="app_name" translatable="false">Fair</string>
+    <string name="namespace_example" translatable="false"><![CDATA[dybr.ru/<address>]]></string>
+
     <!-- placeholders -->
     <string name="placeholder_long" translatable="false">Sample placeholder text</string>
     <string name="placeholder_short" translatable="false">Placeholder</string>
 
-    <string name="app_name">Fair</string>
     <string name="my_profile">My Profile</string>
     <string name="my_diary">My Diary</string>
     <string name="refresh">Refresh</string>
@@ -27,7 +30,6 @@
     <string name="should_not_be_empty">Should not be empty!</string>
     <string name="should_only_contain_alphanumeric">Should only contain a–z or 0–9</string>
     <string name="register">Register</string>
-    <string name="namespace_example"><![CDATA[dybr.ru/<address>]]></string>
     <string name="username">Username</string>
     <string name="checking_in_progress">Checking…</string>
     <string name="checking_nickname">Checking nickname…</string>
