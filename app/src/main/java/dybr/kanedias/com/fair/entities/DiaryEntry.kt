@@ -24,6 +24,12 @@ import java.util.*
  * Created on 18.11.17
  */
 class DiaryEntry {
+
+    companion object {
+        val TYPE_PENDING = 0
+        val TYPE_EXISTING = 1
+    }
+
     /**
      * Created timestamp of this entry
      */

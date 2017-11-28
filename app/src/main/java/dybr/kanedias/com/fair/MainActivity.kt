@@ -2,6 +2,7 @@ package dybr.kanedias.com.fair
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.design.widget.AppBarLayout
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
@@ -18,7 +19,6 @@ import butterknife.BindView
 import butterknife.OnClick
 import butterknife.ButterKnife
 import com.afollestad.materialdialogs.MaterialDialog
-import com.bartoszlipinski.recyclerviewheader2.RecyclerViewHeader
 import dybr.kanedias.com.fair.entities.Auth
 import dybr.kanedias.com.fair.misc.Android
 import dybr.kanedias.com.fair.ui.Sidebar
@@ -38,6 +38,12 @@ class MainActivity : AppCompatActivity() {
 
     private val FAV_TAB = 0
     private val MY_DIARY_TAB = 1
+
+    /**
+     * AppBar layout with toolbar and tabs
+     */
+    @BindView(R.id.header)
+    lateinit var appBar: AppBarLayout
 
     /**
      * Actionbar header (where app title is written)
@@ -231,6 +237,8 @@ class MainActivity : AppCompatActivity() {
             return totalTabs
         }
 
+
+
         override fun getItem(position: Int): PostListFragment {
             val ownFavEndpoint = "${Network.IDENTITY_ENDPOINT}/${Auth.user.profile.uris.last()}"
             val ownDiaryEndpoint = "${Network.ENTRIES_ENDPOINT}/${Auth.user.profile.uris.last()}"
@@ -255,15 +263,16 @@ class MainActivity : AppCompatActivity() {
      */
     @OnClick(R.id.floating_button)
     fun addEntry() {
-        val currFragment = tabAdapter.getItem(pager.currentItem)
+        // use `instantiate` here because getItem returns new item with each invocation
+        // we know that fragment is already present so it will return cached one
+        val currFragment = tabAdapter.instantiateItem(pager, pager.currentItem) as PostListFragment
         if (currFragment.refresher.isRefreshing) {
             // diary is not loaded yet
             Toast.makeText(this, R.string.still_loading, Toast.LENGTH_SHORT).show()
             return
         }
 
-        val header = layoutInflater.inflate(R.layout.fragment_post_list_add_item,
-                currFragment.postRibbon, false) as RecyclerViewHeader
-        header.attachTo(currFragment.postRibbon)
+        appBar.setExpanded(false)
+        currFragment.showAddEntryForm()
     }
 }

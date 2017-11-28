@@ -57,4 +57,6 @@
     <string name="diary_title">Diary title</string>
     <string name="still_loading">Still loading…</string>
     <string name="entry_content">Entry content</string>
+    <string name="entry_title">Entry title</string>
+    <string name="previewing_in_n_seconds">Previewing in %s seconds…</string>
 </resources>

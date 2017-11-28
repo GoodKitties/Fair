@@ -26,8 +26,6 @@ class PersistManager(context: Context) : OrmLiteSqliteOpenHelper(context, DATABA
     override fun onCreate(db: SQLiteDatabase, connectionSource: ConnectionSource) {
         try {
             TableUtils.createTable<Account>(connectionSource, Account::class.java)
-            TableUtils.createTable<Identity>(connectionSource, Identity::class.java)
-            TableUtils.createTable<Diary>(connectionSource, Diary::class.java)
         } catch (e: SQLException) {
             Log.e(TAG, "error creating DB " + DATABASE_NAME)
             throw RuntimeException(e)

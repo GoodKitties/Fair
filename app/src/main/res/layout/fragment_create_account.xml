@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/md_grey_850">
 
     <LinearLayout
         android:id="@+id/create_account_area"
@@ -14,7 +15,6 @@
         android:animateLayoutChanges="true"
         android:orientation="vertical"
         android:padding="16dp"
-        android:background="@color/md_grey_850"
         tools:context="AddAccountFragment">
 
         <android.support.design.widget.TextInputLayout
