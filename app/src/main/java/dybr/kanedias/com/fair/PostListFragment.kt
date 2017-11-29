@@ -1,26 +1,28 @@
 package dybr.kanedias.com.fair
 
-import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.StaggeredGridLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import butterknife.BindView
 import butterknife.ButterKnife
+import dybr.kanedias.com.fair.entities.Auth
+import dybr.kanedias.com.fair.entities.Author
 import dybr.kanedias.com.fair.entities.DiaryEntry
 import dybr.kanedias.com.fair.misc.Android
 import kotlinx.coroutines.experimental.*
 import ru.noties.markwon.Markwon
-import java.io.IOException
+import java.util.*
 
 
 /**
+ * Fragment which displays list of posts in currently viewed diary.
+ * I can sometimes refer to posts/entries, so just remember that post == entry and they are [DiaryEntry].
+ *
  * @author Kanedias
  *
  * Created on 18.11.17
@@ -41,7 +43,7 @@ class PostListFragment: Fragment() {
      */
     lateinit var uri: String
 
-    private var posts: List<DiaryEntry> = emptyList()
+    private var entries: List<DiaryEntry> = emptyList()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_post_list, container, false)
@@ -59,15 +61,7 @@ class PostListFragment: Fragment() {
     private fun retrievePosts() {
         launch(Android) {
             refresher.isRefreshing = true
-
-            try {
-                val postFuture = async(CommonPool) { Network.getEntries(uri) }
-                posts = postFuture.await()
-            } catch (ioex: IOException) {
-                val errorText = getString(R.string.error_connecting)
-                Toast.makeText(this@PostListFragment.context, "$errorText: ${ioex.localizedMessage}", Toast.LENGTH_SHORT).show()
-            }
-
+            entries = Network.makeAsyncRequest(activity!!, { Network.getEntries(uri) }) ?: emptyList()
             refresher.isRefreshing = false
             postRibbon.adapter = postAdapter
         }
@@ -76,19 +70,20 @@ class PostListFragment: Fragment() {
     inner class PostListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         // first go header views for adding posts, then already ready entries
-        val pendingPosts = ArrayList<DiaryEntry>()
+        val pendingEntries = ArrayList<DiaryEntry>()
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
             when (holder!!.itemViewType) {
                 DiaryEntry.TYPE_PENDING -> {
+                    val entry = pendingEntries[position]
                     val pendingHolder = holder as CreateNewPostViewHolder
-                    val post = pendingPosts[position]
+                    pendingHolder.setup(entry)
                 }
                 else -> {
                     val postHolder = holder as RegularPostViewHolder
-                    val post = posts[position - pendingPosts.size]
-                    postHolder.titleView.text = post.title
-                    Markwon.setMarkdown(postHolder.bodyView, post.body)
+                    val entry = entries[position - pendingEntries.size]
+                    postHolder.titleView.text = entry.title
+                    Markwon.setMarkdown(postHolder.bodyView, entry.body)
                 }
             }
 
@@ -99,7 +94,7 @@ class PostListFragment: Fragment() {
             return when (viewType) {
                 DiaryEntry.TYPE_PENDING -> {
                     val view = inflater.inflate(R.layout.fragment_post_list_add_item, parent, false)
-                    CreateNewPostViewHolder(view)
+                    CreateNewPostViewHolder(view, this)
                 }
                 else -> { // TYPE_EXISTING
                     val view = inflater.inflate(R.layout.fragment_post_list_item, parent, false)
@@ -109,19 +104,34 @@ class PostListFragment: Fragment() {
         }
 
         override fun getItemViewType(position: Int): Int {
-            val headerCount = pendingPosts.size
+            val headerCount = pendingEntries.size
             return when (position) {
                 in 0 until headerCount ->  DiaryEntry.TYPE_PENDING // it's header
                 else -> DiaryEntry.TYPE_EXISTING // it's regular post
             }
         }
 
-        override fun getItemCount() = pendingPosts.size + posts.size
+        override fun getItemCount() = pendingEntries.size + entries.size
 
     }
 
-    fun showAddEntryForm() {
-        postAdapter.pendingPosts.add(DiaryEntry())
+    /**
+     * Adds diary entry on top of post ribbon and scrolls to it
+     */
+    fun addCreateNewPostForm() {
+        // construct new diary entry
+        val entry = DiaryEntry().apply {
+            createdAt = Date()
+            updatedAt = Date()
+            author = Author().apply {
+                authorID = Auth.user.profile.identityId
+                name = Auth.user.name
+                uri = this@PostListFragment.uri
+            }
+        }
+
+        // pending == waiting to be submitted
+        postAdapter.pendingEntries.add(entry)
         postAdapter.notifyItemInserted(0)
         postRibbon.scrollToPosition(0)
     }

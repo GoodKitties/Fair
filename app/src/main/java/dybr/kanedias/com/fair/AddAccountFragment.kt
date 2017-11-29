@@ -20,6 +20,7 @@ import dybr.kanedias.com.fair.entities.Auth
 import dybr.kanedias.com.fair.entities.Account
 import dybr.kanedias.com.fair.entities.RegisterRequest
 import dybr.kanedias.com.fair.misc.Android
+import dybr.kanedias.com.fair.misc.HttpException
 import dybr.kanedias.com.fair.ui.LoginInputs
 import dybr.kanedias.com.fair.ui.RegisterInputs
 import kotlinx.coroutines.experimental.async
@@ -30,6 +31,7 @@ import org.json.JSONObject
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import dybr.kanedias.com.fair.ui.Sidebar
+import java.net.HttpURLConnection
 
 /**
  * Fragment responsible for adding account. Appears when you click "add account" in the sidebar.
@@ -155,14 +157,18 @@ class AddAccountFragment : Fragment() {
                     current = true
                 }
 
-                if (!Network.login(acc)) {
-                    makeToast(getString(R.string.invalid_credentials))
-                    return false
-                }
-
+                Network.login(acc)
                 saveAuth(acc)
                 return true
-            } catch (ioex: IOException) {
+            } catch (httpex: HttpException) { // non-200 code on login
+                // TODO: check actual code on login
+                if (httpex.code == HttpURLConnection.HTTP_UNAUTHORIZED) { // unauthorized
+                    makeToast(getString(R.string.invalid_credentials))
+                } else {
+                    val errorText = getString(R.string.unexpected_website_error)
+                    makeToast("$errorText: ${httpex.message}")
+                }
+            }  catch (ioex: IOException) {
                 val errorText = getString(R.string.error_connecting)
                 makeToast("$errorText: ${ioex.localizedMessage}")
             } finally {
@@ -254,6 +260,14 @@ class AddAccountFragment : Fragment() {
                 // this was the last step, verifications complete!
                 // send actual register POST
                 return sendRegisterInfo()
+            }  catch (httpex: HttpException) { // non-200 code
+                // TODO: check actual code on login
+                if (httpex.code == HttpURLConnection.HTTP_NOT_FOUND) { // unauthorized
+                    makeToast(getString(R.string.profile_not_found))
+                } else {
+                    val errorText = getString(R.string.unexpected_website_error)
+                    makeToast("$errorText: ${httpex.message}")
+                }
             } catch (ioex: IOException) {
                 val errorText =  getString(R.string.error_connecting)
                 makeToast("$errorText: ${ioex.localizedMessage}")
@@ -304,11 +318,7 @@ class AddAccountFragment : Fragment() {
             }
 
             // without identity we can't know current profile name
-            if (!Network.populateIdentity(acc)) {
-                makeToast(getString(R.string.profile_not_found))
-                return false
-            }
-
+            Network.populateIdentity(acc)
             saveAuth(acc)
             return true
         }

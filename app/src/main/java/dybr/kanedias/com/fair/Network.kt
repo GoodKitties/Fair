@@ -1,16 +1,21 @@
 package dybr.kanedias.com.fair
 
 import android.content.Context
+import android.widget.Toast
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
 import com.google.gson.Gson
 import dybr.kanedias.com.fair.entities.*
+import dybr.kanedias.com.fair.misc.HttpException
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.async
 import okhttp3.*
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.util.concurrent.TimeUnit
 import java.io.IOException
+import java.net.HttpRetryException
 
 
 /**
@@ -59,12 +64,12 @@ object Network {
      * @return true if auth was successful, false otherwise
      * @throws IOException on connection fail
      */
-    fun login(acc: Account): Boolean {
+    fun login(acc: Account) {
         // clear present cookies, we're re-logging
         cookieJar.clear()
         if (acc === Auth.guest) {
             // it's guest, leave it as-is
-            return true
+            return
         }
 
         val loginRequest = LoginRequest(
@@ -76,21 +81,17 @@ object Network {
         val resp = Network.httpClient.newCall(req).execute()
 
         // unauthorized error is returned when smth is wrong with your input
-        if (resp.networkResponse()?.code() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-            return false
+        if (!resp.isSuccessful) {
+            throw HttpException(resp)
         }
 
         // we should have the cookie now
-        if (!resp.isSuccessful || Network.cookiesInvalid()) {
-            return false
+        if (Network.cookiesInvalid()) {
+            throw IllegalStateException("Couldn't get required cookie from the site!") // should not happen
         }
 
         // without identity we won't know the name of the user
-        if (!populateIdentity(acc)) {
-            return false
-        }
-
-        return true
+        populateIdentity(acc)
     }
 
     /**
@@ -98,11 +99,11 @@ object Network {
      * @return true if account was successfully populated with current profile and identity, false otherwise
      * @throws IOException on connection fail
      */
-    fun populateIdentity(acc: Account): Boolean {
+    fun populateIdentity(acc: Account) {
         val req = Request.Builder().url(CURRENT_IDENTITY_ENDPOINT).build()
         val resp = Network.httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            return false
+            throw HttpException(resp)
 
         // response is returned after execute call, body is not null
         val body = resp.body()!!.string()
@@ -112,7 +113,6 @@ object Network {
             name = identity.name
             profile = identity
         }
-        return true
     }
 
     /**
@@ -128,13 +128,70 @@ object Network {
     fun getEntries(endpointUrl: String): List<DiaryEntry> {
         val req = Request.Builder().url(endpointUrl).build()
         val resp = Network.httpClient.newCall(req).execute()
-        if (!resp.isSuccessful)
-            return emptyList()
+        if (!resp.isSuccessful) {
+            throw HttpException(resp)
+        }
 
         // response is returned after execute call, body is not null
         val body = resp.body()!!.string()
         val container = Gson().fromJson(body, EntryContainer::class.java)
         return container.entries
+    }
+
+    /**
+     * Create diary entry on server.
+     * @param entry entry to create. Should be filled with author, title, body content etc.
+     * TODO: rewrite when actual API docs are available, add examples
+     */
+    fun createEntry(entry: DiaryEntry) {
+        val body = RequestBody.create(MIME_JSON, Gson().toJson(entry))
+        val req = Request.Builder().post(body).url("something").build()
+        val resp = Network.httpClient.newCall(req).execute()
+        if (!resp.isSuccessful) {
+            throw HttpException(resp)
+        }
+    }
+
+    /**
+     * Use this in `launch(Android)` to handle typical errors in [Network]-invoked operations
+     * @param ctx context from which to extract error strings
+     * @param job main job to execute. The actual invocation happens in pooled thread. If all goes well no error mappings are needed
+     * @param errMapping map containing correlation between HTTP return codes and messages
+     * @param onErr job to execute if anything bad happens
+     */
+    suspend fun <T> makeAsyncRequest(ctx: Context,
+                                 job: () -> T,
+                                 errMapping: Map<Int, Int> = emptyMap(),
+                                 onErr: () -> Unit = {}): T? {
+        try {
+            // execute main job that can throw
+            val success = async(CommonPool) { job() }
+
+            // all went well, report if we should
+            if (errMapping.containsKey(HttpURLConnection.HTTP_OK)) {
+                Toast.makeText(ctx, errMapping.getValue(HttpURLConnection.HTTP_OK), Toast.LENGTH_SHORT).show()
+            }
+            return success.await()
+        } catch (httpex: HttpException) { // non-200 code
+            // something happened, see if we have appropriate map
+            if (errMapping.containsKey(httpex.code)) {
+                // we have, take value from map
+                val key = ctx.getString(errMapping.getValue(httpex.code))
+                Toast.makeText(ctx, key, Toast.LENGTH_SHORT).show()
+            } else {
+                // we haven't, show generic error
+                val errorText = ctx.getString(R.string.unexpected_website_error)
+                Toast.makeText(ctx, "$errorText: ${httpex.message}", Toast.LENGTH_SHORT).show()
+            }
+            onErr()
+        } catch (ioex: IOException) {
+            // generic connection error, show as-is
+            val errorText = ctx.getString(R.string.error_connecting)
+            Toast.makeText(ctx, "$errorText: ${ioex.localizedMessage}", Toast.LENGTH_SHORT).show()
+            onErr()
+        }
+
+        return null
     }
 
     private class EntryContainer {

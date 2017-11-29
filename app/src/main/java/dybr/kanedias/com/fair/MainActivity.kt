@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.support.design.widget.AppBarLayout
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.TabLayout
-import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewPager
@@ -23,10 +22,8 @@ import dybr.kanedias.com.fair.entities.Auth
 import dybr.kanedias.com.fair.misc.Android
 import dybr.kanedias.com.fair.ui.Sidebar
 import dybr.kanedias.com.fair.entities.DiaryEntry
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
-import java.io.IOException
+import java.net.HttpURLConnection.*
 
 /**
  * Main activity with drawer and sliding tabs where most of user interaction happens.
@@ -175,15 +172,10 @@ class MainActivity : AppCompatActivity() {
             progressDialog.setContent(R.string.loading_profile)
             progressDialog.show()
 
-            try {
-                val success = async(CommonPool) { Network.populateIdentity(Auth.user) }
-                if (!success.await()) {
-                    Toast.makeText(this@MainActivity, R.string.profile_not_found, Toast.LENGTH_LONG).show()
-                }
-            } catch (ioex: IOException) {
-                val errorText = getString(R.string.error_connecting)
-                Toast.makeText(this@MainActivity, "$errorText: ${ioex.localizedMessage}", Toast.LENGTH_SHORT).show()
-            }
+            Network.makeAsyncRequest(this@MainActivity,
+                    { Network.populateIdentity(Auth.user) },
+                    mapOf(HTTP_NOT_FOUND to R.string.invalid_credentials),
+                    { handleAuthFailure() })
 
             progressDialog.hide()
 
@@ -201,21 +193,22 @@ class MainActivity : AppCompatActivity() {
             progressDialog.setContent(R.string.logging_in)
             progressDialog.show()
 
-            try {
-                val success = async(CommonPool) { Network.login(Auth.user) }
-                if (success.await()) {
-                    Toast.makeText(this@MainActivity, R.string.login_successful, Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this@MainActivity, R.string.invalid_credentials, Toast.LENGTH_SHORT).show()
-                }
-            } catch (ioex: IOException) {
-                val errorText = getString(R.string.error_connecting)
-                Toast.makeText(this@MainActivity, "$errorText: ${ioex.localizedMessage}", Toast.LENGTH_SHORT).show()
-            }
+            val errMapping = mapOf(HTTP_OK to R.string.login_successful, HTTP_UNAUTHORIZED to R.string.invalid_credentials)
+            Network.makeAsyncRequest(this@MainActivity,
+                    { Network.login(Auth.user) },
+                    errMapping,
+                    { handleAuthFailure() })
 
             progressDialog.hide()
             refreshTabs()
         }
+    }
+
+    private fun handleAuthFailure() {
+        // couldn't log in, become guest
+        Auth.user = Auth.guest
+        sidebar.updateAccountsArea()
+        drawer.openDrawer(GravityCompat.START)
     }
 
     /**
@@ -273,6 +266,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         appBar.setExpanded(false)
-        currFragment.showAddEntryForm()
+        currFragment.addCreateNewPostForm()
     }
 }

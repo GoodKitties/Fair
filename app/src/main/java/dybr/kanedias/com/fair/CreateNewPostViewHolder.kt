@@ -5,17 +5,19 @@ import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.text.Editable
 import android.text.TextUtils
+import android.text.TextWatcher
 import android.view.View
+import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
+import com.afollestad.materialdialogs.MaterialDialog
+import dybr.kanedias.com.fair.entities.DiaryEntry
 import dybr.kanedias.com.fair.misc.Android
 import dybr.kanedias.com.fair.misc.SimpleTextWatcher
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.*
 import ru.noties.markwon.Markwon
 import java.util.concurrent.TimeUnit
 
@@ -26,7 +28,7 @@ import java.util.concurrent.TimeUnit
  * @see PostListFragment.postRibbon
  * @author Kanedias
  */
-class CreateNewPostViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
+class CreateNewPostViewHolder(iv: View, private val adapter: PostListFragment.PostListAdapter) : RecyclerView.ViewHolder(iv) {
 
     /**
      * Title of future diary entry
@@ -38,7 +40,7 @@ class CreateNewPostViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
      * Content of entry
      */
     @BindView(R.id.entry_source_text)
-    lateinit var bodyInput: EditText
+    lateinit var contentInput: EditText
 
     /**
      * Markdown preview
@@ -46,31 +48,49 @@ class CreateNewPostViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
     @BindView(R.id.entry_markdown_preview)
     lateinit var preview: TextView
 
+    @BindView(R.id.entry_submit)
+    lateinit var submitBtn: Button
+
+    /**
+     * [EditText] has no ability to remove all watchers at once, track them here
+     */
+    private var contentWatcher: TextWatcher? = null
+    private var titleWatcher: TextWatcher? = null
+
+    /**
+     * Post that this holder is currently bound to
+     */
+    private lateinit var entry: DiaryEntry
+
     init {
         ButterKnife.bind(this, iv)
 
         // initialize what we can before binding
-        bodyInput.addTextChangedListener(object: SimpleTextWatcher() {
+        // show preview if 3 seconds without actions
+        contentInput.addTextChangedListener(object: SimpleTextWatcher() {
 
             private var routine: Job? = null
+
+            override fun onTextChanged(str: CharSequence?, start: Int, count: Int, after: Int) {
+                if (routine != null) {
+                    routine!!.cancel()
+                }
+                preview.setBackgroundResource(0) // clear border
+                preview.text = ""
+            }
 
             override fun afterTextChanged(str: Editable?) {
                 if (TextUtils.isEmpty(str))
                     return
 
-
-                if (routine != null) {
-                    routine!!.cancel()
-                }
-
                 routine = launch(Android) {
                     for (countdown in 3 downTo 0) {
                         delay(1, TimeUnit.SECONDS)
                         val notification = iv.context.getString(R.string.previewing_in_n_seconds)
-                        preview.setBackgroundResource(0) // clear border
                         preview.text = String.format(notification, countdown)
                     }
 
+                    // 3 seconds passed with no actions on entry content input, show preview
                     preview.setBackgroundResource(R.drawable.white_border_line) // set border when previewing
                     Markwon.setMarkdown(preview, str.toString())
                 }
@@ -78,6 +98,9 @@ class CreateNewPostViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
         })
     }
 
+    /**
+     * Handler of all small editing buttons above content input.
+     */
     @OnClick(
         R.id.entry_quick_bold, R.id.entry_quick_italic, R.id.entry_quick_underlined, R.id.entry_quick_strikethrough,
         R.id.entry_quick_code, R.id.entry_quick_quote, R.id.entry_quick_number_list, R.id.entry_quick_bullet_list,
@@ -100,30 +123,113 @@ class CreateNewPostViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
             R.id.entry_quick_quote -> insertInCursorPosition("> ", paste)
             R.id.entry_quick_number_list -> insertInCursorPosition("\n1. ", paste, "\n2. \n3. ")
             R.id.entry_quick_bullet_list -> insertInCursorPosition("\n* ", paste, "\n* \n* ")
-            R.id.entry_quick_link -> insertInCursorPosition("[$paste](", paste, ")")
-            R.id.entry_quick_image -> insertInCursorPosition("![$paste](", paste, ")")
+            R.id.entry_quick_link -> insertInCursorPosition("<a href='$paste'>", paste, "</a>")
+            R.id.entry_quick_image -> insertInCursorPosition("<img src='$paste'>", paste, ")")
         }
     }
 
+    /**
+     * Helper function for inserting quick snippets of markup into the various parts of edited text
+     * @param prefix prefix preceding content.
+     *          This is most likely non-empty. Cursor is positioned after it in all cases.
+     * @param what content to insert.
+     *          If it's empty and [suffix] is not, cursor will be positioned here
+     * @param suffix suffix after content. Can be empty fairly often. Cursor will be placed after it if [what] is
+     *          not empty.
+     */
     private fun insertInCursorPosition(prefix: String, what: String, suffix: String = "") {
-        var cursorPos = bodyInput.selectionStart
+        var cursorPos = contentInput.selectionStart
         if (cursorPos == -1)
-            cursorPos = bodyInput.text.length
+            cursorPos = contentInput.text.length
 
-        val beforeCursor = bodyInput.text.substring(0, cursorPos)
-        val afterCursor = bodyInput.text.substring(cursorPos, bodyInput.text.length)
+        val beforeCursor = contentInput.text.substring(0, cursorPos)
+        val afterCursor = contentInput.text.substring(cursorPos, contentInput.text.length)
 
         val beforeCursorWithPrefix = beforeCursor + prefix
         val suffixWithAfterCursor = suffix + afterCursor
-        bodyInput.setText(beforeCursorWithPrefix + what + suffixWithAfterCursor)
+        contentInput.setText(beforeCursorWithPrefix + what + suffixWithAfterCursor)
 
         when {
             // empty string between tags, set cursor between tags
-            what.isEmpty() -> bodyInput.setSelection(bodyInput.text.indexOf(suffixWithAfterCursor, cursorPos))
+            what.isEmpty() -> contentInput.setSelection(contentInput.text.indexOf(suffixWithAfterCursor, cursorPos))
             // append to text, set cursor to the end of text
-            afterCursor.isEmpty() -> bodyInput.setSelection(bodyInput.text.length)
+            afterCursor.isEmpty() -> contentInput.setSelection(contentInput.text.length)
             // insert inside text, set cursor at the end of paste
-            else -> bodyInput.setSelection(bodyInput.text.indexOf(afterCursor, cursorPos))
+            else -> contentInput.setSelection(contentInput.text.indexOf(afterCursor, cursorPos))
+        }
+    }
+
+    /**
+     * Called on view holder binding. Make sure to release all previous bindings to old entry
+     * @param entry diary entry to bind values to
+     */
+    fun setup(entry: DiaryEntry) {
+        this.entry = entry
+
+        // release old watchers
+        titleInput.removeTextChangedListener(titleWatcher)
+        contentInput.removeTextChangedListener(contentWatcher)
+
+        // reconfigure watchers to follow [entry]
+        titleWatcher = object: SimpleTextWatcher() {
+            override fun afterTextChanged(str: Editable?) {
+                entry.title = str.toString()
+            }
+        }
+        contentWatcher = object: SimpleTextWatcher() {
+            override fun afterTextChanged(str: Editable?) {
+                entry.body = str.toString()
+            }
+        }
+
+        // set text while watchers are not attached or they'll fire
+        titleInput.setText(entry.title)
+        contentInput.setText(entry.body)
+
+        // reattach watchers back
+        contentInput.addTextChangedListener(contentWatcher)
+        titleInput.addTextChangedListener(titleWatcher)
+    }
+
+    /**
+     * Cancel this item editing (with confirmation) and remove it from pending posts
+     */
+    @Suppress("DEPRECATION") // getColor doesn't work up to API level 23
+    @OnClick(R.id.entry_cancel)
+    fun cancel() {
+        // lambda to actually delete entry
+        val removeUs = {
+            adapter.run {
+                val idx = pendingEntries.indexOf(entry)
+                pendingEntries.removeAt(idx)
+                notifyItemRemoved(idx)
+            }
+        }
+
+        if (entry.title.isEmpty() && entry.body.isEmpty()) {
+            // entry has empty title and content, canceling right away
+            removeUs()
+            return
+        }
+
+        // entry has been written to, delete with confirmation only
+        MaterialDialog.Builder(itemView.context)
+                .title(android.R.string.dialog_alert_title)
+                .content(R.string.are_you_sure)
+                .negativeText(android.R.string.no)
+                .positiveColorRes(R.color.md_red_600)
+                .positiveText(android.R.string.yes)
+                .onPositive { _, _ -> removeUs() }
+                .show()
+    }
+
+    @OnClick(R.id.entry_submit)
+    fun submit() {
+        // hide edit form, show loading spinner
+
+        // make http request
+        launch(Android) {
+            Network.makeAsyncRequest(itemView.context, { Network.createEntry(entry) })
         }
     }
 }

@@ -6,9 +6,7 @@ import android.animation.ValueAnimator
 import android.app.FragmentTransaction
 import android.support.v4.view.animation.FastOutSlowInInterpolator
 import android.support.v4.widget.DrawerLayout
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import butterknife.BindView
 import butterknife.ButterKnife

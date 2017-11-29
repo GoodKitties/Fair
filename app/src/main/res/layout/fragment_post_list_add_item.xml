@@ -144,6 +144,30 @@
             android:padding="4dp"
             android:textAppearance="@android:style/TextAppearance.Medium" />
 
+        <LinearLayout
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                style="?android:attr/buttonBarButtonStyle"
+                android:id="@+id/entry_cancel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:text="@android:string/cancel"
+                android:textColor="@color/md_red_500"/>
+
+            <Button
+                style="?android:attr/buttonBarButtonStyle"
+                android:id="@+id/entry_submit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:text="@string/submit"/>
+
+        </LinearLayout>
+
     </LinearLayout>
 
 </android.support.v7.widget.CardView>
