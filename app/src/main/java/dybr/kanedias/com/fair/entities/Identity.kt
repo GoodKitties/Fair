@@ -1,9 +1,7 @@
 package dybr.kanedias.com.fair.entities
 
-import com.google.gson.annotations.SerializedName
-import com.j256.ormlite.field.DataType
-import com.j256.ormlite.field.DatabaseField
-import com.j256.ormlite.table.DatabaseTable
+import com.squareup.moshi.Json
+import moe.banana.jsonapi2.Resource
 import java.util.*
 
 /**
@@ -27,12 +25,12 @@ import java.util.*
  *
  * Created on 17.11.17
  */
-class Identity {
+class Identity: Resource() {
 
     /**
      * Server-side identity id
      */
-    @SerializedName("_id")
+    @Json(name = "_id")
     var identityId: String = ""
 
     // not interested in updated/created timestamps yet
@@ -63,6 +61,6 @@ class Identity {
     /**
      * Array of all assigned URIs (diary address paths) for this user.
      */
-    @SerializedName("uri")
+    @Json(name = "uri")
     var uris: MutableList<String> = ArrayList()
 }

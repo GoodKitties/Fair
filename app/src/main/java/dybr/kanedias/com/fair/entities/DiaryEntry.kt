@@ -1,5 +1,6 @@
 package dybr.kanedias.com.fair.entities
 
+import moe.banana.jsonapi2.Resource
 import java.util.*
 
 /**
@@ -23,7 +24,7 @@ import java.util.*
  *
  * Created on 18.11.17
  */
-class DiaryEntry {
+class DiaryEntry: Resource() {
 
     companion object {
         val TYPE_PENDING = 0

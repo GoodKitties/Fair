@@ -1,8 +1,8 @@
 package dybr.kanedias.com.fair.entities
 
-import com.google.gson.annotations.SerializedName
 import com.j256.ormlite.field.DatabaseField
 import com.j256.ormlite.table.DatabaseTable
+import com.squareup.moshi.Json
 
 /**
  * @author Kanedias
@@ -21,7 +21,7 @@ class Diary {
     /**
      * server-side ID of this diary
      */
-    @SerializedName("_id")
+    @Json(name = "_id")
     @DatabaseField(index = true, canBeNull = false)
     var diaryId: String = ""
 

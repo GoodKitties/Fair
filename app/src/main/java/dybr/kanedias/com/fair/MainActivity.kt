@@ -193,10 +193,10 @@ class MainActivity : AppCompatActivity() {
             progressDialog.setContent(R.string.logging_in)
             progressDialog.show()
 
-            val errMapping = mapOf(HTTP_OK to R.string.login_successful, HTTP_UNAUTHORIZED to R.string.invalid_credentials)
             Network.makeAsyncRequest(this@MainActivity,
                     { Network.login(Auth.user) },
-                    errMapping,
+                    mapOf(HTTP_OK to R.string.login_successful,
+                            HTTP_UNAUTHORIZED to R.string.invalid_credentials),
                     { handleAuthFailure() })
 
             progressDialog.hide()

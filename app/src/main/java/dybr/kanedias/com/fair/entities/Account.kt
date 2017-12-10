@@ -1,7 +1,11 @@
 package dybr.kanedias.com.fair.entities
 
+import com.j256.ormlite.field.DataType
 import com.j256.ormlite.field.DatabaseField
 import com.j256.ormlite.table.DatabaseTable
+import moe.banana.jsonapi2.JsonApi
+import moe.banana.jsonapi2.Resource
+import java.util.*
 
 /**
  * Account class for logging in.
@@ -16,7 +20,8 @@ import com.j256.ormlite.table.DatabaseTable
  * Created on 14.11.17
  */
 @DatabaseTable(tableName = "account")
-class Account {
+@JsonApi(type = "users")
+class Account: Resource() {
     /**
      * Inner id in the database, not used
      */
@@ -27,13 +32,7 @@ class Account {
      * E-Mail user when registered
      */
     @DatabaseField(canBeNull = false, unique = true)
-    var email: String = ""
-
-    /**
-     * Chosen nickname
-     */
-    @DatabaseField(canBeNull = false, unique = true)
-    var name: String = ""
+    lateinit var email: String
 
     /**
      * Password in plaintext. In Android all application data
@@ -41,17 +40,20 @@ class Account {
      * so we don't have to worry about it being non-encoded.
      */
     @DatabaseField(canBeNull = false)
-    var password: String = ""
+    lateinit var password: String
+
+    @DatabaseField(dataType = DataType.DATE_LONG, canBeNull = false)
+    lateinit var createdAt: Date
+
+    @DatabaseField(dataType = DataType.DATE_LONG, canBeNull = false)
+    lateinit var updatedAt: Date
+
+    @DatabaseField(canBeNull = false)
+    var isOver18: Boolean = false
 
     /**
      * Whether this is current account for the app
      */
     @DatabaseField(canBeNull = false)
     var current: Boolean = false
-
-    /**
-     * Current profile for this user.
-     * Not saved in DB.
-     */
-    lateinit var profile: Identity
 }

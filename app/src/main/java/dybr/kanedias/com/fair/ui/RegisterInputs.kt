@@ -27,15 +27,6 @@ class RegisterInputs(private val parent: AddAccountFragment) {
     @ConfirmPasswordValidation(R.string.passwords_not_match)
     val confirmPassword = parent.confirmPasswordInput
 
-    @JvmField
-    @PatternValidation(pattern = "[0-9a-z]+", errorMessage = R.string.should_only_contain_alphanumeric)
-    val namespace = parent.namespaceInput
-
-    @JvmField
-    @NotEmptyValidation(R.string.should_not_be_empty)
-    val title = parent.titleInput
-
-
     // required for validator to work
     fun getString(id: Int): String = parent.getString(id)
 }

@@ -13,11 +13,11 @@ import android.widget.EditText
 import android.widget.Toast
 import butterknife.*
 import com.afollestad.materialdialogs.MaterialDialog
-import com.google.gson.Gson
 import convalida.library.Convalida
 import dybr.kanedias.com.fair.database.DbProvider
 import dybr.kanedias.com.fair.entities.Auth
 import dybr.kanedias.com.fair.entities.Account
+import dybr.kanedias.com.fair.entities.LoginRequest
 import dybr.kanedias.com.fair.entities.RegisterRequest
 import dybr.kanedias.com.fair.misc.Android
 import dybr.kanedias.com.fair.misc.HttpException
@@ -31,7 +31,9 @@ import org.json.JSONObject
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import dybr.kanedias.com.fair.ui.Sidebar
+import kotlinx.coroutines.experimental.launch
 import java.net.HttpURLConnection
+import java.util.*
 
 /**
  * Fragment responsible for adding account. Appears when you click "add account" in the sidebar.
@@ -56,11 +58,8 @@ class AddAccountFragment : Fragment() {
     @BindView(R.id.acc_password_confirm_input)
     lateinit var confirmPasswordInput: EditText
 
-    @BindView(R.id.acc_diary_address_input)
-    lateinit var namespaceInput: EditText
-
-    @BindView(R.id.acc_diary_title_input)
-    lateinit var titleInput: EditText
+    @BindView(R.id.acc_termsofservice_checkbox)
+    lateinit var termsOfServiceSwitch: CheckBox
 
     @BindView(R.id.confirm_button)
     lateinit var confirmButton: Button
@@ -71,12 +70,12 @@ class AddAccountFragment : Fragment() {
     @BindViews(
             R.id.acc_email, R.id.acc_username,
             R.id.acc_password, R.id.acc_password_confirm,
-            R.id.acc_diary_address, R.id.acc_diary_title
+            R.id.acc_termsofservice_checkbox
     )
-    lateinit var regInputs: List<@JvmSuppressWildcards TextInputLayout>
+    lateinit var regInputs: List<@JvmSuppressWildcards View>
 
     @BindViews(R.id.acc_email, R.id.acc_password)
-    lateinit var loginInputs: List<@JvmSuppressWildcards TextInputLayout>
+    lateinit var loginInputs: List<@JvmSuppressWildcards View>
 
     private lateinit var activity: MainActivity
 
@@ -128,214 +127,60 @@ class AddAccountFragment : Fragment() {
         progressDialog.show()
         if (registerSwitch.isChecked) {
             // send register query
-            RegisterCallback(progressDialog).execute(Step.CHECK_USERNAME)
+            doRegistration()
         } else {
             // send login query
-            LoginCallback(progressDialog).execute()
+            doLogin()
         }
+        progressDialog.dismiss()
     }
 
     /**
-     * Authentication task.
-     * If auth is successful, saves account and dismisses both dialog and fragment.
-     *
-     * Be sure to launch and pass progress dialog prior to launching this.
+     * Creates session for the user, saves auth and closes fragment on success.
      */
-    inner class LoginCallback(dialog: MaterialDialog): AsyncTask<Unit, Unit, Boolean>() {
-
-        private val pd = dialog
-
-        /**
-         * Just delegate auth to [Network.login] and handle the result
-         */
-        override fun doInBackground(vararg nothing: Unit?): Boolean {
-            try {
-                val acc = Account()
-                acc.apply {
-                    email = emailInput.text.toString()
-                    password = passwordInput.text.toString()
-                    current = true
-                }
-
-                Network.login(acc)
-                saveAuth(acc)
-                return true
-            } catch (httpex: HttpException) { // non-200 code on login
-                // TODO: check actual code on login
-                if (httpex.code == HttpURLConnection.HTTP_UNAUTHORIZED) { // unauthorized
-                    makeToast(getString(R.string.invalid_credentials))
-                } else {
-                    val errorText = getString(R.string.unexpected_website_error)
-                    makeToast("$errorText: ${httpex.message}")
-                }
-            }  catch (ioex: IOException) {
-                val errorText = getString(R.string.error_connecting)
-                makeToast("$errorText: ${ioex.localizedMessage}")
-            } finally {
-                pd.dismiss()
-            }
-
-            return false
+    private fun doLogin() {
+        val acc = Account().apply {
+            email = emailInput.text.toString()
+            password = passwordInput.text.toString()
+            current = true
         }
 
-        override fun onPostExecute(result: Boolean?) {
-            // post success message and dismiss fragment if all went well
-            if (result!!) {
-                makeToast(getString(R.string.login_successful))
-                fragmentManager!!.popBackStack()
-                activity.refreshTabs()
-            }
-        }
-    }
-
-    /**
-     * Registration steps.
-     * These represent server-side sequence of operation.
-     *
-     * @see RegisterCallback
-     */
-    enum class Step {
-        CHECK_USERNAME,
-        CHECK_EMAIL,
-        CHECK_NAMESPACE,
-    }
-
-    /**
-     * Pre-registration async checks and registration.
-     *
-     * Performs checks for username, email, address not to be taken.
-     * If something goes wrong, dismisses the dialog and shows toast about what has gone wrong.
-     * If all is successful, posts registration information, saves account and dismisses both dialog and fragment.
-     *
-     * Be sure to launch and pass progress dialog prior to launching this.
-     */
-    inner class RegisterCallback(dialog: MaterialDialog): AsyncTask<Step, Step, Boolean>() {
-
-        private val pd = dialog
-
-        /**
-         * Recursive, does auth checks one by one. If all checks pass,
-         * calls [sendRegisterInfo]
-         */
-        override fun doInBackground(vararg initial: Step?) : Boolean {
-            val step = initial[0]!!
-            publishProgress(step)
-
-            // initialize check urls/error strings
-            val url = when (step) {
-                Step.CHECK_USERNAME -> "${Network.IDENTITY_ENDPOINT}/exists?name=${usernameInput.text}"
-                Step.CHECK_EMAIL -> "${Network.USER_ENDPOINT}/exists?email=${emailInput.text}"
-                Step.CHECK_NAMESPACE -> "${Network.IDENTITY_ENDPOINT}/exists?uri=${namespaceInput.text}"
-            }
-            val possibleError = getString(when (step) {
-                Step.CHECK_USERNAME -> R.string.nickname_already_taken
-                Step.CHECK_EMAIL -> R.string.email_already_registered
-                Step.CHECK_NAMESPACE -> R.string.namespace_already_taken
-            })
-
-            val req = Request.Builder().url(url).build()
-            try {
-                // call it synchronously, we don't want callback hell here
-                val resp = Network.httpClient.newCall(req).execute()
-                if (!resp.isSuccessful) {
-                    // TODO: this normally shouldn't happen but it'd be good to test this!
-                    throw IOException(getString(R.string.unexpected_website_error))
-                }
-
-                // body looks like { "result": true }
-                // no need in heavy-lifting through Gson
-                val json = JSONObject(resp.body()?.string())
-                val result = json.get("result") as Boolean
-                if (result) {
-                    makeToast(possibleError)
-                    return false
-                }
-
-
-                if (step.ordinal != Step.values().size - 1) {
-                    // proceed to next step
-                    return doInBackground(Step.values()[step.ordinal + 1])
-                }
-
-                // this was the last step, verifications complete!
-                // send actual register POST
-                return sendRegisterInfo()
-            }  catch (httpex: HttpException) { // non-200 code
-                // TODO: check actual code on login
-                if (httpex.code == HttpURLConnection.HTTP_NOT_FOUND) { // unauthorized
-                    makeToast(getString(R.string.profile_not_found))
-                } else {
-                    val errorText = getString(R.string.unexpected_website_error)
-                    makeToast("$errorText: ${httpex.message}")
-                }
-            } catch (ioex: IOException) {
-                val errorText =  getString(R.string.error_connecting)
-                makeToast("$errorText: ${ioex.localizedMessage}")
-            } finally {
-                pd.dismiss()
-            }
-
-            return false
-        }
-
-        /**
-         * Send registration request and validate the result.
-         *
-         * This also sets session cookies in http client that are needed
-         * to call authenticated-only API functions.
-         */
-        private fun sendRegisterInfo(): Boolean {
-            val regRequest = RegisterRequest(
-                    name = usernameInput.text.toString(),
-                    email = emailInput.text.toString(),
-                    uri = namespaceInput.text.toString(),
-                    password = passwordInput.text.toString(),
-                    confirmPassword = passwordInput.text.toString(),
-                    title = titleInput.text.toString()
-            )
-            val body = RequestBody.create(Network.MIME_JSON, Gson().toJson(regRequest))
-            val req = Request.Builder().post(body).url(Network.REGISTER_ENDPOINT).build()
-            val resp = Network.httpClient.newCall(req).execute() // if it throws, we still catch it in [doInBackground]
-            if (!resp.isSuccessful) {
-                throw IOException(getString(R.string.unexpected_website_error))
-            }
-
-            // body looks like { "status": "OK" }
-            val json = JSONObject(resp.body()?.string())
-            val result = json.get("status") as String
-            if (result != "OK") {
-                makeToast(getString(R.string.registration_failed))
-                return false
-            }
-
-            // if we're here then we survived through registration checks
-            // and registration itself was successful, let's save what we have
-            val acc = Account().apply {
-                name = regRequest.name
-                email = regRequest.email
-                password = regRequest.password
-                current = true
-            }
-
-            // without identity we can't know current profile name
-            Network.populateIdentity(acc)
+        launch(Android) {
+            Network.makeAsyncRequest(activity, { Network.login(acc) }, mapOf(422 to R.string.invalid_credentials))
             saveAuth(acc)
-            return true
         }
 
-        override fun onProgressUpdate(vararg value: Step?) {
-            // update text of progress dialog to current step description
-            when (value[0]!!) {
-                Step.CHECK_USERNAME -> pd.setContent(R.string.checking_nickname)
-                Step.CHECK_EMAIL -> pd.setContent(R.string.checking_email)
-                Step.CHECK_NAMESPACE -> pd.setContent(R.string.checking_namespace)
-            }
-        }
+        Toast.makeText(activity, R.string.login_successful, Toast.LENGTH_SHORT).show()
+        fragmentManager!!.popBackStack()
+        activity.refreshTabs()
+    }
 
-        override fun onPostExecute(result: Boolean?) {
-            // post success message and dismiss fragment if all went well
-            if (result!!) {
-                makeToast(getString(R.string.congrats_diary_registered))
+    /**
+     * Obtains registration info from input fields, sends registration request, handles answer.
+     * Also saves account, makes it current and closes the fragment if everything was successful.
+     */
+    private fun doRegistration() {
+        val req = RegisterRequest(
+                email = emailInput.text.toString(),
+                password = passwordInput.text.toString(),
+                confirmPassword = confirmPasswordInput.text.toString(),
+                termsOfService = termsOfServiceSwitch.isChecked
+        )
+
+        launch(Android) {
+            val response = Network.makeAsyncRequest(activity, { Network.register(req) })
+            response?.let { // on success
+                val acc = Account().apply {
+                    email = it.email
+                    password = req.password // get from request, can't be obtained from user info
+                    createdAt = it.createdAt
+                    updatedAt = it.updatedAt
+                    isOver18 = it.isOver18 // default is false
+                    current = true // we just registered, certainly we want to use it now
+                }
+                saveAuth(acc)
+
+                Toast.makeText(activity, R.string.congrats_diary_registered, Toast.LENGTH_SHORT).show()
                 fragmentManager!!.popBackStack()
                 activity.refreshTabs()
             }
@@ -350,12 +195,4 @@ class AddAccountFragment : Fragment() {
         DbProvider.helper.accDao.create(acc)
         Auth.user = acc
     }
-
-    /**
-     * Be sure to call this function only if fragment is already attached to activity!
-     */
-    fun makeToast(text: String) {
-        activity.runOnUiThread { Toast.makeText(activity, text, Toast.LENGTH_SHORT).show() }
-    }
-
 }
