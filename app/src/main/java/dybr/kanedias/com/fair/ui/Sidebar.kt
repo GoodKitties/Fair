@@ -93,7 +93,7 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
         val inflater = parent.layoutInflater
 
         // set welcome message to current user
-        currentUsername.text = Auth.user.name
+        currentUsername.text = Auth.user.email
 
         // update account area views
         // remove previous accounts, they may be invalid
@@ -106,7 +106,7 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
             val accName = view.findViewById<TextView>(R.id.account_name)
             val accRemove = view.findViewById<ImageView>(R.id.account_remove)
 
-            accName.text = acc.name
+            accName.text = acc.email
             accName.setOnClickListener {
                 Auth.user = acc
                 drawer.closeDrawers()
@@ -146,7 +146,7 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
      */
     private fun deleteAccount(acc: Account) {
         // if we deleted current account, set it to guest
-        if (Auth.user.name == acc.name) {
+        if (Auth.user.email == acc.email) {
             Auth.user = Auth.guest
 
             drawer.closeDrawers()

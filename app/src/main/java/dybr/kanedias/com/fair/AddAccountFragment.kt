@@ -1,8 +1,6 @@
 package dybr.kanedias.com.fair
 
-import android.os.AsyncTask
 import android.os.Bundle
-import android.support.design.widget.TextInputLayout
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -17,23 +15,14 @@ import convalida.library.Convalida
 import dybr.kanedias.com.fair.database.DbProvider
 import dybr.kanedias.com.fair.entities.Auth
 import dybr.kanedias.com.fair.entities.Account
-import dybr.kanedias.com.fair.entities.LoginRequest
 import dybr.kanedias.com.fair.entities.RegisterRequest
 import dybr.kanedias.com.fair.misc.Android
-import dybr.kanedias.com.fair.misc.HttpException
 import dybr.kanedias.com.fair.ui.LoginInputs
 import dybr.kanedias.com.fair.ui.RegisterInputs
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.delay
-import okhttp3.Request
-import okhttp3.RequestBody
-import org.json.JSONObject
-import java.io.IOException
 import java.util.concurrent.TimeUnit
 import dybr.kanedias.com.fair.ui.Sidebar
-import kotlinx.coroutines.experimental.launch
-import java.net.HttpURLConnection
-import java.util.*
 
 /**
  * Fragment responsible for adding account. Appears when you click "add account" in the sidebar.
@@ -96,6 +85,7 @@ class AddAccountFragment : Fragment() {
             loginInputs.forEach { it -> it.visibility = View.GONE }
             regInputs.forEach { it -> it.visibility = View.VISIBLE }
         } else {
+            confirmButton.setText(R.string.enter)
             regInputs.forEach { it -> it.visibility = View.GONE }
             loginInputs.forEach { it -> it.visibility = View.VISIBLE }
         }
@@ -145,14 +135,15 @@ class AddAccountFragment : Fragment() {
             current = true
         }
 
-        launch(Android) {
-            Network.makeAsyncRequest(activity, { Network.login(acc) }, mapOf(422 to R.string.invalid_credentials))
-            saveAuth(acc)
-        }
 
-        Toast.makeText(activity, R.string.login_successful, Toast.LENGTH_SHORT).show()
-        fragmentManager!!.popBackStack()
-        activity.refreshTabs()
+        Network.makeAsyncRequest(activity, { Network.login(acc) }, mapOf(422 to R.string.invalid_credentials))
+        acc.accessToken?.let { // success, we obtained access token
+            saveAuth(acc)
+
+            Toast.makeText(activity, R.string.login_successful, Toast.LENGTH_SHORT).show()
+            fragmentManager!!.popBackStack()
+            activity.refreshTabs()
+        }
     }
 
     /**
@@ -160,30 +151,28 @@ class AddAccountFragment : Fragment() {
      * Also saves account, makes it current and closes the fragment if everything was successful.
      */
     private fun doRegistration() {
-        val req = RegisterRequest(
-                email = emailInput.text.toString(),
-                password = passwordInput.text.toString(),
-                confirmPassword = confirmPasswordInput.text.toString(),
-                termsOfService = termsOfServiceSwitch.isChecked
-        )
+        val req = RegisterRequest().apply {
+            email = emailInput.text.toString()
+            password = passwordInput.text.toString()
+            confirmPassword = confirmPasswordInput.text.toString()
+            termsOfService = termsOfServiceSwitch.isChecked
+        }
 
-        launch(Android) {
-            val response = Network.makeAsyncRequest(activity, { Network.register(req) })
-            response?.let { // on success
-                val acc = Account().apply {
-                    email = it.email
-                    password = req.password // get from request, can't be obtained from user info
-                    createdAt = it.createdAt
-                    updatedAt = it.updatedAt
-                    isOver18 = it.isOver18 // default is false
-                    current = true // we just registered, certainly we want to use it now
-                }
-                saveAuth(acc)
-
-                Toast.makeText(activity, R.string.congrats_diary_registered, Toast.LENGTH_SHORT).show()
-                fragmentManager!!.popBackStack()
-                activity.refreshTabs()
+        val response = Network.makeAsyncRequest(activity, { Network.register(req) })
+        response?.let { // on success
+            val acc = Account().apply {
+                email = it.email
+                password = req.password // get from request, can't be obtained from user info
+                createdAt = it.createdAt
+                updatedAt = it.updatedAt
+                isOver18 = it.isOver18 // default is false
+                current = true // we just registered, certainly we want to use it now
             }
+            saveAuth(acc)
+
+            Toast.makeText(activity, R.string.congrats_diary_registered, Toast.LENGTH_SHORT).show()
+            fragmentManager!!.popBackStack()
+            activity.refreshTabs()
         }
     }
 

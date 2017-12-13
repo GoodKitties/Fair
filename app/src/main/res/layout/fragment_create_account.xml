@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="@color/md_grey_850">
 
     <LinearLayout
@@ -83,6 +83,7 @@
             android:layout_height="wrap_content"
             android:gravity="start|center_vertical"
             android:layout_marginTop="16dp"
+            android:visibility="gone"
             android:text="@string/termsofservice_accept"/>
 
         <CheckBox

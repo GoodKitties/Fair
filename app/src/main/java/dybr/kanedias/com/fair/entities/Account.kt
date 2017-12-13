@@ -20,8 +20,7 @@ import java.util.*
  * Created on 14.11.17
  */
 @DatabaseTable(tableName = "account")
-@JsonApi(type = "users")
-class Account: Resource() {
+class Account {
     /**
      * Inner id in the database, not used
      */
@@ -42,14 +41,29 @@ class Account: Resource() {
     @DatabaseField(canBeNull = false)
     lateinit var password: String
 
+    /**
+     * Date this account was created, as returned by users API request
+     */
     @DatabaseField(dataType = DataType.DATE_LONG, canBeNull = false)
     lateinit var createdAt: Date
 
+    /**
+     * Date this account was updated, as returned by users API request
+     */
     @DatabaseField(dataType = DataType.DATE_LONG, canBeNull = false)
     lateinit var updatedAt: Date
 
+    /**
+     * Whether this users is allowed to see NSFW content
+     */
     @DatabaseField(canBeNull = false)
     var isOver18: Boolean = false
+
+    /**
+     * Access token that's created after session start is saved along with the account
+     */
+    @DatabaseField(canBeNull = true)
+    var accessToken: String? = null
 
     /**
      * Whether this is current account for the app

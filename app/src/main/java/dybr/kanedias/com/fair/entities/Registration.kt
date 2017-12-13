@@ -29,12 +29,19 @@ import java.util.*
  * Created on 13.11.17
  */
 @JsonApi(type = "users", policy = Policy.SERIALIZATION_ONLY)
-class RegisterRequest(
-        val email: String,
-        val password: String,
-        val confirmPassword: String = password,
-        val termsOfService: Boolean = true
-) : Resource()
+class RegisterRequest : Resource() {
+    @Json(name = "email")
+    lateinit var email: String
+
+    @Json(name = "password")
+    lateinit var password: String
+
+    @Json(name = "confirm-password")
+    lateinit var confirmPassword: String
+
+    @Json(name = "terms-of-service")
+    var termsOfService: Boolean = true
+}
 
 /**
  * Response from server on success after [RegisterRequest]
@@ -62,9 +69,16 @@ class RegisterRequest(
  * Created on 10.12.2017
  */
 @JsonApi(type = "users", policy = Policy.DESERIALIZATION_ONLY)
-class RegisterResponse(
-        val email: String,
-        val createdAt: Date,
-        val updatedAt: Date,
-        val isOver18: Boolean
-) : Resource()
+class RegisterResponse : Resource() {
+    @Json(name = "email")
+    lateinit var email: String
+
+    @Json(name = "created-at")
+    lateinit var createdAt: Date
+
+    @Json(name = "updated-at")
+    lateinit var updatedAt: Date
+
+    @Json(name = "is-over-18")
+    var isOver18: Boolean = false
+}

@@ -168,40 +168,35 @@ class MainActivity : AppCompatActivity() {
             return
 
         // retrieve our identity from site
-        launch(Android) {
-            progressDialog.setContent(R.string.loading_profile)
-            progressDialog.show()
+        progressDialog.setContent(R.string.loading_profile)
+        progressDialog.show()
 
-            Network.makeAsyncRequest(this@MainActivity,
-                    { Network.populateIdentity(Auth.user) },
-                    mapOf(HTTP_NOT_FOUND to R.string.invalid_credentials),
-                    { handleAuthFailure() })
+        Network.makeAsyncRequest(this@MainActivity,
+                { Network.populateIdentity(Auth.user) },
+                mapOf(HTTP_NOT_FOUND to R.string.invalid_credentials),
+                { handleAuthFailure() })
 
-            progressDialog.hide()
+        progressDialog.hide()
 
-            // main action, next interactions are held
-            // inside respective fragments in view pager
-            refreshTabs()
-        }
+        // main action, next interactions are held
+        // inside respective fragments in view pager
+        refreshTabs()
     }
 
     /**
      * Logs in with an account specified in [Auth.user]
      */
     fun reLogin() {
-        launch(Android) {
-            progressDialog.setContent(R.string.logging_in)
-            progressDialog.show()
+        progressDialog.setContent(R.string.logging_in)
+        progressDialog.show()
 
-            Network.makeAsyncRequest(this@MainActivity,
-                    { Network.login(Auth.user) },
-                    mapOf(HTTP_OK to R.string.login_successful,
-                            HTTP_UNAUTHORIZED to R.string.invalid_credentials),
-                    { handleAuthFailure() })
+        Network.makeAsyncRequest(this@MainActivity,
+                { Network.login(Auth.user) },
+                mapOf(HTTP_OK to R.string.login_successful),
+                { handleAuthFailure() })
 
-            progressDialog.hide()
-            refreshTabs()
-        }
+        progressDialog.hide()
+        refreshTabs()
     }
 
     private fun handleAuthFailure() {
@@ -221,6 +216,8 @@ class MainActivity : AppCompatActivity() {
     inner class TabAdapter: FragmentStatePagerAdapter(supportFragmentManager) {
 
         override fun getCount(): Int {
+            // not working atm - no API for posting at all
+            /*
             if (Auth.user === Auth.guest) {
                 // guest can't see anything without logging in yet.
                 return 0
@@ -228,11 +225,15 @@ class MainActivity : AppCompatActivity() {
             var totalTabs = 2 // first tab is favorite post wall, second is own diary
             totalTabs += Auth.user.profile.favorites.size // add tabs for favorites
             return totalTabs
+            */
+            return 0
         }
 
 
 
         override fun getItem(position: Int): PostListFragment {
+            // not working atm - no API for posting at all
+            /*
             val ownFavEndpoint = "${Network.IDENTITY_ENDPOINT}/${Auth.user.profile.uris.last()}"
             val ownDiaryEndpoint = "${Network.ENTRIES_ENDPOINT}/${Auth.user.profile.uris.last()}"
             val selectedFavEndpoint = lazy { Auth.user.profile.favorites[position - 2].uris.last() }
@@ -241,13 +242,18 @@ class MainActivity : AppCompatActivity() {
                 MY_DIARY_TAB -> PostListFragment().apply { uri = ownDiaryEndpoint }
                 else -> PostListFragment().apply { uri = "${Network.ENTRIES_ENDPOINT}/${selectedFavEndpoint.value}" }
             }
+            */
+            return PostListFragment()
         }
 
+        // not working atm - no API for posting at all
+        /*
         override fun getPageTitle(position: Int): CharSequence? = when (position) {
             FAV_TAB -> getString(R.string.favorite)
             MY_DIARY_TAB -> getString(R.string.my_diary)
             else -> Auth.user.profile.favorites[position - 2].name
         }
+        */
     }
 
     /**

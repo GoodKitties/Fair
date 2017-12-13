@@ -5,16 +5,21 @@ import android.widget.Toast
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
-import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import dybr.kanedias.com.fair.entities.*
+import dybr.kanedias.com.fair.misc.Android
 import dybr.kanedias.com.fair.misc.HttpApiException
 import dybr.kanedias.com.fair.misc.HttpException
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.launch
 import moe.banana.jsonapi2.Document
+import moe.banana.jsonapi2.ObjectDocument
 import moe.banana.jsonapi2.ResourceAdapterFactory
+import moe.banana.jsonapi2.ResourceIdentifier
 import okhttp3.*
+import okio.BufferedSource
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 import java.io.IOException
@@ -30,19 +35,15 @@ object Network {
 
     private val MAIN_DYBR_API_ENDPOINT = "https://dybr-staging-api.herokuapp.com/v1"
 
-    val IDENTITY_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/identity"
-    val USERS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/users"
-    val SESSIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/sessions"
+    private val USERS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/users"
+    private val SESSIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/sessions"
     val CURRENT_IDENTITY_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/current_identity"
-    val REGISTER_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/register"
-    val LOGIN_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/login"
-    val ENTRIES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/entries"
 
-    val MIME_JSON_API = MediaType.parse("application/vnd.api+json")
+    private val MIME_JSON_API = MediaType.parse("application/vnd.api+json")
 
     private val jsonApiAdapter = ResourceAdapterFactory.builder()
-            .add(Account::class.java)
             .add(LoginRequest::class.java)
+            .add(LoginResponse::class.java)
             .add(RegisterRequest::class.java)
             .add(RegisterResponse::class.java)
             .build()
@@ -65,68 +66,81 @@ object Network {
                 .build()
     }
 
-    /**
-     * Check that cookies are not expired.
-     * The relevant cookies are "express:sess" and "express:sess.sig"
-     */
-    fun cookiesInvalid(): Boolean = cookieJar.loadForRequest(HttpUrl.parse(MAIN_DYBR_API_ENDPOINT)!!).isEmpty()
-
     fun register(regInfo: RegisterRequest): RegisterResponse {
-        val reqAdapter = jsonConverter.adapter(RegisterRequest::class.java)
-        val reqBody = RequestBody.create(MIME_JSON_API, reqAdapter.toJson(regInfo))
+        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(regInfo))
         val req = Request.Builder().post(reqBody).url(USERS_ENDPOINT).build()
         val resp = Network.httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
-            if (resp.code() == 422) { // Unprocessable entity
-                // try to get error info
-                val errAdapter = jsonConverter.adapter(Document::class.java)
-                val errDoc = errAdapter.fromJson(resp.body()!!.source())!!
-                throw HttpApiException(resp, errDoc.errors)
-            }
-            throw HttpException(resp)
+            throw extractErrors(resp)
         }
 
-        val respAdapter = jsonConverter.adapter(RegisterResponse::class.java)
-        return respAdapter.fromJson(resp.body()!!.source())!!
+        return fromWrappedJson(resp.body()!!.source(), RegisterResponse::class.java)
     }
 
     /**
-     * Logs in with specified account.
-     * This also clears previous and sets corresponding cookies.
+     * Tries to deduce errors from non-successful response.
+     * @param resp http response that was not successful
+     * @return [HttpApiException] if specific errors were found or generic [HttpException] for this response
+     */
+    private fun extractErrors(resp: Response) : HttpException {
+        if (resp.code() == 422) { // Unprocessable entity
+            // try to get error info
+            val errAdapter = jsonConverter.adapter(Document::class.java)
+            val errDoc = errAdapter.fromJson(resp.body()!!.source())!!
+            return HttpApiException(resp, errDoc.errors)
+        }
+        return HttpException(resp)
+    }
+
+    /**
+     * Logs in with specified account, i.e. creates session and obtains access token for this user
      *
      * *This should be done in background thread*
+     *
+     * @param
      * @return true if auth was successful, false otherwise
      * @throws IOException on connection fail
      */
     fun login(acc: Account) {
-        // clear present cookies, we're re-logging
-        cookieJar.clear()
         if (acc === Auth.guest) {
             // it's guest, leave it as-is
             return
         }
 
-        val loginRequest = LoginRequest(
-                email = acc.email,
-                password = acc.password
-        )
-        val adapter = jsonConverter.adapter(LoginRequest::class.java)
-        val body = RequestBody.create(MIME_JSON_API, adapter.toJson(loginRequest))
+        // clear present access token, we're re-logging
+        acc.accessToken = null
+
+        val loginRequest = LoginRequest().apply {
+            email = acc.email
+            password = acc.password
+        }
+        val body = RequestBody.create(MIME_JSON_API, toWrappedJson(loginRequest))
         val req = Request.Builder().post(body).url(SESSIONS_ENDPOINT).build()
         val resp = Network.httpClient.newCall(req).execute()
 
-        // unauthorized error is returned when something is wrong with your input
+        // unprocessable entity error can be returned when something is wrong with your input
         if (!resp.isSuccessful) {
-            throw HttpException(resp)
+            throw extractErrors(resp)
         }
 
-        // we should have the cookie now
-        if (Network.cookiesInvalid()) {
-            throw IllegalStateException("Couldn't get required cookie from the site!") // should not happen
-        }
+        // if response is successful we should have login response in body
+        val respAdapter = jsonConverter.adapter(LoginResponse::class.java)
+        val response = respAdapter.fromJson(resp.body()!!.source())!!
+        acc.accessToken = response.accessToken
+    }
 
-        // without identity we won't know the name of the user
-        populateIdentity(acc)
+    private fun <T: ResourceIdentifier> toWrappedJson(obj: T): String {
+        val wrapped = ObjectDocument<T>().apply { set(obj) }
+        val type = Types.newParameterizedType(Document::class.java, obj::class.java)
+        val reqAdapter = jsonConverter.adapter<Document<T>>(type)
+        return reqAdapter.toJson(wrapped)
+    }
+
+    private fun <T: ResourceIdentifier> fromWrappedJson(obj: BufferedSource, clazz: Class<T>): T {
+        val type = Types.newParameterizedType(Document::class.java, clazz)
+        val reqAdapter = jsonConverter.adapter<Document<T>>(type)
+        val doc = reqAdapter.fromJson(obj)!!
+        return doc.asObjectDocument().get()
     }
 
     /**
@@ -190,49 +204,53 @@ object Network {
     }
 
     /**
-     * Use this in `launch(Android)` to handle typical errors in [Network]-invoked operations
+     * Use this to handle typical errors in [Network]-invoked operations
      * @param ctx context from which to extract error strings
      * @param job main job to execute. The actual invocation happens in pooled thread. If all goes well no error mappings are needed
      * @param errMapping map containing correlation between HTTP return codes and messages
      * @param onErr job to execute if anything bad happens
      */
-    suspend fun <T> makeAsyncRequest(ctx: Context,
+    fun <T> makeAsyncRequest(ctx: Context,
                                  job: () -> T,
                                  errMapping: Map<Int, Int> = emptyMap(),
                                  onErr: () -> Unit = {}): T? {
-        try {
-            // execute main job that can throw
-            val success = async(CommonPool) { job() }
+        var answer: T? = null
 
-            // all went well, report if we should
-            if (errMapping.containsKey(HTTP_OK)) {
-                Toast.makeText(ctx, errMapping.getValue(HTTP_OK), Toast.LENGTH_SHORT).show()
+        launch(Android) {
+            try {
+                // execute main job that can throw
+                val success = async(CommonPool) { job() }
+                answer = success.await()
+
+                // all went well, report if we should
+                if (errMapping.containsKey(HTTP_OK)) {
+                    Toast.makeText(ctx, errMapping.getValue(HTTP_OK), Toast.LENGTH_SHORT).show()
+                }
+            } catch (apiex: HttpApiException) { // API exchange error, most specific
+                for (error in apiex.errors) {
+                    Toast.makeText(ctx, error.detail, Toast.LENGTH_SHORT).show()
+                }
+                onErr()
+            } catch (httpex: HttpException) { // non-200 code, but couldn't deduce any API errors
+                // something happened, see if we have appropriate map
+                if (errMapping.containsKey(httpex.code)) {
+                    // we have, take value from map
+                    val key = ctx.getString(errMapping.getValue(httpex.code))
+                    Toast.makeText(ctx, key, Toast.LENGTH_SHORT).show()
+                } else {
+                    // we haven't, show generic error
+                    val errorText = ctx.getString(R.string.unexpected_website_error)
+                    Toast.makeText(ctx, "$errorText: ${httpex.message}", Toast.LENGTH_SHORT).show()
+                }
+                onErr()
+            } catch (ioex: IOException) { // generic connection-level error, show as-is
+                val errorText = ctx.getString(R.string.error_connecting)
+                Toast.makeText(ctx, "$errorText: ${ioex.localizedMessage}", Toast.LENGTH_SHORT).show()
+                onErr()
             }
-            return success.await()
-        } catch (apiex: HttpApiException) { // API exchange error, most specific
-            for (error in apiex.errors) {
-                Toast.makeText(ctx, error.detail, Toast.LENGTH_SHORT).show()
-            }
-            onErr()
-        } catch (httpex: HttpException) { // non-200 code, but couldn't deduce any API errors
-            // something happened, see if we have appropriate map
-            if (errMapping.containsKey(httpex.code)) {
-                // we have, take value from map
-                val key = ctx.getString(errMapping.getValue(httpex.code))
-                Toast.makeText(ctx, key, Toast.LENGTH_SHORT).show()
-            } else {
-                // we haven't, show generic error
-                val errorText = ctx.getString(R.string.unexpected_website_error)
-                Toast.makeText(ctx, "$errorText: ${httpex.message}", Toast.LENGTH_SHORT).show()
-            }
-            onErr()
-        } catch (ioex: IOException) { // generic connection-level error, show as-is
-            val errorText = ctx.getString(R.string.error_connecting)
-            Toast.makeText(ctx, "$errorText: ${ioex.localizedMessage}", Toast.LENGTH_SHORT).show()
-            onErr()
         }
 
-        return null
+        return answer
     }
 
     private class EntryContainer {

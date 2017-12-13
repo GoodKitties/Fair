@@ -59,12 +59,10 @@ class PostListFragment: Fragment() {
     }
 
     private fun retrievePosts() {
-        launch(Android) {
-            refresher.isRefreshing = true
-            entries = Network.makeAsyncRequest(activity!!, { Network.getEntries(uri) }) ?: emptyList()
-            refresher.isRefreshing = false
-            postRibbon.adapter = postAdapter
-        }
+        refresher.isRefreshing = true
+        entries = Network.makeAsyncRequest(activity!!, { Network.getEntries(uri) }) ?: emptyList()
+        refresher.isRefreshing = false
+        postRibbon.adapter = postAdapter
     }
 
     inner class PostListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -124,8 +122,9 @@ class PostListFragment: Fragment() {
             createdAt = Date()
             updatedAt = Date()
             author = Author().apply {
-                authorID = Auth.user.profile.identityId
-                name = Auth.user.name
+                // not working atm, no profile loading routines
+                // authorID = Auth.user.profile.identityId
+                // name = Auth.user.name
                 uri = this@PostListFragment.uri
             }
         }
