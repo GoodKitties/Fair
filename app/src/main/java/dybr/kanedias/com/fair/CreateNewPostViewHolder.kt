@@ -229,7 +229,7 @@ class CreateNewPostViewHolder(iv: View, private val adapter: PostListFragment.Po
 
         // make http request
         launch(Android) {
-            Network.makeAsyncRequest(itemView.context, { Network.createEntry(entry) })
+
         }
     }
 }

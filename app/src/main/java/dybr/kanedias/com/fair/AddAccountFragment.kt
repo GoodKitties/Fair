@@ -104,10 +104,14 @@ class AddAccountFragment : Fragment() {
             confirmButton.setText(R.string.register)
             loginInputs.forEach { it -> it.visibility = View.GONE }
             regInputs.forEach { it -> it.visibility = View.VISIBLE }
+
+            usernameInput.requestFocus()
         } else {
             confirmButton.setText(R.string.enter)
             regInputs.forEach { it -> it.visibility = View.GONE }
             loginInputs.forEach { it -> it.visibility = View.VISIBLE }
+
+            emailInput.requestFocus()
         }
     }
 

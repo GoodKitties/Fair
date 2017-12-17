@@ -4,34 +4,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
     android:background="@color/md_grey_850">
 
     <LinearLayout
         android:id="@+id/create_account_area"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:gravity="center"
         android:animateLayoutChanges="true"
         android:orientation="vertical"
         android:padding="16dp"
         tools:context="AddAccountFragment">
-
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/acc_email"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <requestFocus/>
-
-            <EditText
-                android:id="@+id/acc_email_input"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textEmailAddress"
-                android:hint="@string/email"/>
-
-        </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/acc_username"
@@ -43,7 +28,24 @@
                 android:id="@+id/acc_username_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:inputType="text"
+                android:nextFocusForward="@id/acc_email_input"
                 android:hint="@string/username"/>
+
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/acc_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/acc_email_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:nextFocusForward="@id/acc_password_input"
+                android:hint="@string/email"/>
 
         </android.support.design.widget.TextInputLayout>
 
@@ -58,6 +60,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
+                android:nextFocusForward="@id/acc_password_confirm_input"
                 android:hint="@string/password"/>
 
         </android.support.design.widget.TextInputLayout>
@@ -73,6 +76,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
+                android:nextFocusForward="@id/acc_termsofservice_checkbox"
                 android:hint="@string/confirm_password"/>
 
         </android.support.design.widget.TextInputLayout>
@@ -84,6 +88,7 @@
             android:gravity="start|center_vertical"
             android:layout_marginTop="16dp"
             android:visibility="gone"
+            android:nextFocusForward="@id/acc_is_over_18_checkbox"
             android:text="@string/termsofservice_accept"/>
 
         <CheckBox
@@ -93,6 +98,7 @@
             android:gravity="start|center_vertical"
             android:layout_marginTop="16dp"
             android:visibility="gone"
+            android:nextFocusForward="@id/confirm_button"
             android:text="@string/i_am_over_eighteen"/>
 
         <CheckBox
