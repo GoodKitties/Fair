@@ -25,8 +25,9 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"    // Kotlin language support
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.12"         // Kotlin coroutines
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"     // Kotlin language support
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.20"         // Kotlin coroutines
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:0.20"      // Kotlin UI context
     implementation "com.android.support:design:$supportLibVersion"              // Material design support lib
     implementation "com.android.support:appcompat-v7:$supportLibVersion"        // basic toolbars etc.
     implementation "com.android.support:cardview-v7:$supportLibVersion"         // snappy cardview for lists
@@ -39,6 +40,7 @@ dependencies {
     implementation 'com.github.Adonai.convalida-extended:convalida:1.1.0'       // validation of text inputs
     implementation 'moe.banana:moshi-jsonapi:3.3.0'                             // JSON-API parser
     implementation 'com.squareup.moshi:moshi-kotlin:1.5.0'                      // Moshi Kotlin support
+    implementation 'com.squareup.moshi:moshi-adapters:1.5.0'                    // Moshi serializers collection
     implementation 'ru.noties:markwon:1.0.1'                                    // markdown rendering
     //implementation 'com.github.clans:fab:1.6.4'                               // Floating action button with menu
 

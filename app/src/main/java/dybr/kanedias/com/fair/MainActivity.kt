@@ -19,9 +19,11 @@ import butterknife.OnClick
 import butterknife.ButterKnife
 import com.afollestad.materialdialogs.MaterialDialog
 import dybr.kanedias.com.fair.entities.Auth
-import dybr.kanedias.com.fair.misc.Android
 import dybr.kanedias.com.fair.ui.Sidebar
 import dybr.kanedias.com.fair.entities.DiaryEntry
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import java.net.HttpURLConnection.*
 
@@ -167,16 +169,22 @@ class MainActivity : AppCompatActivity() {
         if (Auth.user === Auth.guest)
             return
 
-        // retrieve our identity from site
-        progressDialog.setContent(R.string.loading_profile)
-        progressDialog.show()
+        launch(UI) {
+            // retrieve our identity from site
+            progressDialog.setContent(R.string.loading_profile)
+            progressDialog.show()
 
-        Network.makeAsyncRequest(this@MainActivity,
-                { Network.populateIdentity(Auth.user) },
-                mapOf(HTTP_NOT_FOUND to R.string.invalid_credentials),
-                { handleAuthFailure() })
+            try {
+                val success = async(CommonPool) { Network.populateIdentity(Auth.user) }
+                success.await()
 
-        progressDialog.hide()
+            } catch (ex: Exception) {
+                Network.reportErrors(this@MainActivity, ex, mapOf(HTTP_NOT_FOUND to R.string.invalid_credentials))
+                handleAuthFailure()
+            }
+
+            progressDialog.hide()
+        }
 
         // main action, next interactions are held
         // inside respective fragments in view pager
@@ -187,16 +195,24 @@ class MainActivity : AppCompatActivity() {
      * Logs in with an account specified in [Auth.user]
      */
     fun reLogin() {
-        progressDialog.setContent(R.string.logging_in)
-        progressDialog.show()
+        launch(UI) {
+            progressDialog.setContent(R.string.logging_in)
+            progressDialog.show()
 
-        Network.makeAsyncRequest(this@MainActivity,
-                { Network.login(Auth.user) },
-                mapOf(HTTP_OK to R.string.login_successful),
-                { handleAuthFailure() })
+            try {
+                val success = async(CommonPool) { Network.login(Auth.user) }
+                success.await()
 
-        progressDialog.hide()
-        refreshTabs()
+                // all went well, report if we should
+                Toast.makeText(this@MainActivity, R.string.login_successful, Toast.LENGTH_SHORT).show()
+            } catch (ex: Exception) {
+                Network.reportErrors(this@MainActivity, ex)
+                handleAuthFailure()
+            }
+
+            progressDialog.hide()
+            refreshTabs()
+        }
     }
 
     private fun handleAuthFailure() {

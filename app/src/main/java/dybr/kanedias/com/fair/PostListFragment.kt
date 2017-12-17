@@ -10,11 +10,10 @@ import android.view.View
 import android.view.ViewGroup
 import butterknife.BindView
 import butterknife.ButterKnife
-import dybr.kanedias.com.fair.entities.Auth
 import dybr.kanedias.com.fair.entities.Author
 import dybr.kanedias.com.fair.entities.DiaryEntry
-import dybr.kanedias.com.fair.misc.Android
 import kotlinx.coroutines.experimental.*
+import kotlinx.coroutines.experimental.android.UI
 import ru.noties.markwon.Markwon
 import java.util.*
 
@@ -41,12 +40,16 @@ class PostListFragment: Fragment() {
      * Address of selected diary, main source of posts
      * Should always be set after instantiation if this fragment.
      */
-    lateinit var uri: String
+    private lateinit var uri: String
+
+    private lateinit var activity: MainActivity
 
     private var entries: List<DiaryEntry> = emptyList()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_post_list, container, false)
+        activity = context as MainActivity
+
         ButterKnife.bind(this, view)
         setupUI()
         retrievePosts()
@@ -59,10 +62,19 @@ class PostListFragment: Fragment() {
     }
 
     private fun retrievePosts() {
-        refresher.isRefreshing = true
-        entries = Network.makeAsyncRequest(activity!!, { Network.getEntries(uri) }) ?: emptyList()
-        refresher.isRefreshing = false
-        postRibbon.adapter = postAdapter
+        launch(UI) {
+            refresher.isRefreshing = true
+
+            try {
+                val success = async(CommonPool) { Network.getEntries(uri) }
+                entries = success.await()
+            } catch (ex: Exception) {
+                Network.reportErrors(activity, ex)
+            }
+
+            refresher.isRefreshing = false
+            postRibbon.adapter = postAdapter
+        }
     }
 
     inner class PostListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {

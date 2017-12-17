@@ -5,14 +5,18 @@ import android.widget.Toast
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
+import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.Rfc3339DateJsonAdapter
 import com.squareup.moshi.Types
 import dybr.kanedias.com.fair.entities.*
 import dybr.kanedias.com.fair.misc.Android
 import dybr.kanedias.com.fair.misc.HttpApiException
 import dybr.kanedias.com.fair.misc.HttpException
 import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import moe.banana.jsonapi2.Document
 import moe.banana.jsonapi2.ObjectDocument
@@ -24,6 +28,7 @@ import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 import java.io.IOException
 import java.net.HttpURLConnection.*
+import java.util.*
 
 
 /**
@@ -50,6 +55,7 @@ object Network {
 
     private val jsonConverter = Moshi.Builder()
             .add(jsonApiAdapter)
+            .add(Date::class.java, Rfc3339DateJsonAdapter())
             .build()
 
     lateinit var httpClient: OkHttpClient
@@ -204,53 +210,39 @@ object Network {
     }
 
     /**
-     * Use this to handle typical errors in [Network]-invoked operations
-     * @param ctx context from which to extract error strings
-     * @param job main job to execute. The actual invocation happens in pooled thread. If all goes well no error mappings are needed
-     * @param errMapping map containing correlation between HTTP return codes and messages
-     * @param onErr job to execute if anything bad happens
+     * Handle typical network-related problems.
+     * * Handles API-level problems - answers with errors from API
+     * * Handles HTTP-level problems - answers with strings from [errMapping]
+     * * Handles conection IO-level problems
+     * @param ctx context to get error string from
+     * @param errMapping mapping of ids like `HttpUrlConnection.HTTP_NOT_FOUND -> R.string.not_found`
      */
-    fun <T> makeAsyncRequest(ctx: Context,
-                                 job: () -> T,
-                                 errMapping: Map<Int, Int> = emptyMap(),
-                                 onErr: () -> Unit = {}): T? {
-        var answer: T? = null
+    fun reportErrors(ctx: Context, ex: Exception, errMapping: Map<Int, Int> = emptyMap()) = when (ex) {
+        // API exchange error, most specific
+        is HttpApiException -> for (error in ex.errors) {
+            Toast.makeText(ctx, error.detail, Toast.LENGTH_SHORT).show()
+        }
 
-        launch(Android) {
-            try {
-                // execute main job that can throw
-                val success = async(CommonPool) { job() }
-                answer = success.await()
-
-                // all went well, report if we should
-                if (errMapping.containsKey(HTTP_OK)) {
-                    Toast.makeText(ctx, errMapping.getValue(HTTP_OK), Toast.LENGTH_SHORT).show()
-                }
-            } catch (apiex: HttpApiException) { // API exchange error, most specific
-                for (error in apiex.errors) {
-                    Toast.makeText(ctx, error.detail, Toast.LENGTH_SHORT).show()
-                }
-                onErr()
-            } catch (httpex: HttpException) { // non-200 code, but couldn't deduce any API errors
-                // something happened, see if we have appropriate map
-                if (errMapping.containsKey(httpex.code)) {
-                    // we have, take value from map
-                    val key = ctx.getString(errMapping.getValue(httpex.code))
-                    Toast.makeText(ctx, key, Toast.LENGTH_SHORT).show()
-                } else {
-                    // we haven't, show generic error
-                    val errorText = ctx.getString(R.string.unexpected_website_error)
-                    Toast.makeText(ctx, "$errorText: ${httpex.message}", Toast.LENGTH_SHORT).show()
-                }
-                onErr()
-            } catch (ioex: IOException) { // generic connection-level error, show as-is
-                val errorText = ctx.getString(R.string.error_connecting)
-                Toast.makeText(ctx, "$errorText: ${ioex.localizedMessage}", Toast.LENGTH_SHORT).show()
-                onErr()
+        // non-200 code, but couldn't deduce any API errors
+        is HttpException -> {
+            if (errMapping.containsKey(ex.code)) {
+                // we have, take value from map
+                val key = ctx.getString(errMapping.getValue(ex.code))
+                Toast.makeText(ctx, key, Toast.LENGTH_SHORT).show()
+            } else {
+                // we haven't, show generic error
+                val errorText = ctx.getString(R.string.unexpected_website_error)
+                Toast.makeText(ctx, "$errorText: ${ex.message}", Toast.LENGTH_SHORT).show()
             }
         }
 
-        return answer
+        // generic connection-level error, show as-is
+        is IOException -> {
+            val errorText = ctx.getString(R.string.error_connecting)
+            Toast.makeText(ctx, "$errorText: ${ex.localizedMessage}", Toast.LENGTH_SHORT).show()
+        }
+
+        else -> throw ex
     }
 
     private class EntryContainer {

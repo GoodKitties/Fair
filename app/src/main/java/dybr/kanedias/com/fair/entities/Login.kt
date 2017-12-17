@@ -22,21 +22,21 @@ import moe.banana.jsonapi2.Resource
  */
 @JsonApi(type = "sessions", policy = Policy.SERIALIZATION_ONLY)
 class LoginRequest : Resource() {
-        @Json(name = "action")
+        @field:Json(name = "action")
         val action: String = "login"
 
-        @Json(name = "email")
+        @field:Json(name = "email")
         lateinit var email: String
 
-        @Json(name = "password")
+        @field:Json(name = "password")
         lateinit var password: String
 }
 
 @JsonApi(type = "sessions", policy = Policy.DESERIALIZATION_ONLY)
 class LoginResponse : Resource() {
-        @Json(name = "action")
+        @field:Json(name = "action")
         lateinit var action: String
 
-        @Json(name = "access-token")
+        @field:Json(name = "access-token")
         lateinit var accessToken: String
 }

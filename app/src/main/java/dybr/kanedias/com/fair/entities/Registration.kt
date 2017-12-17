@@ -18,7 +18,9 @@ import java.util.*
  *       "email": "test@example.com",
  *       "password": "testpass",
  *       "password-confirmation": "testpass",
- *       "terms-of-service": true
+ *       "terms-of-service": true,
+ *       "is-adult": false,
+ *       "timezone": null
  *     }
  *   }
  * }
@@ -30,17 +32,23 @@ import java.util.*
  */
 @JsonApi(type = "users", policy = Policy.SERIALIZATION_ONLY)
 class RegisterRequest : Resource() {
-    @Json(name = "email")
+    @field:Json(name = "email")
     lateinit var email: String
 
-    @Json(name = "password")
+    @field:Json(name = "password")
     lateinit var password: String
 
-    @Json(name = "confirm-password")
+    @field:Json(name = "password-confirmation")
     lateinit var confirmPassword: String
 
-    @Json(name = "terms-of-service")
-    var termsOfService: Boolean = true
+    @field:Json(name = "terms-of-service")
+    var termsOfService: Boolean = false
+
+    @field:Json(name = "is-adult")
+    var isAdult: Boolean = false
+
+    @field:Json(name = "timezone")
+    var timezone: String? = null
 }
 
 /**
@@ -70,15 +78,15 @@ class RegisterRequest : Resource() {
  */
 @JsonApi(type = "users", policy = Policy.DESERIALIZATION_ONLY)
 class RegisterResponse : Resource() {
-    @Json(name = "email")
+    @field:Json(name = "email")
     lateinit var email: String
 
-    @Json(name = "created-at")
+    @field:Json(name = "created-at")
     lateinit var createdAt: Date
 
-    @Json(name = "updated-at")
+    @field:Json(name = "updated-at")
     lateinit var updatedAt: Date
 
-    @Json(name = "is-over-18")
-    var isOver18: Boolean = false
+    @field:Json(name = "is-adult")
+    var isAdult: Boolean = false
 }

@@ -23,6 +23,9 @@ import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.delay
 import java.util.concurrent.TimeUnit
 import dybr.kanedias.com.fair.ui.Sidebar
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 
 /**
  * Fragment responsible for adding account. Appears when you click "add account" in the sidebar.
@@ -50,6 +53,9 @@ class AddAccountFragment : Fragment() {
     @BindView(R.id.acc_termsofservice_checkbox)
     lateinit var termsOfServiceSwitch: CheckBox
 
+    @BindView(R.id.acc_is_over_18_checkbox)
+    lateinit var isAdultSwitch: CheckBox
+
     @BindView(R.id.confirm_button)
     lateinit var confirmButton: Button
 
@@ -59,7 +65,7 @@ class AddAccountFragment : Fragment() {
     @BindViews(
             R.id.acc_email, R.id.acc_username,
             R.id.acc_password, R.id.acc_password_confirm,
-            R.id.acc_termsofservice_checkbox
+            R.id.acc_termsofservice_checkbox, R.id.acc_is_over_18_checkbox
     )
     lateinit var regInputs: List<@JvmSuppressWildcards View>
 
@@ -68,11 +74,25 @@ class AddAccountFragment : Fragment() {
 
     private lateinit var activity: MainActivity
 
+    private lateinit var progressDialog: MaterialDialog
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val root = inflater.inflate(R.layout.fragment_create_account, container, false)
         ButterKnife.bind(this, root)
         activity = context as MainActivity
+
+        progressDialog = MaterialDialog.Builder(activity)
+                .title(R.string.please_wait)
+                .content(R.string.checking_in_progress)
+                .progress(true, 0)
+                .build()
+
         return root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        progressDialog.dismiss()
     }
 
     /**
@@ -108,13 +128,6 @@ class AddAccountFragment : Fragment() {
             return
         }
 
-        val progressDialog = MaterialDialog.Builder(activity)
-                .title(R.string.please_wait)
-                .content(R.string.checking_in_progress)
-                .progress(true, 0)
-                .build()
-
-        progressDialog.show()
         if (registerSwitch.isChecked) {
             // send register query
             doRegistration()
@@ -122,7 +135,7 @@ class AddAccountFragment : Fragment() {
             // send login query
             doLogin()
         }
-        progressDialog.dismiss()
+
     }
 
     /**
@@ -135,14 +148,23 @@ class AddAccountFragment : Fragment() {
             current = true
         }
 
+        launch(UI) {
+            progressDialog.show()
 
-        Network.makeAsyncRequest(activity, { Network.login(acc) }, mapOf(422 to R.string.invalid_credentials))
-        acc.accessToken?.let { // success, we obtained access token
-            saveAuth(acc)
+            try {
+                val success = async(CommonPool) { Network.login(acc) }
+                success.await()
 
-            Toast.makeText(activity, R.string.login_successful, Toast.LENGTH_SHORT).show()
-            fragmentManager!!.popBackStack()
-            activity.refreshTabs()
+                // all went well, report if we should
+                saveAuth(acc)
+                Toast.makeText(activity, R.string.login_successful, Toast.LENGTH_SHORT).show()
+                fragmentManager!!.popBackStack()
+                activity.refreshTabs()
+            } catch (ex: Exception) {
+                Network.reportErrors(activity, ex, mapOf(422 to R.string.invalid_credentials))
+            }
+
+            progressDialog.hide()
         }
     }
 
@@ -156,23 +178,33 @@ class AddAccountFragment : Fragment() {
             password = passwordInput.text.toString()
             confirmPassword = confirmPasswordInput.text.toString()
             termsOfService = termsOfServiceSwitch.isChecked
+            isAdult = isAdultSwitch.isChecked
         }
 
-        val response = Network.makeAsyncRequest(activity, { Network.register(req) })
-        response?.let { // on success
-            val acc = Account().apply {
-                email = it.email
-                password = req.password // get from request, can't be obtained from user info
-                createdAt = it.createdAt
-                updatedAt = it.updatedAt
-                isOver18 = it.isOver18 // default is false
-                current = true // we just registered, certainly we want to use it now
-            }
-            saveAuth(acc)
+        launch(UI) {
+            progressDialog.show()
 
-            Toast.makeText(activity, R.string.congrats_diary_registered, Toast.LENGTH_SHORT).show()
-            fragmentManager!!.popBackStack()
-            activity.refreshTabs()
+            try {
+                val success = async(CommonPool) { Network.register(req) }
+                val response = success.await()
+                val acc = Account().apply {
+                    email = response.email
+                    password = req.password // get from request, can't be obtained from user info
+                    createdAt = response.createdAt
+                    updatedAt = response.updatedAt
+                    isOver18 = response.isAdult // default is false
+                    current = true // we just registered, certainly we want to use it now
+                }
+
+                saveAuth(acc)
+                Toast.makeText(activity, R.string.congrats_diary_registered, Toast.LENGTH_SHORT).show()
+                fragmentManager!!.popBackStack()
+                activity.refreshTabs()
+            } catch (ex: Exception) {
+                Network.reportErrors(activity, ex, mapOf(422 to R.string.invalid_credentials))
+            }
+
+            progressDialog.hide()
         }
     }
 
