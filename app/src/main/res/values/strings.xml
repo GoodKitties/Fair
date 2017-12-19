@@ -62,4 +62,6 @@
     <string name="submit">Submit</string>
     <string name="termsofservice_accept">I accept Terms of Service</string>
     <string name="i_am_over_eighteen">I am over eighteen</string>
+    <string name="next_steps">Next steps</string>
+    <string name="registered_please_confirm_mail">Registration complete! Please check your email and follow activation instructions.</string>
 </resources>

@@ -16,7 +16,6 @@ import dybr.kanedias.com.fair.database.DbProvider
 import dybr.kanedias.com.fair.entities.Auth
 import dybr.kanedias.com.fair.entities.Account
 import dybr.kanedias.com.fair.entities.RegisterRequest
-import dybr.kanedias.com.fair.misc.Android
 import dybr.kanedias.com.fair.ui.LoginInputs
 import dybr.kanedias.com.fair.ui.RegisterInputs
 import kotlinx.coroutines.experimental.async
@@ -128,7 +127,7 @@ class AddAccountFragment : Fragment() {
         if (!validator.validateFields()) {
             // don't allow network request if there are errors in form
             // and hide errors after 3 seconds
-            async(Android) { delay(3, TimeUnit.SECONDS); validator.clearValidations() }
+            async(UI) { delay(3, TimeUnit.SECONDS); validator.clearValidations() }
             return
         }
 
@@ -162,6 +161,8 @@ class AddAccountFragment : Fragment() {
                 // all went well, report if we should
                 saveAuth(acc)
                 Toast.makeText(activity, R.string.login_successful, Toast.LENGTH_SHORT).show()
+
+                // return to main activity
                 fragmentManager!!.popBackStack()
                 activity.refreshTabs()
             } catch (ex: Exception) {
@@ -202,6 +203,15 @@ class AddAccountFragment : Fragment() {
 
                 saveAuth(acc)
                 Toast.makeText(activity, R.string.congrats_diary_registered, Toast.LENGTH_SHORT).show()
+
+                // let's make sure user understood what's needed of him
+                MaterialDialog.Builder(activity)
+                        .title(R.string.next_steps)
+                        .content(R.string.registered_please_confirm_mail)
+                        .positiveText(android.R.string.ok)
+                        .show()
+
+                // return to main activity
                 fragmentManager!!.popBackStack()
                 activity.refreshTabs()
             } catch (ex: Exception) {

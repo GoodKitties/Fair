@@ -5,19 +5,12 @@ import android.widget.Toast
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
-import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Rfc3339DateJsonAdapter
 import com.squareup.moshi.Types
 import dybr.kanedias.com.fair.entities.*
-import dybr.kanedias.com.fair.misc.Android
 import dybr.kanedias.com.fair.misc.HttpApiException
 import dybr.kanedias.com.fair.misc.HttpException
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
 import moe.banana.jsonapi2.Document
 import moe.banana.jsonapi2.ObjectDocument
 import moe.banana.jsonapi2.ResourceAdapterFactory
@@ -27,7 +20,6 @@ import okio.BufferedSource
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 import java.io.IOException
-import java.net.HttpURLConnection.*
 import java.util.*
 
 

@@ -15,9 +15,9 @@ import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import dybr.kanedias.com.fair.entities.DiaryEntry
-import dybr.kanedias.com.fair.misc.Android
 import dybr.kanedias.com.fair.misc.SimpleTextWatcher
 import kotlinx.coroutines.experimental.*
+import kotlinx.coroutines.experimental.android.UI
 import ru.noties.markwon.Markwon
 import java.util.concurrent.TimeUnit
 
@@ -83,7 +83,7 @@ class CreateNewPostViewHolder(iv: View, private val adapter: PostListFragment.Po
                 if (TextUtils.isEmpty(str))
                     return
 
-                routine = launch(Android) {
+                routine = launch(UI) {
                     for (countdown in 3 downTo 0) {
                         delay(1, TimeUnit.SECONDS)
                         val notification = iv.context.getString(R.string.previewing_in_n_seconds)
@@ -228,7 +228,7 @@ class CreateNewPostViewHolder(iv: View, private val adapter: PostListFragment.Po
         // hide edit form, show loading spinner
 
         // make http request
-        launch(Android) {
+        launch(UI) {
 
         }
     }
