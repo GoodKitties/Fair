@@ -81,9 +81,6 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .replace(R.id.main_drawer_layout, AddAccountFragment())
                 .commit()
-
-        // refresh accounts whenever fragments change
-        fragManager.addOnBackStackChangedListener { updateAccountsArea() }
     }
 
     /**

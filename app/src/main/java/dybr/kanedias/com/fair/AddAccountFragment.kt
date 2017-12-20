@@ -163,14 +163,22 @@ class AddAccountFragment : Fragment() {
                 Toast.makeText(activity, R.string.login_successful, Toast.LENGTH_SHORT).show()
 
                 // return to main activity
-                fragmentManager!!.popBackStack()
-                activity.refreshTabs()
+                handleSuccess()
             } catch (ex: Exception) {
                 Network.reportErrors(activity, ex, mapOf(422 to R.string.invalid_credentials))
             }
 
             progressDialog.hide()
         }
+    }
+
+    /**
+     * Handle successful account addition. Navigate back to [MainActivity] and update sidebar account list.
+     */
+    private fun handleSuccess() {
+        fragmentManager!!.popBackStack()
+        activity.sidebar.updateAccountsArea()
+        activity.refreshTabs()
     }
 
     /**
@@ -212,8 +220,7 @@ class AddAccountFragment : Fragment() {
                         .show()
 
                 // return to main activity
-                fragmentManager!!.popBackStack()
-                activity.refreshTabs()
+                handleSuccess()
             } catch (ex: Exception) {
                 Network.reportErrors(activity, ex, mapOf(422 to R.string.invalid_credentials))
             }

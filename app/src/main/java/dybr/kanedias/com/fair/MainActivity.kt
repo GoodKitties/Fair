@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
     /**
      * Sidebar that opens from the left (the second part of drawer)
      */
-    private lateinit var sidebar: Sidebar
+    lateinit var sidebar: Sidebar
 
     /**
      * ancillary progress dialog for use in various places
