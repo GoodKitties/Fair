@@ -17,7 +17,11 @@ class MainApplication : Application() {
         Network.init(this)
         Auth.init(this)
 
+        // load last account if it exists
         val acc = DbProvider.helper.accDao.queryBuilder().where().eq("current", true).queryForFirst()
+        acc?.let {
+            Auth.user = acc
+        }
     }
 
     override fun onTerminate() {

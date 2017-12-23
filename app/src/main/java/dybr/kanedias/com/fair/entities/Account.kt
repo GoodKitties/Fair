@@ -3,16 +3,15 @@ package dybr.kanedias.com.fair.entities
 import com.j256.ormlite.field.DataType
 import com.j256.ormlite.field.DatabaseField
 import com.j256.ormlite.table.DatabaseTable
-import moe.banana.jsonapi2.JsonApi
-import moe.banana.jsonapi2.Resource
 import java.util.*
+import dybr.kanedias.com.fair.Network
 
 /**
  * Account class for logging in.
  *
- * A distinction between this and [Identity] is that account
+ * A distinction between this and [OwnProfile] is that account
  * holds only auth and basic naming info which is stored after registration or first login.
- * The account itself is almost always immutable, whereas [Identity] is subject to change
+ * The account itself is almost always immutable, whereas [OwnProfile] is subject to change
  * on favourite/subscribers additions.
  *
  * @author Kanedias
@@ -64,6 +63,18 @@ class Account {
      */
     @DatabaseField(canBeNull = true)
     var accessToken: String? = null
+
+    /**
+     * Profile id to load when application starts again
+     */
+    //@DatabaseField(canBeNull = true)
+    var lastProfile: String? = null
+
+    /**
+     * Current profile after it's loaded
+     * Filled in [Network.populateIdentity]
+     */
+    lateinit var currentProfile: OwnProfile
 
     /**
      * Whether this is current account for the app

@@ -2,9 +2,6 @@ package dybr.kanedias.com.fair
 
 import android.content.Context
 import android.widget.Toast
-import com.franmontiel.persistentcookiejar.PersistentCookieJar
-import com.franmontiel.persistentcookiejar.cache.SetCookieCache
-import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Rfc3339DateJsonAdapter
 import com.squareup.moshi.Types
@@ -34,7 +31,7 @@ object Network {
 
     private val USERS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/users"
     private val SESSIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/sessions"
-    val CURRENT_IDENTITY_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/current_identity"
+    private val CURRENT_PROFILE_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/own-profiles"
 
     private val MIME_JSON_API = MediaType.parse("application/vnd.api+json")
 
@@ -50,24 +47,42 @@ object Network {
             .add(Date::class.java, Rfc3339DateJsonAdapter())
             .build()
 
-    lateinit var httpClient: OkHttpClient
-    private lateinit var cookieJar: PersistentCookieJar
+    /**
+     * OkHttp [Interceptor] for populating authorization header.
+     *
+     * Authorizes all requests if we have access token for account (i.e. logged in).
+     */
+    private val authorizer = Interceptor { chain ->
+        val origRequest = chain.request()
+        val alreadyHasAuth = origRequest.headers().names().contains("Authorization")
+
+        // skip if we already have auth header in request
+        if (Auth.user.accessToken == null || alreadyHasAuth)
+            return@Interceptor chain.proceed(origRequest)
+
+        val authorisedReq  = origRequest.newBuilder()
+                .header("Authorization", "Bearer: ${Auth.user.accessToken}")
+                .build()
+
+        return@Interceptor chain.proceed(authorisedReq)
+    }
+
+    private lateinit var httpClient: OkHttpClient
 
     fun init(ctx: Context) {
-        cookieJar = PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(ctx))
         httpClient =  OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)
                 .connectionPool(ConnectionPool())
-                .cookieJar(cookieJar)
                 .dispatcher(Dispatcher())
+                .addInterceptor(authorizer)
                 .build()
     }
 
     fun register(regInfo: RegisterRequest): RegisterResponse {
         val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(regInfo))
         val req = Request.Builder().post(reqBody).url(USERS_ENDPOINT).build()
-        val resp = Network.httpClient.newCall(req).execute()
+        val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw extractErrors(resp)
         }
@@ -91,9 +106,9 @@ object Network {
     }
 
     /**
-     * Logs in with specified account, i.e. creates session and obtains access token for this user
-     *
-     * *This should be done in background thread*
+     * Logs in with specified account, i.e. creates session and obtains access token for this user.
+     * After this call succeeds you may be certain that [httpClient] sends requests with correct
+     * "Authorization" header.
      *
      * @param
      * @return true if auth was successful, false otherwise
@@ -114,7 +129,7 @@ object Network {
         }
         val body = RequestBody.create(MIME_JSON_API, toWrappedJson(loginRequest))
         val req = Request.Builder().post(body).url(SESSIONS_ENDPOINT).build()
-        val resp = Network.httpClient.newCall(req).execute()
+        val resp = httpClient.newCall(req).execute()
 
         // unprocessable entity error can be returned when something is wrong with your input
         if (!resp.isSuccessful) {
@@ -122,8 +137,9 @@ object Network {
         }
 
         // if response is successful we should have login response in body
-        val respAdapter = jsonConverter.adapter(LoginResponse::class.java)
-        val response = respAdapter.fromJson(resp.body()!!.source())!!
+        val response = fromWrappedJson(resp.body()!!.source(), LoginResponse::class.java)
+
+        // memorize the access token and use it in next requests
         acc.accessToken = response.accessToken
     }
 
@@ -142,25 +158,26 @@ object Network {
     }
 
     /**
-     * Pull profile of current user. Http client should have relevant cookie at this point.
+     * Pull profile of current user. Account should have relevant access token by this point.
      * @return true if account was successfully populated with current profile and identity, false otherwise
      * @throws IOException on connection fail
      */
     fun populateIdentity(acc: Account) {
-        val req = Request.Builder().url(CURRENT_IDENTITY_ENDPOINT).build()
-        val resp = Network.httpClient.newCall(req).execute()
+        val req = Request.Builder().url(CURRENT_PROFILE_ENDPOINT).build()
+        val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
             throw HttpException(resp)
 
         // response is returned after execute call, body is not null
-        val body = resp.body()!!.string()
-        val identityObj = JSONObject(body).get("identity").toString() // stupid as hell
-        val adapter = jsonConverter.adapter(Identity::class.java)
-        val identity = adapter.fromJson(identityObj)!!
-        acc.apply {
-            //name = identity.name
-            //profile = identity
-        }
+        val profile = fromWrappedJson(resp.body()!!.source(), OwnProfile::class.java)
+        acc.lastProfile = profile.id
+    }
+
+    /**
+     * Load all profiles
+     */
+    fun loadProfiles(acc: Account) {
+
     }
 
     /**
@@ -175,7 +192,7 @@ object Network {
      */
     fun getEntries(endpointUrl: String): List<DiaryEntry> {
         val req = Request.Builder().url(endpointUrl).build()
-        val resp = Network.httpClient.newCall(req).execute()
+        val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw HttpException(resp)
         }
@@ -195,7 +212,7 @@ object Network {
         val adapter = jsonConverter.adapter(DiaryEntry::class.java)
         val body = RequestBody.create(MIME_JSON_API, adapter.toJson(entry))
         val req = Request.Builder().post(body).url("something").build()
-        val resp = Network.httpClient.newCall(req).execute()
+        val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw HttpException(resp)
         }

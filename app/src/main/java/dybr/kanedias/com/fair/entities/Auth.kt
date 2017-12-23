@@ -15,7 +15,7 @@ object Auth {
     lateinit var user: Account
 
     fun init(ctx: Context) {
-        guest = Account().apply { email = "guest@dybr.ru" }
+        guest = Account().apply { email = ctx.getString(R.string.guest) }
         user = guest
     }
 }

@@ -90,3 +90,5 @@ class RegisterResponse : Resource() {
     @field:Json(name = "is-adult")
     var isAdult: Boolean = false
 }
+
+typealias User = RegisterResponse

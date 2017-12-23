@@ -101,7 +101,7 @@ class MainActivity : AppCompatActivity() {
         // setup click listeners, adapters etc.
         setupUI()
         // load user profile and initialize tabs
-        loadProfile()
+        reLogin()
     }
 
     private fun setupUI() {
@@ -162,36 +162,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Loads profile for account. This should be done early when program starts.
-     */
-    private fun loadProfile() {
-        // don't need identity for guest
-        if (Auth.user === Auth.guest)
-            return
-
-        launch(UI) {
-            // retrieve our identity from site
-            progressDialog.setContent(R.string.loading_profile)
-            progressDialog.show()
-
-            try {
-                val success = async(CommonPool) { Network.populateIdentity(Auth.user) }
-                success.await()
-
-            } catch (ex: Exception) {
-                Network.reportErrors(this@MainActivity, ex, mapOf(HTTP_NOT_FOUND to R.string.invalid_credentials))
-                handleAuthFailure()
-            }
-
-            progressDialog.hide()
-        }
-
-        // main action, next interactions are held
-        // inside respective fragments in view pager
-        refreshTabs()
-    }
-
-    /**
      * Logs in with an account specified in [Auth.user]
      */
     fun reLogin() {
@@ -200,8 +170,8 @@ class MainActivity : AppCompatActivity() {
             progressDialog.show()
 
             try {
-                val success = async(CommonPool) { Network.login(Auth.user) }
-                success.await()
+                async(CommonPool) { Network.login(Auth.user) }.await()
+                async(CommonPool) { Network.populateIdentity(Auth.user) }.await()
 
                 // all went well, report if we should
                 Toast.makeText(this@MainActivity, R.string.login_successful, Toast.LENGTH_SHORT).show()
