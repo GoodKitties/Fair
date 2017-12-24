@@ -14,13 +14,55 @@ import moe.banana.jsonapi2.ResourceAdapterFactory
 import moe.banana.jsonapi2.ResourceIdentifier
 import okhttp3.*
 import okio.BufferedSource
-import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 import java.io.IOException
 import java.util.*
+import moe.banana.jsonapi2.ArrayDocument
 
 
 /**
+ * Singleton for outlining network-related operations. Has heavy dependencies on [Auth].
+ * Common network operations and http client routines go here.
+ *
+ * State machine of API interchange can be roughly described as:
+ * ```
+ *  Android-client                      Dybr server
+ *       |                                  |
+ *       |                                  |
+ *       |    Register/login to /users      |\
+ *       | ------------------------------>  | \
+ *       |    User info + access token      |  |
+ *       | <------------------------------  |  |
+ *       |                                  |  |-- Auth. Without this only limited guest mode is available.
+ *       |     Get/create own profiles      |  |   Order of operations here is important.
+ *       | ------------------------------>  |  |
+ *       |   List of profiles/current       | /
+ *       | <------------------------------  |/
+ *       |                                  |
+ *       |    Get diary entries/comments    |
+ *       | ------------------------------>  | -- can be performed without auth, but with it content may be richer
+ *       |    Post diary entries/comments   |
+ *       | ------------------------------>  | -- guests can't post diary entries but can comment
+ *       |      Post comments/pics          |
+ *       | ------------------------------>  |\
+ *       |      Change profile settings     | \
+ *       | ------------------------------>  |  |
+ *       |     Administrate communities     |  |-- authorized users only
+ *       | ------------------------------>  |  |
+ *       |     Like/dislike/emote           | /
+ *       | ------------------------------>  |/
+ *       |                                  |
+ *       |     Responses/confirmations      |
+ *       | <------------------------------  |
+ *       |     Lists of entries/comments    |
+ *       | <------------------------------  |
+ *       |         URLs to images           |
+ *       | <------------------------------  |
+ *       |   Content of entries/comments    |
+ *       | <------------------------------  |
+ *       |                                  |
+ * ```
+ *
  * @author Kanedias
  *
  * Created on 12.11.17
@@ -31,7 +73,7 @@ object Network {
 
     private val USERS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/users"
     private val SESSIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/sessions"
-    private val CURRENT_PROFILE_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/own-profiles"
+    private val PROFILES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/own-profiles"
 
     private val MIME_JSON_API = MediaType.parse("application/vnd.api+json")
 
@@ -40,6 +82,8 @@ object Network {
             .add(LoginResponse::class.java)
             .add(RegisterRequest::class.java)
             .add(RegisterResponse::class.java)
+            .add(ProfileCreateRequest::class.java)
+            .add(OwnProfile::class.java)
             .build()
 
     private val jsonConverter = Moshi.Builder()
@@ -61,7 +105,7 @@ object Network {
             return@Interceptor chain.proceed(origRequest)
 
         val authorisedReq  = origRequest.newBuilder()
-                .header("Authorization", "Bearer: ${Auth.user.accessToken}")
+                .header("Authorization", "Bearer ${Auth.user.accessToken}")
                 .build()
 
         return@Interceptor chain.proceed(authorisedReq)
@@ -106,7 +150,8 @@ object Network {
     }
 
     /**
-     * Logs in with specified account, i.e. creates session and obtains access token for this user.
+     * Logs in with specified account, i.e. creates session, obtains access token for this user
+     * ands sets [Auth.user] if all went good.
      * After this call succeeds you may be certain that [httpClient] sends requests with correct
      * "Authorization" header.
      *
@@ -115,11 +160,6 @@ object Network {
      * @throws IOException on connection fail
      */
     fun login(acc: Account) {
-        if (acc === Auth.guest) {
-            // it's guest, leave it as-is
-            return
-        }
-
         // clear present access token, we're re-logging
         acc.accessToken = null
 
@@ -139,8 +179,25 @@ object Network {
         // if response is successful we should have login response in body
         val response = fromWrappedJson(resp.body()!!.source(), LoginResponse::class.java)
 
+        // login successful
         // memorize the access token and use it in next requests
+        Auth.user = acc
         acc.accessToken = response.accessToken
+
+        // looks like we're logging in for the first time, retrieve user info for later
+        if (acc.lastProfileId == null) {
+            // get user info
+            val reqUser = Request.Builder().url(USERS_ENDPOINT).build()
+            val respUser = httpClient.newCall(reqUser).execute() // returns array with only one element
+            val user = fromWrappedListJson(respUser.body()!!.source(), User::class.java)
+
+            // memorize account info
+            acc.apply {
+                createdAt = user[0].createdAt
+                updatedAt = user[0].updatedAt
+                isAdult = user[0].isAdult
+            }
+        }
     }
 
     private fun <T: ResourceIdentifier> toWrappedJson(obj: T): String {
@@ -157,27 +214,59 @@ object Network {
         return doc.asObjectDocument().get()
     }
 
+    private fun <T: ResourceIdentifier> fromWrappedListJson(obj: BufferedSource, clazz: Class<T>): ArrayDocument<T> {
+        val type = Types.newParameterizedType(Document::class.java, clazz)
+        val reqAdapter = jsonConverter.adapter<Document<T>>(type)
+        val doc = reqAdapter.fromJson(obj)!!
+        return doc.asArrayDocument()
+    }
+
     /**
-     * Pull profile of current user. Account should have relevant access token by this point.
-     * @return true if account was successfully populated with current profile and identity, false otherwise
+     * Pull profile of current user. Account should have selected last profile and relevant access token by this point.
+     * After the completion [Account.currentProfile] will be populated.
+     *
+     * @param acc account with set [Account.lastProfileId] to know whom to search for
      * @throws IOException on connection fail
      */
-    fun populateIdentity(acc: Account) {
-        val req = Request.Builder().url(CURRENT_PROFILE_ENDPOINT).build()
+    fun populateIdentity() {
+        val req = Request.Builder().url("$PROFILES_ENDPOINT/${Auth.user.lastProfileId}").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
             throw HttpException(resp)
 
         // response is returned after execute call, body is not null
         val profile = fromWrappedJson(resp.body()!!.source(), OwnProfile::class.java)
-        acc.lastProfile = profile.id
+        Auth.user.currentProfile = profile
     }
 
     /**
-     * Load all profiles
+     * Load all profiles for current account. The account must be already set in [Auth.user].
+     * Guests can't request any profiles.
+     * @return list of profiles that are bound to currently logged in user
      */
-    fun loadProfiles(acc: Account) {
+    fun loadProfiles(): List<OwnProfile> {
+        val req = Request.Builder().url(PROFILES_ENDPOINT).build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful)
+            throw HttpException(resp)
 
+        // response is returned after execute call, body is not null
+        return fromWrappedListJson(resp.body()!!.source(), OwnProfile::class.java)
+    }
+
+    /**
+     * Create new profile for logged in user
+     * @param prof profile creation request with all the information in it
+     */
+    fun createProfile(prof: ProfileCreateRequest): OwnProfile {
+        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(prof))
+        val req = Request.Builder().url(PROFILES_ENDPOINT).post(reqBody).build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful)
+            throw HttpException(resp)
+
+        // response is returned after execute call, body is not null
+        return fromWrappedJson(resp.body()!!.source(), OwnProfile::class.java)
     }
 
     /**
@@ -253,7 +342,6 @@ object Network {
 
         else -> throw ex
     }
-
     private class EntryContainer {
         lateinit var entries: List<DiaryEntry>
     }

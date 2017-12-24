@@ -89,8 +89,10 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
     fun updateAccountsArea() {
         val inflater = parent.layoutInflater
 
-        // set welcome message to current user
-        currentUsername.text = Auth.user.email
+        // set welcome message to current user nickname
+        Auth.user.currentProfile?.let { prof ->
+            currentUsername.text = prof.nickname
+        }
 
         // update account area views
         // remove previous accounts, they may be invalid
@@ -105,9 +107,8 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
 
             accName.text = acc.email
             accName.setOnClickListener {
-                Auth.user = acc
                 drawer.closeDrawers()
-                this@Sidebar.parent.reLogin()
+                parent.reLogin(acc)
                 updateAccountsArea()
             }
 
@@ -130,9 +131,8 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
         val guestName = guestRow.findViewById<TextView>(R.id.account_name)
         guestName.text = parent.getString(R.string.guest)
         guestName.setOnClickListener {
-            Auth.user = Auth.guest
             drawer.closeDrawers()
-            parent.reLogin()
+            parent.reLogin(Auth.guest)
         }
         accountsArea.addView(guestRow)
     }
@@ -144,10 +144,8 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
     private fun deleteAccount(acc: Account) {
         // if we deleted current account, set it to guest
         if (Auth.user.email == acc.email) {
-            Auth.user = Auth.guest
-
             drawer.closeDrawers()
-            parent.reLogin()
+            parent.reLogin(Auth.guest)
         }
 
         // all accounts are present in the DB, inner id is set either on query

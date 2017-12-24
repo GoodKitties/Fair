@@ -16,10 +16,6 @@ class RegisterInputs(private val parent: AddAccountFragment) {
     val email = parent.emailInput
 
     @JvmField
-    @NotEmptyValidation(R.string.should_not_be_empty)
-    val username = parent.usernameInput
-
-    @JvmField
     @PasswordValidation(errorMessage = R.string.invalid_password)
     val password = parent.passwordInput
 

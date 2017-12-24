@@ -64,4 +64,10 @@
     <string name="i_am_over_eighteen">I am over eighteen</string>
     <string name="next_steps">Next steps</string>
     <string name="registered_please_confirm_mail">Registration complete! Please check your email and follow activation instructions.</string>
+    <string name="select_profile">Select profile</string>
+    <string name="nickname">Nickname</string>
+    <string name="birthday_dd_mm">Birthday</string>
+    <string name="description">Description</string>
+    <string name="create">Create</string>
+    <string name="profile_creation">Profile creation</string>
 </resources>

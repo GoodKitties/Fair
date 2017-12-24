@@ -8,7 +8,46 @@ import moe.banana.jsonapi2.Resource
 import java.util.*
 
 /**
- * OwnProfile is essentially a profile with readers/favorites, diary info, address and so on.
+ * Profile creation request.
+ * Example of request body:
+ * ```
+ * {
+ *   "data": {
+ *     "type": "own-profiles",
+ *     "attributes": {
+ *       "nickname": "olaf",
+ *       "birthday": "02-01",
+ *       "description": "Repellendus tempore vel qui quia. "
+ *     }
+ *   }
+ * }
+ * ```
+ */
+@JsonApi(type = "own-profiles", policy = Policy.SERIALIZATION_ONLY)
+class ProfileCreateRequest: Resource() {
+
+    /**
+     * Chosen nickname
+     */
+    @field:Json(name = "nickname")
+    lateinit var nickname: String
+
+    /**
+     * Birthday in DD-MM format
+     */
+    @field:Json(name = "birthday")
+    lateinit var birthday: String
+
+    /**
+     * Description of this profile (multiline text)
+     */
+    @field:Json(name = "description")
+    lateinit var description: String
+}
+
+/**
+ * OwnProfile is an actual identity that user wants to be associated with.
+ * Has description, nickname, readers/favorites, diary info, address and so on.
  * Example (result of `/v1/own-profiles/{id}` call):
  * ```
  * {
@@ -79,5 +118,6 @@ class OwnProfile : Resource() {
     /**
      * Link to the user this profile belongs to
      */
+    @field:Json(name = "user")
     var user = HasOne<User>()
 }

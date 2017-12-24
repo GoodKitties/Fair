@@ -56,7 +56,7 @@ class Account {
      * Whether this users is allowed to see NSFW content
      */
     @DatabaseField(canBeNull = false)
-    var isOver18: Boolean = false
+    var isAdult: Boolean = false
 
     /**
      * Access token that's created after session start is saved along with the account
@@ -67,14 +67,14 @@ class Account {
     /**
      * Profile id to load when application starts again
      */
-    //@DatabaseField(canBeNull = true)
-    var lastProfile: String? = null
+    @DatabaseField(canBeNull = true)
+    var lastProfileId: String? = null
 
     /**
      * Current profile after it's loaded
      * Filled in [Network.populateIdentity]
      */
-    lateinit var currentProfile: OwnProfile
+    var currentProfile: OwnProfile? = null
 
     /**
      * Whether this is current account for the app

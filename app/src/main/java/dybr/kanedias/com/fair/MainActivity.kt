@@ -1,5 +1,6 @@
 package dybr.kanedias.com.fair
 
+import android.app.FragmentTransaction
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.AppBarLayout
@@ -18,6 +19,8 @@ import butterknife.BindView
 import butterknife.OnClick
 import butterknife.ButterKnife
 import com.afollestad.materialdialogs.MaterialDialog
+import dybr.kanedias.com.fair.database.DbProvider
+import dybr.kanedias.com.fair.entities.Account
 import dybr.kanedias.com.fair.entities.Auth
 import dybr.kanedias.com.fair.ui.Sidebar
 import dybr.kanedias.com.fair.entities.DiaryEntry
@@ -25,7 +28,6 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
-import java.net.HttpURLConnection.*
 
 /**
  * Main activity with drawer and sliding tabs where most of user interaction happens.
@@ -101,7 +103,7 @@ class MainActivity : AppCompatActivity() {
         // setup click listeners, adapters etc.
         setupUI()
         // load user profile and initialize tabs
-        reLogin()
+        reLogin(Auth.user)
     }
 
     private fun setupUI() {
@@ -162,29 +164,86 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Logs in with an account specified in [Auth.user]
+     * Logs in with specified account. This must be the very first action after opening the app.
+     *
+     * @param acc account to be logged in with
      */
-    fun reLogin() {
+    fun reLogin(acc: Account) {
+        if (acc === Auth.guest) {
+            // we're logging in as guest, skip auth
+            Auth.user = Auth.guest
+            refresh()
+            return
+        }
+
         launch(UI) {
             progressDialog.setContent(R.string.logging_in)
             progressDialog.show()
 
             try {
-                async(CommonPool) { Network.login(Auth.user) }.await()
-                async(CommonPool) { Network.populateIdentity(Auth.user) }.await()
-
-                // all went well, report if we should
-                Toast.makeText(this@MainActivity, R.string.login_successful, Toast.LENGTH_SHORT).show()
+                async(CommonPool) { Network.login(acc) }.await()
+                if (Auth.user.lastProfileId == null) {
+                    // first time we're loading this account, select profile
+                    selectProfile()
+                } else {
+                    // we already have profile to load from
+                    async(CommonPool) { Network.populateIdentity() }.await()
+                    // all went well, report if we should
+                    Toast.makeText(this@MainActivity, R.string.login_successful, Toast.LENGTH_SHORT).show()
+                }
             } catch (ex: Exception) {
                 Network.reportErrors(this@MainActivity, ex)
                 handleAuthFailure()
             }
 
             progressDialog.hide()
-            refreshTabs()
+            refresh()
         }
     }
 
+    /**
+     * Load profiles for logged in user and show selector dialog to user.
+     * If there are no any profiles for this user, suggest to create it.
+     */
+    suspend fun selectProfile() {
+        val profiles = async(CommonPool) { Network.loadProfiles() }.await()
+        if (profiles.isEmpty()) {
+            // suggest user to create profile
+            drawer.closeDrawers()
+            supportFragmentManager.beginTransaction()
+                    .addToBackStack("Showing account fragment")
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .replace(R.id.main_drawer_layout, AddProfileFragment())
+                    .commit()
+            return
+        }
+
+        val onSelection = { pos: Int ->
+            Auth.user.currentProfile = profiles[pos]
+            Auth.user.lastProfileId = profiles[pos].id
+
+            DbProvider.helper.accDao.update(Auth.user)
+            refresh()
+        }
+
+        if (profiles.size == 1) {
+            // we have only one profile, use it
+            onSelection(0)
+            return
+        }
+
+        // we have multiple accounts to select from
+        MaterialDialog.Builder(this@MainActivity)
+                .title(R.string.select_profile)
+                .cancelable(false)
+                .items(profiles.map { it -> it.nickname })
+                .itemsCallback({ _, _, pos, _ -> onSelection(pos)})
+                .show()
+    }
+
+    /**
+     * What to do if auth failed
+     */
     private fun handleAuthFailure() {
         // couldn't log in, become guest
         Auth.user = Auth.guest
@@ -193,9 +252,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Refresh sliding tabs
+     * Refresh sliding tabs, sidebar (usually after auth/settings change)
      */
-    fun refreshTabs() {
+    fun refresh() {
+        sidebar.updateAccountsArea()
         pager.adapter = tabAdapter
     }
 

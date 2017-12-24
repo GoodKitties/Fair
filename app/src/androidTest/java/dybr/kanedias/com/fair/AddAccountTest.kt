@@ -101,7 +101,6 @@ class AddAccountTest {
         onView(withId(R.id.register_checkbox)).perform(click())
 
         // fill reg form
-        onView(withId(R.id.acc_username_input)).perform(typeText(nickname))
         onView(withId(R.id.acc_email_input)).perform(typeText(email))
         onView(withId(R.id.acc_password_input)).perform(typeText(password))
         onView(withId(R.id.acc_password_confirm_input)).perform(typeText(password))

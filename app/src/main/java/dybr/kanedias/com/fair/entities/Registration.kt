@@ -20,7 +20,7 @@ import java.util.*
  *       "password-confirmation": "testpass",
  *       "terms-of-service": true,
  *       "is-adult": false,
- *       "timezone": null
+ *       "timezone": "Asia/Bangkok"
  *     }
  *   }
  * }
