@@ -225,7 +225,6 @@ object Network {
      * Pull profile of current user. Account should have selected last profile and relevant access token by this point.
      * After the completion [Account.currentProfile] will be populated.
      *
-     * @param acc account with set [Account.lastProfileId] to know whom to search for
      * @throws IOException on connection fail
      */
     fun populateIdentity() {
@@ -252,6 +251,21 @@ object Network {
 
         // response is returned after execute call, body is not null
         return fromWrappedListJson(resp.body()!!.source(), OwnProfile::class.java)
+    }
+
+    /**
+     * Remove own profile. Warning: this deletes diaries, comments and all associated data with it.
+     * Use with caution.
+     *
+     * @param prof Profile to delete. Only profile id is actually needed.
+     */
+    fun removeProfile(prof: OwnProfile) {
+        val req = Request.Builder().delete().url("$PROFILES_ENDPOINT/${prof.id}").build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful)
+            throw HttpException(resp)
+
+        // we don't need answer body
     }
 
     /**

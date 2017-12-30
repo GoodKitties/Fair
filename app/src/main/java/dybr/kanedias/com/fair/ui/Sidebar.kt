@@ -7,6 +7,7 @@ import android.app.FragmentTransaction
 import android.support.v4.view.animation.FastOutSlowInInterpolator
 import android.support.v4.widget.DrawerLayout
 import android.view.View
+import android.view.animation.LinearInterpolator
 import android.widget.*
 import butterknife.BindView
 import butterknife.ButterKnife
@@ -14,10 +15,16 @@ import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import dybr.kanedias.com.fair.AddAccountFragment
 import dybr.kanedias.com.fair.MainActivity
+import dybr.kanedias.com.fair.Network
 import dybr.kanedias.com.fair.R
 import dybr.kanedias.com.fair.database.DbProvider
 import dybr.kanedias.com.fair.entities.Auth
 import dybr.kanedias.com.fair.entities.Account
+import kotlinx.coroutines.experimental.CoroutineStart
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.channels.Channel
+import kotlinx.coroutines.experimental.channels.actor
+import kotlinx.coroutines.experimental.launch
 
 /**
  * Sidebar views and controls.
@@ -28,9 +35,9 @@ import dybr.kanedias.com.fair.entities.Account
  *
  * Created on 05.11.17
  */
-class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity) {
+class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivity) {
 
-    private val fragManager = parent.supportFragmentManager
+    private val fragManager = activity.supportFragmentManager
 
     /**
      * Sidebar header up/down image (to the right of welcome text)
@@ -51,7 +58,7 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
     lateinit var currentUsername: TextView
 
     init {
-        ButterKnife.bind(this, parent)
+        ButterKnife.bind(this, activity)
         updateAccountsArea()
     }
 
@@ -87,12 +94,10 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
      * Update accounts area after possible account change
      */
     fun updateAccountsArea() {
-        val inflater = parent.layoutInflater
+        val inflater = activity.layoutInflater
 
         // set welcome message to current user nickname
-        Auth.user.currentProfile?.let { prof ->
-            currentUsername.text = prof.nickname
-        }
+        currentUsername.text = Auth.user.currentProfile?.nickname ?: Auth.user.email
 
         // update account area views
         // remove previous accounts, they may be invalid
@@ -104,14 +109,17 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
             val view = inflater.inflate(R.layout.activity_main_sidebar_account_row, accountsArea, false)
             val accName = view.findViewById<TextView>(R.id.account_name)
             val accRemove = view.findViewById<ImageView>(R.id.account_remove)
+            val profSwap = view.findViewById<ImageView>(R.id.profile_swap)
 
+            // setup account row - set email as account name
             accName.text = acc.email
             accName.setOnClickListener {
                 drawer.closeDrawers()
-                parent.reLogin(acc)
+                activity.reLogin(acc)
                 updateAccountsArea()
             }
 
+            // setup account row - handle click on delete button
             accRemove.setOnClickListener {
                 // "delete account" confirmation dialog
                 MaterialDialog.Builder(view.context)
@@ -122,17 +130,47 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
                         .onPositive{ _, _ -> deleteAccount(acc) }
                         .show()
             }
+
+            // setup account row - handle click on profile change button
+            // we need to ignore subsequent clicks if profiles are already loading
+            val profileSwapActor = actor<Unit>(UI) {
+                for (event in channel) {
+                    val swapAnim = ValueAnimator.ofFloat(1f, -1f, 1f)
+                    swapAnim.interpolator = FastOutSlowInInterpolator()
+                    swapAnim.addUpdateListener { profSwap.scaleY = swapAnim.animatedValue as Float }
+                    swapAnim.duration = 1_000
+                    swapAnim.repeatCount = ValueAnimator.INFINITE
+                    swapAnim.start()
+
+                    try {
+                        // force profile selection even if we only have one
+                        activity.selectProfile(true)
+                        drawer.closeDrawers()
+                    } catch (ex: Exception) {
+                        Network.reportErrors(activity, ex)
+                    }
+
+                    swapAnim.repeatCount = 0 // stop gracefully
+                }
+            }
+
+            profSwap.setOnClickListener {
+                profileSwapActor.offer(Unit)
+            }
+
+            // add finished account row to the layout
             accountsArea.addView(view)
         }
 
-        // inflate guest account
+        // special setup item - inflate guest account row
         val guestRow = inflater.inflate(R.layout.activity_main_sidebar_account_row, accountsArea, false)
         guestRow.findViewById<ImageView>(R.id.account_remove).visibility = View.GONE
+        guestRow.findViewById<ImageView>(R.id.profile_swap).visibility = View.GONE
         val guestName = guestRow.findViewById<TextView>(R.id.account_name)
-        guestName.text = parent.getString(R.string.guest)
+        guestName.text = activity.getString(R.string.guest)
         guestName.setOnClickListener {
             drawer.closeDrawers()
-            parent.reLogin(Auth.guest)
+            activity.reLogin(Auth.guest)
         }
         accountsArea.addView(guestRow)
     }
@@ -145,7 +183,7 @@ class Sidebar(private val drawer: DrawerLayout, private val parent: MainActivity
         // if we deleted current account, set it to guest
         if (Auth.user.email == acc.email) {
             drawer.closeDrawers()
-            parent.reLogin(Auth.guest)
+            activity.reLogin(Auth.guest)
         }
 
         // all accounts are present in the DB, inner id is set either on query

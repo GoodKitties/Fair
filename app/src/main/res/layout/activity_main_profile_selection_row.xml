@@ -6,7 +6,7 @@
     android:layout_height="48dp">
 
     <TextView
-        android:id="@+id/account_name"
+        android:id="@+id/profile_name"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:textColor="#fff"
@@ -17,18 +17,7 @@
         android:textStyle="bold" />
 
     <ImageView
-        android:layout_width="36dp"
-        android:id="@+id/profile_swap"
-        android:layout_toLeftOf="@id/account_remove"
-        android:layout_toStartOf="@id/account_remove"
-        android:padding="6dp"
-        android:layout_centerVertical="true"
-        android:src="@drawable/swap"
-        android:tint="#fff"
-        android:layout_height="36dp" />
-
-    <ImageView
-        android:id="@+id/account_remove"
+        android:id="@+id/profile_remove"
         android:layout_width="36dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"

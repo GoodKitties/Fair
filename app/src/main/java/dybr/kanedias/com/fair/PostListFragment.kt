@@ -100,7 +100,7 @@ class PostListFragment: Fragment() {
         }
 
         override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder {
-            val inflater = LayoutInflater.from(parent!!.context)
+            val inflater = LayoutInflater.from(activity)
             return when (viewType) {
                 DiaryEntry.TYPE_PENDING -> {
                     val view = inflater.inflate(R.layout.fragment_post_list_add_item, parent, false)

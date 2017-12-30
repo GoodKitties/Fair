@@ -69,5 +69,7 @@
     <string name="birthday_dd_mm">Birthday</string>
     <string name="description">Description</string>
     <string name="create">Create</string>
+    <string name="create_new">Create new</string>
     <string name="profile_creation">Profile creation</string>
+    <string name="no_profiles_create_one">No profiles found for this account, create one?</string>
 </resources>

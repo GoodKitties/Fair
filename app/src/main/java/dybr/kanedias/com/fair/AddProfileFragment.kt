@@ -19,6 +19,8 @@ import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 
 /**
+ * Fragment for creating profile for currently logged in account.
+ *
  * @author Kanedias
  *
  * Created on 24.12.17

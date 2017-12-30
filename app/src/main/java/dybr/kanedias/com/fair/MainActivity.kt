@@ -11,9 +11,10 @@ import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewPager
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
-import android.view.Menu
-import android.view.MenuInflater
+import android.view.*
 import android.widget.*
 import butterknife.BindView
 import butterknife.OnClick
@@ -24,6 +25,7 @@ import dybr.kanedias.com.fair.entities.Account
 import dybr.kanedias.com.fair.entities.Auth
 import dybr.kanedias.com.fair.ui.Sidebar
 import dybr.kanedias.com.fair.entities.DiaryEntry
+import dybr.kanedias.com.fair.entities.OwnProfile
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
@@ -204,21 +206,36 @@ class MainActivity : AppCompatActivity() {
     /**
      * Load profiles for logged in user and show selector dialog to user.
      * If there are no any profiles for this user, suggest to create it.
+     * @param showIfOne whether to show dialog if only one profile is available
      */
-    suspend fun selectProfile() {
+    suspend fun selectProfile(showIfOne: Boolean = false) {
+        // retrieve profiles from server
         val profiles = async(CommonPool) { Network.loadProfiles() }.await()
-        if (profiles.isEmpty()) {
-            // suggest user to create profile
-            drawer.closeDrawers()
+
+        // predefine what to do if new profile is needed
+        val showAddProfile = {
             supportFragmentManager.beginTransaction()
-                    .addToBackStack("Showing account fragment")
+                    .addToBackStack("Showing profile creation fragment")
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .replace(R.id.main_drawer_layout, AddProfileFragment())
                     .commit()
+        }
+
+        if (profiles.isEmpty()) {
+            // suggest user to create profile
+            drawer.closeDrawers()
+            MaterialDialog.Builder(this)
+                    .title(R.string.select_profile)
+                    .content(R.string.no_profiles_create_one)
+                    .negativeText(android.R.string.no)
+                    .positiveText(android.R.string.yes)
+                    .onPositive({ _, _ -> showAddProfile() })
+                    .show()
             return
         }
 
-        val onSelection = { pos: Int ->
+        // predefine what we do on item selection
+        val onSelection = fun(pos: Int) { // define as function as we use early-return
             Auth.user.currentProfile = profiles[pos]
             Auth.user.lastProfileId = profiles[pos].id
 
@@ -226,18 +243,20 @@ class MainActivity : AppCompatActivity() {
             refresh()
         }
 
-        if (profiles.size == 1) {
+        if (profiles.size == 1 && !showIfOne) {
             // we have only one profile, use it
             onSelection(0)
             return
         }
 
         // we have multiple accounts to select from
-        MaterialDialog.Builder(this@MainActivity)
+        MaterialDialog.Builder(this)
                 .title(R.string.select_profile)
                 .cancelable(false)
-                .items(profiles.map { it -> it.nickname })
-                .itemsCallback({ _, _, pos, _ -> onSelection(pos)})
+                .itemsCallback({ _, _, pos, _ -> onSelection(pos) })
+                .adapter(ProfileListAdapter(profiles), LinearLayoutManager(this))
+                .positiveText(R.string.create_new)
+                .onPositive({_, _ -> showAddProfile() })
                 .show()
     }
 
@@ -257,6 +276,25 @@ class MainActivity : AppCompatActivity() {
     fun refresh() {
         sidebar.updateAccountsArea()
         pager.adapter = tabAdapter
+    }
+
+    /**
+     * Add entry handler. Shows header view for adding diary entry.
+     * @see DiaryEntry
+     */
+    @OnClick(R.id.floating_button)
+    fun addEntry() {
+        // use `instantiate` here because getItem returns new item with each invocation
+        // we know that fragment is already present so it will return cached one
+        val currFragment = tabAdapter.instantiateItem(pager, pager.currentItem) as PostListFragment
+        if (currFragment.refresher.isRefreshing) {
+            // diary is not loaded yet
+            Toast.makeText(this, R.string.still_loading, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        appBar.setExpanded(false)
+        currFragment.addCreateNewPostForm()
     }
 
     inner class TabAdapter: FragmentStatePagerAdapter(supportFragmentManager) {
@@ -303,21 +341,45 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Add entry handler. Shows header view for adding diary entry.
-     * @see DiaryEntry
+     * Profile selector adapter. We can't use standard one because we need a way to delete profile or add another.
      */
-    @OnClick(R.id.floating_button)
-    fun addEntry() {
-        // use `instantiate` here because getItem returns new item with each invocation
-        // we know that fragment is already present so it will return cached one
-        val currFragment = tabAdapter.instantiateItem(pager, pager.currentItem) as PostListFragment
-        if (currFragment.refresher.isRefreshing) {
-            // diary is not loaded yet
-            Toast.makeText(this, R.string.still_loading, Toast.LENGTH_SHORT).show()
-            return
+    inner class ProfileListAdapter(private val profiles: List<OwnProfile>) : RecyclerView.Adapter<ProfileListAdapter.ProfileViewHolder>() {
+
+        override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ProfileViewHolder {
+            val inflater = LayoutInflater.from(this@MainActivity)
+            val v = inflater.inflate(R.layout.activity_main_profile_selection_row, parent, false)
+            return ProfileViewHolder(v)
         }
 
-        appBar.setExpanded(false)
-        currFragment.addCreateNewPostForm()
+        override fun onBindViewHolder(holder: ProfileViewHolder, position: Int) {
+            val prof = profiles[position]
+            holder.setup(prof)
+        }
+
+        override fun getItemCount(): Int {
+            return profiles.size
+        }
+
+        inner class ProfileViewHolder(v: View): RecyclerView.ViewHolder(v) {
+
+            @BindView(R.id.profile_name)
+            lateinit var profileName: TextView
+
+            @BindView(R.id.profile_remove)
+            lateinit var profileRemove: ImageView
+
+            init {
+                ButterKnife.bind(this, v)
+            }
+
+            fun setup(prof: OwnProfile) {
+                profileName.text = prof.nickname
+                profileRemove.setOnClickListener {
+
+                }
+            }
+
+        }
+
     }
 }
