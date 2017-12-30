@@ -72,7 +72,7 @@ class Account {
 
     /**
      * Current profile after it's loaded
-     * Filled in [Network.populateIdentity]
+     * Filled in [Auth.updateCurrentProfile]
      */
     var currentProfile: OwnProfile? = null
 

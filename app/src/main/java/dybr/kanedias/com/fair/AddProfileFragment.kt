@@ -67,8 +67,7 @@ class AddProfileFragment: Fragment() {
 
             try {
                 val profile = async(CommonPool) { Network.createProfile(profReq) }.await()
-                Auth.user.currentProfile = profile
-                Auth.user.lastProfileId = profile.id
+                Auth.updateCurrentProfile(profile)
 
                 //we logged in successfully, return to main activity
                 Toast.makeText(activity, R.string.login_successful, Toast.LENGTH_SHORT).show()

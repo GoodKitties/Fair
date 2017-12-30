@@ -72,4 +72,8 @@
     <string name="create_new">Create new</string>
     <string name="profile_creation">Profile creation</string>
     <string name="no_profiles_create_one">No profiles found for this account, create one?</string>
+    <string name="confirm_action">Confirm action</string>
+    <string name="confirm_profile_deletion">Confirm profile deletion. Warning: diary and all posts belonging to this profile will be deleted by this action!</string>
+    <string name="confirm">Confirm</string>
+    <string name="profile_deleted">Profile deleted</string>
 </resources>

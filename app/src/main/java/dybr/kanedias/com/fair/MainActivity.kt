@@ -195,7 +195,7 @@ class MainActivity : AppCompatActivity() {
                 }
             } catch (ex: Exception) {
                 Network.reportErrors(this@MainActivity, ex)
-                handleAuthFailure()
+                becomeGuest()
             }
 
             progressDialog.hide()
@@ -236,10 +236,7 @@ class MainActivity : AppCompatActivity() {
 
         // predefine what we do on item selection
         val onSelection = fun(pos: Int) { // define as function as we use early-return
-            Auth.user.currentProfile = profiles[pos]
-            Auth.user.lastProfileId = profiles[pos].id
-
-            DbProvider.helper.accDao.update(Auth.user)
+            Auth.updateCurrentProfile(profiles[pos])
             refresh()
         }
 
@@ -250,23 +247,45 @@ class MainActivity : AppCompatActivity() {
         }
 
         // we have multiple accounts to select from
-        MaterialDialog.Builder(this)
+        val profAdapter = ProfileListAdapter(profiles.toMutableList())
+        val dialog = MaterialDialog.Builder(this)
                 .title(R.string.select_profile)
-                .cancelable(false)
                 .itemsCallback({ _, _, pos, _ -> onSelection(pos) })
-                .adapter(ProfileListAdapter(profiles), LinearLayoutManager(this))
+                .adapter(profAdapter, LinearLayoutManager(this))
                 .positiveText(R.string.create_new)
                 .onPositive({_, _ -> showAddProfile() })
                 .show()
+        profAdapter.toDismiss = dialog
+    }
+
+
+    /**
+     * Delete specified profile and report it
+     * @param prof profile to remove
+     */
+    private fun deleteProfile(prof: OwnProfile) {
+        launch(UI) {
+            try {
+                async(CommonPool) { Network.removeProfile(prof) }.await()
+                Toast.makeText(this@MainActivity, R.string.profile_deleted, Toast.LENGTH_SHORT).show()
+            } catch (ex: Exception) {
+                Network.reportErrors(this@MainActivity, ex)
+            }
+
+            if (Auth.user.currentProfile == prof) {
+                // we deleted current profile, need to become guest
+                becomeGuest()
+            }
+        }
     }
 
     /**
-     * What to do if auth failed
+     * What to do if auth failed/current account/profile was deleted
      */
-    private fun handleAuthFailure() {
+    private fun becomeGuest() {
         // couldn't log in, become guest
         Auth.user = Auth.guest
-        sidebar.updateAccountsArea()
+        refresh()
         drawer.openDrawer(GravityCompat.START)
     }
 
@@ -343,7 +362,12 @@ class MainActivity : AppCompatActivity() {
     /**
      * Profile selector adapter. We can't use standard one because we need a way to delete profile or add another.
      */
-    inner class ProfileListAdapter(private val profiles: List<OwnProfile>) : RecyclerView.Adapter<ProfileListAdapter.ProfileViewHolder>() {
+    inner class ProfileListAdapter(private val profiles: MutableList<OwnProfile>) : RecyclerView.Adapter<ProfileListAdapter.ProfileViewHolder>() {
+
+        /**
+         * Dismiss this if item is selected
+         */
+        lateinit var toDismiss: MaterialDialog
 
         override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ProfileViewHolder {
             val inflater = LayoutInflater.from(this@MainActivity)
@@ -352,8 +376,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onBindViewHolder(holder: ProfileViewHolder, position: Int) {
-            val prof = profiles[position]
-            holder.setup(prof)
+            holder.setup(position)
         }
 
         override fun getItemCount(): Int {
@@ -372,10 +395,27 @@ class MainActivity : AppCompatActivity() {
                 ButterKnife.bind(this, v)
             }
 
-            fun setup(prof: OwnProfile) {
+            fun setup(pos: Int) {
+                val prof = profiles[pos]
                 profileName.text = prof.nickname
-                profileRemove.setOnClickListener {
 
+                profileRemove.setOnClickListener {
+                    MaterialDialog.Builder(this@MainActivity)
+                            .title(R.string.confirm_action)
+                            .content(R.string.confirm_profile_deletion)
+                            .negativeText(android.R.string.no)
+                            .positiveText(R.string.confirm)
+                            .onPositive {_, _ ->
+                                deleteProfile(prof)
+                                profiles.remove(prof)
+                                this@ProfileListAdapter.notifyItemRemoved(pos)
+                            }.show()
+                }
+
+                itemView.setOnClickListener {
+                    Auth.updateCurrentProfile(prof)
+                    toDismiss.dismiss()
+                    refresh()
                 }
             }
 
