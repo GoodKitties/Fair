@@ -11,6 +11,9 @@ import android.support.test.filters.LargeTest
 import android.support.test.rule.ActivityTestRule
 import android.support.test.runner.AndroidJUnit4
 import android.view.WindowManager
+import com.j256.ormlite.table.TableUtils
+import dybr.kanedias.com.fair.database.DbProvider
+import dybr.kanedias.com.fair.entities.Account
 import org.apache.commons.text.RandomStringGenerator
 import org.hamcrest.Matchers.*
 import org.junit.*
@@ -28,22 +31,26 @@ import java.util.concurrent.TimeUnit
 @RunWith(AndroidJUnit4::class)
 @FixMethodOrder(value = MethodSorters.NAME_ASCENDING)
 @LargeTest
-class AddAccountTest {
+class AddProfileTest {
 
     @get:Rule
     var mActivityRule = ActivityTestRule<MainActivity>(MainActivity::class.java)
 
     private lateinit var activity: MainActivity
 
+    private val KNOWN_ACCOUNT_EMAIL = "kairllur@mail.ru"
+    private val KNOWN_ACCOUNT_PASSWORD = "123"
+
     // need to remember these to reuse in other tests
     companion object {
-        private val strGen = RandomStringGenerator.Builder().withinRange('a'.toInt(), 'z'.toInt()).build()
 
-        private val email = "${strGen.generate(10)}@${strGen.generate(5)}.${strGen.generate(2, 4)}"
-        private val password = strGen.generate(12)
+        private val strGen = RandomStringGenerator.Builder().withinRange('a'.toInt(), 'z'.toInt()).build()
+        private val nickname = strGen.generate(10)
+
     }
 
 
+    val gen10 = { strGen.generate(10) }
 
     @Before
     fun unlockScreen() {
@@ -64,6 +71,11 @@ class AddAccountTest {
         IdlingPolicies.setMasterPolicyTimeout(30, TimeUnit.SECONDS)
     }
 
+    @Before
+    fun getRidOfAllAccounts() {
+        TableUtils.clearTable(DbProvider.helper.connectionSource, Account::class.java)
+    }
+
     /**
      * Close drawers so next test can open them
      */
@@ -74,54 +86,38 @@ class AddAccountTest {
 
     @Test
     fun test1Registration() {
-        performRegistration()
+        addKnownAccount()
 
-        // click "ok" on dialog
-        onView(withText(android.R.string.ok)).inRoot(isDialog()).perform(click())
+        // it has quite a lot of profiles already and profile deletion doesn't work... yet... so let's pretend
+        // it was all just as planned!
 
-        // open drawer
-        onView(withContentDescription(R.string.open)).perform(click())
+        // fragment with profile addition should now be active
+        onView(withId(R.id.prof_nickname_input)).perform(typeText(nickname))
+        onView(withId(R.id.prof_birthday_input)).perform(typeText("10-12"))
+        onView(withId(R.id.prof_description_input)).perform(typeText("${gen10()}\n${gen10()}\n${gen10()}"))
 
-        // check there's account added
-        onView(withId(R.id.accounts_area)).check(matches(hasDescendant(withText(email))))
+        // click create
+        onView(withId(R.id.prof_create_button)).perform(click())
 
-        // delete account
-        onView(allOf(withId(R.id.account_remove), isDisplayed())).perform(click())
-        onView(withText(android.R.string.ok)).inRoot(isDialog()).perform(click())
+        // profile should be created after dialog finishes
+        onView(withId(R.id.current_user_name)).check(matches(withText((nickname))))
+
+        // click on profile switcher button
+        onView(allOf(withId(R.id.profile_swap), hasSibling(withText(KNOWN_ACCOUNT_EMAIL)))).perform(click())
     }
 
-    private fun performRegistration() {
+    private fun addKnownAccount() {
         onView(withContentDescription(R.string.open)).perform(click())
 
         // click "add account"
         onView(withText(R.string.add_an_account)).perform(click())
 
-        // request registration, not login
-        onView(withId(R.id.register_checkbox)).perform(click())
-
         // fill reg form
-        onView(withId(R.id.acc_email_input)).perform(typeText(email))
-        onView(withId(R.id.acc_password_input)).perform(typeText(password))
-        onView(withId(R.id.acc_password_confirm_input)).perform(typeText(password))
+        onView(withId(R.id.acc_email_input)).perform(typeText(KNOWN_ACCOUNT_EMAIL))
+        onView(withId(R.id.acc_password_input)).perform(typeText(KNOWN_ACCOUNT_PASSWORD))
         closeSoftKeyboard()
-        onView(withId(R.id.acc_termsofservice_checkbox)).perform(click())
-        onView(withId(R.id.acc_is_over_18_checkbox)).perform(click())
 
         // click register button
         onView(withId(R.id.confirm_button)).perform(click())
-    }
-
-    @Test
-    fun test2RegistrationFails() {
-        performRegistration()
-
-        // wait till dialog closes and navigate back from this fragment
-        onView(withId(R.id.register_checkbox)).perform(pressBack())
-
-        // open drawer
-        onView(withContentDescription(R.string.open)).perform(click())
-
-        // check there's no account added
-        onView(withId(R.id.accounts_area)).check(matches(not(hasDescendant(withText(email)))))
     }
 }

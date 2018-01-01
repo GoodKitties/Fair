@@ -235,7 +235,7 @@ object Network {
 
         // response is returned after execute call, body is not null
         val profile = fromWrappedJson(resp.body()!!.source(), OwnProfile::class.java)
-        Auth.updateCurrentProfile(profile)
+        Auth.updateCurrentProfile(profile) // all steps aren't required here, use this just to have all in one place
     }
 
     /**

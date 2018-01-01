@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:foreground="?android:attr/selectableItemBackground"
+    android:id="@+id/account_row_area"
     android:layout_width="match_parent"
     android:paddingStart="16dp"
     android:paddingEnd="16dp"
