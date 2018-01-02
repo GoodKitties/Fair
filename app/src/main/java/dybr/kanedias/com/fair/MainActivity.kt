@@ -228,7 +228,7 @@ class MainActivity : AppCompatActivity() {
                     .title(R.string.switch_profile)
                     .content(R.string.no_profiles_create_one)
                     .negativeText(android.R.string.no)
-                    .positiveText(android.R.string.yes)
+                    .positiveText(R.string.create_new)
                     .onPositive({ _, _ -> showAddProfile() })
                     .show()
             return
