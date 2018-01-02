@@ -4,6 +4,7 @@ import android.support.test.espresso.Espresso.closeSoftKeyboard
 import android.support.test.espresso.Espresso.onView
 import android.support.test.espresso.IdlingPolicies
 import android.support.test.espresso.action.ViewActions.*
+import android.support.test.espresso.assertion.ViewAssertions.doesNotExist
 import android.support.test.espresso.assertion.ViewAssertions.matches
 import android.support.test.espresso.matcher.RootMatchers.isDialog
 import android.support.test.espresso.matcher.ViewMatchers.*
@@ -50,7 +51,7 @@ class AddProfileTest {
     }
 
 
-    val gen10 = { strGen.generate(10) }
+    private val gen10 = { strGen.generate(10) }
 
     @Before
     fun unlockScreen() {
@@ -85,28 +86,48 @@ class AddProfileTest {
     }
 
     @Test
-    fun test1Registration() {
+    fun test1AddDeleteRandomProfile() {
         addKnownAccount()
 
         // it has quite a lot of profiles already and profile deletion doesn't work... yet... so let's pretend
         // it was all just as planned!
+        // it should show dialog with all profiles listed, create new one
+        onView(withText(R.string.switch_profile)).inRoot(isDialog()).check(matches(isDisplayed()))
+        onView(withText(R.string.create_new)).inRoot(isDialog()).perform(click())
 
         // fragment with profile addition should now be active
+        waitForDialog()
         onView(withId(R.id.prof_nickname_input)).perform(typeText(nickname))
         onView(withId(R.id.prof_birthday_input)).perform(typeText("10-12"))
         onView(withId(R.id.prof_description_input)).perform(typeText("${gen10()}\n${gen10()}\n${gen10()}"))
+        closeSoftKeyboard()
 
         // click create
         onView(withId(R.id.prof_create_button)).perform(click())
+
+        // open drawer
+        onView(withContentDescription(R.string.open)).perform(click())
 
         // profile should be created after dialog finishes
         onView(withId(R.id.current_user_name)).check(matches(withText((nickname))))
 
         // click on profile switcher button
-        onView(allOf(withId(R.id.profile_swap), hasSibling(withText(KNOWN_ACCOUNT_EMAIL)))).perform(click())
+        onView(allOf(withId(R.id.profile_switch), hasSibling(withText(KNOWN_ACCOUNT_EMAIL)))).perform(click())
+
+        waitForDialog()
+        onView(withText(nickname)).inRoot(isDialog()).check(matches(isDisplayed()))
+        onView(allOf(withId(R.id.profile_remove), hasSibling(withText(nickname)))).inRoot(isDialog()).perform(click())
+
+        waitForDialog() // this one is above previous
+        onView(withText(nickname)).inRoot(isDialog()).check(doesNotExist())
+    }
+
+    private fun waitForDialog() {
+        Thread.sleep(500) // somewhy dialog is not detected instantly
     }
 
     private fun addKnownAccount() {
+        // open drawer
         onView(withContentDescription(R.string.open)).perform(click())
 
         // click "add account"

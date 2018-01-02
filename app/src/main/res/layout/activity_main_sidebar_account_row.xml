@@ -20,14 +20,15 @@
 
     <ImageView
         android:layout_width="36dp"
-        android:id="@+id/profile_swap"
+        android:id="@+id/profile_switch"
         android:layout_toLeftOf="@id/account_remove"
         android:layout_toStartOf="@id/account_remove"
         android:padding="6dp"
         android:layout_centerVertical="true"
         android:src="@drawable/swap"
         android:tint="#fff"
-        android:layout_height="36dp" />
+        android:layout_height="36dp"
+        android:contentDescription="@string/switch_profile"/>
 
     <ImageView
         android:id="@+id/account_remove"
@@ -38,6 +39,7 @@
         android:layout_centerVertical="true"
         android:src="@drawable/close"
         android:tint="#fff"
-        android:layout_height="36dp" />
+        android:layout_height="36dp"
+        android:contentDescription="@string/remove_profile"/>
 
 </RelativeLayout>

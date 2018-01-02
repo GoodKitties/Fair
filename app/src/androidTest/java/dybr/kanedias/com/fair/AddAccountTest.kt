@@ -73,8 +73,8 @@ class AddAccountTest {
     }
 
     @Test
-    fun test1Registration() {
-        performRegistration()
+    fun test1RegistrationSucceeds() {
+        performRegistration(email, password)
 
         // click "ok" on dialog
         onView(withText(android.R.string.ok)).inRoot(isDialog()).perform(click())
@@ -90,7 +90,7 @@ class AddAccountTest {
         onView(withText(android.R.string.ok)).inRoot(isDialog()).perform(click())
     }
 
-    private fun performRegistration() {
+    private fun performRegistration(email: String, password: String) {
         onView(withContentDescription(R.string.open)).perform(click())
 
         // click "add account"
@@ -112,8 +112,8 @@ class AddAccountTest {
     }
 
     @Test
-    fun test2RegistrationFails() {
-        performRegistration()
+    fun test2SecondRegistrationFails() {
+        performRegistration(email, password)
 
         // wait till dialog closes and navigate back from this fragment
         onView(withId(R.id.register_checkbox)).perform(pressBack())
@@ -123,5 +123,27 @@ class AddAccountTest {
 
         // check there's no account added
         onView(withId(R.id.accounts_area)).check(matches(not(hasDescendant(withText(email)))))
+    }
+
+    @Test
+    fun test3CurrentAccountDeletionMakesYouGuest() {
+        val randEmail = "${strGen.generate(8)}@${strGen.generate(5)}.${strGen.generate(2)}"
+        performRegistration(randEmail, strGen.generate(12))
+
+        // click "ok" on success dialog
+        onView(withText(android.R.string.ok)).inRoot(isDialog()).perform(click())
+
+        // open drawer
+        onView(withContentDescription(R.string.open)).perform(click())
+
+        // click on delete account icon
+        onView(allOf(withId(R.id.account_remove), hasSibling(withText(randEmail)))).perform(click())
+
+        // dialog should open
+        onView(withText(R.string.delete_account)).inRoot(isDialog()).check(matches(isDisplayed()))
+        onView(withText(android.R.string.yes)).inRoot(isDialog()).perform(click()) // confirm
+
+        // check that greeting is now for guest user
+        onView(withId(R.id.current_user_name)).check(matches(withText((R.string.guest))))
     }
 }

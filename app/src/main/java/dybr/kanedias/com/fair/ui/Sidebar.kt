@@ -109,7 +109,7 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
             val view = inflater.inflate(R.layout.activity_main_sidebar_account_row, accountsArea, false)
             val accName = view.findViewById<TextView>(R.id.account_name)
             val accRemove = view.findViewById<ImageView>(R.id.account_remove)
-            val profSwap = view.findViewById<ImageView>(R.id.profile_swap)
+            val profSwap = view.findViewById<ImageView>(R.id.profile_switch)
 
             // setup account row - set email as account name
             accName.text = acc.email
@@ -165,7 +165,7 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
         // special setup item - inflate guest account row
         val guestRow = inflater.inflate(R.layout.activity_main_sidebar_account_row, accountsArea, false)
         guestRow.findViewById<ImageView>(R.id.account_remove).visibility = View.GONE
-        guestRow.findViewById<ImageView>(R.id.profile_swap).visibility = View.GONE
+        guestRow.findViewById<ImageView>(R.id.profile_switch).visibility = View.GONE
         val guestName = guestRow.findViewById<TextView>(R.id.account_name)
         guestName.text = activity.getString(R.string.guest)
         guestName.setOnClickListener {

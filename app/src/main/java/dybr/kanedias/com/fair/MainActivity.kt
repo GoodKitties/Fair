@@ -225,7 +225,7 @@ class MainActivity : AppCompatActivity() {
             // suggest user to create profile
             drawer.closeDrawers()
             MaterialDialog.Builder(this)
-                    .title(R.string.select_profile)
+                    .title(R.string.switch_profile)
                     .content(R.string.no_profiles_create_one)
                     .negativeText(android.R.string.no)
                     .positiveText(android.R.string.yes)
@@ -249,7 +249,7 @@ class MainActivity : AppCompatActivity() {
         // we have multiple accounts to select from
         val profAdapter = ProfileListAdapter(profiles.toMutableList())
         val dialog = MaterialDialog.Builder(this)
-                .title(R.string.select_profile)
+                .title(R.string.switch_profile)
                 .itemsCallback({ _, _, pos, _ -> onSelection(pos) })
                 .adapter(profAdapter, LinearLayoutManager(this))
                 .positiveText(R.string.create_new)
