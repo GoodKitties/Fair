@@ -85,7 +85,13 @@ object Network {
             .add(RegisterRequest::class.java)
             .add(RegisterResponse::class.java)
             .add(ProfileCreateRequest::class.java)
-            .add(OwnProfile::class.java)
+            .add(ProfileResponse::class.java)
+            .add(BlogCreateRequest::class.java)
+            .add(BlogResponse::class.java)
+            .add(EntryCreateRequest::class.java)
+            .add(EntryResponse::class.java)
+            .add(CreateCommentRequest::class.java)
+            .add(CommentResponse::class.java)
             .build()
 
     private val jsonConverter = Moshi.Builder()
@@ -236,7 +242,7 @@ object Network {
      *
      * @throws IOException on connection fail
      */
-    fun populateIdentity() {
+    fun populateProfile() {
         val req = Request.Builder().url("$PROFILES_ENDPOINT/${Auth.user.lastProfileId}").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)

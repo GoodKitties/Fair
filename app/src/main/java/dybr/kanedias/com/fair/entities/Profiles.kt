@@ -83,7 +83,7 @@ class ProfileCreateRequest: Resource() {
  * Created on 17.11.17
  */
 @JsonApi(type = "profiles", policy = Policy.DESERIALIZATION_ONLY)
-class OwnProfile : Resource() {
+class ProfileResponse : Resource() {
 
     /**
      * Chosen nickname
@@ -121,3 +121,5 @@ class OwnProfile : Resource() {
     @field:Json(name = "user")
     var user = HasOne<User>()
 }
+
+typealias OwnProfile = ProfileResponse

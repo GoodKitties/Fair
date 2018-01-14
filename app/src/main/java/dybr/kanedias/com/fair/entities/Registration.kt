@@ -33,21 +33,40 @@ import java.util.*
  */
 @JsonApi(type = "users", policy = Policy.SERIALIZATION_ONLY)
 class RegisterRequest : Resource() {
+
+    /**
+     * Email to register. This will be used in later login requests
+     */
     @field:Json(name = "email")
     lateinit var email: String
 
+    /**
+     * Password for this email. API endpoints are HTTPS so we don't afraid of leakage
+     */
     @field:Json(name = "password")
     lateinit var password: String
 
+    /**
+     * Confirmation for [password]
+     */
     @field:Json(name = "password-confirmation")
     lateinit var confirmPassword: String
 
+    /**
+     * If this is unchecked server throws error that ToS are not accepted
+     */
     @field:Json(name = "terms-of-service")
     var termsOfService: Boolean = false
 
+    /**
+     * Whether to show non-SFW content
+     */
     @field:Json(name = "is-adult")
     var isAdult: Boolean = false
 
+    /**
+     * Timezone like 'Europe/Moscow', optional
+     */
     @field:Json(name = "timezone")
     var timezone: String? = null
 }
@@ -79,15 +98,29 @@ class RegisterRequest : Resource() {
  */
 @JsonApi(type = "users", policy = Policy.DESERIALIZATION_ONLY)
 class RegisterResponse : Resource() {
+
+    /**
+     * Email used when registering, see [RegisterRequest.email]
+     */
     @field:Json(name = "email")
     lateinit var email: String
 
+    /**
+     * Date this profile was created at.
+     * Immutable
+     */
     @field:Json(name = "created-at")
     lateinit var createdAt: Date
 
+    /**
+     * Date this profile was last modified at
+     */
     @field:Json(name = "updated-at")
     lateinit var updatedAt: Date
 
+    /**
+     * if checked - show non-SFW content
+     */
     @field:Json(name = "is-adult")
     var isAdult: Boolean = false
 

@@ -20,7 +20,6 @@ import butterknife.BindView
 import butterknife.OnClick
 import butterknife.ButterKnife
 import com.afollestad.materialdialogs.MaterialDialog
-import dybr.kanedias.com.fair.database.DbProvider
 import dybr.kanedias.com.fair.entities.Account
 import dybr.kanedias.com.fair.entities.Auth
 import dybr.kanedias.com.fair.ui.Sidebar
@@ -190,7 +189,7 @@ class MainActivity : AppCompatActivity() {
                     selectProfile()
                 } else {
                     // we already have profile to load from
-                    async(CommonPool) { Network.populateIdentity() }.await()
+                    async(CommonPool) { Network.populateProfile() }.await()
                     // all went well, report if we should
                     Toast.makeText(this@MainActivity, R.string.login_successful, Toast.LENGTH_SHORT).show()
                 }
@@ -327,7 +326,8 @@ class MainActivity : AppCompatActivity() {
 
             //var totalTabs = 2 // first tab is favorite post wall, second is own diary
             //totalTabs += Auth.user.currentProfile.favorites.size // add tabs for favorites
-            return totalTabs
+            //return totalTabs
+            return 0
         }
 
 
