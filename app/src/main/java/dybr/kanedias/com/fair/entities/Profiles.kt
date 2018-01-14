@@ -23,7 +23,7 @@ import java.util.*
  * }
  * ```
  */
-@JsonApi(type = "own-profiles", policy = Policy.SERIALIZATION_ONLY)
+@JsonApi(type = "profiles", policy = Policy.SERIALIZATION_ONLY)
 class ProfileCreateRequest: Resource() {
 
     /**
@@ -82,7 +82,7 @@ class ProfileCreateRequest: Resource() {
  *
  * Created on 17.11.17
  */
-@JsonApi(type = "own-profiles", policy = Policy.DESERIALIZATION_ONLY)
+@JsonApi(type = "profiles", policy = Policy.DESERIALIZATION_ONLY)
 class OwnProfile : Resource() {
 
     /**

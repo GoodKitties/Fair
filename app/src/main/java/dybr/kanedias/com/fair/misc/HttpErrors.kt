@@ -15,6 +15,11 @@ open class HttpException(val code: Int, message: String, val body: String) : IOE
 
     constructor(resp: Response): this(resp.code(), resp.message(), resp.body()!!.string())
 
+    /**
+     * For cases when body was already extracted
+     */
+    constructor(resp: Response, body: String): this(resp.code(), resp.message(), body)
+
     // we always have message in http exception via primary constructor
     override val message: String
         get() = super.message!!

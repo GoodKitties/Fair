@@ -141,6 +141,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
+        pager.adapter = tabAdapter
     }
 
 
@@ -294,7 +295,7 @@ class MainActivity : AppCompatActivity() {
      */
     fun refresh() {
         sidebar.updateAccountsArea()
-        pager.adapter = tabAdapter
+        tabAdapter.notifyDataSetChanged()
     }
 
     /**
@@ -319,17 +320,14 @@ class MainActivity : AppCompatActivity() {
     inner class TabAdapter: FragmentStatePagerAdapter(supportFragmentManager) {
 
         override fun getCount(): Int {
-            // not working atm - no API for posting at all
-            /*
             if (Auth.user === Auth.guest) {
                 // guest can't see anything without logging in yet.
                 return 0
             }
-            var totalTabs = 2 // first tab is favorite post wall, second is own diary
-            totalTabs += Auth.user.profile.favorites.size // add tabs for favorites
+
+            //var totalTabs = 2 // first tab is favorite post wall, second is own diary
+            //totalTabs += Auth.user.currentProfile.favorites.size // add tabs for favorites
             return totalTabs
-            */
-            return 0
         }
 
 

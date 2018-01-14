@@ -1,6 +1,7 @@
 package dybr.kanedias.com.fair.entities
 
 import com.squareup.moshi.Json
+import moe.banana.jsonapi2.HasMany
 import moe.banana.jsonapi2.JsonApi
 import moe.banana.jsonapi2.Policy
 import moe.banana.jsonapi2.Resource
@@ -89,6 +90,11 @@ class RegisterResponse : Resource() {
 
     @field:Json(name = "is-adult")
     var isAdult: Boolean = false
+
+    /**
+     * Available when requested with `include=profiles`
+     */
+    var profiles = HasMany<OwnProfile>()
 }
 
 typealias User = RegisterResponse

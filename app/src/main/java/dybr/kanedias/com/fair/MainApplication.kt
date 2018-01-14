@@ -14,7 +14,7 @@ class MainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         DbProvider.setHelper(this)
-        Network.init(this)
+        Network.init()
         Auth.init(this)
 
         // load last account if it exists

@@ -27,6 +27,12 @@ class Account {
     var id: Long = 0
 
     /**
+     * Retrieved on first login
+     */
+    @DatabaseField(canBeNull = false, unique = true)
+    lateinit var serverId: String
+
+    /**
      * E-Mail user when registered
      */
     @DatabaseField(canBeNull = false, unique = true)
@@ -66,6 +72,7 @@ class Account {
 
     /**
      * Profile id to load when application starts again
+     * (server-side)
      */
     @DatabaseField(canBeNull = true)
     var lastProfileId: String? = null

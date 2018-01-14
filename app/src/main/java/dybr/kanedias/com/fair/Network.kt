@@ -18,6 +18,8 @@ import java.util.concurrent.TimeUnit
 import java.io.IOException
 import java.util.*
 import moe.banana.jsonapi2.ArrayDocument
+import java.net.HttpURLConnection.HTTP_BAD_REQUEST
+import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
 
 
 /**
@@ -73,7 +75,7 @@ object Network {
 
     private val USERS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/users"
     private val SESSIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/sessions"
-    private val PROFILES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/own-profiles"
+    private val PROFILES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/profiles"
 
     private val MIME_JSON_API = MediaType.parse("application/vnd.api+json")
 
@@ -113,7 +115,7 @@ object Network {
 
     private lateinit var httpClient: OkHttpClient
 
-    fun init(ctx: Context) {
+    fun init() {
         httpClient =  OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)
@@ -140,11 +142,16 @@ object Network {
      * @return [HttpApiException] if specific errors were found or generic [HttpException] for this response
      */
     private fun extractErrors(resp: Response) : HttpException {
-        if (resp.code() == 422) { // Unprocessable entity
+        if (resp.code() in HTTP_BAD_REQUEST until HTTP_INTERNAL_ERROR) { // 400-499: client error
             // try to get error info
             val errAdapter = jsonConverter.adapter(Document::class.java)
-            val errDoc = errAdapter.fromJson(resp.body()!!.source())!!
-            return HttpApiException(resp, errDoc.errors)
+            val body = resp.body()!!.string()
+            if (body.isNullOrEmpty()) // no body, no details
+                return HttpException(resp, body)
+
+            val errDoc = errAdapter.fromJson(body)!!
+            if (errDoc.errors.isNotEmpty()) // likely
+                return HttpApiException(resp, errDoc.errors)
         }
         return HttpException(resp)
     }
@@ -152,10 +159,10 @@ object Network {
     /**
      * Logs in with specified account, i.e. creates session, obtains access token for this user
      * ands sets [Auth.user] if all went good.
-     * After this call succeeds you may be certain that [httpClient] sends requests with correct
+     * After this call succeeds you can be certain that [httpClient] sends requests with correct
      * "Authorization" header.
      *
-     * @param
+     * @param acc account to authenticate with
      * @return true if auth was successful, false otherwise
      * @throws IOException on connection fail
      */
@@ -164,6 +171,7 @@ object Network {
         acc.accessToken = null
 
         val loginRequest = LoginRequest().apply {
+            action = "login"
             email = acc.email
             password = acc.password
         }
@@ -193,6 +201,7 @@ object Network {
 
             // memorize account info
             acc.apply {
+                serverId = user[0].id
                 createdAt = user[0].createdAt
                 updatedAt = user[0].updatedAt
                 isAdult = user[0].isAdult
@@ -244,19 +253,21 @@ object Network {
      * @return list of profiles that are bound to currently logged in user
      */
     fun loadProfiles(): List<OwnProfile> {
-        val req = Request.Builder().url(PROFILES_ENDPOINT).build()
+        val req = Request.Builder().url("$USERS_ENDPOINT/${Auth.user.serverId}?include=profiles").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw HttpException(resp)
+            throw extractErrors(resp)
 
         // response is returned after execute call, body is not null
-        return fromWrappedListJson(resp.body()!!.source(), OwnProfile::class.java)
+        val user = fromWrappedJson(resp.body()!!.source(), User::class.java)
+        return user.profiles.get(user.document)
     }
 
     /**
      * Remove own profile. Warning: this deletes diaries, comments and all associated data with it.
      * Use with caution.
      *
+     * @warning doesn't work for now
      * @param prof Profile to delete. Only profile id is actually needed.
      */
     fun removeProfile(prof: OwnProfile) {
@@ -281,6 +292,26 @@ object Network {
 
         // response is returned after execute call, body is not null
         return fromWrappedJson(resp.body()!!.source(), OwnProfile::class.java)
+    }
+
+    fun confirmRegistration(emailToConfirm: String, tokenFromMail: String): LoginResponse {
+        val confirmation = ConfirmRequest().apply {
+            action = "confirm"
+            email = emailToConfirm
+            confirmToken = tokenFromMail
+        }
+
+        val body = RequestBody.create(MIME_JSON_API, toWrappedJson(confirmation))
+        val req = Request.Builder().post(body).url(SESSIONS_ENDPOINT).build()
+        val resp = httpClient.newCall(req).execute()
+
+        // unprocessable entity error can be returned when something is wrong with your input
+        if (!resp.isSuccessful) {
+            throw extractErrors(resp)
+        }
+
+        // if response is successful we should have login response in body
+        return fromWrappedJson(resp.body()!!.source(), LoginResponse::class.java)
     }
 
     /**
@@ -325,7 +356,7 @@ object Network {
      * Handle typical network-related problems.
      * * Handles API-level problems - answers with errors from API
      * * Handles HTTP-level problems - answers with strings from [errMapping]
-     * * Handles conection IO-level problems
+     * * Handles connection IO-level problems
      * @param ctx context to get error string from
      * @param errMapping mapping of ids like `HttpUrlConnection.HTTP_NOT_FOUND -> R.string.not_found`
      */
