@@ -78,12 +78,6 @@ class Account {
     var lastProfileId: String? = null
 
     /**
-     * Current profile after it's loaded
-     * Filled in [Auth.updateCurrentProfile]
-     */
-    var currentProfile: OwnProfile? = null
-
-    /**
      * Whether this is current account for the app
      */
     @DatabaseField(canBeNull = false)

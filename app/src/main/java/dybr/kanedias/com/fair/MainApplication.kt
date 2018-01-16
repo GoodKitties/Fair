@@ -20,7 +20,7 @@ class MainApplication : Application() {
         // load last account if it exists
         val acc = DbProvider.helper.accDao.queryBuilder().where().eq("current", true).queryForFirst()
         acc?.let {
-            Auth.user = acc
+            Auth.updateCurrentUser(acc)
         }
     }
 

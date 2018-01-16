@@ -18,8 +18,7 @@ import java.util.concurrent.TimeUnit
 import java.io.IOException
 import java.util.*
 import moe.banana.jsonapi2.ArrayDocument
-import java.net.HttpURLConnection.HTTP_BAD_REQUEST
-import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
+import java.net.HttpURLConnection.*
 
 
 /**
@@ -131,7 +130,11 @@ object Network {
                 .build()
     }
 
-    fun register(regInfo: RegisterRequest): RegisterResponse {
+    /**
+     * Perform registration with specified register request
+     * @param regInfo registration request with all necessary fields filled
+     */
+    fun createAccount(regInfo: RegisterRequest): RegisterResponse {
         val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(regInfo))
         val req = Request.Builder().post(reqBody).url(USERS_ENDPOINT).build()
         val resp = httpClient.newCall(req).execute()
@@ -139,7 +142,8 @@ object Network {
             throw extractErrors(resp)
         }
 
-        return fromWrappedJson(resp.body()!!.source(), RegisterResponse::class.java)
+        // response is successful, should have register response in answer
+        return fromWrappedJson(resp.body()!!.source(), RegisterResponse::class.java)!!
     }
 
     /**
@@ -151,9 +155,9 @@ object Network {
         if (resp.code() in HTTP_BAD_REQUEST until HTTP_INTERNAL_ERROR) { // 400-499: client error
             // try to get error info
             val errAdapter = jsonConverter.adapter(Document::class.java)
-            val body = resp.body()!!.string()
-            if (body.isNullOrEmpty()) // no body, no details
-                return HttpException(resp, body)
+            val body = resp.body()!!.source()
+            if (body.exhausted()) // no content
+                return HttpException(resp)
 
             val errDoc = errAdapter.fromJson(body)!!
             if (errDoc.errors.isNotEmpty()) // likely
@@ -191,11 +195,11 @@ object Network {
         }
 
         // if response is successful we should have login response in body
-        val response = fromWrappedJson(resp.body()!!.source(), LoginResponse::class.java)
+        val response = fromWrappedJson(resp.body()!!.source(), LoginResponse::class.java)!!
 
         // login successful
         // memorize the access token and use it in next requests
-        Auth.user = acc
+        Auth.updateCurrentUser(acc)
         acc.accessToken = response.accessToken
 
         // looks like we're logging in for the first time, retrieve user info for later
@@ -212,7 +216,12 @@ object Network {
                 updatedAt = user[0].updatedAt
                 isAdult = user[0].isAdult
             }
+            return
         }
+
+        // last profile exists, try to load it
+        populateProfile()
+        loadBlog()
     }
 
     private fun <T: ResourceIdentifier> toWrappedJson(obj: T): String {
@@ -222,7 +231,7 @@ object Network {
         return reqAdapter.toJson(wrapped)
     }
 
-    private fun <T: ResourceIdentifier> fromWrappedJson(obj: BufferedSource, clazz: Class<T>): T {
+    private fun <T: ResourceIdentifier> fromWrappedJson(obj: BufferedSource, clazz: Class<T>): T? {
         val type = Types.newParameterizedType(Document::class.java, clazz)
         val reqAdapter = jsonConverter.adapter<Document<T>>(type)
         val doc = reqAdapter.fromJson(obj)!!
@@ -238,18 +247,18 @@ object Network {
 
     /**
      * Pull profile of current user. Account should have selected last profile and relevant access token by this point.
-     * After the completion [Account.currentProfile] will be populated.
+     * After the completion [Auth.profile] will be populated.
      *
      * @throws IOException on connection fail
      */
-    fun populateProfile() {
+    private fun populateProfile() {
         val req = Request.Builder().url("$PROFILES_ENDPOINT/${Auth.user.lastProfileId}").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
             throw HttpException(resp)
 
         // response is returned after execute call, body is not null
-        val profile = fromWrappedJson(resp.body()!!.source(), OwnProfile::class.java)
+        val profile = fromWrappedJson(resp.body()!!.source(), OwnProfile::class.java)!!
         Auth.updateCurrentProfile(profile) // all steps aren't required here, use this just to have all in one place
     }
 
@@ -265,8 +274,22 @@ object Network {
             throw extractErrors(resp)
 
         // response is returned after execute call, body is not null
-        val user = fromWrappedJson(resp.body()!!.source(), User::class.java)
+        val user = fromWrappedJson(resp.body()!!.source(), User::class.java)!!
         return user.profiles.get(user.document)
+    }
+
+    /**
+     * Loads blog for requested profile if it's present and sets it in [Auth.blog]
+     * Make sure profile is already populated in [populateProfile]
+     */
+    fun loadBlog() {
+        val req = Request.Builder().url("$PROFILES_ENDPOINT/${Auth.profile?.id}/blog").build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful)
+            throw extractErrors(resp)
+
+        val blog = fromWrappedJson(resp.body()!!.source(), Blog::class.java)
+        blog?.let { Auth.updateBlog(it) }
     }
 
     /**
@@ -297,7 +320,7 @@ object Network {
             throw HttpException(resp)
 
         // response is returned after execute call, body is not null
-        return fromWrappedJson(resp.body()!!.source(), OwnProfile::class.java)
+        return fromWrappedJson(resp.body()!!.source(), OwnProfile::class.java)!!
     }
 
     fun confirmRegistration(emailToConfirm: String, tokenFromMail: String): LoginResponse {
@@ -317,7 +340,7 @@ object Network {
         }
 
         // if response is successful we should have login response in body
-        return fromWrappedJson(resp.body()!!.source(), LoginResponse::class.java)
+        return fromWrappedJson(resp.body()!!.source(), LoginResponse::class.java)!!
     }
 
     /**

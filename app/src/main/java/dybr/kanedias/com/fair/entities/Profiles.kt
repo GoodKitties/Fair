@@ -1,10 +1,7 @@
 package dybr.kanedias.com.fair.entities
 
 import com.squareup.moshi.Json
-import moe.banana.jsonapi2.HasOne
-import moe.banana.jsonapi2.JsonApi
-import moe.banana.jsonapi2.Policy
-import moe.banana.jsonapi2.Resource
+import moe.banana.jsonapi2.*
 import java.util.*
 
 /**
@@ -120,6 +117,12 @@ class ProfileResponse : Resource() {
      */
     @field:Json(name = "user")
     var user = HasOne<User>()
+
+    /**
+     * Link to the blog of this profile
+     */
+    @field:Json(name = "blog")
+    var blog = HasOne<Blog>()
 }
 
 typealias OwnProfile = ProfileResponse

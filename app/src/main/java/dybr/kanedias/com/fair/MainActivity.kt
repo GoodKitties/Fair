@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity() {
     /**
      * Sidebar that opens from the left (the second part of drawer)
      */
-    lateinit var sidebar: Sidebar
+    private lateinit var sidebar: Sidebar
 
     /**
      * ancillary progress dialog for use in various places
@@ -173,7 +173,7 @@ class MainActivity : AppCompatActivity() {
     fun reLogin(acc: Account) {
         if (acc === Auth.guest) {
             // we're logging in as guest, skip auth
-            Auth.user = Auth.guest
+            Auth.updateCurrentUser(Auth.guest)
             refresh()
             return
         }
@@ -183,13 +183,14 @@ class MainActivity : AppCompatActivity() {
             progressDialog.show()
 
             try {
+                // login with this account and reset profile/blog links
                 async(CommonPool) { Network.login(acc) }.await()
-                if (Auth.user.lastProfileId == null) {
+
+                if (Auth.profile == null) {
                     // first time we're loading this account, select profile
                     selectProfile()
                 } else {
-                    // we already have profile to load from
-                    async(CommonPool) { Network.populateProfile() }.await()
+                    // we already have loaded profile
                     // all went well, report if we should
                     Toast.makeText(this@MainActivity, R.string.login_successful, Toast.LENGTH_SHORT).show()
                 }
@@ -205,7 +206,11 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Load profiles for logged in user and show selector dialog to user.
+     * If there's just one profile, select it right away.
      * If there are no any profiles for this user, suggest to create it.
+     *
+     * This should be invoked after [Auth.user] is populated
+     *
      * @param showIfOne whether to show dialog if only one profile is available
      */
     suspend fun selectProfile(showIfOne: Boolean = false) {
@@ -272,7 +277,7 @@ class MainActivity : AppCompatActivity() {
                 Network.reportErrors(this@MainActivity, ex)
             }
 
-            if (Auth.user.currentProfile == prof) {
+            if (Auth.profile == prof) {
                 // we deleted current profile, need to become guest
                 becomeGuest()
             }
@@ -284,7 +289,7 @@ class MainActivity : AppCompatActivity() {
      */
     private fun becomeGuest() {
         // couldn't log in, become guest
-        Auth.user = Auth.guest
+        Auth.updateCurrentUser(Auth.guest)
         refresh()
         drawer.openDrawer(GravityCompat.START)
     }
@@ -293,8 +298,33 @@ class MainActivity : AppCompatActivity() {
      * Refresh sliding tabs, sidebar (usually after auth/settings change)
      */
     fun refresh() {
-        sidebar.updateAccountsArea()
-        tabAdapter.notifyDataSetChanged()
+
+        // load current blog and favorites
+        launch(UI) {
+            if (Auth.profile != null && Auth.blog == null) {
+                // we have loaded profile, try to load our blog
+                try {
+                    async(CommonPool) { Network.loadBlog() }.await()
+
+                } catch (ex: Exception) {
+                    Network.reportErrors(this@MainActivity, ex)
+                }
+            }
+
+            sidebar.updateAccountsArea()
+            tabAdapter.notifyDataSetChanged()
+        }
+    }
+
+    /**
+     *
+     */
+    private suspend fun createBlog() {
+        supportFragmentManager.beginTransaction()
+                .addToBackStack("Showing profile creation fragment")
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .replace(R.id.main_drawer_layout, AddProfileFragment())
+                .commit()
     }
 
     /**
@@ -325,7 +355,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             //var totalTabs = 2 // first tab is favorite post wall, second is own diary
-            //totalTabs += Auth.user.currentProfile.favorites.size // add tabs for favorites
+            //totalTabs += Auth.user.profile.favorites.size // add tabs for favorites
             //return totalTabs
             return 0
         }

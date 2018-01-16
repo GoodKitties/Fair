@@ -7,7 +7,6 @@ import android.app.FragmentTransaction
 import android.support.v4.view.animation.FastOutSlowInInterpolator
 import android.support.v4.widget.DrawerLayout
 import android.view.View
-import android.view.animation.LinearInterpolator
 import android.widget.*
 import butterknife.BindView
 import butterknife.ButterKnife
@@ -20,11 +19,8 @@ import dybr.kanedias.com.fair.R
 import dybr.kanedias.com.fair.database.DbProvider
 import dybr.kanedias.com.fair.entities.Auth
 import dybr.kanedias.com.fair.entities.Account
-import kotlinx.coroutines.experimental.CoroutineStart
 import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.channels.actor
-import kotlinx.coroutines.experimental.launch
 
 /**
  * Sidebar views and controls.
@@ -97,7 +93,7 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
         val inflater = activity.layoutInflater
 
         // set welcome message to current user nickname
-        currentUsername.text = Auth.user.currentProfile?.nickname ?: Auth.user.email
+        currentUsername.text = Auth.profile?.nickname ?: Auth.user.email
 
         // update account area views
         // remove previous accounts, they may be invalid

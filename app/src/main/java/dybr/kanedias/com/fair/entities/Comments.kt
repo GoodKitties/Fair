@@ -39,7 +39,7 @@ import java.util.*
  *
  * Created on 14.01.18
  */
-@JsonApi(type = "blogs", policy = Policy.SERIALIZATION_ONLY)
+@JsonApi(type = "comments", policy = Policy.SERIALIZATION_ONLY)
 class CreateCommentRequest: Resource() {
 
     /**

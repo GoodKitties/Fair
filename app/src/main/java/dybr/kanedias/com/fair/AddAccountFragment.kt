@@ -150,26 +150,18 @@ class AddAccountFragment : Fragment() {
             try {
                 async(CommonPool) { Network.login(acc) }.await()
 
+                Toast.makeText(activity, R.string.login_successful, Toast.LENGTH_SHORT).show()
+                activity.selectProfile() // shows profile selection dialog
+
                 //we logged in successfully, return to main activity
                 DbProvider.helper.accDao.create(acc)
-                Toast.makeText(activity, R.string.login_successful, Toast.LENGTH_SHORT).show()
                 handleSuccess()
-
-                activity.selectProfile()
             } catch (ex: Exception) {
                 Network.reportErrors(activity, ex, mapOf(422 to R.string.invalid_credentials))
             }
 
             progressDialog.hide()
         }
-    }
-
-    /**
-     * Handle successful account addition. Navigate back to [MainActivity] and update sidebar account list.
-     */
-    private fun handleSuccess() {
-        fragmentManager!!.popBackStack()
-        activity.refresh()
     }
 
     /**
@@ -189,7 +181,7 @@ class AddAccountFragment : Fragment() {
             progressDialog.show()
 
             try {
-                val response = async(CommonPool) { Network.register(req) }.await()
+                val response = async(CommonPool) { Network.createAccount(req) }.await()
                 val acc = Account().apply {
                     email = response.email
                     password = req.password // get from request, can't be obtained from user info
@@ -217,5 +209,13 @@ class AddAccountFragment : Fragment() {
 
             progressDialog.hide()
         }
+    }
+
+    /**
+     * Handle successful account addition. Navigate back to [MainActivity] and update sidebar account list.
+     */
+    private fun handleSuccess() {
+        fragmentManager!!.popBackStack()
+        activity.refresh()
     }
 }
