@@ -69,8 +69,8 @@ class AddProfileFragment: Fragment() {
                 val profile = async(CommonPool) { Network.createProfile(profReq) }.await()
                 Auth.updateCurrentProfile(profile)
 
-                //we logged in successfully, return to main activity
-                Toast.makeText(activity, R.string.login_successful, Toast.LENGTH_SHORT).show()
+                //we created profile successfully, return to main activity
+                Toast.makeText(activity, R.string.profile_created, Toast.LENGTH_SHORT).show()
                 handleSuccess()
             } catch (ex: Exception) {
                 Network.reportErrors(activity, ex, mapOf(422 to R.string.invalid_credentials))
