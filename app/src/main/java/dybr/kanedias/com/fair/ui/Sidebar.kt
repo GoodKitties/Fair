@@ -48,6 +48,12 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
     lateinit var accountsArea: LinearLayout
 
     /**
+     * "My Profile" row
+     */
+    @BindView(R.id.profile_area)
+    lateinit var profileArea: LinearLayout
+
+    /**
      * Label that shows current username near welcome text
      */
     @BindView(R.id.current_user_name)
@@ -55,7 +61,7 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
 
     init {
         ButterKnife.bind(this, activity)
-        updateAccountsArea()
+        updateSidebar()
     }
 
     /**
@@ -87,9 +93,17 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
     }
 
     /**
+     * Update sidebar after account change/refresh
+     */
+    fun updateSidebar() {
+        updateAccountsArea()
+        updateProfileRow()
+    }
+
+    /**
      * Update accounts area after possible account change
      */
-    fun updateAccountsArea() {
+    private fun updateAccountsArea() {
         val inflater = activity.layoutInflater
 
         // set welcome message to current user nickname
@@ -105,14 +119,13 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
             val view = inflater.inflate(R.layout.activity_main_sidebar_account_row, accountsArea, false)
             val accName = view.findViewById<TextView>(R.id.account_name)
             val accRemove = view.findViewById<ImageView>(R.id.account_remove)
-            val profSwap = view.findViewById<ImageView>(R.id.profile_switch)
 
             // setup account row - set email as account name
             accName.text = acc.email
             accName.setOnClickListener {
                 drawer.closeDrawers()
                 activity.reLogin(acc)
-                updateAccountsArea()
+                updateSidebar()
             }
 
             // setup account row - handle click on delete button
@@ -123,38 +136,8 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
                         .content(R.string.are_you_sure)
                         .positiveText(android.R.string.yes)
                         .negativeText(android.R.string.no)
-                        .onPositive{ _, _ -> deleteAccount(acc) }
+                        .onPositive { _, _ -> deleteAccount(acc) }
                         .show()
-            }
-
-            // setup account row - handle click on profile change button
-            // we need to ignore subsequent clicks if profiles are already loading
-            val profileSwapActor = actor<Unit>(UI) {
-                for (event in channel) {
-                    val swapAnim = ValueAnimator.ofFloat(1f, -1f, 1f)
-                    swapAnim.interpolator = FastOutSlowInInterpolator()
-                    swapAnim.addUpdateListener { profSwap.scaleY = swapAnim.animatedValue as Float }
-                    swapAnim.duration = 1_000
-                    swapAnim.repeatCount = ValueAnimator.INFINITE
-                    swapAnim.start()
-
-                    try {
-                        // force profile selection even if we only have one
-                        activity.selectProfile(true)
-                        drawer.closeDrawers()
-                    } catch (ex: Exception) {
-                        Network.reportErrors(activity, ex)
-                    }
-
-                    swapAnim.repeatCount = 0 // stop gracefully
-                }
-            }
-
-            if (Auth.user.email == acc.email) {
-                profSwap.visibility = View.VISIBLE
-                profSwap.setOnClickListener {
-                    profileSwapActor.offer(Unit)
-                }
             }
 
             // add finished account row to the layout
@@ -164,7 +147,6 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
         // special setup item - inflate guest account row
         val guestRow = inflater.inflate(R.layout.activity_main_sidebar_account_row, accountsArea, false)
         guestRow.findViewById<ImageView>(R.id.account_remove).visibility = View.GONE
-        guestRow.findViewById<ImageView>(R.id.profile_switch).visibility = View.GONE
         val guestName = guestRow.findViewById<TextView>(R.id.account_name)
         guestName.text = activity.getString(R.string.guest)
         guestName.setOnClickListener {
@@ -172,6 +154,63 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
             activity.reLogin(Auth.guest)
         }
         accountsArea.addView(guestRow)
+    }
+
+    /**
+     * update "My Profile" row
+     */
+    private fun updateProfileRow() {
+        val profName = profileArea.findViewById<TextView>(R.id.my_profile)
+        val profSwap = profileArea.findViewById<ImageView>(R.id.switch_profile)
+        val profAdd = profileArea.findViewById<ImageView>(R.id.add_profile)
+
+        if (Auth.profile == null) {
+            // no profile, set to disabled
+            profName.isEnabled = false
+            profSwap.visibility = View.GONE
+
+            // if account is present, enable "add-profile" button
+            if (Auth.user !== Auth.guest) {
+                profAdd.visibility = View.VISIBLE
+                profAdd.setOnClickListener {
+                    activity.addProfile()
+                    drawer.closeDrawers()
+                }
+            }
+            return
+        }
+
+        // We have a profile, then
+        profName.isEnabled = true
+        profAdd.visibility = View.GONE
+        profSwap.visibility = View.VISIBLE
+
+        // handle click on profile change button
+        // we need to ignore subsequent clicks if profiles are already loading
+        val profileSwapActor = actor<Unit>(UI) {
+            for (event in channel) {
+                val swapAnim = ValueAnimator.ofFloat(1f, -1f, 1f)
+                swapAnim.interpolator = FastOutSlowInInterpolator()
+                swapAnim.addUpdateListener { profSwap.scaleY = swapAnim.animatedValue as Float }
+                swapAnim.duration = 1_000
+                swapAnim.repeatCount = ValueAnimator.INFINITE
+                swapAnim.start()
+
+                try {
+                    // force profile selection even if we only have one
+                    activity.selectProfile(true)
+                    drawer.closeDrawers()
+                } catch (ex: Exception) {
+                    Network.reportErrors(activity, ex)
+                }
+
+                swapAnim.repeatCount = 0 // stop gracefully
+            }
+        }
+
+        profSwap.setOnClickListener {
+            profileSwapActor.offer(Unit)
+        }
     }
 
     /**
@@ -188,7 +227,7 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
         // all accounts are present in the DB, inner id is set either on query
         // or in Register/Login persist step, see AddAccountFragment
         DbProvider.helper.accDao.delete(acc)
-        updateAccountsArea()
+        updateSidebar()
     }
 
     /**

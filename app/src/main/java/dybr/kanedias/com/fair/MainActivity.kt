@@ -218,13 +218,6 @@ class MainActivity : AppCompatActivity() {
         val profiles = async(CommonPool) { Network.loadProfiles() }.await()
 
         // predefine what to do if new profile is needed
-        val showAddProfile = {
-            supportFragmentManager.beginTransaction()
-                    .addToBackStack("Showing profile creation fragment")
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .replace(R.id.main_drawer_layout, AddProfileFragment())
-                    .commit()
-        }
 
         if (profiles.isEmpty()) {
             // suggest user to create profile
@@ -235,7 +228,7 @@ class MainActivity : AppCompatActivity() {
                     .negativeText(R.string.no_profile)
                     .onNegative({_, _ -> Auth.user.lastProfileId = "0"; refresh() })
                     .positiveText(R.string.create_new)
-                    .onPositive({ _, _ -> showAddProfile() })
+                    .onPositive({ _, _ -> addProfile() })
                     .show()
             return
         }
@@ -261,9 +254,20 @@ class MainActivity : AppCompatActivity() {
                 .negativeText(R.string.no_profile)
                 .onNegative({_, _ -> Auth.user.lastProfileId = "0"; refresh() })
                 .positiveText(R.string.create_new)
-                .onPositive({_, _ -> showAddProfile() })
+                .onPositive({_, _ -> addProfile() })
                 .show()
         profAdapter.toDismiss = dialog
+    }
+
+    /**
+     * Show "Add profile" fragment
+     */
+    fun addProfile() {
+        supportFragmentManager.beginTransaction()
+                .addToBackStack("Showing profile creation fragment")
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .replace(R.id.main_drawer_layout, AddProfileFragment())
+                .commit()
     }
 
 
@@ -314,7 +318,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            sidebar.updateAccountsArea()
+            sidebar.updateSidebar()
             tabAdapter.notifyDataSetChanged()
         }
     }

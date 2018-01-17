@@ -113,46 +113,48 @@
         android:background="?android:selectableItemBackground"
         android:orientation="horizontal">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/my_profile"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:orientation="horizontal">
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:drawableLeft="@drawable/profile"
+            android:drawableStart="@drawable/profile"
+            android:drawablePadding="26dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:text="@string/my_profile"
+            android:textSize="14sp"
+            android:textStyle="bold"/>
 
-            <ImageView
-                android:id="@+id/profile_icon"
-                android:layout_width="26dp"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="26dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginRight="26dp"
-                android:layout_marginLeft="16dp"
-                android:src="@drawable/profile" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:text="@string/my_profile"
-                android:textSize="14sp"
-                android:textStyle="bold"/>
-        </LinearLayout>
-
-        <ImageView
-            android:id="@+id/expand_profile_down"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+        <LinearLayout
+            android:id="@+id/profile_actions_area"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_gravity="center_vertical"
             android:layout_marginEnd="2dp"
-            android:layout_marginRight="2dp"
-            android:gravity="center"
-            android:padding="14dp"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:theme="@style/Ripple.Item"
-            android:src="@drawable/down" />
+            android:layout_marginRight="2dp">
+
+            <ImageView
+                android:id="@+id/switch_profile"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:padding="14dp"
+                android:src="@drawable/swap"
+                android:contentDescription="@string/switch_profile"/>
+
+            <ImageView
+                android:id="@+id/add_profile"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:padding="14dp"
+                android:src="@drawable/add_box"
+                android:contentDescription="@string/add_profile"/>
+
+        </LinearLayout>
 
     </RelativeLayout>
 
