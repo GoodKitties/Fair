@@ -232,7 +232,8 @@ class MainActivity : AppCompatActivity() {
             MaterialDialog.Builder(this)
                     .title(R.string.switch_profile)
                     .content(R.string.no_profiles_create_one)
-                    .negativeText(android.R.string.no)
+                    .negativeText(R.string.no_profile)
+                    .onNegative({_, _ -> Auth.user.lastProfileId = "0"; refresh() })
                     .positiveText(R.string.create_new)
                     .onPositive({ _, _ -> showAddProfile() })
                     .show()
@@ -257,6 +258,8 @@ class MainActivity : AppCompatActivity() {
                 .title(R.string.switch_profile)
                 .itemsCallback({ _, _, pos, _ -> onSelection(pos) })
                 .adapter(profAdapter, LinearLayoutManager(this))
+                .negativeText(R.string.no_profile)
+                .onNegative({_, _ -> Auth.user.lastProfileId = "0"; refresh() })
                 .positiveText(R.string.create_new)
                 .onPositive({_, _ -> showAddProfile() })
                 .show()
@@ -304,7 +307,7 @@ class MainActivity : AppCompatActivity() {
             if (Auth.profile != null && Auth.blog == null) {
                 // we have loaded profile, try to load our blog
                 try {
-                    async(CommonPool) { Network.loadBlog() }.await()
+                    async(CommonPool) { Network.populateBlog() }.await()
 
                 } catch (ex: Exception) {
                     Network.reportErrors(this@MainActivity, ex)

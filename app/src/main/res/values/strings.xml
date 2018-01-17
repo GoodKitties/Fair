@@ -78,4 +78,5 @@
     <string name="switch_profile">Switch profile</string>
     <string name="remove_profile">Remove profile</string>
     <string name="profile_created">Profile created</string>
+    <string name="no_profile">No profile</string>
 </resources>

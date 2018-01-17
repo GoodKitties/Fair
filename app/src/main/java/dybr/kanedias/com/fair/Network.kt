@@ -216,12 +216,11 @@ object Network {
                 updatedAt = user[0].updatedAt
                 isAdult = user[0].isAdult
             }
-            return
         }
 
         // last profile exists, try to load it
         populateProfile()
-        loadBlog()
+        populateBlog()
     }
 
     private fun <T: ResourceIdentifier> toWrappedJson(obj: T): String {
@@ -252,14 +251,34 @@ object Network {
      * @throws IOException on connection fail
      */
     private fun populateProfile() {
+        if (Auth.user.lastProfileId == null)
+            return // no profile selected, nothing to populate
+
         val req = Request.Builder().url("$PROFILES_ENDPOINT/${Auth.user.lastProfileId}").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
             throw HttpException(resp)
 
         // response is returned after execute call, body is not null
-        val profile = fromWrappedJson(resp.body()!!.source(), OwnProfile::class.java)!!
-        Auth.updateCurrentProfile(profile) // all steps aren't required here, use this just to have all in one place
+        val profile = fromWrappedJson(resp.body()!!.source(), OwnProfile::class.java)
+        profile?.let { Auth.updateCurrentProfile(profile) } // all steps aren't required here, use this just to have all in one place
+    }
+
+    /**
+     * Loads blog for requested profile if it's present and sets it in [Auth.blog]
+     * Make sure profile is already populated in [populateProfile]
+     */
+    fun populateBlog() {
+        if (Auth.profile?.id == null)
+            return // no profile->no blog, nothing to populate
+
+        val req = Request.Builder().url("$PROFILES_ENDPOINT/${Auth.profile?.id}/blog").build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful)
+            throw extractErrors(resp)
+
+        val blog = fromWrappedJson(resp.body()!!.source(), Blog::class.java)
+        blog?.let { Auth.updateBlog(it) }
     }
 
     /**
@@ -273,23 +292,9 @@ object Network {
         if (!resp.isSuccessful)
             throw extractErrors(resp)
 
-        // response is returned after execute call, body is not null
-        val user = fromWrappedJson(resp.body()!!.source(), User::class.java)!!
+        // there's an edge-case when user is deleted on server but we still have Auth.user.serverId set
+        val user = fromWrappedJson(resp.body()!!.source(), User::class.java) ?: return emptyList()
         return user.profiles.get(user.document)
-    }
-
-    /**
-     * Loads blog for requested profile if it's present and sets it in [Auth.blog]
-     * Make sure profile is already populated in [populateProfile]
-     */
-    fun loadBlog() {
-        val req = Request.Builder().url("$PROFILES_ENDPOINT/${Auth.profile?.id}/blog").build()
-        val resp = httpClient.newCall(req).execute()
-        if (!resp.isSuccessful)
-            throw extractErrors(resp)
-
-        val blog = fromWrappedJson(resp.body()!!.source(), Blog::class.java)
-        blog?.let { Auth.updateBlog(it) }
     }
 
     /**

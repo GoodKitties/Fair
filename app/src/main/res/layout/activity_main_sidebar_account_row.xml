@@ -28,6 +28,7 @@
         android:src="@drawable/swap"
         android:tint="#fff"
         android:layout_height="36dp"
+        android:visibility="gone"
         android:contentDescription="@string/switch_profile"/>
 
     <ImageView

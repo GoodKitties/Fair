@@ -150,8 +150,11 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
                 }
             }
 
-            profSwap.setOnClickListener {
-                profileSwapActor.offer(Unit)
+            if (Auth.user.email == acc.email) {
+                profSwap.visibility = View.VISIBLE
+                profSwap.setOnClickListener {
+                    profileSwapActor.offer(Unit)
+                }
             }
 
             // add finished account row to the layout
