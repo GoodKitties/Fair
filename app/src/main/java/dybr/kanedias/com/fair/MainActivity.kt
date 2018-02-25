@@ -226,7 +226,7 @@ class MainActivity : AppCompatActivity() {
                     .title(R.string.switch_profile)
                     .content(R.string.no_profiles_create_one)
                     .negativeText(R.string.no_profile)
-                    .onNegative({_, _ -> Auth.user.lastProfileId = "0"; refresh() })
+                    .onNegative({_, _ -> Auth.user.lastProfileId = "0"; refresh() }) // set to null so it won't ask next time
                     .positiveText(R.string.create_new)
                     .onPositive({ _, _ -> addProfile() })
                     .show()
@@ -263,6 +263,17 @@ class MainActivity : AppCompatActivity() {
      * Show "Add profile" fragment
      */
     fun addProfile() {
+        supportFragmentManager.beginTransaction()
+                .addToBackStack("Showing profile creation fragment")
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .replace(R.id.main_drawer_layout, AddProfileFragment())
+                .commit()
+    }
+
+    /**
+     * Show "Add blog" fragment. Only one blog can belong to specific profile
+     */
+    fun createBlog() {
         supportFragmentManager.beginTransaction()
                 .addToBackStack("Showing profile creation fragment")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
@@ -321,17 +332,6 @@ class MainActivity : AppCompatActivity() {
             sidebar.updateSidebar()
             tabAdapter.notifyDataSetChanged()
         }
-    }
-
-    /**
-     *
-     */
-    private suspend fun createBlog() {
-        supportFragmentManager.beginTransaction()
-                .addToBackStack("Showing profile creation fragment")
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .replace(R.id.main_drawer_layout, AddProfileFragment())
-                .commit()
     }
 
     /**

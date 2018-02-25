@@ -54,6 +54,12 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
     lateinit var profileArea: LinearLayout
 
     /**
+     * "My Blog" row
+     */
+    @BindView(R.id.blog_area)
+    lateinit var blogArea: LinearLayout
+
+    /**
      * Label that shows current username near welcome text
      */
     @BindView(R.id.current_user_name)
@@ -98,6 +104,7 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
     fun updateSidebar() {
         updateAccountsArea()
         updateProfileRow()
+        updateBlogRow()
     }
 
     /**
@@ -210,6 +217,42 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
 
         profSwap.setOnClickListener {
             profileSwapActor.offer(Unit)
+        }
+    }
+
+    /**
+     * Updates blog row according to retrieved info in
+     * @see [Auth.blog]
+     * @see [Auth.profile]
+     */
+    private fun updateBlogRow() {
+        val blogName = blogArea.findViewById<TextView>(R.id.my_blog)
+        val blogAdd = blogArea.findViewById<ImageView>(R.id.add_blog)
+
+        if (Auth.profile == null) {
+            // no profile yet, disable everything
+            blogName.isEnabled = false
+            blogAdd.visibility = View.GONE
+            return
+        }
+
+        if (Auth.blog == null) {
+            // no blog yet, disable click, show "Add blog" button
+            blogName.isEnabled = false
+            blogAdd.visibility = View.VISIBLE
+            blogAdd.setOnClickListener {
+                activity.createBlog()
+                drawer.closeDrawers()
+            }
+        }
+
+        // we have a blog, show it
+        blogName.isEnabled = true
+        blogName.hint = Auth.blog?.title
+        blogAdd.visibility = View.GONE
+        blogName.setOnClickListener {
+            activity.pager.setCurrentItem(0, true)
+            drawer.closeDrawers()
         }
     }
 

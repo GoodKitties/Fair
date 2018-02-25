@@ -75,6 +75,7 @@ object Network {
     private val USERS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/users"
     private val SESSIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/sessions"
     private val PROFILES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/profiles"
+    private val BLOGS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/blogs"
 
     private val MIME_JSON_API = MediaType.parse("application/vnd.api+json")
 
@@ -246,6 +247,7 @@ object Network {
 
     /**
      * Pull profile of current user. Account should have selected last profile and relevant access token by this point.
+     * Don't invoke this for accounts that are logging in for the first time, use [loadProfiles] instead.
      * After the completion [Auth.profile] will be populated.
      *
      * @throws IOException on connection fail
@@ -257,7 +259,7 @@ object Network {
         val req = Request.Builder().url("$PROFILES_ENDPOINT/${Auth.user.lastProfileId}").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw HttpException(resp)
+            throw extractErrors(resp)
 
         // response is returned after execute call, body is not null
         val profile = fromWrappedJson(resp.body()!!.source(), OwnProfile::class.java)
@@ -308,24 +310,39 @@ object Network {
         val req = Request.Builder().delete().url("$PROFILES_ENDPOINT/${prof.id}").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw HttpException(resp)
+            throw extractErrors(resp)
 
         // we don't need answer body
     }
 
     /**
      * Create new profile for logged in user
-     * @param prof profile creation request with all the information in it
+     * @param prof profile creation request with all info filled in
      */
     fun createProfile(prof: ProfileCreateRequest): OwnProfile {
         val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(prof))
         val req = Request.Builder().url(PROFILES_ENDPOINT).post(reqBody).build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw HttpException(resp)
+            throw extractErrors(resp)
 
         // response is returned after execute call, body is not null
         return fromWrappedJson(resp.body()!!.source(), OwnProfile::class.java)!!
+    }
+
+    /**
+     * Create new blog for logged in user
+     * @param blog blog creation request with all info filled in
+     */
+    fun createBlog(blog: BlogCreateRequest): Blog {
+        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(blog))
+        val req = Request.Builder().url(BLOGS_ENDPOINT).post(reqBody).build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful)
+            throw extractErrors(resp)
+
+        // response is returned after execute call, body is not null
+        return fromWrappedJson(resp.body()!!.source(), Blog::class.java)!!
     }
 
     fun confirmRegistration(emailToConfirm: String, tokenFromMail: String): LoginResponse {
@@ -421,6 +438,7 @@ object Network {
 
         else -> throw ex
     }
+
     private class EntryContainer {
         lateinit var entries: List<DiaryEntry>
     }

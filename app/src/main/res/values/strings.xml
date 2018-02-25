@@ -69,7 +69,7 @@
     <string name="description">Description</string>
     <string name="create">Create</string>
     <string name="create_new">Create new</string>
-    <string name="profile_creation">Profile creation</string>
+    <string name="new_profile">New profile</string>
     <string name="no_profiles_create_one">No profiles found for this account, create one?</string>
     <string name="confirm_action">Confirm action</string>
     <string name="confirm_profile_deletion">Confirm profile deletion. Warning: diary and all posts belonging to this profile will be deleted by this action!</string>
@@ -80,4 +80,10 @@
     <string name="profile_created">Profile created</string>
     <string name="no_profile">No profile</string>
     <string name="add_profile">Add profile</string>
+    <string name="create_blog">Create blog</string>
+    <string name="blog_address"><![CDATA[dybr.ru/<address>]]></string>
+    <string name="blog_title">Blog title</string>
+    <string name="blog_created">Blog created</string>
+    <string name="add_blog">Add blog</string>
+    <string name="my_blog">My Blog</string>
 </resources>
