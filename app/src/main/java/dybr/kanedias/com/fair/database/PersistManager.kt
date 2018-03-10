@@ -8,7 +8,6 @@ import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
 import dybr.kanedias.com.fair.entities.Account
-import dybr.kanedias.com.fair.entities.Diary
 import dybr.kanedias.com.fair.entities.OwnProfile
 
 import java.sql.SQLException
@@ -41,7 +40,6 @@ class PersistManager(context: Context) : OrmLiteSqliteOpenHelper(context, DATABA
         try {
             TableUtils.clearTable<Account>(DbProvider.helper.getConnectionSource(), Account::class.java)
             TableUtils.clearTable<OwnProfile>(DbProvider.helper.getConnectionSource(), OwnProfile::class.java)
-            TableUtils.clearTable<Diary>(DbProvider.helper.getConnectionSource(), Diary::class.java)
         } catch (e: SQLException) {
             throw RuntimeException(e)
         }

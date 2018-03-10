@@ -10,11 +10,14 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.ViewSwitcher
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import dybr.kanedias.com.fair.entities.DiaryEntry
+import dybr.kanedias.com.fair.entities.Entry
+import dybr.kanedias.com.fair.entities.EntryCreateRequest
 import dybr.kanedias.com.fair.misc.SimpleTextWatcher
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
@@ -51,51 +54,40 @@ class CreateNewPostViewHolder(iv: View, private val adapter: PostListFragment.Po
     @BindView(R.id.entry_submit)
     lateinit var submitBtn: Button
 
+    @BindView(R.id.entry_preview_switcher)
+    lateinit var previewSwitcher: ViewSwitcher
+
     /**
      * [EditText] has no ability to remove all watchers at once, track them here
      */
     private var contentWatcher: TextWatcher? = null
     private var titleWatcher: TextWatcher? = null
+    private var previewShown = false
 
     /**
      * Post that this holder is currently bound to
      */
-    private lateinit var entry: DiaryEntry
+    private lateinit var entry: EntryCreateRequest
 
     init {
         ButterKnife.bind(this, iv)
+    }
 
-        // initialize what we can before binding
-        // show preview if 3 seconds without actions
-        contentInput.addTextChangedListener(object: SimpleTextWatcher() {
+    /**
+     * Handler for clicking on "Preview" button
+     */
+    @OnClick(R.id.entry_preview)
+    fun togglePreview() {
+        previewShown = !previewShown
 
-            private var routine: Job? = null
+        if (previewShown) {
+            //preview.setBackgroundResource(R.drawable.white_border_line) // set border when previewing
+            Markwon.setMarkdown(preview, entry.content)
+            previewSwitcher.showNext()
+        } else {
+            previewSwitcher.showPrevious()
+        }
 
-            override fun onTextChanged(str: CharSequence?, start: Int, count: Int, after: Int) {
-                if (routine != null) {
-                    routine!!.cancel()
-                }
-                preview.setBackgroundResource(0) // clear border
-                preview.text = ""
-            }
-
-            override fun afterTextChanged(str: Editable?) {
-                if (TextUtils.isEmpty(str))
-                    return
-
-                routine = launch(UI) {
-                    for (countdown in 3 downTo 0) {
-                        delay(1, TimeUnit.SECONDS)
-                        val notification = iv.context.getString(R.string.previewing_in_n_seconds)
-                        preview.text = String.format(notification, countdown)
-                    }
-
-                    // 3 seconds passed with no actions on entry content input, show preview
-                    preview.setBackgroundResource(R.drawable.white_border_line) // set border when previewing
-                    Markwon.setMarkdown(preview, str.toString())
-                }
-            }
-        })
     }
 
     /**
@@ -123,7 +115,7 @@ class CreateNewPostViewHolder(iv: View, private val adapter: PostListFragment.Po
             R.id.entry_quick_quote -> insertInCursorPosition("> ", paste)
             R.id.entry_quick_number_list -> insertInCursorPosition("\n1. ", paste, "\n2. \n3. ")
             R.id.entry_quick_bullet_list -> insertInCursorPosition("\n* ", paste, "\n* \n* ")
-            R.id.entry_quick_link -> insertInCursorPosition("<a href='$paste'>", paste, "</a>")
+            R.id.entry_quick_link -> insertInCursorPosition("<a href=\"$paste\">", paste, "</a>")
             R.id.entry_quick_image -> insertInCursorPosition("<img src='$paste'>", paste, ")")
         }
     }
@@ -147,7 +139,8 @@ class CreateNewPostViewHolder(iv: View, private val adapter: PostListFragment.Po
 
         val beforeCursorWithPrefix = beforeCursor + prefix
         val suffixWithAfterCursor = suffix + afterCursor
-        contentInput.setText(beforeCursorWithPrefix + what + suffixWithAfterCursor)
+        val result = beforeCursorWithPrefix + what + suffixWithAfterCursor
+        contentInput.setText(result)
 
         when {
             // empty string between tags, set cursor between tags
@@ -163,7 +156,7 @@ class CreateNewPostViewHolder(iv: View, private val adapter: PostListFragment.Po
      * Called on view holder binding. Make sure to release all previous bindings to old entry
      * @param entry diary entry to bind values to
      */
-    fun setup(entry: DiaryEntry) {
+    fun setup(entry: EntryCreateRequest) {
         this.entry = entry
 
         // release old watchers
@@ -178,13 +171,13 @@ class CreateNewPostViewHolder(iv: View, private val adapter: PostListFragment.Po
         }
         contentWatcher = object: SimpleTextWatcher() {
             override fun afterTextChanged(str: Editable?) {
-                entry.body = str.toString()
+                entry.content = str.toString()
             }
         }
 
         // set text while watchers are not attached or they'll fire
         titleInput.setText(entry.title)
-        contentInput.setText(entry.body)
+        contentInput.setText(entry.content)
 
         // reattach watchers back
         contentInput.addTextChangedListener(contentWatcher)
@@ -206,7 +199,7 @@ class CreateNewPostViewHolder(iv: View, private val adapter: PostListFragment.Po
             }
         }
 
-        if (entry.title.isEmpty() && entry.body.isEmpty()) {
+        if (TextUtils.isEmpty(entry.title) && entry.content.isEmpty()) {
             // entry has empty title and content, canceling right away
             removeUs()
             return
@@ -217,7 +210,7 @@ class CreateNewPostViewHolder(iv: View, private val adapter: PostListFragment.Po
                 .title(android.R.string.dialog_alert_title)
                 .content(R.string.are_you_sure)
                 .negativeText(android.R.string.no)
-                .positiveColorRes(R.color.md_red_600)
+                .positiveColorRes(R.color.md_red_900)
                 .positiveText(android.R.string.yes)
                 .onPositive { _, _ -> removeUs() }
                 .show()

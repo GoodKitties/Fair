@@ -6,7 +6,7 @@ package dybr.kanedias.com.fair.entities
  * ```
  * {
  *   "authorID": "5a0f1e0159373c001faf4927",
- *   "uri": "random-diary",
+ *   "slug": "random-diary",
  *   "_id": "5a0f1ea559373c001faf492d",
  *   "name": "Random Author"
  * }

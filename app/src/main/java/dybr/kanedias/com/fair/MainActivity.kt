@@ -38,8 +38,8 @@ import kotlinx.coroutines.experimental.launch
  */
 class MainActivity : AppCompatActivity() {
 
-    private val FAV_TAB = 0
-    private val MY_DIARY_TAB = 1
+    private val MY_DIARY_TAB = 0
+    private val FAV_TAB = 1
 
     /**
      * AppBar layout with toolbar and tabs
@@ -357,41 +357,37 @@ class MainActivity : AppCompatActivity() {
 
         override fun getCount(): Int {
             if (Auth.user === Auth.guest) {
-                // guest can't see anything without logging in yet.
+                // guest can't see anything without logging in yet
                 return 0
             }
 
-            //var totalTabs = 2 // first tab is favorite post wall, second is own diary
+            var totalTabs = 0
+            Auth.blog?.let {
+                // we have our own diary, show it
+                totalTabs++
+            }
+
+            //var totalTabs = 2 // first tab is own diary, second is favorite post wall
             //totalTabs += Auth.user.profile.favorites.size // add tabs for favorites
             //return totalTabs
-            return 0
+            return totalTabs
         }
-
-
 
         override fun getItem(position: Int): PostListFragment {
-            // not working atm - no API for posting at all
-            /*
-            val ownFavEndpoint = "${Network.IDENTITY_ENDPOINT}/${Auth.user.profile.uris.last()}"
-            val ownDiaryEndpoint = "${Network.ENTRIES_ENDPOINT}/${Auth.user.profile.uris.last()}"
-            val selectedFavEndpoint = lazy { Auth.user.profile.favorites[position - 2].uris.last() }
+            //val ownFavEndpoint = "${Network.IDENTITY_ENDPOINT}/${Auth.user.profile.uris.last()}"
+            //val selectedFavEndpoint = lazy { Auth.user.profile.favorites[position - 2].uris.last() }
             return when(position) {
-                FAV_TAB -> PostListFragment().apply { uri = "$ownFavEndpoint/favorites" }
-                MY_DIARY_TAB -> PostListFragment().apply { uri = ownDiaryEndpoint }
-                else -> PostListFragment().apply { uri = "${Network.ENTRIES_ENDPOINT}/${selectedFavEndpoint.value}" }
+                MY_DIARY_TAB -> PostListFragment().apply { blog = Auth.blog }
+                //FAV_TAB -> PostListFragment().apply { slug = "$ownFavEndpoint/favorites" }
+                else -> PostListFragment().apply { blog = null }
             }
-            */
-            return PostListFragment()
         }
 
-        // not working atm - no API for posting at all
-        /*
         override fun getPageTitle(position: Int): CharSequence? = when (position) {
             FAV_TAB -> getString(R.string.favorite)
             MY_DIARY_TAB -> getString(R.string.my_diary)
-            else -> Auth.user.profile.favorites[position - 2].name
+            else -> ""
         }
-        */
     }
 
     /**
@@ -404,7 +400,7 @@ class MainActivity : AppCompatActivity() {
          */
         lateinit var toDismiss: MaterialDialog
 
-        override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ProfileViewHolder {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProfileViewHolder {
             val inflater = LayoutInflater.from(this@MainActivity)
             val v = inflater.inflate(R.layout.activity_main_profile_selection_row, parent, false)
             return ProfileViewHolder(v)

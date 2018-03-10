@@ -86,4 +86,5 @@
     <string name="blog_created">Blog created</string>
     <string name="add_blog">Add blog</string>
     <string name="my_blog">My Blog</string>
+    <string name="preview">Preview</string>
 </resources>

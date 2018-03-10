@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "dybr.kanedias.com.fair"
-        targetSdkVersion 25 // device you test on
+        targetSdkVersion 27 // device you test on
         minSdkVersion 16    // device you allow your users to be on :)
         versionCode 1
         versionName "1.0"

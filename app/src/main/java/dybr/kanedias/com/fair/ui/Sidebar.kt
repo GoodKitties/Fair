@@ -51,13 +51,13 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
      * "My Profile" row
      */
     @BindView(R.id.profile_area)
-    lateinit var profileArea: LinearLayout
+    lateinit var profileArea: RelativeLayout
 
     /**
      * "My Blog" row
      */
     @BindView(R.id.blog_area)
-    lateinit var blogArea: LinearLayout
+    lateinit var blogArea: RelativeLayout
 
     /**
      * Label that shows current username near welcome text
@@ -175,6 +175,7 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
             // no profile, set to disabled
             profName.isEnabled = false
             profSwap.visibility = View.GONE
+            profAdd.visibility = View.GONE
 
             // if account is present, enable "add-profile" button
             if (Auth.user !== Auth.guest) {
@@ -248,7 +249,8 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
 
         // we have a blog, show it
         blogName.isEnabled = true
-        blogName.hint = Auth.blog?.title
+        blogName.hint = activity.getString(R.string.my_blog)
+        blogName.text = Auth.blog?.title
         blogAdd.visibility = View.GONE
         blogName.setOnClickListener {
             activity.pager.setCurrentItem(0, true)

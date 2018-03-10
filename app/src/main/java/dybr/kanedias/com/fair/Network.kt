@@ -366,26 +366,20 @@ object Network {
     }
 
     /**
-     * Pull requested diary entries.
-     * Examples of urls to pass to this function:
-     * ```
-     * https://dybr.ru/api/identity/<your-identity-name>/favorites
-     * https://dybr.ru/api/entries/<someones-identity-name>
-     * ```
+     * Pull diary entries from blog denoted by [blog].
+     * The resulting URL will be like this: http://dybr.ru/api/v1/blogs/<blog-slug>
      *
-     * @param endpointUrl full url of endpoint to pull from
+     * @param blog slug of blog to retrieve entries from
      */
-    fun getEntries(endpointUrl: String): List<DiaryEntry> {
-        val req = Request.Builder().url(endpointUrl).build()
+    fun getEntries(blog: Blog, pageNum: Int = 1): ArrayDocument<Entry> {
+        val req = Request.Builder().url("$BLOGS_ENDPOINT/${blog.id}/entries?page[number]=$pageNum").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw HttpException(resp)
         }
 
         // response is returned after execute call, body is not null
-        val adapter = jsonConverter.adapter(EntryContainer::class.java)
-        val container = adapter.fromJson(resp.body()!!.source())!!
-        return container.entries
+        return fromWrappedListJson(resp.body()!!.source(), Entry::class.java)
     }
 
     /**
@@ -437,9 +431,5 @@ object Network {
         }
 
         else -> throw ex
-    }
-
-    private class EntryContainer {
-        lateinit var entries: List<DiaryEntry>
     }
 }
