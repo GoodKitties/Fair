@@ -76,6 +76,7 @@ object Network {
     private val SESSIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/sessions"
     private val PROFILES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/profiles"
     private val BLOGS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/blogs"
+    private val ENTRIES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/entries"
 
     private val MIME_JSON_API = MediaType.parse("application/vnd.api+json")
 
@@ -372,7 +373,7 @@ object Network {
      * @param blog slug of blog to retrieve entries from
      */
     fun getEntries(blog: Blog, pageNum: Int = 1): ArrayDocument<Entry> {
-        val req = Request.Builder().url("$BLOGS_ENDPOINT/${blog.id}/entries?page[number]=$pageNum").build()
+        val req = Request.Builder().url("$BLOGS_ENDPOINT/${blog.id}/entries?sort=-created-at&page[number]=$pageNum").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw HttpException(resp)
@@ -384,17 +385,17 @@ object Network {
 
     /**
      * Create diary entry on server.
-     * @param entry entry to create. Should be filled with author, title, body content etc.
-     * TODO: rewrite when actual API docs are available, add examples
+     * @param entry entry to create. Should be filled with blog, title, body content etc.
      */
-    fun createEntry(entry: DiaryEntry) {
-        val adapter = jsonConverter.adapter(DiaryEntry::class.java)
-        val body = RequestBody.create(MIME_JSON_API, adapter.toJson(entry))
-        val req = Request.Builder().post(body).url("something").build()
+    fun createEntry(entry: EntryCreateRequest): Entry {
+        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(entry))
+        val req = Request.Builder().url(ENTRIES_ENDPOINT).post(reqBody).build()
         val resp = httpClient.newCall(req).execute()
-        if (!resp.isSuccessful) {
-            throw HttpException(resp)
-        }
+        if (!resp.isSuccessful)
+            throw extractErrors(resp)
+
+        // response is returned after execute call, body is not null
+        return fromWrappedJson(resp.body()!!.source(), Entry::class.java)!!
     }
 
     /**

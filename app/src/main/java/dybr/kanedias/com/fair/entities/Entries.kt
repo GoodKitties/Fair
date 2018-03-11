@@ -7,9 +7,6 @@ import moe.banana.jsonapi2.Policy
 import moe.banana.jsonapi2.Resource
 import java.util.*
 
-val ENTRY_TYPE_PENDING = 0
-val ENTRY_TYPE_EXISTING = 1
-
 /**
  * Entry creation request
  * Example:

@@ -2,11 +2,11 @@ package dybr.kanedias.com.fair
 
 import android.content.ClipboardManager
 import android.content.Context
-import android.support.v7.widget.RecyclerView
-import android.text.Editable
-import android.text.TextUtils
-import android.text.TextWatcher
+import android.os.Bundle
+import android.support.v4.app.Fragment
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -15,23 +15,23 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
-import dybr.kanedias.com.fair.entities.DiaryEntry
-import dybr.kanedias.com.fair.entities.Entry
+import dybr.kanedias.com.fair.entities.Blog
 import dybr.kanedias.com.fair.entities.EntryCreateRequest
-import dybr.kanedias.com.fair.misc.SimpleTextWatcher
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
+import org.commonmark.parser.Parser
+import org.commonmark.renderer.html.HtmlRenderer
 import ru.noties.markwon.Markwon
-import java.util.concurrent.TimeUnit
 
 /**
- * View holder responsible for showing create new post form.
- * This is shown as recycler view element.
+ * Fragment responsible for showing create new post form.
  *
  * @see PostListFragment.postRibbon
+ * @param iv view inside adapter
+ * @param fragment parent blog post list fragment
  * @author Kanedias
  */
-class CreateNewPostViewHolder(iv: View, private val adapter: PostListFragment.PostListAdapter) : RecyclerView.ViewHolder(iv) {
+class CreateNewPostFragment : Fragment() {
 
     /**
      * Title of future diary entry
@@ -51,26 +51,23 @@ class CreateNewPostViewHolder(iv: View, private val adapter: PostListFragment.Po
     @BindView(R.id.entry_markdown_preview)
     lateinit var preview: TextView
 
-    @BindView(R.id.entry_submit)
-    lateinit var submitBtn: Button
-
     @BindView(R.id.entry_preview_switcher)
     lateinit var previewSwitcher: ViewSwitcher
 
-    /**
-     * [EditText] has no ability to remove all watchers at once, track them here
-     */
-    private var contentWatcher: TextWatcher? = null
-    private var titleWatcher: TextWatcher? = null
     private var previewShown = false
 
-    /**
-     * Post that this holder is currently bound to
-     */
-    private lateinit var entry: EntryCreateRequest
+    private lateinit var activity: MainActivity
 
-    init {
-        ButterKnife.bind(this, iv)
+    lateinit var blog: Blog
+    lateinit var parent: PostListFragment
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val root = inflater.inflate(R.layout.fragment_create_entry, container, false)
+        ButterKnife.bind(this, root)
+
+        activity = context as MainActivity
+
+        return root
     }
 
     /**
@@ -82,7 +79,7 @@ class CreateNewPostViewHolder(iv: View, private val adapter: PostListFragment.Po
 
         if (previewShown) {
             //preview.setBackgroundResource(R.drawable.white_border_line) // set border when previewing
-            Markwon.setMarkdown(preview, entry.content)
+            Markwon.setMarkdown(preview, contentInput.text.toString())
             previewSwitcher.showNext()
         } else {
             previewSwitcher.showPrevious()
@@ -153,76 +150,47 @@ class CreateNewPostViewHolder(iv: View, private val adapter: PostListFragment.Po
     }
 
     /**
-     * Called on view holder binding. Make sure to release all previous bindings to old entry
-     * @param entry diary entry to bind values to
-     */
-    fun setup(entry: EntryCreateRequest) {
-        this.entry = entry
-
-        // release old watchers
-        titleInput.removeTextChangedListener(titleWatcher)
-        contentInput.removeTextChangedListener(contentWatcher)
-
-        // reconfigure watchers to follow [entry]
-        titleWatcher = object: SimpleTextWatcher() {
-            override fun afterTextChanged(str: Editable?) {
-                entry.title = str.toString()
-            }
-        }
-        contentWatcher = object: SimpleTextWatcher() {
-            override fun afterTextChanged(str: Editable?) {
-                entry.content = str.toString()
-            }
-        }
-
-        // set text while watchers are not attached or they'll fire
-        titleInput.setText(entry.title)
-        contentInput.setText(entry.content)
-
-        // reattach watchers back
-        contentInput.addTextChangedListener(contentWatcher)
-        titleInput.addTextChangedListener(titleWatcher)
-    }
-
-    /**
      * Cancel this item editing (with confirmation) and remove it from pending posts
      */
     @Suppress("DEPRECATION") // getColor doesn't work up to API level 23
     @OnClick(R.id.entry_cancel)
     fun cancel() {
-        // lambda to actually delete entry
-        val removeUs = {
-            adapter.run {
-                val idx = pendingEntries.indexOf(entry)
-                pendingEntries.removeAt(idx)
-                notifyItemRemoved(idx)
-            }
-        }
-
-        if (TextUtils.isEmpty(entry.title) && entry.content.isEmpty()) {
+        if (titleInput.text.isNullOrEmpty() && contentInput.text.isNullOrEmpty()) {
             // entry has empty title and content, canceling right away
-            removeUs()
+            fragmentManager!!.popBackStack()
             return
         }
 
         // entry has been written to, delete with confirmation only
-        MaterialDialog.Builder(itemView.context)
+        MaterialDialog.Builder(activity)
                 .title(android.R.string.dialog_alert_title)
                 .content(R.string.are_you_sure)
                 .negativeText(android.R.string.no)
                 .positiveColorRes(R.color.md_red_900)
                 .positiveText(android.R.string.yes)
-                .onPositive { _, _ -> removeUs() }
+                .onPositive { _, _ -> fragmentManager!!.popBackStack() }
                 .show()
     }
 
     @OnClick(R.id.entry_submit)
     fun submit() {
         // hide edit form, show loading spinner
+        val parser = Parser.builder().build()
+        val document = parser.parse(contentInput.text.toString())
+        val htmlContent = HtmlRenderer.builder().build().render(document)
+
+        val entry = EntryCreateRequest()
+        entry.blog.set(blog)
+        entry.apply {
+            title = titleInput.text.toString()
+            content = htmlContent
+        }
 
         // make http request
         launch(UI) {
-
+            async { Network.createEntry(entry) }.await()
+            fragmentManager!!.popBackStack()
+            parent.refreshPosts()
         }
     }
 }

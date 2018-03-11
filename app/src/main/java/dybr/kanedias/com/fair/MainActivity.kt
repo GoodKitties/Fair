@@ -23,7 +23,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import dybr.kanedias.com.fair.entities.Account
 import dybr.kanedias.com.fair.entities.Auth
 import dybr.kanedias.com.fair.ui.Sidebar
-import dybr.kanedias.com.fair.entities.DiaryEntry
+import dybr.kanedias.com.fair.entities.Entry
 import dybr.kanedias.com.fair.entities.OwnProfile
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
@@ -336,7 +336,7 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Add entry handler. Shows header view for adding diary entry.
-     * @see DiaryEntry
+     * @see Entry
      */
     @OnClick(R.id.floating_button)
     fun addEntry() {

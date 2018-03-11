@@ -7,7 +7,7 @@
     android:layout_margin="5dp"
     android:foreground="?android:attr/selectableItemBackground"
     android:gravity="center"
-    app:cardCornerRadius="1dp"
+    app:cardCornerRadius="2dp"
     app:cardElevation="2dp"
     app:cardMaxElevation="4dp">
 
@@ -19,26 +19,35 @@
         android:padding="8dp">
 
         <TextView
+            android:id="@+id/post_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:padding="5dp"
+            android:text="@string/placeholder_long"/>
+
+        <TextView
             android:id="@+id/post_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
+            android:layout_below="@+id/post_date"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_margin="5dp"
+            android:padding="5dp"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="@string/placeholder_long"
             android:maxEms="20"/>
 
-        <TextView
+        <org.sufficientlysecure.htmltextview.HtmlTextView
             android:id="@+id/post_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_below="@id/post_title"
-            android:layout_marginStart="5dp"
-            android:layout_marginLeft="5dp"
+            android:padding="5dp"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/placeholder_short"/>
 

@@ -1,5 +1,6 @@
 package dybr.kanedias.com.fair
 
+import android.app.FragmentTransaction
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
@@ -14,13 +15,10 @@ import dybr.kanedias.com.fair.entities.*
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
 import moe.banana.jsonapi2.ArrayDocument
-import ru.noties.markwon.Markwon
-import java.util.*
 
 
 /**
- * Fragment which displays list of posts in currently viewed diary.
- * I can sometimes refer to posts/entries, so just remember that post == entry and they are [DiaryEntry].
+ * Fragment which displays list of posts in currently viewed blog.
  *
  * @author Kanedias
  *
@@ -34,7 +32,7 @@ class PostListFragment: Fragment() {
     @BindView(R.id.post_list_area)
     lateinit var refresher: SwipeRefreshLayout
 
-    private val postAdapter = PostListAdapter()
+    val postAdapter = PostListAdapter()
 
     var blog: Blog? = null
 
@@ -48,16 +46,16 @@ class PostListFragment: Fragment() {
 
         ButterKnife.bind(this, view)
         setupUI()
-        retrievePosts()
+        refreshPosts()
         return view
     }
 
     private fun setupUI() {
-        refresher.setOnRefreshListener { retrievePosts() }
+        refresher.setOnRefreshListener { refreshPosts() }
         postRibbon.layoutManager = LinearLayoutManager(activity)
     }
 
-    private fun retrievePosts() {
+    fun refreshPosts() {
         if (blog == null) // we don't have slug, just show empty list
             return
 
@@ -78,49 +76,19 @@ class PostListFragment: Fragment() {
 
     inner class PostListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-        // first go header views for adding posts, then already ready entries
-        val pendingEntries = ArrayList<EntryCreateRequest>()
-
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            when (holder.itemViewType) {
-                ENTRY_TYPE_PENDING -> {
-                    val entry = pendingEntries[position]
-                    val pendingHolder = holder as CreateNewPostViewHolder
-                    pendingHolder.setup(entry)
-                }
-                else -> {
-                    val postHolder = holder as RegularPostViewHolder
-                    val entry = entries[position - pendingEntries.size]
-                    postHolder.titleView.text = entry.title
-                    Markwon.setMarkdown(postHolder.bodyView, entry.content)
-                }
-            }
-
+            val postHolder = holder as RegularPostViewHolder
+            val entry = entries[position]
+            postHolder.setup(entry)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
             val inflater = LayoutInflater.from(activity)
-            return when (viewType) {
-                ENTRY_TYPE_PENDING -> {
-                    val view = inflater.inflate(R.layout.fragment_post_list_add_item, parent, false)
-                    CreateNewPostViewHolder(view, this)
-                }
-                else -> { // TYPE_EXISTING
-                    val view = inflater.inflate(R.layout.fragment_post_list_item, parent, false)
-                    RegularPostViewHolder(view)
-                }
-            }
+            val view = inflater.inflate(R.layout.fragment_post_list_item, parent, false)
+            return RegularPostViewHolder(view)
         }
 
-        override fun getItemViewType(position: Int): Int {
-            val headerCount = pendingEntries.size
-            return when (position) {
-                in 0 until headerCount ->  ENTRY_TYPE_PENDING // it's header
-                else -> ENTRY_TYPE_EXISTING // it's regular post
-            }
-        }
-
-        override fun getItemCount() = pendingEntries.size + entries.size
+        override fun getItemCount() = entries.size
 
     }
 
@@ -128,14 +96,16 @@ class PostListFragment: Fragment() {
      * Adds diary entry on top of post ribbon and scrolls to it
      */
     fun addCreateNewPostForm() {
-        // construct new diary entry
-        val entry = EntryCreateRequest()
-        entry.blog.set(blog) // we're adding entry to the blog this fragment belongs to
+        val postAdd = CreateNewPostFragment().apply {
+            this.blog = this@PostListFragment.blog!!
+            this.parent = this@PostListFragment
+        }
 
-        // pending == waiting to be submitted
-        postAdapter.pendingEntries.add(entry)
-        postAdapter.notifyItemInserted(0)
-        postRibbon.scrollToPosition(0)
+        fragmentManager!!.beginTransaction()
+                .addToBackStack("Showing post add fragment")
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .replace(R.id.main_drawer_layout, postAdd)
+                .commit()
     }
 
 }
