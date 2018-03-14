@@ -7,7 +7,6 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.ViewSwitcher
@@ -150,7 +149,7 @@ class CreateNewPostFragment : Fragment() {
     }
 
     /**
-     * Cancel this item editing (with confirmation) and remove it from pending posts
+     * Cancel this item editing (with confirmation)
      */
     @Suppress("DEPRECATION") // getColor doesn't work up to API level 23
     @OnClick(R.id.entry_cancel)
@@ -172,6 +171,9 @@ class CreateNewPostFragment : Fragment() {
                 .show()
     }
 
+    /**
+     * Assemble entry creation request and submit it to the server
+     */
     @OnClick(R.id.entry_submit)
     fun submit() {
         // hide edit form, show loading spinner
@@ -188,9 +190,14 @@ class CreateNewPostFragment : Fragment() {
 
         // make http request
         launch(UI) {
-            async { Network.createEntry(entry) }.await()
-            fragmentManager!!.popBackStack()
-            parent.refreshPosts()
+            try {
+                async { Network.createEntry(entry) }.await()
+                fragmentManager!!.popBackStack()
+                parent.refreshPosts()
+            } catch (ex: Exception) {
+                // don't close the fragment, just report errors
+                Network.reportErrors(activity, ex)
+            }
         }
     }
 }

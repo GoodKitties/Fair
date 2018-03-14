@@ -3,6 +3,8 @@
 buildscript {
     ext.kotlinVersion = '1.2.30'
     ext.supportLibVersion = '27.1.0'
+    ext.acraVersion = '5.1.1'
+
     repositories {
         google()
         jcenter()

@@ -87,4 +87,7 @@
     <string name="add_blog">Add blog</string>
     <string name="my_blog">My Blog</string>
     <string name="preview">Preview</string>
+    <string name="leave_crash_comment">Please describe your last performed action before the crash</string>
+    <string name="app_crashed">Sorry, app just crashed</string>
+    <string name="app_crash_report">Fair crash report</string>
 </resources>

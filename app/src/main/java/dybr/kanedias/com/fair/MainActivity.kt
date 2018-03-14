@@ -29,6 +29,7 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
+import java.io.IOException
 
 /**
  * Main activity with drawer and sliding tabs where most of user interaction happens.
@@ -340,6 +341,8 @@ class MainActivity : AppCompatActivity() {
      */
     @OnClick(R.id.floating_button)
     fun addEntry() {
+        throw IOException("aaaaa")
+
         // use `instantiate` here because getItem returns new item with each invocation
         // we know that fragment is already present so it will return cached one
         val currFragment = tabAdapter.instantiateItem(pager, pager.currentItem) as PostListFragment
