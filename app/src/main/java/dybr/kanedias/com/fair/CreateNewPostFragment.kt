@@ -50,6 +50,9 @@ class CreateNewPostFragment : Fragment() {
     @BindView(R.id.entry_markdown_preview)
     lateinit var preview: TextView
 
+    /**
+     * View switcher between preview and editor
+     */
     @BindView(R.id.entry_preview_switcher)
     lateinit var previewSwitcher: ViewSwitcher
 

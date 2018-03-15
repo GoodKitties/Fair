@@ -341,7 +341,6 @@ class MainActivity : AppCompatActivity() {
      */
     @OnClick(R.id.floating_button)
     fun addEntry() {
-        throw IOException("aaaaa")
 
         // use `instantiate` here because getItem returns new item with each invocation
         // we know that fragment is already present so it will return cached one
