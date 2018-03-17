@@ -134,15 +134,6 @@ class MainActivity : AppCompatActivity() {
 
         // setup tabs
         tabs.setupWithViewPager(pager, true)
-        pager.addOnPageChangeListener(object: ViewPager.SimpleOnPageChangeListener() {
-            override fun onPageSelected(position: Int) {
-                // we can now add posts only in our own diary
-                when (position) {
-                    MY_DIARY_TAB -> actionButton.show()
-                    else -> actionButton.hide()
-                }
-            }
-        })
         pager.adapter = tabAdapter
     }
 
@@ -375,8 +366,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun getItemPosition(fragment: Any): Int {
-            if (Auth.user == Auth.guest) // needed to kill old fragment that is shown when auth is switched to guest
+            if (Auth.user == Auth.guest) {
+                // needed to kill old fragment that is shown when auth is switched to guest
+                (fragment as PostListFragment).userVisibleHint = false
                 return POSITION_NONE
+            }
+
 
             return super.getItemPosition(fragment)
         }

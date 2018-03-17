@@ -233,6 +233,7 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
         if (Auth.profile == null) {
             // no profile yet, disable everything
             blogName.isEnabled = false
+            blogName.setText(R.string.my_blog)
             blogAdd.visibility = View.GONE
             return
         }
@@ -240,6 +241,7 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
         if (Auth.blog == null) {
             // no blog yet, disable click, show "Add blog" button
             blogName.isEnabled = false
+            blogName.setText(R.string.my_blog)
             blogAdd.visibility = View.VISIBLE
             blogAdd.setOnClickListener {
                 activity.createBlog()

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- buttons affinity -->
+    <string translatable="false" name="edit_tag">0</string>
+    <string translatable="false" name="mod_tag">1</string>
+</resources>

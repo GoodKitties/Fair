@@ -14,7 +14,7 @@
     <RelativeLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:descendantFocusability="blocksDescendants"
         android:padding="8dp">
 
@@ -42,14 +42,56 @@
 
         <org.sufficientlysecure.htmltextview.HtmlTextView
             android:id="@+id/post_message"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_below="@id/post_title"
             android:padding="5dp"
+            android:minLines="3"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/placeholder_short"/>
+
+        <LinearLayout
+            android:id="@+id/post_icon_area"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/post_message"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"> <!-- invisible for entries you don't own -->
+
+            <ImageView
+                style="@style/Ripple.Item"
+                android:id="@+id/post_edit"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="8dp"
+                android:src="@drawable/edit"
+                android:tag="@string/edit_tag"
+                android:contentDescription="@string/edit_entry"/>
+
+            <ImageView
+                style="@style/Ripple.Item"
+                android:id="@+id/post_delete"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="8dp"
+                android:src="@drawable/delete"
+                android:tag="@string/edit_tag"
+                android:contentDescription="@string/delete_entry"/>
+
+            <ImageView
+                style="@style/Ripple.Item"
+                android:id="@+id/post_more_options"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="8dp"
+                android:src="@drawable/more"
+                android:contentDescription="@string/more_options"/>
+
+        </LinearLayout>
 
     </RelativeLayout>
 </android.support.v7.widget.CardView>

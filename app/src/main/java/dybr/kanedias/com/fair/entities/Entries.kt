@@ -52,9 +52,9 @@ class EntryCreateRequest : Resource() {
 
     /**
      * Blog that this entry belongs to.
-     * Must be set
+     * Must be set if it's new entry.
      */
-    val blog = HasOne<Blog>()
+    var blog: HasOne<Blog>? = null
 }
 
 /**

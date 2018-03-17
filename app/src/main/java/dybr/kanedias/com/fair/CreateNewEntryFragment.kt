@@ -9,28 +9,31 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import android.widget.ViewSwitcher
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import dybr.kanedias.com.fair.entities.Blog
+import dybr.kanedias.com.fair.entities.Entry
 import dybr.kanedias.com.fair.entities.EntryCreateRequest
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
+import moe.banana.jsonapi2.HasOne
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import ru.noties.markwon.Markwon
 
 /**
- * Fragment responsible for showing create new post form.
+ * Fragment responsible for showing create entry/edit entry form.
  *
  * @see PostListFragment.postRibbon
  * @param iv view inside adapter
  * @param fragment parent blog post list fragment
  * @author Kanedias
  */
-class CreateNewPostFragment : Fragment() {
+class CreateNewEntryFragment : Fragment() {
 
     /**
      * Title of future diary entry
@@ -61,15 +64,33 @@ class CreateNewPostFragment : Fragment() {
     private lateinit var activity: MainActivity
 
     lateinit var blog: Blog
-    lateinit var parent: PostListFragment
+    var editMode = false // create new by default
+
+    /**
+     * Entry that is being edited. Only set if [editMode] is `true`
+     */
+    lateinit var editEntry: Entry
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.fragment_create_entry, container, false)
         ButterKnife.bind(this, root)
 
         activity = context as MainActivity
+        if (editMode) {
+            populateUI()
+        }
 
         return root
+    }
+
+    /**
+     * Populates UI elements from entry that is edited.
+     * Call once when fragment is initialized.
+     */
+    private fun populateUI() {
+        titleInput.setText(editEntry.title)
+        // need to convert entry content (html) to Markdown somehow...
+        contentInput.setText(editEntry.content)
     }
 
     /**
@@ -157,7 +178,7 @@ class CreateNewPostFragment : Fragment() {
     @Suppress("DEPRECATION") // getColor doesn't work up to API level 23
     @OnClick(R.id.entry_cancel)
     fun cancel() {
-        if (titleInput.text.isNullOrEmpty() && contentInput.text.isNullOrEmpty()) {
+        if (editMode || titleInput.text.isNullOrEmpty() && contentInput.text.isNullOrEmpty()) {
             // entry has empty title and content, canceling right away
             fragmentManager!!.popBackStack()
             return
@@ -185,7 +206,6 @@ class CreateNewPostFragment : Fragment() {
         val htmlContent = HtmlRenderer.builder().build().render(document)
 
         val entry = EntryCreateRequest()
-        entry.blog.set(blog)
         entry.apply {
             title = titleInput.text.toString()
             content = htmlContent
@@ -194,9 +214,23 @@ class CreateNewPostFragment : Fragment() {
         // make http request
         launch(UI) {
             try {
-                async { Network.createEntry(entry) }.await()
+                if (editMode) {
+                    // alter existing entry
+                    entry.id = editEntry.id
+                    async { Network.updateEntry(entry) }.await()
+                    Toast.makeText(activity, R.string.entry_updated, Toast.LENGTH_SHORT).show()
+                } else {
+                    // create new
+                    entry.blog = HasOne(blog)
+                    async { Network.createEntry(entry) }.await()
+                    Toast.makeText(activity, R.string.entry_created, Toast.LENGTH_SHORT).show()
+                }
                 fragmentManager!!.popBackStack()
-                parent.refreshPosts()
+
+                // if we have current tab set, refresh it
+                val plPredicate = { it: Fragment -> it is PostListFragment && it.userVisibleHint }
+                val currentTab = fragmentManager!!.fragments.find(plPredicate) as PostListFragment?
+                currentTab?.refreshPosts()
             } catch (ex: Exception) {
                 // don't close the fragment, just report errors
                 Network.reportErrors(activity, ex)

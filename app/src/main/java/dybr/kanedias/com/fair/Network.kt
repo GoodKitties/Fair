@@ -327,8 +327,25 @@ object Network {
     }
 
     /**
-     * Create diary entry on server.
-     * @param entry entry to create. Should be filled with blog, title, body content etc.
+     * Pull diary entries from blog denoted by [blog].
+     * The resulting URL will be like this: http://dybr.ru/api/v1/blogs/<blog-slug>
+     *
+     * @param blog slug of blog to retrieve entries from
+     */
+    fun loadEntries(blog: Blog, pageNum: Int = 1): ArrayDocument<Entry> {
+        val req = Request.Builder().url("$BLOGS_ENDPOINT/${blog.id}/entries?sort=-created-at&page[number]=$pageNum&include=blog").build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful) {
+            throw HttpException(resp)
+        }
+
+        // response is returned after execute call, body is not null
+        return fromWrappedListJson(resp.body()!!.source(), Entry::class.java)
+    }
+
+    /**
+     * Create new diary entry on server.
+     * @param entry entry to create. Must not exist on server. Should be filled with blog, title, body content etc.
      */
     fun createEntry(entry: EntryCreateRequest): Entry {
         val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(entry))
@@ -339,6 +356,32 @@ object Network {
 
         // response is returned after execute call, body is not null
         return fromWrappedJson(resp.body()!!.source(), Entry::class.java)!!
+    }
+
+    /**
+     * Updates existing entry. Content, title attributes are changeable.
+     * @param entry entry to update. Must exist on server. Must have id field set and null blog.
+     */
+    fun updateEntry(entry: EntryCreateRequest): Entry {
+        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(entry))
+        val req = Request.Builder().url("$ENTRIES_ENDPOINT/${entry.id}").patch(reqBody).build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful)
+            throw extractErrors(resp)
+
+        // response is returned after execute call, body is not null
+        return fromWrappedJson(resp.body()!!.source(), Entry::class.java)!!
+    }
+
+    /**
+     * Deletes existing entry.
+     * @param entry entry to delete. Must exist on server. Must have id field set.
+     */
+    fun deleteEntry(entry: Entry) {
+        val req = Request.Builder().url("$ENTRIES_ENDPOINT/${entry.id}").delete().build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful)
+            throw extractErrors(resp)
     }
 
     fun confirmRegistration(emailToConfirm: String, tokenFromMail: String): LoginResponse {
@@ -359,23 +402,6 @@ object Network {
 
         // if response is successful we should have login response in body
         return fromWrappedJson(resp.body()!!.source(), LoginResponse::class.java)!!
-    }
-
-    /**
-     * Pull diary entries from blog denoted by [blog].
-     * The resulting URL will be like this: http://dybr.ru/api/v1/blogs/<blog-slug>
-     *
-     * @param blog slug of blog to retrieve entries from
-     */
-    fun loadEntries(blog: Blog, pageNum: Int = 1): ArrayDocument<Entry> {
-        val req = Request.Builder().url("$BLOGS_ENDPOINT/${blog.id}/entries?sort=-created-at&page[number]=$pageNum&include=blog").build()
-        val resp = httpClient.newCall(req).execute()
-        if (!resp.isSuccessful) {
-            throw HttpException(resp)
-        }
-
-        // response is returned after execute call, body is not null
-        return fromWrappedListJson(resp.body()!!.source(), Entry::class.java)
     }
 
     /**

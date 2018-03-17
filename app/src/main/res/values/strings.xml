@@ -90,4 +90,10 @@
     <string name="leave_crash_comment">Please describe your last performed action before the crash</string>
     <string name="app_crashed">Sorry, app just crashed</string>
     <string name="app_crash_report">Fair crash report</string>
+    <string name="edit_entry">Edit entry</string>
+    <string name="delete_entry">Delete entry</string>
+    <string name="more_options">More options</string>
+    <string name="entry_deleted">Entry deleted</string>
+    <string name="entry_updated">Entry updated</string>
+    <string name="entry_created">Entry created</string>
 </resources>

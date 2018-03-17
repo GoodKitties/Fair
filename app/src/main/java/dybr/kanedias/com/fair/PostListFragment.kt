@@ -3,6 +3,7 @@ package dybr.kanedias.com.fair
 import android.app.FragmentTransaction
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -53,6 +54,24 @@ class PostListFragment: Fragment() {
         postRibbon.layoutManager = LinearLayoutManager(activity)
     }
 
+    /**
+     * [FragmentStatePagerAdapter] calls this when fragment becomes active (e.g. tab is selected)
+     */
+    override fun setUserVisibleHint(isVisibleToUser: Boolean) {
+        super.setUserVisibleHint(isVisibleToUser)
+
+        // don't touch any views if fragment is just instantiated and not attached yet
+        // FragmentStatePagerAdapter does this when creating items anew
+        if (context == null)
+            return
+
+        // for now we can only write entries in blog if it's our own
+        when (isVisibleToUser && blog == Auth.blog) {
+            false -> activity.actionButton.hide()
+            true -> activity.actionButton.show()
+        }
+    }
+
     fun refreshPosts() {
         if (blog == null) // we don't have a blog, just show empty list
             return
@@ -69,6 +88,10 @@ class PostListFragment: Fragment() {
 
             refresher.isRefreshing = false
             postRibbon.adapter = postAdapter
+
+            if (blog == Auth.blog) {
+                activity.actionButton.show()
+            }
         }
     }
 
@@ -79,7 +102,7 @@ class PostListFragment: Fragment() {
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             val postHolder = holder as RegularPostViewHolder
             val entry = entries[position]
-            postHolder.setup(entry)
+            postHolder.setup(entry, blog!!)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -95,9 +118,8 @@ class PostListFragment: Fragment() {
      * Adds diary entry on top of post ribbon and scrolls to it
      */
     fun addCreateNewPostForm() {
-        val postAdd = CreateNewPostFragment().apply {
-            this.blog = this@PostListFragment.blog!!
-            this.parent = this@PostListFragment
+        val postAdd = CreateNewEntryFragment().apply {
+            this.blog = this@PostListFragment.blog!! // at this point we know we have the blog
         }
 
         fragmentManager!!.beginTransaction()
