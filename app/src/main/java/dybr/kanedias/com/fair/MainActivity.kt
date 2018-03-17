@@ -29,7 +29,6 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
-import java.io.IOException
 
 /**
  * Main activity with drawer and sliding tabs where most of user interaction happens.
@@ -39,8 +38,11 @@ import java.io.IOException
  */
 class MainActivity : AppCompatActivity() {
 
-    private val MY_DIARY_TAB = 0
-    private val FAV_TAB = 1
+    companion object {
+        private const val MY_DIARY_TAB = 0
+        private const val FAV_TAB = 1
+    }
+
 
     /**
      * AppBar layout with toolbar and tabs
@@ -131,7 +133,7 @@ class MainActivity : AppCompatActivity() {
         drawerToggle.syncState()
 
         // setup tabs
-        tabs.setupWithViewPager(pager)
+        tabs.setupWithViewPager(pager, true)
         pager.addOnPageChangeListener(object: ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
                 // we can now add posts only in our own diary
@@ -369,20 +371,20 @@ class MainActivity : AppCompatActivity() {
                 totalTabs++
             }
 
-            //var totalTabs = 2 // first tab is own diary, second is favorite post wall
-            //totalTabs += Auth.user.profile.favorites.size // add tabs for favorites
-            //return totalTabs
             return totalTabs
         }
 
-        override fun getItem(position: Int): PostListFragment {
-            //val ownFavEndpoint = "${Network.IDENTITY_ENDPOINT}/${Auth.user.profile.uris.last()}"
-            //val selectedFavEndpoint = lazy { Auth.user.profile.favorites[position - 2].uris.last() }
-            return when(position) {
-                MY_DIARY_TAB -> PostListFragment().apply { blog = Auth.blog }
-                //FAV_TAB -> PostListFragment().apply { slug = "$ownFavEndpoint/favorites" }
-                else -> PostListFragment().apply { blog = null }
-            }
+        override fun getItemPosition(fragment: Any): Int {
+            if (Auth.user == Auth.guest) // needed to kill old fragment that is shown when auth is switched to guest
+                return POSITION_NONE
+
+            return super.getItemPosition(fragment)
+        }
+
+        override fun getItem(position: Int): PostListFragment = when(position) {
+            MY_DIARY_TAB -> PostListFragment().apply { blog = Auth.blog }
+            //FAV_TAB -> PostListFragment().apply { slug = "$ownFavEndpoint/favorites" }
+            else -> PostListFragment().apply { blog = null }
         }
 
         override fun getPageTitle(position: Int): CharSequence? = when (position) {

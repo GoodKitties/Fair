@@ -32,13 +32,11 @@ class PostListFragment: Fragment() {
     @BindView(R.id.post_list_area)
     lateinit var refresher: SwipeRefreshLayout
 
-    val postAdapter = PostListAdapter()
-
     var blog: Blog? = null
 
-    private lateinit var activity: MainActivity
+    private val postAdapter = PostListAdapter()
 
-    private var entries: ArrayDocument<Entry> = ArrayDocument()
+    private lateinit var activity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_post_list, container, false)
@@ -56,15 +54,15 @@ class PostListFragment: Fragment() {
     }
 
     fun refreshPosts() {
-        if (blog == null) // we don't have slug, just show empty list
+        if (blog == null) // we don't have a blog, just show empty list
             return
 
         launch(UI) {
             refresher.isRefreshing = true
 
             try {
-                val success = async(CommonPool) { Network.getEntries(blog!!) }
-                entries = success.await()
+                val success = async(CommonPool) { Network.loadEntries(blog!!) }
+                postAdapter.entries = success.await()
             } catch (ex: Exception) {
                 Network.reportErrors(activity, ex)
             }
@@ -75,6 +73,8 @@ class PostListFragment: Fragment() {
     }
 
     inner class PostListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+        var entries: ArrayDocument<Entry> = ArrayDocument()
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             val postHolder = holder as RegularPostViewHolder
@@ -89,7 +89,6 @@ class PostListFragment: Fragment() {
         }
 
         override fun getItemCount() = entries.size
-
     }
 
     /**

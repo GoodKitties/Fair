@@ -27,6 +27,7 @@ class Account {
     var id: Long = 0
 
     /**
+     * Server-side account id.
      * Retrieved on first login
      */
     @DatabaseField(canBeNull = false, unique = true)

@@ -149,26 +149,6 @@ object Network {
     }
 
     /**
-     * Tries to deduce errors from non-successful response.
-     * @param resp http response that was not successful
-     * @return [HttpApiException] if specific errors were found or generic [HttpException] for this response
-     */
-    private fun extractErrors(resp: Response) : HttpException {
-        if (resp.code() in HTTP_BAD_REQUEST until HTTP_INTERNAL_ERROR) { // 400-499: client error
-            // try to get error info
-            val errAdapter = jsonConverter.adapter(Document::class.java)
-            val body = resp.body()!!.source()
-            if (body.exhausted()) // no content
-                return HttpException(resp)
-
-            val errDoc = errAdapter.fromJson(body)!!
-            if (errDoc.errors.isNotEmpty()) // likely
-                return HttpApiException(resp, errDoc.errors)
-        }
-        return HttpException(resp)
-    }
-
-    /**
      * Logs in with specified account, i.e. creates session, obtains access token for this user
      * ands sets [Auth.user] if all went good.
      * After this call succeeds you can be certain that [httpClient] sends requests with correct
@@ -346,6 +326,21 @@ object Network {
         return fromWrappedJson(resp.body()!!.source(), Blog::class.java)!!
     }
 
+    /**
+     * Create diary entry on server.
+     * @param entry entry to create. Should be filled with blog, title, body content etc.
+     */
+    fun createEntry(entry: EntryCreateRequest): Entry {
+        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(entry))
+        val req = Request.Builder().url(ENTRIES_ENDPOINT).post(reqBody).build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful)
+            throw extractErrors(resp)
+
+        // response is returned after execute call, body is not null
+        return fromWrappedJson(resp.body()!!.source(), Entry::class.java)!!
+    }
+
     fun confirmRegistration(emailToConfirm: String, tokenFromMail: String): LoginResponse {
         val confirmation = ConfirmRequest().apply {
             action = "confirm"
@@ -372,8 +367,8 @@ object Network {
      *
      * @param blog slug of blog to retrieve entries from
      */
-    fun getEntries(blog: Blog, pageNum: Int = 1): ArrayDocument<Entry> {
-        val req = Request.Builder().url("$BLOGS_ENDPOINT/${blog.id}/entries?sort=-created-at&page[number]=$pageNum").build()
+    fun loadEntries(blog: Blog, pageNum: Int = 1): ArrayDocument<Entry> {
+        val req = Request.Builder().url("$BLOGS_ENDPOINT/${blog.id}/entries?sort=-created-at&page[number]=$pageNum&include=blog").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw HttpException(resp)
@@ -384,18 +379,23 @@ object Network {
     }
 
     /**
-     * Create diary entry on server.
-     * @param entry entry to create. Should be filled with blog, title, body content etc.
+     * Tries to deduce errors from non-successful response.
+     * @param resp http response that was not successful
+     * @return [HttpApiException] if specific errors were found or generic [HttpException] for this response
      */
-    fun createEntry(entry: EntryCreateRequest): Entry {
-        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(entry))
-        val req = Request.Builder().url(ENTRIES_ENDPOINT).post(reqBody).build()
-        val resp = httpClient.newCall(req).execute()
-        if (!resp.isSuccessful)
-            throw extractErrors(resp)
+    private fun extractErrors(resp: Response) : HttpException {
+        if (resp.code() in HTTP_BAD_REQUEST until HTTP_INTERNAL_ERROR) { // 400-499: client error
+            // try to get error info
+            val errAdapter = jsonConverter.adapter(Document::class.java)
+            val body = resp.body()!!.source()
+            if (body.exhausted()) // no content
+                return HttpException(resp)
 
-        // response is returned after execute call, body is not null
-        return fromWrappedJson(resp.body()!!.source(), Entry::class.java)!!
+            val errDoc = errAdapter.fromJson(body)!!
+            if (errDoc.errors.isNotEmpty()) // likely
+                return HttpApiException(resp, errDoc.errors)
+        }
+        return HttpException(resp)
     }
 
     /**
