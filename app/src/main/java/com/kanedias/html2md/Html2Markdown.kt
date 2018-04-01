@@ -1,11 +1,11 @@
-package com.kanedias.dybr.fair.misc
+package com.kanedias.html2md
 
 /**
  * @author Kanedias
  *
  * Created on 01.04.18
  */
-class Html2MdParser {
+class Html2Markdown {
 
     init {
         System.loadLibrary("html2md")

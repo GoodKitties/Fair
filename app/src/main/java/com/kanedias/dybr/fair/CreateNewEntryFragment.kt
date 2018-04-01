@@ -18,17 +18,13 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.entities.Blog
 import com.kanedias.dybr.fair.entities.Entry
 import com.kanedias.dybr.fair.entities.EntryCreateRequest
-import com.kanedias.dybr.fair.misc.Html2MdParser
+import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
 import moe.banana.jsonapi2.HasOne
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import ru.noties.markwon.*
-import ru.noties.markwon.renderer.html.SpannableHtmlParser
-import ru.noties.markwon.spans.AsyncDrawable
-import ru.noties.markwon.spans.LinkSpan
-import ru.noties.markwon.spans.SpannableTheme
 
 /**
  * Fragment responsible for showing create entry/edit entry form.
@@ -95,7 +91,7 @@ class CreateNewEntryFragment : Fragment() {
     private fun populateUI() {
         titleInput.setText(editEntry.title)
         // need to convert entry content (html) to Markdown somehow...
-        val markdown = Html2MdParser().parse(editEntry.content)
+        val markdown = Html2Markdown().parse(editEntry.content)
         contentInput.setText(markdown)
     }
 
