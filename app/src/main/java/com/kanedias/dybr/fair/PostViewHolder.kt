@@ -4,8 +4,8 @@ import android.app.FragmentTransaction
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
+import android.view.MotionEvent
 import android.view.View
-import android.webkit.WebView
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -20,9 +20,7 @@ import com.kanedias.dybr.fair.entities.Entry
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
-import org.sufficientlysecure.htmltextview.ClickableTableSpan
 import org.sufficientlysecure.htmltextview.HtmlTextView
-import org.sufficientlysecure.htmltextview.DrawTableLinkSpan
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -33,7 +31,7 @@ import java.util.*
  * @see PostListFragment.postRibbon
  * @author Kanedias
  */
-class RegularPostViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
+class PostViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
     @BindView(R.id.post_title)
     lateinit var titleView: TextView
@@ -51,14 +49,17 @@ class RegularPostViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
     init {
         ButterKnife.bind(this, iv)
+        bodyView.isClickable = false
 
-        // support loading tables into text views
-        bodyView.setClickableTableSpan(ClickableTableSpanImpl())
-        val drawTableLinkSpan = DrawTableLinkSpan().apply { tableLinkText = "[tap for table]" }
-        drawTableLinkSpan.textColor = iv.context!!.resources.getColor(R.color.md_indigo_200)
-        bodyView.setDrawTableLinkSpan(drawTableLinkSpan)
-
-        iv.setOnClickListener {} // TODO: show comments fragment
+        iv.setOnClickListener {
+            val activity = it.context as AppCompatActivity
+            val commentsPage = CommentListFragment()
+            activity.supportFragmentManager.beginTransaction()
+                    .addToBackStack("Showing post edit fragment")
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .replace(R.id.main_drawer_layout, commentsPage)
+                    .commit()
+        }
     }
 
     @OnClick(R.id.post_edit)
@@ -66,7 +67,7 @@ class RegularPostViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
         val activity = itemView.context as AppCompatActivity
         val postEdit = CreateNewEntryFragment().apply {
             editMode = true
-            editEntry = this@RegularPostViewHolder.entry
+            editEntry = this@PostViewHolder.entry
         }
 
         activity.supportFragmentManager.beginTransaction()
@@ -132,21 +133,5 @@ class RegularPostViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
         bodyView.setHtml(entry.content)
 
         toggleEditButtons(blog == Auth.blog)
-    }
-
-    /**
-     * Show webview in a dialog when tapping on a table placeholder
-     */
-    inner class ClickableTableSpanImpl: ClickableTableSpan() {
-        override fun onClick(widget: View?) {
-            val webView = WebView(widget!!.context)
-            webView.loadData(getTableHtml(), "text/html", "UTF-8")
-            MaterialDialog.Builder(widget.context)
-                    .customView(webView, false)
-                    .positiveText(android.R.string.ok)
-                    .show()
-        }
-
-        override fun newInstance(): ClickableTableSpan = ClickableTableSpanImpl()
     }
 }

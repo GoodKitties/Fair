@@ -100,7 +100,7 @@ class PostListFragment: Fragment() {
         var entries: ArrayDocument<Entry> = ArrayDocument()
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            val postHolder = holder as RegularPostViewHolder
+            val postHolder = holder as PostViewHolder
             val entry = entries[position]
             postHolder.setup(entry, blog!!)
         }
@@ -108,7 +108,7 @@ class PostListFragment: Fragment() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
             val inflater = LayoutInflater.from(activity)
             val view = inflater.inflate(R.layout.fragment_post_list_item, parent, false)
-            return RegularPostViewHolder(view)
+            return PostViewHolder(view)
         }
 
         override fun getItemCount() = entries.size

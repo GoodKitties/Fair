@@ -45,7 +45,7 @@ class EntryCreateRequest : Resource() {
     var title: String? = null
 
     /**
-     * Content of a new entry, in html format
+     * Content of a new entry, in HTML format
      */
     @field:Json(name = "content")
     var content: String = ""

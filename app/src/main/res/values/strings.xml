@@ -96,4 +96,7 @@
     <string name="entry_deleted">Entry deleted</string>
     <string name="entry_updated">Entry updated</string>
     <string name="entry_created">Entry created</string>
+    <string name="delete_comment">Delete comment</string>
+    <string name="edit_comment">Edit comment</string>
+    <string name="comment_deleted">Comment deleted</string>
 </resources>

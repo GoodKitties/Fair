@@ -5,7 +5,7 @@
     android:id="@+id/main_drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="dybr.kanedias.com.fair.MainActivity">
+    tools:context="com.kanedias.dybr.fair.MainActivity">
 
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"

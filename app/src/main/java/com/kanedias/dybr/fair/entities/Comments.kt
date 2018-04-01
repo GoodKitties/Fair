@@ -109,9 +109,9 @@ class CreateCommentRequest: Resource() {
 class CommentResponse: Resource() {
 
     /**
-     * Text of this comment in rich text Draft.js format
+     * Text of this comment in HTML format
      */
-    lateinit var content: DraftJsContent
+    lateinit var content: String
 
     /**
      * Date this comment was created at.

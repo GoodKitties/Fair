@@ -78,6 +78,7 @@ object Network {
     private val PROFILES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/profiles"
     private val BLOGS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/blogs"
     private val ENTRIES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/entries"
+    private val COMMENTS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/comments"
 
     private val MIME_JSON_API = MediaType.parse("application/vnd.api+json")
 
@@ -331,7 +332,7 @@ object Network {
      * Pull diary entries from blog denoted by [blog].
      * The resulting URL will be like this: http://dybr.ru/api/v1/blogs/<blog-slug>
      *
-     * @param blog slug of blog to retrieve entries from
+     * @param blog blog to retrieve entries from
      */
     fun loadEntries(blog: Blog, pageNum: Int = 1): ArrayDocument<Entry> {
         val req = Request.Builder().url("$BLOGS_ENDPOINT/${blog.id}/entries?sort=-created-at&page[number]=$pageNum&include=blog").build()
@@ -342,6 +343,48 @@ object Network {
 
         // response is returned after execute call, body is not null
         return fromWrappedListJson(resp.body()!!.source(), Entry::class.java)
+    }
+
+    /**
+     * Pull diary comments from entry denoted by [entry].
+     *
+     * @param entry entry to retrieve comments from
+     */
+    fun loadComments(entry: Entry, pageNum: Int = 1): ArrayDocument<Comment> {
+        val req = Request.Builder().url("$ENTRIES_ENDPOINT/${entry.id}/entries?sort=-created-at&page[number]=$pageNum&include=profile").build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful) {
+            throw HttpException(resp)
+        }
+
+        // response is returned after execute call, body is not null
+        return fromWrappedListJson(resp.body()!!.source(), Comment::class.java)
+    }
+
+    /**
+     * Updates existing comment. Only content attribute is changeable.
+     * @param comment comment to update. Must exist on server. Must have id field set and null entry.
+     */
+    fun updateComment(comment: CreateCommentRequest): Comment {
+        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(comment))
+        val req = Request.Builder().url("$COMMENTS_ENDPOINT/${comment.id}").patch(reqBody).build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful)
+            throw extractErrors(resp)
+
+        // response is returned after execute call, body is not null
+        return fromWrappedJson(resp.body()!!.source(), Comment::class.java)!!
+    }
+
+    /**
+     * Deletes existing comment.
+     * @param comment comment to delete. Must exist on server. Must have id field set.
+     */
+    fun deleteComment(comment: Comment) {
+        val req = Request.Builder().url("$COMMENTS_ENDPOINT/${comment.id}").delete().build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful)
+            throw extractErrors(resp)
     }
 
     /**
