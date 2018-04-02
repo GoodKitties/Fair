@@ -59,7 +59,7 @@ class CommentListFragment : Fragment() {
     }
 
     fun refreshComments() {
-        if (entry == null) // we don't have a blog, just show empty list
+        if (entry == null) // we don't have an entry, just show empty list
             return
 
         launch(UI) {
@@ -94,7 +94,7 @@ class CommentListFragment : Fragment() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
             val inflater = LayoutInflater.from(activity)
             val view = inflater.inflate(R.layout.fragment_comment_list_item, parent, false)
-            return PostViewHolder(view)
+            return CommentViewHolder(view)
         }
 
         override fun getItemCount() = comments.size

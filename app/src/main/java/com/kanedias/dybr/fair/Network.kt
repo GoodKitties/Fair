@@ -351,7 +351,7 @@ object Network {
      * @param entry entry to retrieve comments from
      */
     fun loadComments(entry: Entry, pageNum: Int = 1): ArrayDocument<Comment> {
-        val req = Request.Builder().url("$ENTRIES_ENDPOINT/${entry.id}/entries?sort=-created-at&page[number]=$pageNum&include=profile").build()
+        val req = Request.Builder().url("$ENTRIES_ENDPOINT/${entry.id}/comments?sort=created-at&page[number]=$pageNum&include=profile").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw HttpException(resp)
@@ -359,6 +359,21 @@ object Network {
 
         // response is returned after execute call, body is not null
         return fromWrappedListJson(resp.body()!!.source(), Comment::class.java)
+    }
+
+    /**
+     * Create new entry comment on server.
+     * @param comment comment to create. Must not exist on server. Should be filled with entry, body content etc.
+     */
+    fun createComment(comment: CreateCommentRequest): Comment {
+        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(comment))
+        val req = Request.Builder().url(COMMENTS_ENDPOINT).post(reqBody).build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful)
+            throw extractErrors(resp)
+
+        // response is returned after execute call, body is not null
+        return fromWrappedJson(resp.body()!!.source(), Comment::class.java)!!
     }
 
     /**

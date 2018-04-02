@@ -7,6 +7,7 @@
     android:background="@color/md_grey_900">
 
     <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -21,7 +22,6 @@
             android:paddingTop="4dp"
             android:paddingBottom="4dp"
             android:clipToPadding="false"
-            android:divider="@null"
             android:scrollbars="vertical"
             android:fadeScrollbars="true"
             android:scrollbarStyle="outsideInset"/>

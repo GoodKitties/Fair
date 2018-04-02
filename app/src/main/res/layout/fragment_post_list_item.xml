@@ -6,7 +6,6 @@
     android:layout_height="wrap_content"
     android:layout_margin="5dp"
     android:foreground="?android:attr/selectableItemBackground"
-    android:gravity="center"
     app:cardCornerRadius="2dp"
     app:cardElevation="2dp"
     app:cardMaxElevation="4dp">
@@ -15,7 +14,6 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:descendantFocusability="blocksDescendants"
         android:padding="8dp">
 
         <TextView

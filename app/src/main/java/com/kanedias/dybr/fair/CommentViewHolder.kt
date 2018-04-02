@@ -51,12 +51,12 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
         ButterKnife.bind(this, iv)
     }
 
-    @OnClick(R.id.post_edit)
-    fun editPost() {
+    @OnClick(R.id.comment_edit)
+    fun editComment() {
         val activity = itemView.context as AppCompatActivity
         val postEdit = CreateNewCommentFragment().apply {
             editMode = true
-            //editEntry = this@CommentViewHolder.entry
+            editComment = this@CommentViewHolder.comment
         }
 
         activity.supportFragmentManager.beginTransaction()
@@ -66,8 +66,8 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
                 .commit()
     }
 
-    @OnClick(R.id.post_delete)
-    fun deletePost() {
+    @OnClick(R.id.comment_delete)
+    fun deleteComment() {
         val activity = itemView.context as AppCompatActivity
 
         // delete callback
@@ -79,9 +79,9 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
                     activity.supportFragmentManager.popBackStack()
 
                     // if we have current tab, refresh it
-                    val plPredicate = { it: Fragment -> it is PostListFragment && it.userVisibleHint }
-                    val currentTab = activity.supportFragmentManager.fragments.find(plPredicate) as PostListFragment?
-                    currentTab?.refreshPosts()
+                    val plPredicate = { it: Fragment -> it is CommentListFragment && it.userVisibleHint }
+                    val currentTab = activity.supportFragmentManager.fragments.find(plPredicate) as CommentListFragment?
+                    currentTab?.refreshComments()
                 } catch (ex: Exception) {
                     Network.reportErrors(itemView.context, ex)
                 }

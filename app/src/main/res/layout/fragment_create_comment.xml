@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/comment_add_area"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="5dp"
+    android:gravity="center"
+    app:cardCornerRadius="2dp"
+    app:cardElevation="2dp"
+    app:cardMaxElevation="4dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ScrollView
+            android:fillViewport="true"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <ViewSwitcher
+                android:id="@+id/comment_preview_switcher"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="6dp"
+                android:inAnimation="@android:anim/slide_in_left"
+                android:outAnimation="@android:anim/slide_out_right">
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <include layout="@layout/util_edit_form" />
+
+                    <EditText
+                        android:id="@+id/comment_source_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textAutoComplete|textMultiLine"
+                        android:hint="@string/comment_content"
+                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        android:minLines="2"/>
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/comment_markdown_preview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:padding="4dp"
+                    android:textAppearance="@android:style/TextAppearance.Medium" />
+
+            </ViewSwitcher>
+
+        </ScrollView>
+
+        <LinearLayout
+            style="?android:attr/buttonBarStyle"
+            android:id="@+id/comment_button_bar_area"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                style="?android:attr/buttonBarButtonStyle"
+                android:id="@+id/comment_cancel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@android:string/cancel"
+                android:textColor="@color/md_red_900"/>
+
+            <Button
+                style="?android:attr/buttonBarButtonStyle"
+                android:id="@+id/comment_preview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/preview"/>
+
+            <Button
+                style="?android:attr/buttonBarButtonStyle"
+                android:id="@+id/comment_submit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:text="@string/submit"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>

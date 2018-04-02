@@ -43,19 +43,19 @@ import java.util.*
 class CreateCommentRequest: Resource() {
 
     /**
-     * Content of this comment. Represented in Draft.js rich text format
+     * Content of this comment. Represented in HTML format
      */
-    lateinit var content: DraftJsContent
+    lateinit var content: String
 
     /**
      * Entry for which this comment is being created for
      */
-    val entry = HasOne<Entry>()
+    var entry : HasOne<Entry>? = null
 
     /**
      * Profile this comment is being created with
      */
-    val profile = HasOne<OwnProfile>()
+    val profile : HasOne<OwnProfile>? = null
 }
 
 /**

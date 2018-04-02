@@ -64,13 +64,17 @@ class CreateNewEntryFragment : Fragment() {
 
     private lateinit var activity: MainActivity
 
-    lateinit var blog: Blog
     var editMode = false // create new by default
 
     /**
      * Entry that is being edited. Only set if [editMode] is `true`
      */
     lateinit var editEntry: Entry
+
+    /**
+     * Blog this entry belongs to
+     */
+    lateinit var blog: Blog
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.fragment_create_entry, container, false)
@@ -116,9 +120,9 @@ class CreateNewEntryFragment : Fragment() {
      * Handler of all small editing buttons above content input.
      */
     @OnClick(
-        R.id.entry_quick_bold, R.id.entry_quick_italic, R.id.entry_quick_underlined, R.id.entry_quick_strikethrough,
-        R.id.entry_quick_code, R.id.entry_quick_quote, R.id.entry_quick_number_list, R.id.entry_quick_bullet_list,
-        R.id.entry_quick_link, R.id.entry_quick_image
+        R.id.edit_quick_bold, R.id.edit_quick_italic, R.id.edit_quick_underlined, R.id.edit_quick_strikethrough,
+        R.id.edit_quick_code, R.id.edit_quick_quote, R.id.edit_quick_number_list, R.id.edit_quick_bullet_list,
+        R.id.edit_quick_link, R.id.edit_quick_image
     )
     fun editSelection(v: View) {
         val clipboard = v.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -129,16 +133,16 @@ class CreateNewEntryFragment : Fragment() {
         }
 
         when (v.id) {
-            R.id.entry_quick_bold -> insertInCursorPosition("<b>", paste, "</b>")
-            R.id.entry_quick_italic -> insertInCursorPosition("<i>", paste, "</i>")
-            R.id.entry_quick_underlined -> insertInCursorPosition("<u>", paste, "</u>")
-            R.id.entry_quick_strikethrough -> insertInCursorPosition("<s>", paste, "</s>")
-            R.id.entry_quick_code -> insertInCursorPosition("```\n", paste, "\n```\n")
-            R.id.entry_quick_quote -> insertInCursorPosition("> ", paste)
-            R.id.entry_quick_number_list -> insertInCursorPosition("\n1. ", paste, "\n2. \n3. ")
-            R.id.entry_quick_bullet_list -> insertInCursorPosition("\n* ", paste, "\n* \n* ")
-            R.id.entry_quick_link -> insertInCursorPosition("<a href=\"$paste\">", paste, "</a>")
-            R.id.entry_quick_image -> insertInCursorPosition("<img src='$paste'>", paste, ")")
+            R.id.edit_quick_bold -> insertInCursorPosition("<b>", paste, "</b>")
+            R.id.edit_quick_italic -> insertInCursorPosition("<i>", paste, "</i>")
+            R.id.edit_quick_underlined -> insertInCursorPosition("<u>", paste, "</u>")
+            R.id.edit_quick_strikethrough -> insertInCursorPosition("<s>", paste, "</s>")
+            R.id.edit_quick_code -> insertInCursorPosition("```\n", paste, "\n```\n")
+            R.id.edit_quick_quote -> insertInCursorPosition("> ", paste)
+            R.id.edit_quick_number_list -> insertInCursorPosition("\n1. ", paste, "\n2. \n3. ")
+            R.id.edit_quick_bullet_list -> insertInCursorPosition("\n* ", paste, "\n* \n* ")
+            R.id.edit_quick_link -> insertInCursorPosition("<a href=\"$paste\">", paste, "</a>")
+            R.id.edit_quick_image -> insertInCursorPosition("<img src='$paste'>", paste, ")")
         }
     }
 

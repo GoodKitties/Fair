@@ -99,4 +99,7 @@
     <string name="delete_comment">Delete comment</string>
     <string name="edit_comment">Edit comment</string>
     <string name="comment_deleted">Comment deleted</string>
+    <string name="comment_content">Comment content</string>
+    <string name="comment_updated">Comment updated</string>
+    <string name="comment_created">Comment created</string>
 </resources>

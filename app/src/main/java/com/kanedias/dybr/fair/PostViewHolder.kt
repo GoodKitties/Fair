@@ -53,7 +53,7 @@ class PostViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
         iv.setOnClickListener {
             val activity = it.context as AppCompatActivity
-            val commentsPage = CommentListFragment()
+            val commentsPage = CommentListFragment().apply { entry = this@PostViewHolder.entry }
             activity.supportFragmentManager.beginTransaction()
                     .addToBackStack("Showing post edit fragment")
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)

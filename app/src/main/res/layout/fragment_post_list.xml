@@ -13,7 +13,6 @@
         android:paddingTop="4dp"
         android:paddingBottom="4dp"
         android:clipToPadding="false"
-        android:divider="@null"
         android:scrollbars="vertical"
         android:fadeScrollbars="true"
         android:scrollbarStyle="outsideInset"/>
