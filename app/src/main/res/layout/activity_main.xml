@@ -23,8 +23,7 @@
                 android:layout_height="@dimen/standard_toolbar_height"
                 android:minHeight="@dimen/standard_toolbar_height"
                 android:title="@string/app_name"
-                app:layout_scrollFlags="scroll|snap|enterAlways">
-            </android.support.v7.widget.Toolbar>
+                app:layout_scrollFlags="scroll|snap|enterAlways"/>
 
             <android.support.design.widget.TabLayout
                 android:id="@+id/sliding_tabs"

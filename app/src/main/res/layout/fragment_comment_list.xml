@@ -1,20 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/comment_list_area"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/md_grey_900">
 
-    <LinearLayout
-        android:orientation="vertical"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/comments_header"
+        android:fitsSystemWindows="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- a post that is being commented is displayed here -->
-        <include layout="@layout/fragment_post_list_item" />
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/comments_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/standard_toolbar_height"
+            android:minHeight="@dimen/standard_toolbar_height"
+            android:title="@string/comments"/>
 
-        <!-- comments to this post are displayed here -->
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/comment_list_area"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/comment_ribbon"
             android:layout_width="match_parent"
@@ -23,9 +34,17 @@
             android:paddingBottom="4dp"
             android:clipToPadding="false"
             android:scrollbars="vertical"
-            android:fadeScrollbars="true"
-            android:scrollbarStyle="outsideInset"/>
+            android:fadeScrollbars="true"/>
 
-    </LinearLayout>
+    </android.support.v4.widget.SwipeRefreshLayout>
 
-</android.support.v4.widget.SwipeRefreshLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/add_comment_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/activity_vertical_margin"
+        android:src="@drawable/add"
+        app:layout_behavior="com.kanedias.dybr.fair.misc.ScrollAwareFabBehavior"/>
+
+</android.support.design.widget.CoordinatorLayout>

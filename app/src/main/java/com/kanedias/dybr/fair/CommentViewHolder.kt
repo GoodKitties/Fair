@@ -121,6 +121,8 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
         authorView.text = profile.nickname
         bodyView.setHtml(comment.content)
 
-        toggleEditButtons(profile == Auth.profile)
+        // time diff must be lower than 15 minutes
+        val timeDiff = (Date().time - comment.createdAt.time) / 1000 // in seconds
+        toggleEditButtons(profile == Auth.profile && timeDiff < 60 * 15)
     }
 }

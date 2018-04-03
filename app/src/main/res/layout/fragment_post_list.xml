@@ -14,7 +14,6 @@
         android:paddingBottom="4dp"
         android:clipToPadding="false"
         android:scrollbars="vertical"
-        android:fadeScrollbars="true"
-        android:scrollbarStyle="outsideInset"/>
+        android:fadeScrollbars="true"/>
 
 </android.support.v4.widget.SwipeRefreshLayout>

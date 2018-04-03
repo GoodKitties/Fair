@@ -15,10 +15,7 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
-import com.kanedias.dybr.fair.entities.Comment
-import com.kanedias.dybr.fair.entities.CreateCommentRequest
-import com.kanedias.dybr.fair.entities.Entry
-import com.kanedias.dybr.fair.entities.EntryCreateRequest
+import com.kanedias.dybr.fair.entities.*
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
@@ -205,10 +202,7 @@ class CreateNewCommentFragment : Fragment() {
         val document = parser.parse(contentInput.text.toString())
         val htmlContent = HtmlRenderer.builder().build().render(document)
 
-        val comment = CreateCommentRequest()
-        comment.apply {
-            content = htmlContent
-        }
+        val comment = CreateCommentRequest().apply { content = htmlContent }
 
         // make http request
         launch(UI) {
@@ -221,6 +215,7 @@ class CreateNewCommentFragment : Fragment() {
                 } else {
                     // create new
                     comment.entry = HasOne(entry)
+                    comment.profile = HasOne(Auth.profile)
                     async { Network.createComment(comment) }.await()
                     Toast.makeText(activity, R.string.comment_created, Toast.LENGTH_SHORT).show()
                 }

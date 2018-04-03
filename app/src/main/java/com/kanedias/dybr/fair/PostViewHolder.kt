@@ -125,13 +125,13 @@ class PostViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
     /**
      * Called when this holder should be refreshed based on what it must show now
      */
-    fun setup(entry: Entry, blog: Blog) {
+    fun setup(entry: Entry, editable: Boolean) {
         this.entry = entry
 
         dateView.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(entry.createdAt)
         titleView.text = entry.title
         bodyView.setHtml(entry.content)
 
-        toggleEditButtons(blog == Auth.blog)
+        toggleEditButtons(editable)
     }
 }

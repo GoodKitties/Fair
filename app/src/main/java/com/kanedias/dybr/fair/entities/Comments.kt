@@ -55,7 +55,7 @@ class CreateCommentRequest: Resource() {
     /**
      * Profile this comment is being created with
      */
-    val profile : HasOne<OwnProfile>? = null
+    var profile : HasOne<OwnProfile>? = null
 }
 
 /**

@@ -102,4 +102,5 @@
     <string name="comment_content">Comment content</string>
     <string name="comment_updated">Comment updated</string>
     <string name="comment_created">Comment created</string>
+    <string name="comments">Comments</string>
 </resources>

@@ -102,7 +102,7 @@ class PostListFragment: Fragment() {
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             val postHolder = holder as PostViewHolder
             val entry = entries[position]
-            postHolder.setup(entry, blog!!)
+            postHolder.setup(entry, blog == Auth.blog)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
