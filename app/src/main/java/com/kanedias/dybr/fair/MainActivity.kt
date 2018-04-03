@@ -167,8 +167,7 @@ class MainActivity : AppCompatActivity() {
     fun reLogin(acc: Account) {
         if (acc === Auth.guest) {
             // we're logging in as guest, skip auth
-            Auth.updateCurrentUser(Auth.guest)
-            refresh()
+            becomeGuest()
             return
         }
 

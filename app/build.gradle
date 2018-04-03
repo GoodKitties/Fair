@@ -6,6 +6,11 @@ apply plugin: 'kotlin-kapt'
 android {
     compileSdkVersion 27
 
+    lintOptions {
+        disable 'MissingTranslation'
+        disable 'ExtraTranslation'
+    }
+
     defaultConfig {
         applicationId "dybr.kanedias.com.fair"
         targetSdkVersion 27 // device you test on
@@ -19,6 +24,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+        debug {
+            applicationIdSuffix ".debug"
         }
     }
 
