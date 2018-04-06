@@ -12,7 +12,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "dybr.kanedias.com.fair"
+        applicationId "com.kanedias.dybr.fair"
         targetSdkVersion 27 // device you test on
         minSdkVersion 16    // device you allow your users to be on :)
         versionCode 1
@@ -63,8 +63,7 @@ dependencies {
     implementation 'moe.banana:moshi-jsonapi:3.3.0'                             // JSON-API parser
     implementation 'com.squareup.moshi:moshi-kotlin:1.5.0'                      // Moshi Kotlin support
     implementation 'com.squareup.moshi:moshi-adapters:1.5.0'                    // Moshi serializers collection
-    implementation 'ru.noties:markwon:1.0.1'                                    // markdown rendering
-    implementation 'org.sufficientlysecure:html-textview:3.5'                   // html rendering
+    implementation 'ru.noties:markwon:1.0.4'                                    // markdown rendering
     //implementation 'com.github.clans:fab:1.6.4'                               // Floating action button with menu
 
 

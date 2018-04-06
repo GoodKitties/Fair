@@ -1,8 +1,10 @@
 package com.kanedias.dybr.fair
 
 import android.app.FragmentTransaction
+import android.content.SharedPreferences
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.support.design.widget.AppBarLayout
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.TabLayout
@@ -20,11 +22,8 @@ import butterknife.BindView
 import butterknife.OnClick
 import butterknife.ButterKnife
 import com.afollestad.materialdialogs.MaterialDialog
-import com.kanedias.dybr.fair.entities.Account
-import com.kanedias.dybr.fair.entities.Auth
+import com.kanedias.dybr.fair.entities.*
 import com.kanedias.dybr.fair.ui.Sidebar
-import com.kanedias.dybr.fair.entities.Entry
-import com.kanedias.dybr.fair.entities.OwnProfile
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
@@ -92,6 +91,8 @@ class MainActivity : AppCompatActivity() {
      */
     private lateinit var progressDialog: MaterialDialog
 
+    private lateinit var preferences: SharedPreferences
+
     /**
      * Tab adapter for [pager] <-> [tabs] synchronisation
      */
@@ -101,6 +102,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         ButterKnife.bind(this)
+
+        // init preferences
+        preferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         // set app bar
         setSupportActionBar(toolbar)
@@ -135,8 +139,12 @@ class MainActivity : AppCompatActivity() {
         // setup tabs
         tabs.setupWithViewPager(pager, true)
         pager.adapter = tabAdapter
-    }
 
+        if (preferences.getBoolean("first-app-launch", true)) {
+            drawer.openDrawer(GravityCompat.START)
+            preferences.edit().putBoolean("first-app-launch", false).apply()
+        }
+    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val menuInflater = MenuInflater(this)
@@ -167,7 +175,8 @@ class MainActivity : AppCompatActivity() {
     fun reLogin(acc: Account) {
         if (acc === Auth.guest) {
             // we're logging in as guest, skip auth
-            becomeGuest()
+            Auth.updateCurrentUser(Auth.guest)
+            refresh()
             return
         }
 
@@ -226,15 +235,10 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // predefine what we do on item selection
-        val onSelection = fun(pos: Int) { // define as function as we use early-return
-            Auth.updateCurrentProfile(profiles[pos])
-            refresh()
-        }
-
         if (profiles.size == 1 && !showIfOne) {
             // we have only one profile, use it
-            onSelection(0)
+            Auth.updateCurrentProfile(profiles[0])
+            refresh()
             return
         }
 
@@ -242,7 +246,6 @@ class MainActivity : AppCompatActivity() {
         val profAdapter = ProfileListAdapter(profiles.toMutableList())
         val dialog = MaterialDialog.Builder(this)
                 .title(R.string.switch_profile)
-                .itemsCallback({ _, _, pos, _ -> onSelection(pos) })
                 .adapter(profAdapter, LinearLayoutManager(this))
                 .negativeText(R.string.no_profile)
                 .onNegative({_, _ -> Auth.user.lastProfileId = "0"; refresh() })
@@ -312,6 +315,7 @@ class MainActivity : AppCompatActivity() {
 
         // load current blog and favorites
         launch(UI) {
+
             if (Auth.profile != null && Auth.blog == null) {
                 // we have loaded profile, try to load our blog
                 try {
@@ -323,8 +327,16 @@ class MainActivity : AppCompatActivity() {
             }
 
             sidebar.updateSidebar()
-            tabAdapter.notifyDataSetChanged()
+            refreshTabs()
         }
+    }
+
+    private fun refreshTabs() {
+        tabAdapter.apply {
+            account = Auth.user
+            blog = Auth.blog
+        }
+        tabAdapter.notifyDataSetChanged()
     }
 
     /**
@@ -349,34 +361,39 @@ class MainActivity : AppCompatActivity() {
 
     inner class TabAdapter: FragmentStatePagerAdapter(supportFragmentManager) {
 
+        var account: Account? = null
+        var blog: Blog? = null
+
         override fun getCount(): Int {
-            if (Auth.user === Auth.guest) {
+            if (account == null) {
+                // not initialized yet
+                return 0
+            }
+
+            if (account === Auth.guest) {
                 // guest can't see anything without logging in yet
                 return 0
             }
 
             var totalTabs = 0
-            Auth.blog?.let {
-                // we have our own diary, show it
-                totalTabs++
-            }
+            blog?.let { totalTabs++ }
 
             return totalTabs
         }
 
         override fun getItemPosition(fragment: Any): Int {
-            if (Auth.user == Auth.guest) {
-                // needed to kill old fragment that is shown when auth is switched to guest
-                (fragment as PostListFragment).userVisibleHint = false
+            val postList = fragment as PostListFragment
+            if (postList.blog != blog) {
+                // needed to kill old fragment that is shown when auth is switched
+                postList.userVisibleHint = false
                 return POSITION_NONE
             }
-
 
             return super.getItemPosition(fragment)
         }
 
         override fun getItem(position: Int): PostListFragment = when(position) {
-            MY_DIARY_TAB -> PostListFragment().apply { blog = Auth.blog }
+            MY_DIARY_TAB -> PostListFragment().apply { blog = this@TabAdapter.blog }
             //FAV_TAB -> PostListFragment().apply { slug = "$ownFavEndpoint/favorites" }
             else -> PostListFragment().apply { blog = null }
         }

@@ -122,7 +122,7 @@ object Network {
         return@Interceptor chain.proceed(authorisedReq)
     }
 
-    private lateinit var httpClient: OkHttpClient
+    lateinit var httpClient: OkHttpClient
 
     fun init() {
         httpClient =  OkHttpClient.Builder()

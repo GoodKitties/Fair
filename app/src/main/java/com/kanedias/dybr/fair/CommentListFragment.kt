@@ -114,7 +114,7 @@ class CommentListFragment : Fragment() {
             when (holder) {
                 is PostViewHolder -> {
                     holder.setup(entry, false)
-                    holder.itemView.setOnClickListener(null)
+                    holder.itemView.isClickable = false
                 }
                 is CommentViewHolder -> {
                     val comment = comments[position - 1]

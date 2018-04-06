@@ -15,12 +15,13 @@ import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.entities.*
+import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
-import org.sufficientlysecure.htmltextview.ClickableTableSpan
-import org.sufficientlysecure.htmltextview.HtmlTextView
-import org.sufficientlysecure.htmltextview.DrawTableLinkSpan
+import ru.noties.markwon.Markwon
+import ru.noties.markwon.SpannableBuilder
+import ru.noties.markwon.SpannableConfiguration
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -40,7 +41,7 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
     lateinit var authorView: TextView
 
     @BindView(R.id.comment_message)
-    lateinit var bodyView: HtmlTextView
+    lateinit var bodyView: TextView
 
     @BindViews(R.id.comment_edit, R.id.comment_delete, R.id.comment_more_options)
     lateinit var buttons: List<@JvmSuppressWildcards ImageView>
@@ -119,7 +120,7 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
         dateView.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(comment.createdAt)
         authorView.text = profile.nickname
-        bodyView.setHtml(comment.content)
+        Markwon.setMarkdown(bodyView, Html2Markdown().parse(comment.content))
 
         // time diff must be lower than 15 minutes
         val timeDiff = (Date().time - comment.createdAt.time) / 1000 // in seconds

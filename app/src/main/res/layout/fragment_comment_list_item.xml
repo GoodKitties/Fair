@@ -38,7 +38,7 @@
             android:text="@string/placeholder_long"
             android:maxEms="20"/>
 
-        <org.sufficientlysecure.htmltextview.HtmlTextView
+        <TextView
             android:id="@+id/comment_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
