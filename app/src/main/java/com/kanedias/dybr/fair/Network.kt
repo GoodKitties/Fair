@@ -140,7 +140,9 @@ object Network {
      */
     fun createAccount(regInfo: RegisterRequest): RegisterResponse {
         val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(regInfo))
-        val req = Request.Builder().post(reqBody).url(USERS_ENDPOINT).build()
+
+        // we need empty auth in order to create users
+        val req = Request.Builder().post(reqBody).url(USERS_ENDPOINT).header("Authorization", "").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw extractErrors(resp)

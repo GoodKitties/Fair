@@ -26,10 +26,8 @@ import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import okhttp3.Request
-import okhttp3.Response
 import ru.noties.markwon.Markwon
 import ru.noties.markwon.SpannableConfiguration
-import ru.noties.markwon.renderer.html.ImageSizeResolverDef
 import ru.noties.markwon.spans.AsyncDrawable
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -37,36 +35,36 @@ import java.util.*
 
 
 /**
- * View holder for showing regular posts in diary view.
+ * View holder for showing regular entries in diary view.
  *
- * @see PostListFragment.postRibbon
+ * @see EntryListFragment.entryRibbon
  * @author Kanedias
  */
-class PostViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
+class EntryViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
-    @BindView(R.id.post_title)
+    @BindView(R.id.entry_title)
     lateinit var titleView: TextView
 
-    @BindView(R.id.post_date)
+    @BindView(R.id.entry_date)
     lateinit var dateView: TextView
 
-    @BindView(R.id.post_message)
+    @BindView(R.id.entry_message)
     lateinit var bodyView: TextView
 
-    @BindViews(R.id.post_edit, R.id.post_delete, R.id.post_more_options)
+    @BindViews(R.id.entry_edit, R.id.entry_delete, R.id.entry_more_options)
     lateinit var buttons: List<@JvmSuppressWildcards ImageView>
 
     /**
-     * Entry (post) that this holder represents
+     * Entry that this holder represents
      */
     private lateinit var entry: Entry
 
     /**
-     * Listener to show comments of this post
+     * Listener to show comments of this entry
      */
     private val commentShow  = View.OnClickListener { it ->
         val activity = it.context as AppCompatActivity
-        val commentsPage = CommentListFragment().apply { entry = this@PostViewHolder.entry }
+        val commentsPage = CommentListFragment().apply { entry = this@EntryViewHolder.entry }
         activity.supportFragmentManager.beginTransaction()
                 .addToBackStack("Showing comment list fragment")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
@@ -80,23 +78,23 @@ class PostViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
         iv.setOnClickListener(commentShow)
     }
 
-    @OnClick(R.id.post_edit)
-    fun editPost() {
+    @OnClick(R.id.entry_edit)
+    fun editEntry() {
         val activity = itemView.context as AppCompatActivity
-        val postEdit = CreateNewEntryFragment().apply {
+        val entryEdit = CreateNewEntryFragment().apply {
             editMode = true
-            editEntry = this@PostViewHolder.entry
+            editEntry = this@EntryViewHolder.entry
         }
 
         activity.supportFragmentManager.beginTransaction()
-                .addToBackStack("Showing post edit fragment")
+                .addToBackStack("Showing entry edit fragment")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .replace(R.id.main_drawer_layout, postEdit)
+                .replace(R.id.main_drawer_layout, entryEdit)
                 .commit()
     }
 
-    @OnClick(R.id.post_delete)
-    fun deletePost() {
+    @OnClick(R.id.entry_delete)
+    fun deleteEntry() {
         val activity = itemView.context as AppCompatActivity
 
         // delete callback
@@ -108,9 +106,9 @@ class PostViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
                     activity.supportFragmentManager.popBackStack()
 
                     // if we have current tab, refresh it
-                    val plPredicate = { it: Fragment -> it is PostListFragment && it.userVisibleHint }
-                    val currentTab = activity.supportFragmentManager.fragments.find(plPredicate) as PostListFragment?
-                    currentTab?.refreshPosts()
+                    val plPredicate = { it: Fragment -> it is EntryListFragment && it.userVisibleHint }
+                    val currentTab = activity.supportFragmentManager.fragments.find(plPredicate) as EntryListFragment?
+                    currentTab?.refreshEntries()
                 } catch (ex: Exception) {
                     Network.reportErrors(itemView.context, ex)
                 }
@@ -128,8 +126,27 @@ class PostViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
                 .show()
     }
 
+    @OnClick(R.id.entry_more_options)
+    fun showOverflowMenu() {
+        val ctx = itemView.context
+        val items = listOf(ctx.getString(R.string.show_web_version))
+
+        MaterialDialog.Builder(itemView.context)
+                .title(R.string.entry_menu)
+                .items(items)
+                .itemsCallback({ _, _, position, _ ->
+                    when (position) {
+                        1 -> showInWebView()
+                    }
+                }).show()
+    }
+
+    private fun showInWebView() {
+
+    }
+
     /**
-     * Show or hide post editing buttons depending on circumstances
+     * Show or hide entry editing buttons depending on circumstances
      */
     private fun toggleEditButtons(show: Boolean) {
         val visibility = when (show) {
@@ -152,7 +169,6 @@ class PostViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
         // content handling
         val mdConfig = SpannableConfiguration.builder(itemView.context)
                 .asyncDrawableLoader(DrawableLoader(bodyView))
-                .imageSizeResolver(ImageSizeResolverDef())
                 .build()
         Markwon.setMarkdown(bodyView, mdConfig, Html2Markdown().parse(entry.content))
         bodyView.movementMethod = CustomTextView.LocalLinkMovementMethod()
@@ -160,9 +176,12 @@ class PostViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
         toggleEditButtons(editable)
     }
 
+    /**
+     * Class responsible for loading images inside markdown-enabled text-views
+     */
     inner class DrawableLoader(private val view: TextView): AsyncDrawable.Loader {
 
-        private var imgWait: Deferred<Response>? = null
+        private var imgWait: Deferred<Bitmap>? = null
 
         override fun cancel(destination: String) {
             imgWait?.cancel(null)
@@ -172,9 +191,11 @@ class PostViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
             launch(UI) {
                 try {
                     val req = Request.Builder().url(destination).build()
-                    imgWait = async(CommonPool) { Network.httpClient.newCall(req).execute() }
-                    val image = BitmapFactory.decodeStream(imgWait?.await()?.body()?.byteStream())
-                    image?.let {
+                    imgWait = async(CommonPool) {
+                        val resp = Network.httpClient.newCall(req).execute()
+                        BitmapFactory.decodeStream(resp.body()?.byteStream())
+                    }
+                    imgWait?.await()?.let {
                         val sizedHeight = it.height * view.width / it.width
                         val actual = Bitmap.createScaledBitmap(it, view.width, sizedHeight, false)
                         val result = BitmapDrawable(view.context.resources, actual)

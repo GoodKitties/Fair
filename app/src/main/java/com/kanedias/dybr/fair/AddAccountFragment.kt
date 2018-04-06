@@ -183,6 +183,7 @@ class AddAccountFragment : Fragment() {
             try {
                 val response = async(CommonPool) { Network.createAccount(req) }.await()
                 val acc = Account().apply {
+                    serverId = response.id
                     email = response.email
                     password = req.password // get from request, can't be obtained from user info
                     createdAt = response.createdAt

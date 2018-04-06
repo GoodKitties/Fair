@@ -222,9 +222,9 @@ class CreateNewCommentFragment : Fragment() {
                 fragmentManager!!.popBackStack()
 
                 // if we have current tab set, refresh it
-                val plPredicate = { it: Fragment -> it is PostListFragment && it.userVisibleHint }
-                val currentTab = fragmentManager!!.fragments.find(plPredicate) as PostListFragment?
-                currentTab?.refreshPosts()
+                val elPredicate = { it: Fragment -> it is EntryListFragment && it.userVisibleHint }
+                val currentTab = fragmentManager!!.fragments.find(elPredicate) as EntryListFragment?
+                currentTab?.refreshEntries()
             } catch (ex: Exception) {
                 // don't close the fragment, just report errors
                 Network.reportErrors(activity, ex)

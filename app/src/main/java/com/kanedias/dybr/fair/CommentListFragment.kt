@@ -23,7 +23,7 @@ import kotlinx.coroutines.experimental.launch
 import moe.banana.jsonapi2.ArrayDocument
 
 /**
- * Fragment which displays selected post and its comments below.
+ * Fragment which displays selected entry and its comments below.
  *
  * @author Kanedias
  *
@@ -99,12 +99,12 @@ class CommentListFragment : Fragment() {
     }
 
     /**
-     * Adapter for comments list. Top item is a post being viewed.
-     * All views below represent comments to this post.
+     * Adapter for comments list. Top item is an entry being viewed.
+     * All views below represent comments to this entry.
      */
     inner class CommentListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-        private val TYPE_POST = 0
+        private val TYPE_ENTRY = 0
         private val TYPE_COMMENT = 1
 
         lateinit var comments: ArrayDocument<Comment>
@@ -112,7 +112,7 @@ class CommentListFragment : Fragment() {
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             when (holder) {
-                is PostViewHolder -> {
+                is EntryViewHolder -> {
                     holder.setup(entry, false)
                     holder.itemView.isClickable = false
                 }
@@ -126,16 +126,16 @@ class CommentListFragment : Fragment() {
 
         override fun getItemViewType(position: Int): Int {
             if (position == 0) {
-                return TYPE_POST
+                return TYPE_ENTRY
             }
             return TYPE_COMMENT
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
             val inflater = LayoutInflater.from(activity)
-            return if (viewType == TYPE_POST) {
-                val view = inflater.inflate(R.layout.fragment_comment_list_post_item, parent, false)
-                PostViewHolder(view)
+            return if (viewType == TYPE_ENTRY) {
+                val view = inflater.inflate(R.layout.fragment_comment_list_entry_item, parent, false)
+                EntryViewHolder(view)
             } else {
                 val view = inflater.inflate(R.layout.fragment_comment_list_item, parent, false)
                 CommentViewHolder(view)

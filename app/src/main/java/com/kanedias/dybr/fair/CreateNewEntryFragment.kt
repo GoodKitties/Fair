@@ -29,9 +29,9 @@ import ru.noties.markwon.*
 /**
  * Fragment responsible for showing create entry/edit entry form.
  *
- * @see PostListFragment.postRibbon
+ * @see EntryListFragment.entryRibbon
  * @param iv view inside adapter
- * @param fragment parent blog post list fragment
+ * @param fragment parent blog entry list fragment
  * @author Kanedias
  */
 class CreateNewEntryFragment : Fragment() {
@@ -234,9 +234,9 @@ class CreateNewEntryFragment : Fragment() {
                 fragmentManager!!.popBackStack()
 
                 // if we have current tab set, refresh it
-                val plPredicate = { it: Fragment -> it is PostListFragment && it.userVisibleHint }
-                val currentTab = fragmentManager!!.fragments.find(plPredicate) as PostListFragment?
-                currentTab?.refreshPosts()
+                val plPredicate = { it: Fragment -> it is EntryListFragment && it.userVisibleHint }
+                val currentTab = fragmentManager!!.fragments.find(plPredicate) as EntryListFragment?
+                currentTab?.refreshEntries()
             } catch (ex: Exception) {
                 // don't close the fragment, just report errors
                 Network.reportErrors(activity, ex)

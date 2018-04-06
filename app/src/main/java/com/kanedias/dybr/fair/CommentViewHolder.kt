@@ -27,7 +27,7 @@ import java.util.*
 
 
 /**
- * View holder for showing comments in post view.
+ * View holder for showing comments in entry view.
  *
  * @see CommentListFragment.commentRibbon
  * @author Kanedias
@@ -55,15 +55,15 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
     @OnClick(R.id.comment_edit)
     fun editComment() {
         val activity = itemView.context as AppCompatActivity
-        val postEdit = CreateNewCommentFragment().apply {
+        val commentEdit = CreateNewCommentFragment().apply {
             editMode = true
             editComment = this@CommentViewHolder.comment
         }
 
         activity.supportFragmentManager.beginTransaction()
-                .addToBackStack("Showing post edit fragment")
+                .addToBackStack("Showing comment edit fragment")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .replace(R.id.main_drawer_layout, postEdit)
+                .replace(R.id.main_drawer_layout, commentEdit)
                 .commit()
     }
 
@@ -101,7 +101,7 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
     }
 
     /**
-     * Show or hide post editing buttons depending on circumstances
+     * Show or hide entry editing buttons depending on circumstances
      */
     private fun toggleEditButtons(show: Boolean) {
         val visibility = when (show) {

@@ -19,39 +19,39 @@ import moe.banana.jsonapi2.ArrayDocument
 
 
 /**
- * Fragment which displays list of posts in currently viewed blog.
+ * Fragment which displays list of entries in currently viewed blog.
  *
  * @author Kanedias
  *
  * Created on 18.11.17
  */
-class PostListFragment: Fragment() {
+class EntryListFragment: Fragment() {
 
-    @BindView(R.id.post_ribbon)
-    lateinit var postRibbon: RecyclerView
+    @BindView(R.id.entry_ribbon)
+    lateinit var entryRibbon: RecyclerView
 
-    @BindView(R.id.post_list_area)
+    @BindView(R.id.entry_list_area)
     lateinit var refresher: SwipeRefreshLayout
 
     var blog: Blog? = null
 
-    private val postAdapter = PostListAdapter()
+    private val entryAdapter = EntryListAdapter()
 
     private lateinit var activity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_post_list, container, false)
+        val view = inflater.inflate(R.layout.fragment_entry_list, container, false)
         activity = context as MainActivity
 
         ButterKnife.bind(this, view)
         setupUI()
-        refreshPosts()
+        refreshEntries()
         return view
     }
 
     private fun setupUI() {
-        refresher.setOnRefreshListener { refreshPosts() }
-        postRibbon.layoutManager = LinearLayoutManager(activity)
+        refresher.setOnRefreshListener { refreshEntries() }
+        entryRibbon.layoutManager = LinearLayoutManager(activity)
     }
 
     /**
@@ -72,7 +72,7 @@ class PostListFragment: Fragment() {
         }
     }
 
-    fun refreshPosts() {
+    fun refreshEntries() {
         if (blog == null) // we don't have a blog, just show empty list
             return
 
@@ -81,13 +81,13 @@ class PostListFragment: Fragment() {
 
             try {
                 val success = async(CommonPool) { Network.loadEntries(blog!!) }
-                postAdapter.entries = success.await()
+                entryAdapter.entries = success.await()
             } catch (ex: Exception) {
                 Network.reportErrors(activity, ex)
             }
 
             refresher.isRefreshing = false
-            postRibbon.adapter = postAdapter
+            entryRibbon.adapter = entryAdapter
 
             if (blog == Auth.blog) {
                 activity.actionButton.show()
@@ -95,37 +95,37 @@ class PostListFragment: Fragment() {
         }
     }
 
-    inner class PostListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    inner class EntryListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         var entries: ArrayDocument<Entry> = ArrayDocument()
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            val postHolder = holder as PostViewHolder
+            val entryHolder = holder as EntryViewHolder
             val entry = entries[position]
-            postHolder.setup(entry, blog == Auth.blog)
+            entryHolder.setup(entry, blog == Auth.blog)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
             val inflater = LayoutInflater.from(activity)
-            val view = inflater.inflate(R.layout.fragment_post_list_item, parent, false)
-            return PostViewHolder(view)
+            val view = inflater.inflate(R.layout.fragment_entry_list_item, parent, false)
+            return EntryViewHolder(view)
         }
 
         override fun getItemCount() = entries.size
     }
 
     /**
-     * Adds diary entry on top of post ribbon and scrolls to it
+     * Adds diary entry on top of entry ribbon and scrolls to it
      */
-    fun addCreateNewPostForm() {
-        val postAdd = CreateNewEntryFragment().apply {
-            this.blog = this@PostListFragment.blog!! // at this point we know we have the blog
+    fun addCreateNewEntryForm() {
+        val entryAdd = CreateNewEntryFragment().apply {
+            this.blog = this@EntryListFragment.blog!! // at this point we know we have the blog
         }
 
         fragmentManager!!.beginTransaction()
-                .addToBackStack("Showing post add fragment")
+                .addToBackStack("Showing entry add fragment")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .replace(R.id.main_drawer_layout, postAdd)
+                .replace(R.id.main_drawer_layout, entryAdd)
                 .commit()
     }
 

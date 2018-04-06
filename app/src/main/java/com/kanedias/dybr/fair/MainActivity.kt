@@ -348,7 +348,7 @@ class MainActivity : AppCompatActivity() {
 
         // use `instantiate` here because getItem returns new item with each invocation
         // we know that fragment is already present so it will return cached one
-        val currFragment = tabAdapter.instantiateItem(pager, pager.currentItem) as PostListFragment
+        val currFragment = tabAdapter.instantiateItem(pager, pager.currentItem) as EntryListFragment
         if (currFragment.refresher.isRefreshing) {
             // diary is not loaded yet
             Toast.makeText(this, R.string.still_loading, Toast.LENGTH_SHORT).show()
@@ -356,7 +356,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         appBar.setExpanded(false)
-        currFragment.addCreateNewPostForm()
+        currFragment.addCreateNewEntryForm()
     }
 
     inner class TabAdapter: FragmentStatePagerAdapter(supportFragmentManager) {
@@ -382,20 +382,20 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun getItemPosition(fragment: Any): Int {
-            val postList = fragment as PostListFragment
-            if (postList.blog != blog) {
+            val entryList = fragment as EntryListFragment
+            if (entryList.blog != blog) {
                 // needed to kill old fragment that is shown when auth is switched
-                postList.userVisibleHint = false
+                entryList.userVisibleHint = false
                 return POSITION_NONE
             }
 
             return super.getItemPosition(fragment)
         }
 
-        override fun getItem(position: Int): PostListFragment = when(position) {
-            MY_DIARY_TAB -> PostListFragment().apply { blog = this@TabAdapter.blog }
-            //FAV_TAB -> PostListFragment().apply { slug = "$ownFavEndpoint/favorites" }
-            else -> PostListFragment().apply { blog = null }
+        override fun getItem(position: Int): EntryListFragment = when(position) {
+            MY_DIARY_TAB -> EntryListFragment().apply { blog = this@TabAdapter.blog }
+            //FAV_TAB -> EntryListFragment().apply { slug = "$ownFavEndpoint/favorites" }
+            else -> EntryListFragment().apply { blog = null }
         }
 
         override fun getPageTitle(position: Int): CharSequence? = when (position) {

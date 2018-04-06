@@ -72,7 +72,7 @@
     <string name="new_profile">New profile</string>
     <string name="no_profiles_create_one">No profiles found for this account, create one?</string>
     <string name="confirm_action">Confirm action</string>
-    <string name="confirm_profile_deletion">Confirm profile deletion. Warning: diary and all posts belonging to this profile will be deleted by this action!</string>
+    <string name="confirm_profile_deletion">Confirm profile deletion. Warning: diary and all entries belonging to this profile will be deleted by this action!</string>
     <string name="confirm">Confirm</string>
     <string name="profile_deleted">Profile deleted</string>
     <string name="switch_profile">Switch profile</string>
@@ -103,4 +103,6 @@
     <string name="comment_updated">Comment updated</string>
     <string name="comment_created">Comment created</string>
     <string name="comments">Comments</string>
+    <string name="entry_menu">Entry menu</string>
+    <string name="show_web_version">Show web version</string>
 </resources>

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/post_list_area"
+    android:id="@+id/entry_list_area"
     android:layout_marginStart="4dp"
     android:layout_marginLeft="4dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/post_ribbon"
+        android:id="@+id/entry_ribbon"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingTop="4dp"
