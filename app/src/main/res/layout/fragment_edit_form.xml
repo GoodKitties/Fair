@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <GridLayout
+        android:id="@+id/edit_quick_button_area"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:columnCount="6"
+        android:rowCount="3">
+
+        <ImageView
+            android:id="@+id/edit_quick_bold"
+            android:layout_row="0"
+            android:layout_column="0"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_margin="2dp"
+            android:src="@drawable/bold"
+            android:contentDescription="@string/bold_font"/>
+
+        <ImageView
+            android:id="@+id/edit_quick_italic"
+            android:layout_row="0"
+            android:layout_column="1"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_margin="2dp"
+            android:src="@drawable/italic"
+            android:contentDescription="@string/italic_font"/>
+
+        <ImageView
+            android:id="@+id/edit_quick_underlined"
+            android:layout_row="0"
+            android:layout_column="2"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_margin="2dp"
+            android:src="@drawable/underlined"
+            android:contentDescription="@string/underlined_font"/>
+
+        <ImageView
+            android:id="@+id/edit_quick_strikethrough"
+            android:layout_row="0"
+            android:layout_column="3"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_margin="2dp"
+            android:src="@drawable/strikethrough"
+            android:contentDescription="@string/strikethrough_font"/>
+
+        <ImageView
+            android:id="@+id/edit_quick_code"
+            android:layout_row="0"
+            android:layout_column="4"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_margin="2dp"
+            android:src="@drawable/code"
+            android:contentDescription="@string/insert_code_block"/>
+
+        <ImageView
+            android:id="@+id/edit_quick_quote"
+            android:layout_row="0"
+            android:layout_column="5"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_margin="2dp"
+            android:src="@drawable/quote"
+            android:contentDescription="@string/insert_quote_block"/>
+
+        <ImageView
+            android:id="@+id/edit_quick_number_list"
+            android:layout_row="1"
+            android:layout_column="0"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_margin="2dp"
+            android:src="@drawable/numbered_list"
+            android:contentDescription="@string/insert_numbered_list"/>
+
+        <ImageView
+            android:id="@+id/edit_quick_bullet_list"
+            android:layout_row="1"
+            android:layout_column="1"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_margin="2dp"
+            android:src="@drawable/bulleted_list"
+            android:contentDescription="@string/insert_bulleted_list"/>
+
+        <ImageView
+            android:id="@+id/edit_quick_link"
+            android:layout_row="1"
+            android:layout_column="2"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/link"
+            android:layout_margin="2dp"
+            android:contentDescription="@string/insert_link"/>
+
+        <ImageView
+            android:id="@+id/edit_quick_image"
+            android:layout_row="1"
+            android:layout_column="3"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/image"
+            android:layout_margin="2dp"
+            android:contentDescription="@string/insert_image"/>
+
+        <Switch
+            android:id="@+id/edit_insert_from_clipboard"
+            android:layout_row="2"
+            android:layout_column="0"
+            android:layout_columnSpan="6"
+            android:layout_margin="2dp"
+            android:layout_gravity="center"
+            android:switchPadding="8dp"
+            android:text="@string/insert_from_clipboard" />
+
+    </GridLayout>
+
+    <EditText
+        android:id="@+id/source_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textAutoComplete|textMultiLine"
+        android:hint="@string/content"
+        android:textAppearance="@android:style/TextAppearance.Medium"
+        android:minLines="2"/>
+
+</LinearLayout>

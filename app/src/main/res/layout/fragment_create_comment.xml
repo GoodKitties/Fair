@@ -30,23 +30,11 @@
                 android:inAnimation="@android:anim/slide_in_left"
                 android:outAnimation="@android:anim/slide_out_right">
 
-                <LinearLayout
-                    android:orientation="vertical"
+                <fragment
+                    android:id="@+id/comment_editor"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <include layout="@layout/util_edit_form" />
-
-                    <EditText
-                        android:id="@+id/comment_source_text"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="textAutoComplete|textMultiLine"
-                        android:hint="@string/comment_content"
-                        android:textAppearance="@android:style/TextAppearance.Medium"
-                        android:minLines="2"/>
-
-                </LinearLayout>
+                    android:layout_height="wrap_content"
+                    android:name="com.kanedias.dybr.fair.ui.EditorViews" />
 
                 <TextView
                     android:id="@+id/comment_markdown_preview"

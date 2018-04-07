@@ -52,16 +52,11 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
 
-                        <include layout="@layout/util_edit_form" />
-
-                        <EditText
-                            android:id="@+id/entry_source_text"
+                        <fragment
+                            android:id="@+id/entry_editor"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textAutoComplete|textMultiLine"
-                            android:hint="@string/entry_content"
-                            android:textAppearance="@android:style/TextAppearance.Medium"
-                            android:minLines="2"/>
+                            android:name="com.kanedias.dybr.fair.ui.EditorViews" />
 
                     </LinearLayout>
 

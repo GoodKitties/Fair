@@ -1,6 +1,7 @@
 package com.kanedias.dybr.fair
 
 import android.content.Context
+import android.webkit.MimeTypeMap
 import android.widget.Toast
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Rfc3339DateJsonAdapter
@@ -18,7 +19,10 @@ import java.util.concurrent.TimeUnit
 import java.io.IOException
 import java.util.*
 import moe.banana.jsonapi2.ArrayDocument
+import java.io.InputStream
 import java.net.HttpURLConnection.*
+import okhttp3.RequestBody
+import org.json.JSONObject
 
 
 /**
@@ -70,7 +74,9 @@ import java.net.HttpURLConnection.*
  */
 object Network {
 
-    val MAIN_DYBR_URL = "https://dybr-staging-api.herokuapp.com"
+    private val MAIN_STORAGE_HOST = "https://slonopotam.net"
+    private val IMG_UPLOAD_ENDPOINT = "$MAIN_STORAGE_HOST/upload"
+
     private val MAIN_DYBR_API_ENDPOINT = "https://dybr-staging-api.herokuapp.com/v1"
 
     private val USERS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/users"
@@ -463,6 +469,30 @@ object Network {
 
         // if response is successful we should have login response in body
         return fromWrappedJson(resp.body()!!.source(), LoginResponse::class.java)!!
+    }
+
+    /**
+     * Uploads image to dybr-dedicated storage and returns link to it
+     *
+     * @param image content of image
+     */
+    fun uploadImage(image: ByteArray): String {
+        val body = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("file", "master-foo", RequestBody.create(MediaType.parse("image/*"), image))
+                .build()
+
+        val req = Request.Builder().post(body).url(IMG_UPLOAD_ENDPOINT).build()
+        val resp = httpClient.newCall(req).execute()
+
+        // unprocessable entity error can be returned when something is wrong with your input
+        if (!resp.isSuccessful) {
+            throw extractErrors(resp)
+        }
+
+        // if response is successful we should have login response in body
+        val respJson = JSONObject(resp.body()!!.string())
+        return respJson.get("link") as String
     }
 
     /**

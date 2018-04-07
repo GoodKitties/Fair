@@ -464,8 +464,6 @@ class MainActivity : AppCompatActivity() {
                     refresh()
                 }
             }
-
         }
-
     }
 }

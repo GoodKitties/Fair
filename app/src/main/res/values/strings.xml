@@ -105,4 +105,20 @@
     <string name="comments">Comments</string>
     <string name="entry_menu">Entry menu</string>
     <string name="show_web_version">Show web version</string>
+    <string name="bold_font">Bold font</string>
+    <string name="italic_font">Italic font</string>
+    <string name="underlined_font">Underlined font</string>
+    <string name="strikethrough_font">Strikethrough font</string>
+    <string name="insert_code_block">Insert code block</string>
+    <string name="insert_quote_block">Inser quote block</string>
+    <string name="insert_numbered_list">Insert numbered list</string>
+    <string name="insert_bulleted_list">Insert bulleted list</string>
+    <string name="insert_link">Insert link</string>
+    <string name="insert_image">Insert image</string>
+    <string name="upload_public_image">Upload public image</string>
+    <string name="insert_from_clipboard">Insert from clipboard</string>
+    <string name="content">Content</string>
+    <string name="select_image_to_upload">Select image to upload</string>
+    <string name="no_file_manager_found">No file manager found</string>
+    <string name="uploading">Uploading…</string>
 </resources>

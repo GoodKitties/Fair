@@ -196,11 +196,19 @@ class EntryViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
                         BitmapFactory.decodeStream(resp.body()?.byteStream())
                     }
                     imgWait?.await()?.let {
-                        val sizedHeight = it.height * view.width / it.width
-                        val actual = Bitmap.createScaledBitmap(it, view.width, sizedHeight, false)
-                        val result = BitmapDrawable(view.context.resources, actual)
-                        result.bounds = Rect(0, 0, view.width, sizedHeight)
-                        drawable.result = result
+                        if (it.width < view.width) {
+                            // image is small enough to be inside our view
+                            val result = BitmapDrawable(view.context.resources, it)
+                            result.bounds = Rect(0, 0, it.width, it.height)
+                            drawable.result = result
+                        } else {
+                            // image is big, rescale
+                            val sizedHeight = it.height * view.width / it.width
+                            val actual = Bitmap.createScaledBitmap(it, view.width, sizedHeight, false)
+                            val result = BitmapDrawable(view.context.resources, actual)
+                            result.bounds = Rect(0, 0, view.width, sizedHeight)
+                            drawable.result = result
+                        }
                     }
                 } catch (ioex: IOException) {
                     // ignore, just don't load image
