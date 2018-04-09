@@ -1,10 +1,6 @@
 package com.kanedias.dybr.fair
 
 import android.app.FragmentTransaction
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Rect
-import android.graphics.drawable.BitmapDrawable
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
@@ -18,18 +14,10 @@ import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.entities.Entry
-import com.kanedias.dybr.fair.misc.CustomTextView
-import com.kanedias.html2md.Html2Markdown
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.Deferred
+import com.kanedias.dybr.fair.ui.handleMarkdown
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
-import okhttp3.Request
-import ru.noties.markwon.Markwon
-import ru.noties.markwon.SpannableConfiguration
-import ru.noties.markwon.spans.AsyncDrawable
-import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -166,54 +154,7 @@ class EntryViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
         dateView.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(entry.createdAt)
         titleView.text = entry.title
 
-        // content handling
-        val mdConfig = SpannableConfiguration.builder(itemView.context)
-                .asyncDrawableLoader(DrawableLoader(bodyView))
-                .build()
-        Markwon.setMarkdown(bodyView, mdConfig, Html2Markdown().parse(entry.content))
-        bodyView.movementMethod = CustomTextView.LocalLinkMovementMethod()
-
+        bodyView.handleMarkdown(entry.content)
         toggleEditButtons(editable)
-    }
-
-    /**
-     * Class responsible for loading images inside markdown-enabled text-views
-     */
-    inner class DrawableLoader(private val view: TextView): AsyncDrawable.Loader {
-
-        private var imgWait: Deferred<Bitmap>? = null
-
-        override fun cancel(destination: String) {
-            imgWait?.cancel(null)
-        }
-
-        override fun load(destination: String, drawable: AsyncDrawable) {
-            launch(UI) {
-                try {
-                    val req = Request.Builder().url(destination).build()
-                    imgWait = async(CommonPool) {
-                        val resp = Network.httpClient.newCall(req).execute()
-                        BitmapFactory.decodeStream(resp.body()?.byteStream())
-                    }
-                    imgWait?.await()?.let {
-                        if (it.width < view.width) {
-                            // image is small enough to be inside our view
-                            val result = BitmapDrawable(view.context.resources, it)
-                            result.bounds = Rect(0, 0, it.width, it.height)
-                            drawable.result = result
-                        } else {
-                            // image is big, rescale
-                            val sizedHeight = it.height * view.width / it.width
-                            val actual = Bitmap.createScaledBitmap(it, view.width, sizedHeight, false)
-                            val result = BitmapDrawable(view.context.resources, actual)
-                            result.bounds = Rect(0, 0, view.width, sizedHeight)
-                            drawable.result = result
-                        }
-                    }
-                } catch (ioex: IOException) {
-                    // ignore, just don't load image
-                }
-            }
-        }
     }
 }

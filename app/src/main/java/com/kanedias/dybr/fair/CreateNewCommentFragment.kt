@@ -14,7 +14,7 @@ import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.entities.*
-import com.kanedias.dybr.fair.ui.EditorViews
+import com.kanedias.dybr.fair.ui.handleMarkdown
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
@@ -98,7 +98,7 @@ class CreateNewCommentFragment : Fragment() {
 
         if (previewShown) {
             //preview.setBackgroundResource(R.drawable.white_border_line) // set border when previewing
-            Markwon.setMarkdown(preview, contentInput.text.toString())
+            preview.handleMarkdown(contentInput.text.toString())
             previewSwitcher.showNext()
         } else {
             previewSwitcher.showPrevious()

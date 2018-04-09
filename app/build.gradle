@@ -64,6 +64,7 @@ dependencies {
     implementation 'com.squareup.moshi:moshi-kotlin:1.5.0'                      // Moshi Kotlin support
     implementation 'com.squareup.moshi:moshi-adapters:1.5.0'                    // Moshi serializers collection
     implementation 'ru.noties:markwon:1.0.4'                                    // markdown rendering
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.12'           // show gif in posts
     //implementation 'com.github.clans:fab:1.6.4'                               // Floating action button with menu
 
 

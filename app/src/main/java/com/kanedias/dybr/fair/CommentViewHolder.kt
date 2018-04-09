@@ -5,7 +5,6 @@ import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
 import android.view.View
-import android.webkit.WebView
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -15,13 +14,11 @@ import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.entities.*
+import com.kanedias.dybr.fair.ui.handleMarkdown
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
-import ru.noties.markwon.Markwon
-import ru.noties.markwon.SpannableBuilder
-import ru.noties.markwon.SpannableConfiguration
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -120,7 +117,7 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
         dateView.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(comment.createdAt)
         authorView.text = profile.nickname
-        Markwon.setMarkdown(bodyView, Html2Markdown().parse(comment.content))
+        bodyView.handleMarkdown(Html2Markdown().parse(comment.content))
 
         // time diff must be lower than 15 minutes
         val timeDiff = (Date().time - comment.createdAt.time) / 1000 // in seconds

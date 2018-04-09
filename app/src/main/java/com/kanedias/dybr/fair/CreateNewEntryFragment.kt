@@ -16,14 +16,13 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.entities.Blog
 import com.kanedias.dybr.fair.entities.Entry
 import com.kanedias.dybr.fair.entities.EntryCreateRequest
-import com.kanedias.dybr.fair.ui.EditorViews
+import com.kanedias.dybr.fair.ui.handleMarkdown
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
 import moe.banana.jsonapi2.HasOne
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
-import ru.noties.markwon.*
 
 /**
  * Fragment responsible for showing create entry/edit entry form.
@@ -107,7 +106,7 @@ class CreateNewEntryFragment : Fragment() {
 
         if (previewShown) {
             //preview.setBackgroundResource(R.drawable.white_border_line) // set border when previewing
-            Markwon.setMarkdown(preview, contentInput.text.toString())
+            preview.handleMarkdown(contentInput.text.toString())
             previewSwitcher.showNext()
         } else {
             previewSwitcher.showPrevious()
