@@ -2,7 +2,7 @@
 
 buildscript {
     ext.kotlinVersion = '1.2.31'
-    ext.supportLibVersion = '27.1.0'
+    ext.supportLibVersion = '27.1.1'
     ext.acraVersion = '5.1.1'
 
     repositories {

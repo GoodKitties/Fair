@@ -14,4 +14,9 @@
         android:title="@string/search"
         android:icon="@android:drawable/ic_menu_search"/>
 
+    <item
+        android:id="@+id/menu_donate"
+        android:title="@string/donate"
+        android:icon="@drawable/money"/>
+
 </menu>

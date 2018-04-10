@@ -16,6 +16,7 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
+import android.util.Log
 import android.view.*
 import android.widget.*
 import butterknife.BindView
@@ -91,7 +92,13 @@ class MainActivity : AppCompatActivity() {
      */
     private lateinit var progressDialog: MaterialDialog
 
+    /**
+     * App-global shared preferences for small config changes not suitable for database
+     * (seen-marks, first launch options etc.)
+     */
     private lateinit var preferences: SharedPreferences
+
+    private lateinit var donateHelper: DonateHelper
 
     /**
      * Tab adapter for [pager] <-> [tabs] synchronisation
@@ -105,6 +112,7 @@ class MainActivity : AppCompatActivity() {
 
         // init preferences
         preferences = PreferenceManager.getDefaultSharedPreferences(this)
+        donateHelper = DonateHelper(this)
 
         // set app bar
         setSupportActionBar(toolbar)
@@ -150,6 +158,20 @@ class MainActivity : AppCompatActivity() {
         val menuInflater = MenuInflater(this)
         menuInflater.inflate(R.menu.main_action_bar_menu, menu)
         return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when (item?.itemId) {
+            R.id.menu_donate -> donateHelper.donate()
+            else -> {
+                Log.w("[Main]", "Unknown menu item selected: ${item?.title}")
+                return super.onOptionsItemSelected(item)
+            }
+        }
+
+        // it was handled in `when` block or we wouldn't be at this point
+        // confirm it
+        return true
     }
 
     override fun onBackPressed() {

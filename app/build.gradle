@@ -20,12 +20,21 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        release {
+            storeFile file("${System.getProperty('user.home')}/devel/keystore/Kanedias")
+            storePassword "release"
+            keyAlias "kanedias"
+            keyPassword "release"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-
         debug {
             applicationIdSuffix ".debug"
         }
@@ -34,6 +43,17 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    flavorDimensions "purity"
+    productFlavors {
+        fdroid {
+            dimension "purity"
+        }
+
+        googleplay {
+            dimension "purity"
+        }
     }
 
     splits {
@@ -67,6 +87,7 @@ dependencies {
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.12'           // show gif in posts
     //implementation 'com.github.clans:fab:1.6.4'                               // Floating action button with menu
 
+    googleplayImplementation 'com.android.billingclient:billing:1.0'            // billing library from Google
 
     kapt 'com.jakewharton:butterknife-compiler:8.8.1'                           // Kotlin annotation processors
     kapt 'com.github.Adonai.convalida-extended:convalida-compiler:1.1.0'

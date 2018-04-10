@@ -121,4 +121,9 @@
     <string name="select_image_to_upload">Select image to upload</string>
     <string name="no_file_manager_found">No file manager found</string>
     <string name="uploading">Uploading…</string>
+    <string name="donate">Donate</string>
+    <string name="thanks_for_your_pledge">Thanks for your pledge!</string>
+    <string name="request_a_feature">Request a feature</string>
+    <string name="create_issue">You are about to be redirected to project tracker. Please create new issue there.</string>
+    <string name="understood">Understood</string>
 </resources>
