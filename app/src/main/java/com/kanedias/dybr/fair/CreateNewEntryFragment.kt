@@ -20,6 +20,8 @@ import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
 import moe.banana.jsonapi2.HasOne
+import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
+import org.commonmark.ext.gfm.tables.TablesExtension
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 
@@ -156,9 +158,10 @@ class CreateNewEntryFragment : Fragment() {
     @OnClick(R.id.entry_submit)
     fun submit() {
         // hide edit form, show loading spinner
-        val parser = Parser.builder().build()
+        val extensions = listOf(StrikethroughExtension.create(), TablesExtension.create())
+        val parser = Parser.builder().extensions(extensions).build()
         val document = parser.parse(contentInput.text.toString())
-        val htmlContent = HtmlRenderer.builder().build().render(document)
+        val htmlContent = HtmlRenderer.builder().extensions(extensions).build().render(document)
 
         val entry = EntryCreateRequest()
         entry.apply {

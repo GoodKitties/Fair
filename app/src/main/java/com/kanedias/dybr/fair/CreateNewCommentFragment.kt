@@ -20,6 +20,8 @@ import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import moe.banana.jsonapi2.HasOne
+import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
+import org.commonmark.ext.gfm.tables.TablesExtension
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import ru.noties.markwon.Markwon
@@ -135,9 +137,10 @@ class CreateNewCommentFragment : Fragment() {
     @OnClick(R.id.comment_submit)
     fun submit() {
         // hide edit form, show loading spinner
-        val parser = Parser.builder().build()
+        val extensions = listOf(StrikethroughExtension.create(), TablesExtension.create())
+        val parser = Parser.builder().extensions(extensions).build()
         val document = parser.parse(contentInput.text.toString())
-        val htmlContent = HtmlRenderer.builder().build().render(document)
+        val htmlContent = HtmlRenderer.builder().extensions(extensions).build().render(document)
 
         val comment = CreateCommentRequest().apply { content = htmlContent }
 
