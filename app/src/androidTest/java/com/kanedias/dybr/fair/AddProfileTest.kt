@@ -112,7 +112,7 @@ class AddProfileTest {
         onView(withId(R.id.current_user_name)).check(matches(withText((nickname))))
 
         // click on profile switcher button
-        onView(allOf(withId(R.id.profile_switch), hasSibling(withText(KNOWN_ACCOUNT_EMAIL)))).perform(click())
+        onView(allOf(withId(R.id.switch_profile), hasSibling(withText(KNOWN_ACCOUNT_EMAIL)))).perform(click())
 
         waitForDialog()
         onView(withText(nickname)).inRoot(isDialog()).check(matches(isDisplayed()))

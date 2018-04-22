@@ -5,18 +5,17 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
-import android.widget.ViewSwitcher
+import android.widget.*
 import butterknife.BindView
 import butterknife.ButterKnife
+import butterknife.OnCheckedChanged
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.entities.Blog
 import com.kanedias.dybr.fair.entities.Entry
 import com.kanedias.dybr.fair.entities.EntryCreateRequest
 import com.kanedias.dybr.fair.ui.handleMarkdown
+import com.kanedias.dybr.fair.ui.handleMarkdownRaw
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
@@ -28,8 +27,6 @@ import org.commonmark.renderer.html.HtmlRenderer
  * Fragment responsible for showing create entry/edit entry form.
  *
  * @see EntryListFragment.entryRibbon
- * @param iv view inside adapter
- * @param fragment parent blog entry list fragment
  * @author Kanedias
  */
 class CreateNewEntryFragment : Fragment() {
@@ -57,6 +54,9 @@ class CreateNewEntryFragment : Fragment() {
      */
     @BindView(R.id.entry_preview_switcher)
     lateinit var previewSwitcher: ViewSwitcher
+
+    @BindView(R.id.entry_draft_switch)
+    lateinit var draftSwitch: CheckBox
 
     private var previewShown = false
 
@@ -92,6 +92,7 @@ class CreateNewEntryFragment : Fragment() {
      */
     private fun populateUI() {
         titleInput.setText(editEntry.title)
+        draftSwitch.isChecked = editEntry.state == "published"
         // need to convert entry content (html) to Markdown somehow...
         val markdown = Html2Markdown().parse(editEntry.content)
         contentInput.setText(markdown)
@@ -106,12 +107,24 @@ class CreateNewEntryFragment : Fragment() {
 
         if (previewShown) {
             //preview.setBackgroundResource(R.drawable.white_border_line) // set border when previewing
-            preview.handleMarkdown(contentInput.text.toString())
+            preview.handleMarkdownRaw(contentInput.text.toString())
             previewSwitcher.showNext()
         } else {
             previewSwitcher.showPrevious()
         }
 
+    }
+
+    /**
+     * Change text on draft-publish checkbox based on what's currently selected
+     */
+    @OnCheckedChanged(R.id.entry_draft_switch)
+    fun toggleDraftState(publish: Boolean) {
+        if (publish) {
+            draftSwitch.setText(R.string.publish_entry)
+        } else {
+            draftSwitch.setText(R.string.make_draft_entry)
+        }
     }
 
     /**
@@ -150,6 +163,7 @@ class CreateNewEntryFragment : Fragment() {
         val entry = EntryCreateRequest()
         entry.apply {
             title = titleInput.text.toString()
+            state = if (draftSwitch.isChecked) { "published" } else { "draft" }
             content = htmlContent
         }
 

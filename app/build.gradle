@@ -67,7 +67,7 @@ android {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"     // Kotlin language support
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"     // Kotlin language support
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.22.5"       // Kotlin coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:0.22.5"    // Kotlin UI context
     implementation "com.android.support:design:$supportLibVersion"              // Material design support lib
@@ -93,6 +93,8 @@ dependencies {
     kapt 'com.github.Adonai.convalida-extended:convalida-compiler:1.1.0'
 
     testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-core:2.18.0'
+
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     androidTestImplementation 'org.awaitility:awaitility:3.0.0'                        // useful wait-for-condition

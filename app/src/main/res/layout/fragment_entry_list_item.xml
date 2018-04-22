@@ -27,6 +27,18 @@
             android:text="@string/placeholder_long"/>
 
         <TextView
+            android:id="@+id/entry_draft_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:padding="5dp"
+            android:textColor="@color/md_amber_600"
+            android:text="@string/draft"
+            android:visibility="invisible"/>
+
+        <TextView
             android:id="@+id/entry_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -126,4 +126,7 @@
     <string name="request_a_feature">Request a feature</string>
     <string name="create_issue">You are about to be redirected to project tracker. Please create new issue there.</string>
     <string name="understood">Understood</string>
+    <string name="make_draft_entry">Make draft entry</string>
+    <string name="publish_entry">Publish entry</string>
+    <string name="draft">Draft</string>
 </resources>

@@ -25,14 +25,27 @@ import kotlin.math.ceil
 val CONTENT_TYPE_GIF = MediaType.parse("image/gif")
 
 /**
- * Perform all necessary steps to view Markdown in this text view
- * @param markdown intput markdown to show
+ * Perform all necessary steps to view Markdown in this text view.
+ * Parses input with html2md library and converts resulting markdown to spanned string.
+ * @param html input markdown to show
  */
-infix fun TextView.handleMarkdown(markdown: String) {
+infix fun TextView.handleMarkdown(html: String) {
     val mdConfig = SpannableConfiguration.builder(this.context)
             .asyncDrawableLoader(DrawableLoader(this))
             .build()
-    Markwon.setMarkdown(this, mdConfig, Html2Markdown().parse(markdown))
+    Markwon.setMarkdown(this, mdConfig, Html2Markdown().parse(html))
+    this.movementMethod = CustomTextView.LocalLinkMovementMethod()
+}
+
+/**
+ * Version without parsing html
+ * @see handleMarkdown
+ */
+infix fun TextView.handleMarkdownRaw(markdown: String) {
+    val mdConfig = SpannableConfiguration.builder(this.context)
+            .asyncDrawableLoader(DrawableLoader(this))
+            .build()
+    Markwon.setMarkdown(this, mdConfig, markdown)
     this.movementMethod = CustomTextView.LocalLinkMovementMethod()
 }
 
@@ -41,27 +54,27 @@ infix fun TextView.handleMarkdown(markdown: String) {
  */
 class DrawableLoader(private val view: TextView): AsyncDrawable.Loader {
 
-    private var imgWait: Deferred<Drawable?>? = null
+    private val pendingImages: MutableMap<String, Deferred<Drawable?>> = HashMap()
 
     override fun cancel(destination: String) {
-        imgWait?.cancel(null)
+        //pendingImages[destination]?.cancel(null)
     }
 
     override fun load(destination: String, drawable: AsyncDrawable) {
         launch(UI) {
             try {
                 while (view.width == 0) // just inflated
-                    delay(50)
+                    delay(500)
 
                 val req = Request.Builder().url(destination).build()
-                imgWait = async(CommonPool) {
+                pendingImages[destination] = async(CommonPool) {
                     val resp = Network.httpClient.newCall(req).execute()
                     when (resp.body()!!.contentType()) {
                         CONTENT_TYPE_GIF -> handleGif(resp)
                         else -> handleGeneric(resp)
                     }
                 }
-                imgWait?.await()?.let { drawable.result = it }
+                pendingImages[destination]?.await()?.let { drawable.result = it }
             } catch (ioex: IOException) {
                 // ignore, just don't load image
             }

@@ -51,6 +51,12 @@ class EntryCreateRequest : Resource() {
     var content: String = ""
 
     /**
+     * State of this entry. Variants: "draft", "published"
+     */
+    @field:Json(name = "state")
+    lateinit var state: String
+
+    /**
      * Blog that this entry belongs to.
      * Must be set if it's new entry.
      */
@@ -127,8 +133,8 @@ class EntryResponse: Resource() {
     lateinit var content: String
 
     /**
-     * State of this entry.
-     * For now only "published" is supported
+     * State of this entry
+     * @see EntryCreateRequest.state
      */
     @field:Json(name = "state")
     lateinit var state: String

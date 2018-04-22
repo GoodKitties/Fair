@@ -39,6 +39,9 @@ class EntryViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
     @BindView(R.id.entry_message)
     lateinit var bodyView: TextView
 
+    @BindView(R.id.entry_draft_state)
+    lateinit var draftStateView: TextView
+
     @BindViews(R.id.entry_edit, R.id.entry_delete, R.id.entry_more_options)
     lateinit var buttons: List<@JvmSuppressWildcards ImageView>
 
@@ -153,6 +156,7 @@ class EntryViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
         dateView.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(entry.createdAt)
         titleView.text = entry.title
+        draftStateView.visibility = if (entry.state == "published") { View.INVISIBLE } else { View.VISIBLE }
 
         bodyView.handleMarkdown(entry.content)
         toggleEditButtons(editable)

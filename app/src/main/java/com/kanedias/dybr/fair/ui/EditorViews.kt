@@ -13,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.MimeTypeMap
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.Switch
 import android.widget.Toast
@@ -45,7 +46,7 @@ class EditorViews : Fragment() {
     lateinit var contentInput: EditText
 
     @BindView(R.id.edit_insert_from_clipboard)
-    lateinit var clipboardSwitch: Switch
+    lateinit var clipboardSwitch: CheckBox
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.fragment_edit_form, container, false)
@@ -81,6 +82,8 @@ class EditorViews : Fragment() {
             R.id.edit_quick_link -> insertInCursorPosition("<a href=\"$paste\">", paste, "</a>")
             R.id.edit_quick_image -> insertInCursorPosition("<img src='", paste, "' />")
         }
+
+        clipboardSwitch.isEnabled = false
     }
 
     /**

@@ -85,7 +85,7 @@ class AddAccountTest {
 
         // check there's account added
         onView(withId(R.id.accounts_area)).check(matches(hasDescendant(withText(email))))
-        onView(withText(email)).check(matches(hasSibling(allOf(withId(R.id.profile_switch), isDisplayed()))))
+        onView(withText(email)).check(matches(hasSibling(allOf(withId(R.id.switch_profile), isDisplayed()))))
 
         deleteAccount(email)
     }

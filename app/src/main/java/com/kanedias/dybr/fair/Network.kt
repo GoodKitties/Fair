@@ -134,6 +134,7 @@ object Network {
         httpClient =  OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
                 .connectionPool(ConnectionPool())
                 .dispatcher(Dispatcher())
                 .addInterceptor(authorizer)
