@@ -1,6 +1,8 @@
 package com.kanedias.dybr.fair
 
 import android.content.Context
+import android.content.SharedPreferences
+import android.preference.PreferenceManager
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import com.squareup.moshi.Moshi
@@ -77,14 +79,14 @@ object Network {
     private val MAIN_STORAGE_HOST = "https://slonopotam.net"
     private val IMG_UPLOAD_ENDPOINT = "$MAIN_STORAGE_HOST/upload"
 
-    private val MAIN_DYBR_API_ENDPOINT = "https://dybr-staging-api.herokuapp.com/v1"
+    private var MAIN_DYBR_API_ENDPOINT = "https://dybr-staging-api.herokuapp.com/v1"
 
-    private val USERS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/users"
-    private val SESSIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/sessions"
-    private val PROFILES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/profiles"
-    private val BLOGS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/blogs"
-    private val ENTRIES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/entries"
-    private val COMMENTS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/comments"
+    private var USERS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/users"
+    private var SESSIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/sessions"
+    private var PROFILES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/profiles"
+    private var BLOGS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/blogs"
+    private var ENTRIES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/entries"
+    private var COMMENTS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/comments"
 
     private val MIME_JSON_API = MediaType.parse("application/vnd.api+json")
 
@@ -130,7 +132,14 @@ object Network {
 
     lateinit var httpClient: OkHttpClient
 
-    fun init() {
+    fun init(ctx: Context) {
+
+        // reinitialize endpoints
+        val pref = PreferenceManager.getDefaultSharedPreferences(ctx)
+        setupEndpoints(pref)
+        pref.registerOnSharedPreferenceChangeListener({preferences, _ -> setupEndpoints(preferences) })
+
+        // setup http client
         httpClient =  OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)
@@ -139,6 +148,16 @@ object Network {
                 .dispatcher(Dispatcher())
                 .addInterceptor(authorizer)
                 .build()
+    }
+
+    private fun setupEndpoints(pref: SharedPreferences) {
+        MAIN_DYBR_API_ENDPOINT = pref.getString("home-server", "https://dybr-staging-api.herokuapp.com/v1")
+        USERS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/users"
+        SESSIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/sessions"
+        PROFILES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/profiles"
+        BLOGS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/blogs"
+        ENTRIES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/entries"
+        COMMENTS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/comments"
     }
 
     /**

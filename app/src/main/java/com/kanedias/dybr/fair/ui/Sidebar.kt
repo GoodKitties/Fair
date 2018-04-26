@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.FragmentTransaction
+import android.content.Intent
 import android.support.v4.view.animation.FastOutSlowInInterpolator
 import android.support.v4.widget.DrawerLayout
 import android.view.View
@@ -12,10 +13,7 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
-import com.kanedias.dybr.fair.AddAccountFragment
-import com.kanedias.dybr.fair.MainActivity
-import com.kanedias.dybr.fair.Network
-import com.kanedias.dybr.fair.R
+import com.kanedias.dybr.fair.*
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.entities.Auth
 import com.kanedias.dybr.fair.entities.Account
@@ -96,6 +94,11 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .replace(R.id.main_drawer_layout, AddAccountFragment())
                 .commit()
+    }
+
+    @OnClick(R.id.settings_area)
+    fun goToSettings() {
+        activity.startActivity(Intent(activity, SettingsActivity::class.java))
     }
 
     /**
@@ -247,6 +250,7 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
                 activity.createBlog()
                 drawer.closeDrawers()
             }
+            return
         }
 
         // we have a blog, show it

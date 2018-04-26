@@ -129,4 +129,6 @@
     <string name="make_draft_entry">Make draft entry</string>
     <string name="publish_entry">Publish entry</string>
     <string name="draft">Draft</string>
+    <string name="api_home_server">API home server</string>
+    <string name="api_home_server_sum">Don\'t change this if you don\'t know what you\'re doing</string>
 </resources>

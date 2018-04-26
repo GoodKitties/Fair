@@ -51,7 +51,7 @@ class AddBlogFragment: Fragment() {
         return root
     }
 
-    @OnClick(R.id.prof_create_button)
+    @OnClick(R.id.blog_create_button)
     fun confirm() {
         val blogReq = BlogCreateRequest().apply {
             slug = slugInput.text.toString()
@@ -66,7 +66,7 @@ class AddBlogFragment: Fragment() {
                 val blog = async(CommonPool) { Network.createBlog(blogReq) }.await()
                 Auth.updateBlog(blog)
 
-                //we created profile successfully, return to main activity
+                //we created blog successfully, return to main activity
                 Toast.makeText(activity, R.string.blog_created, Toast.LENGTH_SHORT).show()
                 handleSuccess()
             } catch (ex: Exception) {
@@ -78,7 +78,7 @@ class AddBlogFragment: Fragment() {
     }
 
     /**
-     * Handle successful account addition. Navigate back to [MainActivity] and update sidebar account list.
+     * Handle successful blog addition. Navigate back to [MainActivity] and update sidebar account list.
      */
     private fun handleSuccess() {
         fragmentManager!!.popBackStack()

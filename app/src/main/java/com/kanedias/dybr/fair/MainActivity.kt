@@ -1,6 +1,7 @@
 package com.kanedias.dybr.fair
 
 import android.app.FragmentTransaction
+import android.content.Intent
 import android.content.SharedPreferences
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -163,6 +164,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
             R.id.menu_donate -> donateHelper.donate()
+            R.id.menu_settings -> startActivity(Intent(this, SettingsActivity::class.java))
             else -> {
                 Log.w("[Main]", "Unknown menu item selected: ${item?.title}")
                 return super.onOptionsItemSelected(item)
@@ -293,9 +295,9 @@ class MainActivity : AppCompatActivity() {
      */
     fun createBlog() {
         supportFragmentManager.beginTransaction()
-                .addToBackStack("Showing profile creation fragment")
+                .addToBackStack("Showing blog creation fragment")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .replace(R.id.main_drawer_layout, AddProfileFragment())
+                .replace(R.id.main_drawer_layout, AddBlogFragment())
                 .commit()
     }
 

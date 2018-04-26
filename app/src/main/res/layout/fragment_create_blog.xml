@@ -29,7 +29,7 @@
             android:id="@+id/blog_slug_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textCapSentences"
+            android:inputType="textNoSuggestions"
             android:nextFocusForward="@id/blog_title_input"
             android:hint="@string/blog_address"/>
 

@@ -1,0 +1,21 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/pref_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/standard_toolbar_height"
+        android:minHeight="@dimen/standard_toolbar_height"
+        custom:elevation="4dp"/>
+
+
+    <FrameLayout
+        android:id="@+id/pref_content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</LinearLayout>
