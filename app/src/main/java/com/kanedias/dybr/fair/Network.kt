@@ -3,7 +3,6 @@ package com.kanedias.dybr.fair
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
-import android.webkit.MimeTypeMap
 import android.widget.Toast
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Rfc3339DateJsonAdapter
@@ -21,7 +20,6 @@ import java.util.concurrent.TimeUnit
 import java.io.IOException
 import java.util.*
 import moe.banana.jsonapi2.ArrayDocument
-import java.io.InputStream
 import java.net.HttpURLConnection.*
 import okhttp3.RequestBody
 import org.json.JSONObject
@@ -76,10 +74,12 @@ import org.json.JSONObject
  */
 object Network {
 
+    private const val DEFAULT_DYBR_API_ENDPOINT = "https://dybr-staging-api.herokuapp.com/v1"
+
     private val MAIN_STORAGE_HOST = "https://slonopotam.net"
     private val IMG_UPLOAD_ENDPOINT = "$MAIN_STORAGE_HOST/upload"
 
-    private var MAIN_DYBR_API_ENDPOINT = "https://dybr-staging-api.herokuapp.com/v1"
+    private var MAIN_DYBR_API_ENDPOINT = DEFAULT_DYBR_API_ENDPOINT
 
     private var USERS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/users"
     private var SESSIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/sessions"
@@ -151,7 +151,7 @@ object Network {
     }
 
     private fun setupEndpoints(pref: SharedPreferences) {
-        MAIN_DYBR_API_ENDPOINT = pref.getString("home-server", "https://dybr-staging-api.herokuapp.com/v1")
+        MAIN_DYBR_API_ENDPOINT = pref.getString("home-server", DEFAULT_DYBR_API_ENDPOINT)
         USERS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/users"
         SESSIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/sessions"
         PROFILES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/profiles"

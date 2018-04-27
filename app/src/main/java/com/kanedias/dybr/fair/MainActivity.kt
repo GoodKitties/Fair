@@ -9,6 +9,7 @@ import android.preference.PreferenceManager
 import android.support.design.widget.AppBarLayout
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.TabLayout
+import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewPager
@@ -165,6 +166,7 @@ class MainActivity : AppCompatActivity() {
         when (item?.itemId) {
             R.id.menu_donate -> donateHelper.donate()
             R.id.menu_settings -> startActivity(Intent(this, SettingsActivity::class.java))
+            R.id.menu_refresh -> refreshCurrentTab()
             else -> {
                 Log.w("[Main]", "Unknown menu item selected: ${item?.title}")
                 return super.onOptionsItemSelected(item)
@@ -174,6 +176,15 @@ class MainActivity : AppCompatActivity() {
         // it was handled in `when` block or we wouldn't be at this point
         // confirm it
         return true
+    }
+
+    /**
+     * Find current tab and try to refresh its contents
+     */
+    private fun refreshCurrentTab() {
+        val plPredicate = { it: Fragment -> it is EntryListFragment && it.userVisibleHint }
+        val currentTab = supportFragmentManager.fragments.find(plPredicate) as EntryListFragment?
+        currentTab?.refreshEntries()
     }
 
     override fun onBackPressed() {
