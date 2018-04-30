@@ -363,7 +363,9 @@ object Network {
      * @param blog blog to retrieve entries from
      */
     fun loadEntries(blog: Blog, pageNum: Int = 1): ArrayDocument<Entry> {
-        val req = Request.Builder().url("$BLOGS_ENDPOINT/${blog.id}/entries?sort=-created-at&page[number]=$pageNum&include=blog").build()
+        // handle special case when we selected tab with favorites
+        val urlPrefix = if (blog === Auth.favorites) { ENTRIES_ENDPOINT } else { "$BLOGS_ENDPOINT/${blog.id}/entries" }
+        val req = Request.Builder().url("$urlPrefix?sort=-created-at&page[number]=$pageNum&include=blog").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw HttpException(resp)

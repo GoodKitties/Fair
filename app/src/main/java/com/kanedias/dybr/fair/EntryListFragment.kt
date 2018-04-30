@@ -66,7 +66,7 @@ class EntryListFragment: Fragment() {
             return
 
         // for now we can only write entries in blog if it's our own
-        when (isVisibleToUser && blog == Auth.blog) {
+        when (isVisibleToUser && blog != null && blog == Auth.blog) {
             false -> activity.actionButton.hide()
             true -> activity.actionButton.show()
         }
@@ -97,7 +97,7 @@ class EntryListFragment: Fragment() {
 
     inner class EntryListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-        var entries: ArrayDocument<Entry> = ArrayDocument()
+        var entries: List<Entry> = ArrayList()
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             val entryHolder = holder as EntryViewHolder

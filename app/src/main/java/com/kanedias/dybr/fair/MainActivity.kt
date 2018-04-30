@@ -410,10 +410,7 @@ class MainActivity : AppCompatActivity() {
                 return 0
             }
 
-            var totalTabs = 0
-            blog?.let { totalTabs++ }
-
-            return totalTabs
+            return 2 // favorites and own blog
         }
 
         override fun getItemPosition(fragment: Any): Int {
@@ -429,13 +426,13 @@ class MainActivity : AppCompatActivity() {
 
         override fun getItem(position: Int): EntryListFragment = when(position) {
             MY_DIARY_TAB -> EntryListFragment().apply { blog = this@TabAdapter.blog }
-            //FAV_TAB -> EntryListFragment().apply { slug = "$ownFavEndpoint/favorites" }
+            FAV_TAB -> EntryListFragment().apply { blog = Auth.favorites }
             else -> EntryListFragment().apply { blog = null }
         }
 
         override fun getPageTitle(position: Int): CharSequence? = when (position) {
-            FAV_TAB -> getString(R.string.favorite)
             MY_DIARY_TAB -> getString(R.string.my_diary)
+            FAV_TAB -> getString(R.string.favorite)
             else -> ""
         }
     }

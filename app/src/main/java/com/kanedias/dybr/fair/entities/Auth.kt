@@ -13,6 +13,8 @@ import com.kanedias.dybr.fair.database.DbProvider
  */
 object Auth {
     lateinit var guest: Account
+    lateinit var favorites: Blog
+
     lateinit var user: Account
 
     /**
@@ -27,7 +29,10 @@ object Auth {
     var blog: Blog? = null
 
     fun init(ctx: Context) {
+        // setup special values
+        this.favorites = Blog().apply { title = ctx.getString(R.string.favorite) }
         this.guest = Account().apply { email = ctx.getString(R.string.guest) }
+
         this.user = guest
     }
 

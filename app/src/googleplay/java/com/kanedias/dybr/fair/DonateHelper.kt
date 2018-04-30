@@ -4,7 +4,6 @@ import android.support.v7.app.AppCompatActivity
 import com.afollestad.materialdialogs.MaterialDialog
 import com.android.billingclient.api.*
 import com.android.billingclient.api.BillingClient.BillingResponse
-import android.support.v4.content.ContextCompat.startActivity
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
