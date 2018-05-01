@@ -1,4 +1,2 @@
-app/src/main/jniLibs/armeabi-v7a/libhtml2md.so filter=lfs diff=lfs merge=lfs -text
-app/src/main/jniLibs/x86_64/libhtml2md.so filter=lfs diff=lfs merge=lfs -text
-app/src/main/jniLibs/arm64-v8a/libhtml2md.so filter=lfs diff=lfs merge=lfs -text
+*.so filter=lfs diff=lfs merge=lfs -text
 app/src/main/jniLibs/*/*.so !text !filter !merge !diff
