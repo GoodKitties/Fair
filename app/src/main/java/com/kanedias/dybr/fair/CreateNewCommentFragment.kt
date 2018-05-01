@@ -14,7 +14,7 @@ import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.entities.*
-import com.kanedias.dybr.fair.ui.handleMarkdown
+import com.kanedias.dybr.fair.ui.md.handleMarkdown
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
@@ -24,7 +24,6 @@ import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
 import org.commonmark.ext.gfm.tables.TablesExtension
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
-import ru.noties.markwon.Markwon
 
 /**
  * Frag,emt responsible for creating/updating comments.

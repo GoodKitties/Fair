@@ -1,4 +1,4 @@
-package com.kanedias.dybr.fair.ui
+package com.kanedias.dybr.fair.ui.md
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

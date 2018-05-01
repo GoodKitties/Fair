@@ -14,8 +14,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.entities.Blog
 import com.kanedias.dybr.fair.entities.Entry
 import com.kanedias.dybr.fair.entities.EntryCreateRequest
-import com.kanedias.dybr.fair.ui.handleMarkdown
-import com.kanedias.dybr.fair.ui.handleMarkdownRaw
+import com.kanedias.dybr.fair.ui.md.handleMarkdownRaw
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
