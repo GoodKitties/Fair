@@ -14,7 +14,7 @@ import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.entities.*
-import com.kanedias.dybr.fair.ui.handleMarkdown
+import com.kanedias.dybr.fair.ui.md.handleMarkdown
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
