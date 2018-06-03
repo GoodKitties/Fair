@@ -136,8 +136,8 @@ object Network {
 
         // reinitialize endpoints
         val pref = PreferenceManager.getDefaultSharedPreferences(ctx)
-        setupEndpoints(pref)
-        pref.registerOnSharedPreferenceChangeListener({preferences, _ -> setupEndpoints(preferences) })
+        setupEndpoints(ctx, pref)
+        pref.registerOnSharedPreferenceChangeListener({preferences, _ -> setupEndpoints(ctx, preferences) })
 
         // setup http client
         httpClient =  OkHttpClient.Builder()
@@ -150,8 +150,21 @@ object Network {
                 .build()
     }
 
-    private fun setupEndpoints(pref: SharedPreferences) {
-        MAIN_DYBR_API_ENDPOINT = pref.getString("home-server", DEFAULT_DYBR_API_ENDPOINT)
+    private fun setupEndpoints(ctx: Context, pref: SharedPreferences) {
+        val endpoint = pref.getString("home-server", DEFAULT_DYBR_API_ENDPOINT)
+
+        // endpoint itself must be valid url
+        val valid = HttpUrl.parse(endpoint)
+        if (valid == null) {
+            // url is invalid
+            Toast.makeText(ctx, R.string.invalid_dybr_endpoint, Toast.LENGTH_SHORT).show()
+            MAIN_DYBR_API_ENDPOINT = DEFAULT_DYBR_API_ENDPOINT
+            pref.edit().putString("home-server", DEFAULT_DYBR_API_ENDPOINT).apply()
+        } else {
+            // url is valid, proceed
+            MAIN_DYBR_API_ENDPOINT = endpoint
+        }
+
         USERS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/users"
         SESSIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/sessions"
         PROFILES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/profiles"
