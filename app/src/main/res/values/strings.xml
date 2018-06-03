@@ -132,4 +132,5 @@
     <string name="api_home_server">API home server</string>
     <string name="api_home_server_sum">Don\'t change this if you don\'t know what you\'re doing</string>
     <string name="invalid_dybr_endpoint">Invalid Dybr API endpoint, reset to default</string>
+    <string name="read_more">Read more</string>
 </resources>
