@@ -17,7 +17,7 @@ import android.util.AttributeSet
  */
 class CustomTextView : TextView {
 
-    private var dontConsumeNonUrlClicks = true
+    private var consumeNonUrlClicks = false
     private var linkHit: Boolean = false
 
     constructor(context: Context) : super(context)
@@ -30,14 +30,13 @@ class CustomTextView : TextView {
         linkHit = false
         val res = super.onTouchEvent(event)
 
-        return if (dontConsumeNonUrlClicks) linkHit else res
+        return if (consumeNonUrlClicks) res else linkHit
 
     }
 
     class LocalLinkMovementMethod : LinkMovementMethod() {
 
-        override fun onTouchEvent(widget: TextView,
-                                  buffer: Spannable, event: MotionEvent): Boolean {
+        override fun onTouchEvent(widget: TextView, buffer: Spannable, event: MotionEvent): Boolean {
             val action = event.action
 
             if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_DOWN) {
@@ -54,16 +53,13 @@ class CustomTextView : TextView {
                 val line = layout.getLineForVertical(y)
                 val off = layout.getOffsetForHorizontal(line, x.toFloat())
 
-                val link = buffer.getSpans(
-                        off, off, ClickableSpan::class.java)
+                val link = buffer.getSpans(off, off, ClickableSpan::class.java)
 
                 if (link.isNotEmpty()) {
                     if (action == MotionEvent.ACTION_UP) {
                         link[0].onClick(widget)
                     } else if (action == MotionEvent.ACTION_DOWN) {
-                        Selection.setSelection(buffer,
-                                buffer.getSpanStart(link[0]),
-                                buffer.getSpanEnd(link[0]))
+                        Selection.setSelection(buffer, buffer.getSpanStart(link[0]), buffer.getSpanEnd(link[0]))
                     }
 
                     if (widget is CustomTextView) {
@@ -76,7 +72,7 @@ class CustomTextView : TextView {
                     return false
                 }
             }
-            return Touch.onTouchEvent(widget, buffer, event)
+            return super.onTouchEvent(widget, buffer, event)
         }
     }
 }

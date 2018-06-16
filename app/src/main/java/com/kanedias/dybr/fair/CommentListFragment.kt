@@ -76,12 +76,12 @@ class CommentListFragment : Fragment() {
                 val success = async(CommonPool) { Network.loadComments(entry!!) }
                 commentAdapter.comments = success.await()
                 commentAdapter.entry = entry!!
+                commentRibbon.adapter = commentAdapter
             } catch (ex: Exception) {
                 Network.reportErrors(activity, ex)
             }
 
             refresher.isRefreshing = false
-            commentRibbon.adapter = commentAdapter
         }
     }
 
@@ -134,7 +134,7 @@ class CommentListFragment : Fragment() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
             val inflater = LayoutInflater.from(activity)
             return if (viewType == TYPE_ENTRY) {
-                val view = inflater.inflate(R.layout.fragment_comment_list_entry_item, parent, false)
+                val view = inflater.inflate(R.layout.fragment_entry_list_item, parent, false)
                 EntryViewHolder(view)
             } else {
                 val view = inflater.inflate(R.layout.fragment_comment_list_item, parent, false)

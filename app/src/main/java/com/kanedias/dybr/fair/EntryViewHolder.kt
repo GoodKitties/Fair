@@ -30,6 +30,9 @@ import java.util.*
  */
 class EntryViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
+    @BindView(R.id.entry_author)
+    lateinit var authorView: TextView
+
     @BindView(R.id.entry_title)
     lateinit var titleView: TextView
 
@@ -44,6 +47,12 @@ class EntryViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
     @BindViews(R.id.entry_edit, R.id.entry_delete, R.id.entry_more_options)
     lateinit var buttons: List<@JvmSuppressWildcards ImageView>
+
+    @BindView(R.id.entry_comments_text)
+    lateinit var comments: TextView
+
+    @BindView(R.id.entry_participants_text)
+    lateinit var participants: TextView
 
     /**
      * Entry that this holder represents
@@ -67,6 +76,7 @@ class EntryViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
         ButterKnife.bind(this, iv)
 
         iv.setOnClickListener(commentShow)
+        bodyView.setOnClickListener(commentShow)
     }
 
     @OnClick(R.id.entry_edit)
@@ -125,11 +135,11 @@ class EntryViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
         MaterialDialog.Builder(itemView.context)
                 .title(R.string.entry_menu)
                 .items(items)
-                .itemsCallback({ _, _, position, _ ->
+                .itemsCallback { _, _, position, _ ->
                     when (position) {
                         1 -> showInWebView()
                     }
-                }).show()
+                }.show()
     }
 
     private fun showInWebView() {
@@ -154,11 +164,20 @@ class EntryViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
     fun setup(entry: Entry, editable: Boolean) {
         this.entry = entry
 
+        // setup text views from entry data
         dateView.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(entry.createdAt)
         titleView.text = entry.title
+        entry.profile.get(entry.document)?.let { authorView.text = it.nickname }
         draftStateView.visibility = if (entry.state == "published") { View.INVISIBLE } else { View.VISIBLE }
 
-        bodyView.handleMarkdown(entry.content)
+        // setup bottom row of edit buttons
         toggleEditButtons(editable)
+
+        // setup bottom row of metadata buttons
+        val metadata = Network.bufferToMap(entry.meta)
+        metadata["comments"]?.let { comments.text = it }
+        metadata["commenters"]?.let { participants.text = it }
+
+        bodyView.handleMarkdown(entry.content)
     }
 }

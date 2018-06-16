@@ -17,6 +17,17 @@
         android:padding="8dp">
 
         <TextView
+            android:id="@+id/entry_author"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:padding="5dp"
+            android:text="@string/placeholder_short"
+            android:textStyle="bold"/>
+
+        <TextView
             android:id="@+id/entry_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -50,7 +61,7 @@
             android:text="@string/placeholder_long"
             android:maxEms="20"/>
 
-        <com.kanedias.dybr.fair.misc.CustomTextView
+        <TextView
             android:id="@+id/entry_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -59,8 +70,59 @@
             android:layout_below="@id/entry_title"
             android:padding="5dp"
             android:minLines="3"
+            android:textIsSelectable="true"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/placeholder_short"/>
+
+        <LinearLayout
+            android:id="@+id/entry_meta_area"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/entry_message"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true">
+
+            <ImageView
+                android:id="@+id/entry_participants_indicator"
+                android:layout_width="16dp"
+                android:layout_height="36dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/community"
+                android:scaleType="fitCenter"
+                android:contentDescription="@string/participants_number_indicator"/>
+
+            <TextView
+                android:id="@+id/entry_participants_text"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:gravity="center_vertical"
+                android:text="@string/zero" />
+
+            <ImageView
+                android:id="@+id/entry_comments_indicator"
+                android:layout_width="16dp"
+                android:layout_height="36dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/comments"
+                android:scaleType="fitCenter"
+                android:contentDescription="@string/participants_number_indicator"/>
+
+            <TextView
+                android:id="@+id/entry_comments_text"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:gravity="center_vertical"
+                android:text="@string/zero"/>
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/entry_icon_area"
@@ -73,7 +135,7 @@
             android:layout_alignParentRight="true"> <!-- invisible for entries you don't own -->
 
             <ImageView
-                style="@style/Ripple.Item"
+                android:theme="@style/Ripple.Item"
                 android:id="@+id/entry_edit"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
@@ -83,7 +145,7 @@
                 android:contentDescription="@string/edit_entry"/>
 
             <ImageView
-                style="@style/Ripple.Item"
+                android:theme="@style/Ripple.Item"
                 android:id="@+id/entry_delete"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
@@ -93,7 +155,7 @@
                 android:contentDescription="@string/delete_entry"/>
 
             <ImageView
-                style="@style/Ripple.Item"
+                android:theme="@style/Ripple.Item"
                 android:id="@+id/entry_more_options"
                 android:layout_width="36dp"
                 android:layout_height="36dp"

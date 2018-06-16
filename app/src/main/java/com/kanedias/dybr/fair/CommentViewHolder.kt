@@ -40,7 +40,7 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
     @BindView(R.id.comment_message)
     lateinit var bodyView: TextView
 
-    @BindViews(R.id.comment_edit, R.id.comment_delete, R.id.comment_more_options)
+    @BindViews(R.id.comment_edit, R.id.comment_delete)
     lateinit var buttons: List<@JvmSuppressWildcards ImageView>
 
     private lateinit var comment: Comment

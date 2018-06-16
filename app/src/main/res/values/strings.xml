@@ -6,6 +6,11 @@
     <!-- placeholders -->
     <string name="placeholder_long" translatable="false">Sample placeholder text</string>
     <string name="placeholder_short" translatable="false">Placeholder</string>
+    <string name="placeholder_number_short" translatable="false">1</string>
+    <string name="placeholder_number_long" translatable="false">65536</string>
+
+    <!-- static data -->
+    <string name="zero" translatable="false">0</string>
 
     <string name="my_profile">My Profile</string>
     <string name="my_diary">My Diary</string>
@@ -133,4 +138,6 @@
     <string name="api_home_server_sum">Don\'t change this if you don\'t know what you\'re doing</string>
     <string name="invalid_dybr_endpoint">Invalid Dybr API endpoint, reset to default</string>
     <string name="read_more">Read more</string>
+    <string name="last_page">No more pages for you!</string>
+    <string name="participants_number_indicator">Participants number indicator</string>
 </resources>

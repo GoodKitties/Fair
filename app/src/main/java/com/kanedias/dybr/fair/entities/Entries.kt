@@ -130,19 +130,24 @@ class EntryResponse: Resource() {
      * Content of this entry, in html format
      */
     @field:Json(name = "content")
-    lateinit var content: String
+    var content = ""
 
     /**
-     * State of this entry
+     * State of this entry. May be "published" or "draft"
      * @see EntryCreateRequest.state
      */
     @field:Json(name = "state")
-    lateinit var state: String
+    var state = "published"
 
     /**
      * Blog this entry belongs to
      */
     var blog = HasOne<Blog>()
+
+    /**
+     * Profile this entry was written by
+     */
+    var profile = HasOne<OwnProfile>()
 
     /**
      * Comments of this entry. This is link relationship, thus One-to-One

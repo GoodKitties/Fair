@@ -2,6 +2,7 @@ package com.kanedias.dybr.fair
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.preference.PreferenceManager
 import android.widget.Toast
 import com.squareup.moshi.Moshi
@@ -10,16 +11,12 @@ import com.squareup.moshi.Types
 import com.kanedias.dybr.fair.entities.*
 import com.kanedias.dybr.fair.misc.HttpApiException
 import com.kanedias.dybr.fair.misc.HttpException
-import moe.banana.jsonapi2.Document
-import moe.banana.jsonapi2.ObjectDocument
-import moe.banana.jsonapi2.ResourceAdapterFactory
-import moe.banana.jsonapi2.ResourceIdentifier
+import moe.banana.jsonapi2.*
 import okhttp3.*
 import okio.BufferedSource
 import java.util.concurrent.TimeUnit
 import java.io.IOException
 import java.util.*
-import moe.banana.jsonapi2.ArrayDocument
 import java.net.HttpURLConnection.*
 import okhttp3.RequestBody
 import org.json.JSONObject
@@ -74,7 +71,7 @@ import org.json.JSONObject
  */
 object Network {
 
-    private const val DEFAULT_DYBR_API_ENDPOINT = "https://dybr-staging-api.herokuapp.com/v1"
+    private const val DEFAULT_DYBR_API_ENDPOINT = "https://dybr.ru/v2"
 
     private val MAIN_STORAGE_HOST = "https://slonopotam.net"
     private val IMG_UPLOAD_ENDPOINT = "$MAIN_STORAGE_HOST/upload"
@@ -110,6 +107,8 @@ object Network {
             .add(Date::class.java, Rfc3339DateJsonAdapter())
             .build()
 
+    private lateinit var prefChangeListener: OnSharedPreferenceChangeListener
+
     /**
      * OkHttp [Interceptor] for populating authorization header.
      *
@@ -137,7 +136,9 @@ object Network {
         // reinitialize endpoints
         val pref = PreferenceManager.getDefaultSharedPreferences(ctx)
         setupEndpoints(ctx, pref)
-        pref.registerOnSharedPreferenceChangeListener({preferences, _ -> setupEndpoints(ctx, preferences) })
+
+        prefChangeListener = OnSharedPreferenceChangeListener {preferences, _ -> setupEndpoints(ctx, preferences) }
+        pref.registerOnSharedPreferenceChangeListener(prefChangeListener)
 
         // setup http client
         httpClient =  OkHttpClient.Builder()
@@ -270,6 +271,20 @@ object Network {
     }
 
     /**
+     * Converts links/metadata json buffer object from document to map string<->string
+     * @param buffer Json-API buffer containing map-like structure
+     * @return string<->string map or empty if buffer is null
+     */
+    fun bufferToMap(buffer: JsonBuffer<Any>?): Map<String, String> {
+        if (buffer == null)
+            return emptyMap()
+
+        val mapType = Types.newParameterizedType(Map::class.java, String::class.java, String::class.java)
+        val mapAdapter = Moshi.Builder().build().adapter<Map<String, String>>(mapType)
+        return buffer.get<Map<String, String>>(mapAdapter) as Map<String, String>
+    }
+
+    /**
      * Pull profile of current user. Account should have selected last profile and relevant access token by this point.
      * Don't invoke this for accounts that are logging in for the first time, use [loadProfiles] instead.
      * After the completion [Auth.profile] will be populated.
@@ -378,7 +393,7 @@ object Network {
     fun loadEntries(blog: Blog, pageNum: Int = 1): ArrayDocument<Entry> {
         // handle special case when we selected tab with favorites
         val urlPrefix = if (blog === Auth.favorites) { ENTRIES_ENDPOINT } else { "$BLOGS_ENDPOINT/${blog.id}/entries" }
-        val req = Request.Builder().url("$urlPrefix?sort=-created-at&page[number]=$pageNum&include=blog").build()
+        val req = Request.Builder().url("$urlPrefix?sort=-created-at&page[number]=$pageNum&page[size]=20&include=profile").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw HttpException(resp)
@@ -394,7 +409,7 @@ object Network {
      * @param entry entry to retrieve comments from
      */
     fun loadComments(entry: Entry, pageNum: Int = 1): ArrayDocument<Comment> {
-        val req = Request.Builder().url("$ENTRIES_ENDPOINT/${entry.id}/comments?sort=created-at&page[number]=$pageNum&include=profile").build()
+        val req = Request.Builder().url("$ENTRIES_ENDPOINT/${entry.id}/comments?sort=created-at&page[number]=$pageNum&page[size]=20&include=profile").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw HttpException(resp)

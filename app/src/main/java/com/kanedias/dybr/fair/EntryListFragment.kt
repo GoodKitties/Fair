@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
 import com.kanedias.dybr.fair.entities.*
@@ -36,6 +37,7 @@ class EntryListFragment: Fragment() {
     lateinit var refresher: SwipeRefreshLayout
 
     var blog: Blog? = null
+    val authorCache = mutableSetOf<Blog>()
 
     private val entryAdapter = EntryListAdapter()
     private var nextPage = 1
@@ -86,6 +88,7 @@ class EntryListFragment: Fragment() {
             return
 
         if (reset) {
+            entryRibbon.smoothScrollToPosition(0)
             nextPage = 1
             lastPage = false
         }
@@ -114,42 +117,39 @@ class EntryListFragment: Fragment() {
      * @param reset if true, clear current entries before populating from [loaded]
      */
     private fun updateRibbonPage(loaded: ArrayDocument<Entry>, reset: Boolean) {
-        val linkMap = linksToMap(loaded)
-        if (!linkMap.containsKey("next")) {
+        if (loaded.isEmpty()) {
             lastPage = true
+            entryAdapter.notifyDataSetChanged()
+            return
         }
         nextPage += 1
 
         entryAdapter.apply {
             if (reset) {
                 entries.clear()
+                authorCache.clear()
             }
+            loaded.included
             entries.addAll(loaded)
             notifyDataSetChanged()
         }
-    }
-
-    /**
-     * Converts links object from document to map string<->string
-     * @param loaded Json-API document containing `links {}` part
-     */
-    @Suppress("UNCHECKED_CAST")
-    private fun linksToMap(loaded: ArrayDocument<Entry>): Map<String, String> {
-        val mapType = Types.newParameterizedType(Map::class.java, String::class.java, String::class.java)
-        val mapAdapter = Moshi.Builder().build().adapter<Map<String, String>>(mapType)
-        return loaded.links.get<Map<String, String>>(mapAdapter) as Map<String, String>
     }
 
     inner class EntryListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         private val REGULAR_POST = 0
         private val LOAD_MORE = 1
+        private val LAST_PAGE = 2
 
         var entries: MutableList<Entry> = ArrayList()
 
         override fun getItemViewType(position: Int): Int {
             if (position < entries.size) {
                 return REGULAR_POST
+            }
+
+            if (lastPage) {
+                return  LAST_PAGE
             }
 
             return LOAD_MORE
@@ -162,7 +162,8 @@ class EntryListFragment: Fragment() {
                     val entry = entries[position]
                     entryHolder.setup(entry, blog == Auth.blog)
                 }
-                else -> refreshEntries()
+                LOAD_MORE -> refreshEntries()
+                // Nothing needed for LAST_PAGE
             }
 
         }
@@ -174,9 +175,14 @@ class EntryListFragment: Fragment() {
                     val view = inflater.inflate(R.layout.fragment_entry_list_item, parent, false)
                     EntryViewHolder(view)
                 }
-                else -> {
+                LOAD_MORE -> {
                     val pbar = inflater.inflate(R.layout.view_load_more, parent, false)
                     object: RecyclerView.ViewHolder(pbar) {}
+                }
+                else -> { // LAST_PAGE
+                    val lastPage = inflater.inflate(R.layout.view_last_page, parent, false)
+                    lastPage.findViewById<TextView>(R.id.last_page_reload).setOnClickListener { refreshEntries(true) }
+                    object: RecyclerView.ViewHolder(lastPage) {}
                 }
             }
         }
@@ -189,13 +195,7 @@ class EntryListFragment: Fragment() {
             }
 
             // we have something in the view already
-            var size = entries.size
-
-            // show "load more" holder if it's not the last page
-            if (!lastPage)
-                size += 1
-
-            return size
+            return entries.size + 1
         }
     }
 

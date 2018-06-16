@@ -4,6 +4,7 @@
     android:id="@+id/comment_card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_margin="5dp"
     android:foreground="?android:attr/selectableItemBackground"
     android:layout_marginBottom="1dp"
     app:cardCornerRadius="1dp"
@@ -34,7 +35,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:padding="5dp"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textStyle="bold"
             android:text="@string/placeholder_long"
             android:maxEms="20"/>
 
@@ -46,6 +47,7 @@
             android:layout_alignParentStart="true"
             android:layout_below="@id/comment_author"
             android:padding="5dp"
+            android:textIsSelectable="true"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/placeholder_short"/>
 
@@ -78,15 +80,6 @@
                 android:src="@drawable/delete"
                 android:tag="@string/edit_tag"
                 android:contentDescription="@string/delete_comment"/>
-
-            <ImageView
-                style="@style/Ripple.Item"
-                android:id="@+id/comment_more_options"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:padding="8dp"
-                android:src="@drawable/more"
-                android:contentDescription="@string/more_options"/>
 
         </LinearLayout>
 
