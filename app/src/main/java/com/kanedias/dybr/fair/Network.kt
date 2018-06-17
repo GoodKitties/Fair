@@ -141,7 +141,7 @@ object Network {
         pref.registerOnSharedPreferenceChangeListener(prefChangeListener)
 
         // setup http client
-        httpClient =  OkHttpClient.Builder()
+        httpClient = OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)

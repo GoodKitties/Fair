@@ -24,11 +24,12 @@ import java.util.*
 
 /**
  * View holder for showing regular entries in diary view.
- *
+ * @param iv inflated view to be used by this holder
+ * @param allowSelection whether text in this view can be selected and copied
  * @see EntryListFragment.entryRibbon
  * @author Kanedias
  */
-class EntryViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
+class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : RecyclerView.ViewHolder(iv) {
 
     @BindView(R.id.entry_author)
     lateinit var authorView: TextView
@@ -76,7 +77,10 @@ class EntryViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
         ButterKnife.bind(this, iv)
 
         iv.setOnClickListener(commentShow)
-        bodyView.setOnClickListener(commentShow)
+        if (allowSelection) {
+            bodyView.setTextIsSelectable(true)
+            bodyView.isLongClickable = true
+        }
     }
 
     @OnClick(R.id.entry_edit)

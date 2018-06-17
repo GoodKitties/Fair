@@ -4,7 +4,8 @@
     android:id="@+id/comment_card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="5dp"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp"
     android:foreground="?android:attr/selectableItemBackground"
     android:layout_marginBottom="1dp"
     app:cardCornerRadius="1dp"
@@ -15,7 +16,6 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:descendantFocusability="blocksDescendants"
         android:padding="8dp">
 
         <TextView
@@ -39,7 +39,7 @@
             android:text="@string/placeholder_long"
             android:maxEms="20"/>
 
-        <TextView
+        <com.kanedias.dybr.fair.misc.ClickPreventingTextView
             android:id="@+id/comment_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -47,7 +47,6 @@
             android:layout_alignParentStart="true"
             android:layout_below="@id/comment_author"
             android:padding="5dp"
-            android:textIsSelectable="true"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/placeholder_short"/>
 

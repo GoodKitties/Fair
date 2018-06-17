@@ -47,6 +47,9 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
     init {
         ButterKnife.bind(this, iv)
+
+        bodyView.setTextIsSelectable(true)
+        bodyView.isLongClickable = true
     }
 
     @OnClick(R.id.comment_edit)
@@ -117,7 +120,7 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
         dateView.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(comment.createdAt)
         authorView.text = profile.nickname
-        bodyView.handleMarkdown(Html2Markdown().parse(comment.content))
+        bodyView.handleMarkdown(comment.content)
 
         // time diff must be lower than 15 minutes
         val timeDiff = (Date().time - comment.createdAt.time) / 1000 // in seconds

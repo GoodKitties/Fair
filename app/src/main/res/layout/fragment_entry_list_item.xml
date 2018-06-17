@@ -61,7 +61,7 @@
             android:text="@string/placeholder_long"
             android:maxEms="20"/>
 
-        <TextView
+        <com.kanedias.dybr.fair.misc.ClickPreventingTextView
             android:id="@+id/entry_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -70,7 +70,6 @@
             android:layout_below="@id/entry_title"
             android:padding="5dp"
             android:minLines="3"
-            android:textIsSelectable="true"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/placeholder_short"/>
 
@@ -166,4 +165,5 @@
         </LinearLayout>
 
     </RelativeLayout>
+
 </android.support.v7.widget.CardView>

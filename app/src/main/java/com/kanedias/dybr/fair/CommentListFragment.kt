@@ -135,7 +135,7 @@ class CommentListFragment : Fragment() {
             val inflater = LayoutInflater.from(activity)
             return if (viewType == TYPE_ENTRY) {
                 val view = inflater.inflate(R.layout.fragment_entry_list_item, parent, false)
-                EntryViewHolder(view)
+                EntryViewHolder(view, allowSelection = true)
             } else {
                 val view = inflater.inflate(R.layout.fragment_comment_list_item, parent, false)
                 CommentViewHolder(view)

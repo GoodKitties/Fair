@@ -1,6 +1,5 @@
 package com.kanedias.dybr.fair.ui.md
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Rect
@@ -8,7 +7,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.text.SpannableStringBuilder
 import android.text.Spanned
-import android.text.TextUtils
 import android.text.style.CharacterStyle
 import android.text.style.ClickableSpan
 import android.text.style.ImageSpan
@@ -16,22 +14,18 @@ import android.view.View
 import android.widget.TextView
 import com.kanedias.dybr.fair.Network
 import com.kanedias.dybr.fair.R
-import com.kanedias.dybr.fair.misc.CustomTextView
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
 import okhttp3.MediaType
 import okhttp3.Request
 import okhttp3.Response
-import org.w3c.dom.Text
 import pl.droidsonroids.gif.GifDrawable
 import pl.droidsonroids.gif.GifDrawableBuilder
 import ru.noties.markwon.Markwon
 import ru.noties.markwon.SpannableConfiguration
 import ru.noties.markwon.spans.AsyncDrawable
 import ru.noties.markwon.spans.AsyncDrawableSpan
-import ru.noties.markwon.spans.LinkSpan
-import ru.noties.markwon.spans.SpannableTheme
 import java.io.IOException
 import kotlin.math.ceil
 
@@ -43,14 +37,11 @@ val CONTENT_TYPE_GIF = MediaType.parse("image/gif")
  * @param html input markdown to show
  */
 infix fun TextView.handleMarkdown(html: String) {
-    val mdConfig = SpannableConfiguration.builder(this.context)
-            .asyncDrawableLoader(DrawableLoader(this))
-            .build()
+    val mdConfig = SpannableConfiguration.builder(this.context).asyncDrawableLoader(DrawableLoader(this)).build()
     val spanned = Markwon.markdown(mdConfig, Html2Markdown().parse(html)) as SpannableStringBuilder
     postProcessSpans(this, spanned)
 
     this.text = spanned
-    this.movementMethod = CustomTextView.LocalLinkMovementMethod()
 }
 
 /**
@@ -118,7 +109,7 @@ private fun postProcessDrawables(spanned: SpannableStringBuilder, view: TextView
         val start = spanned.getSpanStart(span)
         val end = spanned.getSpanEnd(span)
         val spansToWrap = spanned.getSpans(start, end, CharacterStyle::class.java)
-        val wrapperImg = ImageSpan(view.context, R.drawable.cloud_download)
+        val wrapperImg = ImageSpan(view.context, R.drawable.download_image)
         val wrapperClick = object: ClickableSpan() {
 
             override fun onClick(widget: View?) {
@@ -149,11 +140,11 @@ private fun postProcessDrawables(spanned: SpannableStringBuilder, view: TextView
  * @see handleMarkdown
  */
 infix fun TextView.handleMarkdownRaw(markdown: String) {
-    val mdConfig = SpannableConfiguration.builder(this.context)
-            .asyncDrawableLoader(DrawableLoader(this))
-            .build()
-    Markwon.setMarkdown(this, mdConfig, markdown)
-    this.movementMethod = CustomTextView.LocalLinkMovementMethod()
+    val mdConfig = SpannableConfiguration.builder(this.context).asyncDrawableLoader(DrawableLoader(this)).build()
+    val spanned = Markwon.markdown(mdConfig, markdown) as SpannableStringBuilder
+    postProcessSpans(this, spanned)
+
+    this.text = spanned
 }
 
 /**

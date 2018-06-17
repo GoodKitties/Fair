@@ -11,13 +11,14 @@ import android.util.AttributeSet
 
 
 /**
+ * This is a text view that prevents clicks on it to be consumed by text view itself.
+ *
  * @author Kanedias
  *
  * Created on 05.04.18
  */
-class CustomTextView : TextView {
+class ClickPreventingTextView : TextView {
 
-    private var consumeNonUrlClicks = false
     private var linkHit: Boolean = false
 
     constructor(context: Context) : super(context)
@@ -26,11 +27,22 @@ class CustomTextView : TextView {
 
     constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle)
 
+    init {
+        this.movementMethod = LocalLinkMovementMethod()
+        this.isClickable = false
+        this.isLongClickable = false
+    }
+
+
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
         linkHit = false
-        val res = super.onTouchEvent(event)
 
-        return if (consumeNonUrlClicks) res else linkHit
+        val res = super.onTouchEvent(event)
+        if (linkHit)
+            return true
+
+        return res
 
     }
 
@@ -62,7 +74,7 @@ class CustomTextView : TextView {
                         Selection.setSelection(buffer, buffer.getSpanStart(link[0]), buffer.getSpanEnd(link[0]))
                     }
 
-                    if (widget is CustomTextView) {
+                    if (widget is ClickPreventingTextView) {
                         widget.linkHit = true
                     }
                     return true
@@ -72,7 +84,7 @@ class CustomTextView : TextView {
                     return false
                 }
             }
-            return super.onTouchEvent(widget, buffer, event)
+            return false
         }
     }
 }
