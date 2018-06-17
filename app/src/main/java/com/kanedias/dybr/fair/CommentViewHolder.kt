@@ -15,7 +15,6 @@ import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.entities.*
 import com.kanedias.dybr.fair.ui.md.handleMarkdown
-import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
@@ -48,7 +47,7 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
     init {
         ButterKnife.bind(this, iv)
 
-        bodyView.setTextIsSelectable(true)
+        // make text selectable
         bodyView.isLongClickable = true
     }
 

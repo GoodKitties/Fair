@@ -15,6 +15,7 @@ import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.entities.Entry
 import com.kanedias.dybr.fair.ui.md.handleMarkdown
+import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
@@ -78,7 +79,6 @@ class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : R
 
         iv.setOnClickListener(commentShow)
         if (allowSelection) {
-            bodyView.setTextIsSelectable(true)
             bodyView.isLongClickable = true
         }
     }
@@ -106,7 +106,7 @@ class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : R
         val delete = {
             launch(UI) {
                 try {
-                    async { Network.deleteEntry(entry) }.await()
+                    async(CommonPool) { Network.deleteEntry(entry) }.await()
                     Toast.makeText(activity, R.string.entry_deleted, Toast.LENGTH_SHORT).show()
                     activity.supportFragmentManager.popBackStack()
 

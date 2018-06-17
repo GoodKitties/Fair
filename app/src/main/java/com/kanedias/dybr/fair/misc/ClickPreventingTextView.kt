@@ -1,6 +1,5 @@
 package com.kanedias.dybr.fair.misc
 
-import android.text.method.Touch
 import android.view.MotionEvent
 import android.content.Context
 import android.text.*
@@ -8,6 +7,8 @@ import android.text.style.ClickableSpan
 import android.widget.TextView
 import android.text.method.LinkMovementMethod
 import android.util.AttributeSet
+import android.text.Spannable
+import android.text.method.ArrowKeyMovementMethod
 
 
 /**
@@ -28,25 +29,38 @@ class ClickPreventingTextView : TextView {
     constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle)
 
     init {
+        setTextIsSelectable(true)
         this.movementMethod = LocalLinkMovementMethod()
+
+        // by default, let clicks on non-links pass through the view, if we want to enable selection
+        // we can do this manually afterwards, see EntryViewHolder
         this.isClickable = false
         this.isLongClickable = false
     }
 
-
-
     override fun onTouchEvent(event: MotionEvent): Boolean {
         linkHit = false
 
+        // Workaround to make text view through-clickable. If we are clicking a link, handle it
+        // If we are not clicking a link, e.g. clicking in any other place inside text view
+        // let the text view handle the click itself (false if it's not clickable)
+        // The downside is that text can't be selectable in such view, so make it selectable
+        // manually when you need to
         val res = super.onTouchEvent(event)
         if (linkHit)
-            return true
+            return linkHit
 
         return res
-
     }
 
-    class LocalLinkMovementMethod : LinkMovementMethod() {
+    /**
+     * Subclasses [ArrowKeyMovementMethod] so it handles selection of text inside this text view
+     * but also has parts from [LinkMovementMethod] that are responsible for clicking on links
+     *
+     * Another special case is indicating whether link was clicked to [ClickPreventingTextView]
+     * possessing this movement method
+     */
+    class LocalLinkMovementMethod: ArrowKeyMovementMethod() {
 
         override fun onTouchEvent(widget: TextView, buffer: Spannable, event: MotionEvent): Boolean {
             val action = event.action
@@ -78,12 +92,9 @@ class ClickPreventingTextView : TextView {
                         widget.linkHit = true
                     }
                     return true
-                } else {
-                    Selection.removeSelection(buffer)
-                    Touch.onTouchEvent(widget, buffer, event)
-                    return false
                 }
             }
+
             return false
         }
     }

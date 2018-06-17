@@ -14,8 +14,6 @@ import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
 import com.kanedias.dybr.fair.entities.*
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
 import moe.banana.jsonapi2.ArrayDocument
@@ -37,7 +35,6 @@ class EntryListFragment: Fragment() {
     lateinit var refresher: SwipeRefreshLayout
 
     var blog: Blog? = null
-    val authorCache = mutableSetOf<Blog>()
 
     private val entryAdapter = EntryListAdapter()
     private var nextPage = 1
@@ -127,7 +124,6 @@ class EntryListFragment: Fragment() {
         entryAdapter.apply {
             if (reset) {
                 entries.clear()
-                authorCache.clear()
             }
             loaded.included
             entries.addAll(loaded)

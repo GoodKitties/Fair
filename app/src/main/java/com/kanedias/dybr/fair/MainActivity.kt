@@ -221,7 +221,7 @@ class MainActivity : AppCompatActivity() {
 
             try {
                 // login with this account and reset profile/blog links
-                async(CommonPool) { Network.login(acc) }.await()
+                async(UI) { Network.login(acc) }.await()
 
                 if (Auth.user.lastProfileId == null) {
                     // first time we're loading this account, select profile
