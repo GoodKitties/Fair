@@ -113,7 +113,7 @@ class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : R
                     // if we have current tab, refresh it
                     val plPredicate = { it: Fragment -> it is EntryListFragment && it.userVisibleHint }
                     val currentTab = activity.supportFragmentManager.fragments.find(plPredicate) as EntryListFragment?
-                    currentTab?.refreshEntries()
+                    currentTab?.refreshEntries(true)
                 } catch (ex: Exception) {
                     Network.reportErrors(itemView.context, ex)
                 }
@@ -172,7 +172,7 @@ class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : R
         dateView.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(entry.createdAt)
         titleView.text = entry.title
         entry.profile.get(entry.document)?.let { authorView.text = it.nickname }
-        draftStateView.visibility = if (entry.state == "published") { View.INVISIBLE } else { View.VISIBLE }
+        draftStateView.visibility = if (entry.state == "published") { View.GONE } else { View.VISIBLE }
 
         // setup bottom row of edit buttons
         toggleEditButtons(editable)
