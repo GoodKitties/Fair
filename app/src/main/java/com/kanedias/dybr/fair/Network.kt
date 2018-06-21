@@ -385,6 +385,21 @@ object Network {
     }
 
     /**
+     * Load one particular blog by slug
+     * @param slug slug of requested entry
+     */
+    fun loadBlog(slug: String): Blog {
+        val req = Request.Builder().url("$BLOGS_ENDPOINT?filters[slug]=$slug&include=profile").build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful) {
+            throw HttpException(resp)
+        }
+
+        // response is returned after execute call, body is not null
+        return fromWrappedJson(resp.body()!!.source(), Blog::class.java)!!
+    }
+
+    /**
      * Pull diary entries from blog denoted by [blog].
      * The resulting URL will be like this: http://dybr.ru/api/v1/blogs/<blog-slug>
      *
@@ -393,7 +408,7 @@ object Network {
     fun loadEntries(blog: Blog, pageNum: Int = 1): ArrayDocument<Entry> {
         // handle special case when we selected tab with favorites
         val urlPrefix = if (blog === Auth.favorites) { ENTRIES_ENDPOINT } else { "$BLOGS_ENDPOINT/${blog.id}/entries" }
-        val req = Request.Builder().url("$urlPrefix?sort=-created-at&page[number]=$pageNum&page[size]=20&include=profile").build()
+        val req = Request.Builder().url("$urlPrefix?sort=-created-at&page[number]=$pageNum&page[size]=20&include=profile,blog").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw HttpException(resp)
@@ -401,6 +416,21 @@ object Network {
 
         // response is returned after execute call, body is not null
         return fromWrappedListJson(resp.body()!!.source(), Entry::class.java)
+    }
+
+    /**
+     * Load one particular entry by its ID
+     * @param id identifier of requested entry
+     */
+    fun loadEntry(id: String): Entry {
+        val req = Request.Builder().url("$ENTRIES_ENDPOINT/$id?include=blog,profile").build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful) {
+            throw HttpException(resp)
+        }
+
+        // response is returned after execute call, body is not null
+        return fromWrappedJson(resp.body()!!.source(), Entry::class.java)!!
     }
 
     /**

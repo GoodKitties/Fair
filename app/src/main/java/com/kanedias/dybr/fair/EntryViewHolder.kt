@@ -1,6 +1,8 @@
 package com.kanedias.dybr.fair
 
 import android.app.FragmentTransaction
+import android.content.Intent
+import android.net.Uri
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
@@ -141,13 +143,20 @@ class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : R
                 .items(items)
                 .itemsCallback { _, _, position, _ ->
                     when (position) {
-                        1 -> showInWebView()
+                        0 -> showInWebView()
                     }
                 }.show()
     }
 
     private fun showInWebView() {
+        val blog = entry.blog.get(entry.document)
+        val uri = Uri.Builder()
+                .scheme("https").authority("dybr.ru")
+                .appendPath("blog").appendPath(blog.slug)
+                .appendPath(entry.id)
+                .build()
 
+        itemView.context.startActivity(Intent(Intent.ACTION_VIEW, uri))
     }
 
     /**

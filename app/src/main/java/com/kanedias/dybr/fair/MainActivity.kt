@@ -3,6 +3,7 @@ package com.kanedias.dybr.fair
 import android.app.FragmentTransaction
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -236,8 +237,52 @@ class MainActivity : AppCompatActivity() {
                 becomeGuest()
             }
 
+            // the whole application may be started because of link click
+            if (intent.data != null && intent.data.authority.contains("dybr.ru")) {
+                consumeCallingUrl()
+            }
+
             progressDialog.hide()
             refresh()
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        this.intent = intent
+
+        // try to detect if it's someone trying to open the dybr.ru link with us
+        launch(UI) {
+            if (intent.data != null && intent.data.authority.contains("dybr.ru")) {
+                consumeCallingUrl()
+            }
+        }
+    }
+
+    private suspend fun consumeCallingUrl() {
+        try {
+            val address = intent.data.pathSegments // it's in the form of /blog/<slug>/[<entry>]
+            if (!address.isEmpty() && address[0] == "blog") {
+                val fragment = when (address.size) {
+                    2 -> {  // the case for /blog/<slug>
+                        val blog = async(CommonPool) { Network.loadBlog(address[1]) }.await()
+                        EntryListFragment().apply { this.blog = blog }
+                    }
+                    3 -> { // the case for /blog/<slug>/<entry>
+                        val entry = async(CommonPool) { Network.loadEntry(address[2]) }.await()
+                        CommentListFragment().apply { this.entry = entry }
+                    }
+                    else -> EntryListFragment().apply { blog = Auth.favorites }
+                }
+
+                supportFragmentManager.beginTransaction()
+                        .addToBackStack("Showing intent-requested address")
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                        .replace(R.id.main_drawer_layout, fragment)
+                        .commit()
+            }
+        } finally {
+            intent.removeExtra("url")
         }
     }
 
@@ -263,9 +308,9 @@ class MainActivity : AppCompatActivity() {
                     .title(R.string.switch_profile)
                     .content(R.string.no_profiles_create_one)
                     .negativeText(R.string.no_profile)
-                    .onNegative({_, _ -> Auth.user.lastProfileId = "0"; refresh() }) // set to null so it won't ask next time
+                    .onNegative { _, _ -> Auth.user.lastProfileId = "0"; refresh() } // set to null so it won't ask next time
                     .positiveText(R.string.create_new)
-                    .onPositive({ _, _ -> addProfile() })
+                    .onPositive { _, _ -> addProfile() }
                     .show()
             return
         }
@@ -283,9 +328,9 @@ class MainActivity : AppCompatActivity() {
                 .title(R.string.switch_profile)
                 .adapter(profAdapter, LinearLayoutManager(this))
                 .negativeText(R.string.no_profile)
-                .onNegative({_, _ -> Auth.user.lastProfileId = "0"; refresh() })
+                .onNegative { _, _ -> Auth.user.lastProfileId = "0"; refresh() }
                 .positiveText(R.string.create_new)
-                .onPositive({_, _ -> addProfile() })
+                .onPositive { _, _ -> addProfile() }
                 .show()
         profAdapter.toDismiss = dialog
     }

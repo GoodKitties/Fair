@@ -59,7 +59,7 @@ class CommentListFragment : Fragment() {
     private fun setupUI() {
         toolbar.title = entry?.title
         toolbar.navigationIcon = DrawerArrowDrawable(activity).apply { progress = 1.0f }
-        toolbar.setNavigationOnClickListener({ fragmentManager?.popBackStack() })
+        toolbar.setNavigationOnClickListener { fragmentManager?.popBackStack() }
 
         refresher.setOnRefreshListener { refreshComments() }
         commentRibbon.layoutManager = LinearLayoutManager(activity)
