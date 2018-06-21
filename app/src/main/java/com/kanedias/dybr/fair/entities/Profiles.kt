@@ -107,10 +107,10 @@ class ProfileResponse : Resource() {
     lateinit var birthday: String
 
     /**
-     * Key-value settings for this profile
+     * Settings structure for this profile
      */
     @field:Json(name = "settings")
-    var settings: Map<String, String> = emptyMap()
+    lateinit var settings: ProfileSettings
 
     /**
      * Link to the user this profile belongs to
@@ -124,5 +124,7 @@ class ProfileResponse : Resource() {
     @field:Json(name = "blog")
     var blog = HasOne<Blog>()
 }
+
+data class ProfileSettings(val avatar: String, val private: Boolean)
 
 typealias OwnProfile = ProfileResponse
