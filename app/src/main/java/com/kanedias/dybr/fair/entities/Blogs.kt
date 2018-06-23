@@ -128,4 +128,6 @@ class BlogResponse : Resource() {
     var comments = HasOne<Comment>()
 }
 
+fun isBlogWritable(blog: Blog?) = blog == Auth.blog
+
 typealias Blog = BlogResponse

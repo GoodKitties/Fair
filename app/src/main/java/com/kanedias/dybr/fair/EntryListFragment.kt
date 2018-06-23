@@ -26,7 +26,7 @@ import moe.banana.jsonapi2.ArrayDocument
  *
  * Created on 18.11.17
  */
-class EntryListFragment: Fragment() {
+open class EntryListFragment: Fragment() {
 
     @BindView(R.id.entry_ribbon)
     lateinit var entryRibbon: RecyclerView
@@ -43,16 +43,18 @@ class EntryListFragment: Fragment() {
     private lateinit var activity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_entry_list, container, false)
+        val view = inflater.inflate(layoutToUse(), container, false)
         activity = context as MainActivity
 
         ButterKnife.bind(this, view)
-        setupUI()
+        setupUI(view)
         refreshEntries()
         return view
     }
 
-    private fun setupUI() {
+    open fun layoutToUse() = R.layout.fragment_entry_list
+
+    open fun setupUI(view: View) {
         refresher.setOnRefreshListener { refreshEntries(true) }
         entryRibbon.layoutManager = LinearLayoutManager(activity)
         entryRibbon.adapter = entryAdapter
@@ -70,9 +72,9 @@ class EntryListFragment: Fragment() {
             return
 
         // for now we can only write entries in blog if it's our own
-        when (isVisibleToUser && blog != null && blog == Auth.blog) {
-            false -> activity.actionButton.hide()
+        when (isVisibleToUser && isBlogWritable(blog)) {
             true -> activity.actionButton.show()
+            false -> activity.actionButton.hide()
         }
     }
 
@@ -102,7 +104,7 @@ class EntryListFragment: Fragment() {
 
             refresher.isRefreshing = false
 
-            if (blog == Auth.blog) {
+            if (isBlogWritable(blog)) {
                 activity.actionButton.show()
             }
         }
@@ -156,7 +158,7 @@ class EntryListFragment: Fragment() {
                 REGULAR_POST -> {
                     val entryHolder = holder as EntryViewHolder
                     val entry = entries[position]
-                    entryHolder.setup(entry, blog == Auth.blog)
+                    entryHolder.setup(entry, isBlogWritable(blog))
                 }
                 LOAD_MORE -> refreshEntries()
                 // Nothing needed for LAST_PAGE
@@ -196,7 +198,8 @@ class EntryListFragment: Fragment() {
     }
 
     /**
-     * Adds diary entry on top of entry ribbon and scrolls to it
+     * Create new entry in current blog. Shows fragment over the main content allowing to enter the
+     * title and the text with an editor.
      */
     fun addCreateNewEntryForm() {
         val entryAdd = CreateNewEntryFragment().apply {

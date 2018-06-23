@@ -259,6 +259,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Take URI from the activity's intent, try to shape it into something usable
+     * and handle the action user requested in it if possible. E.g. clicking on link
+     * https://dybr.ru/blog/... should open that blog or entry inside the app so try
+     * to guess what user wanted with it as much as possible.
+     */
     private suspend fun consumeCallingUrl() {
         try {
             val address = intent.data.pathSegments // it's in the form of /blog/<slug>/[<entry>]
@@ -266,7 +272,7 @@ class MainActivity : AppCompatActivity() {
                 val fragment = when (address.size) {
                     2 -> {  // the case for /blog/<slug>
                         val blog = async(CommonPool) { Network.loadBlog(address[1]) }.await()
-                        EntryListFragment().apply { this.blog = blog }
+                        EntryListFragmentFull().apply { this.blog = blog }
                     }
                     3 -> { // the case for /blog/<slug>/<entry>
                         val entry = async(CommonPool) { Network.loadEntry(address[2]) }.await()
@@ -469,7 +475,7 @@ class MainActivity : AppCompatActivity() {
             return super.getItemPosition(fragment)
         }
 
-        override fun getItem(position: Int): EntryListFragment = when(position) {
+        override fun getItem(position: Int) = when(position) {
             MY_DIARY_TAB -> EntryListFragment().apply { blog = this@TabAdapter.blog }
             FAV_TAB -> EntryListFragment().apply { blog = Auth.favorites }
             else -> EntryListFragment().apply { blog = null }
