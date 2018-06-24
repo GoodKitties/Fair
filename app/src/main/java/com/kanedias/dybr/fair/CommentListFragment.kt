@@ -66,8 +66,10 @@ class CommentListFragment : Fragment() {
     }
 
     fun refreshComments() {
-        if (entry == null) // we don't have an entry, just show empty list
+        if (entry == null) { // we don't have an entry, just show empty list
+            refresher.isRefreshing = false
             return
+        }
 
         launch(UI) {
             refresher.isRefreshing = true

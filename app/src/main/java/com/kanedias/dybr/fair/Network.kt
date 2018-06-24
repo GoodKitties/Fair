@@ -20,6 +20,7 @@ import java.util.*
 import java.net.HttpURLConnection.*
 import okhttp3.RequestBody
 import org.json.JSONObject
+import java.net.HttpURLConnection
 
 
 /**
@@ -315,6 +316,10 @@ object Network {
 
         val req = Request.Builder().url("$PROFILES_ENDPOINT/${Auth.profile?.id}/blog").build()
         val resp = httpClient.newCall(req).execute()
+        if (resp.code() == HttpURLConnection.HTTP_NOT_FOUND) {
+            return // this profile doesn't have blog
+        }
+
         if (!resp.isSuccessful)
             throw extractErrors(resp)
 

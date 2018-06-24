@@ -83,8 +83,10 @@ open class EntryListFragment: Fragment() {
      * @param reset reset page counter to first
      */
     fun refreshEntries(reset: Boolean = false) {
-        if (blog == null) // we don't have a blog, just show empty list
+        if (blog == null) { // we don't have a blog, just show empty list
+            refresher.isRefreshing = false
             return
+        }
 
         if (reset) {
             entryRibbon.smoothScrollToPosition(0)

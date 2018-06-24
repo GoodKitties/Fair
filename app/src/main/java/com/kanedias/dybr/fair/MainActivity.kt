@@ -287,8 +287,10 @@ class MainActivity : AppCompatActivity() {
                         .replace(R.id.main_drawer_layout, fragment)
                         .commit()
             }
+        } catch (ex: Exception) {
+            Network.reportErrors(this@MainActivity, ex)
         } finally {
-            intent.removeExtra("url")
+            intent.data = null
         }
     }
 
