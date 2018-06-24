@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.github.triplet.play'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
@@ -15,8 +16,8 @@ android {
         applicationId "com.kanedias.dybr.fair"
         targetSdkVersion 27 // device you test on
         minSdkVersion 16    // device you allow your users to be on :)
-        versionCode 10
-        versionName "1.2.5"
+        versionCode 11
+        versionName "1.2.6"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
@@ -64,6 +65,19 @@ android {
             universalApk true
         }
     }
+
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def versionCodes = ["universal": 0, "armeabi-v7a": 1, "mips": 2, "arm64-v8a": 3, "x86": 4, "x86_64": 5]
+            int abiVersionCode = versionCodes.get(output.getFilter(com.android.build.OutputFile.ABI) ?: "universal")
+            output.versionCodeOverride = abiVersionCode + android.defaultConfig.versionCode * 10
+        }
+    }
+}
+
+play {
+    jsonFile = file("${System.getProperty('user.home')}/devel/keystore/android-publisher-account.json")
+    track = 'alpha'
 }
 
 dependencies {
