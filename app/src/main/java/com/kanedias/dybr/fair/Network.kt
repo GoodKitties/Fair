@@ -6,11 +6,11 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.preference.PreferenceManager
 import android.widget.Toast
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.Rfc3339DateJsonAdapter
 import com.squareup.moshi.Types
 import com.kanedias.dybr.fair.entities.*
 import com.kanedias.dybr.fair.misc.HttpApiException
 import com.kanedias.dybr.fair.misc.HttpException
+import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter
 import moe.banana.jsonapi2.*
 import okhttp3.*
 import okio.BufferedSource
@@ -253,22 +253,22 @@ object Network {
     private fun <T: ResourceIdentifier> toWrappedJson(obj: T): String {
         val wrapped = ObjectDocument<T>().apply { set(obj) }
         val type = Types.newParameterizedType(Document::class.java, obj::class.java)
-        val reqAdapter = jsonConverter.adapter<Document<T>>(type)
+        val reqAdapter = jsonConverter.adapter<Document>(type)
         return reqAdapter.toJson(wrapped)
     }
 
     private fun <T: ResourceIdentifier> fromWrappedJson(obj: BufferedSource, clazz: Class<T>): T? {
         val type = Types.newParameterizedType(Document::class.java, clazz)
-        val reqAdapter = jsonConverter.adapter<Document<T>>(type)
+        val reqAdapter = jsonConverter.adapter<Document>(type)
         val doc = reqAdapter.fromJson(obj)!!
-        return doc.asObjectDocument().get()
+        return doc.asObjectDocument<T>().get()
     }
 
     private fun <T: ResourceIdentifier> fromWrappedListJson(obj: BufferedSource, clazz: Class<T>): ArrayDocument<T> {
         val type = Types.newParameterizedType(Document::class.java, clazz)
-        val reqAdapter = jsonConverter.adapter<Document<T>>(type)
+        val reqAdapter = jsonConverter.adapter<Document>(type)
         val doc = reqAdapter.fromJson(obj)!!
-        return doc.asArrayDocument()
+        return doc.asArrayDocument<T>()
     }
 
     /**

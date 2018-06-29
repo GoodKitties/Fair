@@ -23,9 +23,9 @@ android {
 
     signingConfigs {
         release {
-            storeFile file("misc/signing.keystore")
+            storeFile file('misc/signing.keystore')
             storePassword System.getenv('SIGNING_KEYSTORE_PASSWORD')
-            keyAlias "release-key"
+            keyAlias 'release-key'
             keyPassword System.getenv('RELEASE_KEY_PASSWORD')
         }
     }
@@ -77,11 +77,11 @@ android {
 
 play {
     jsonFile = file("${System.getProperty('user.home')}/devel/keystore/android-publisher-account.json")
-    track = 'alpha'
+    track = project.hasProperty('releaseType') ? project.property('releaseType') : 'alpha'
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"     // Kotlin language support
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"     // Kotlin language support
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.22.5"       // Kotlin coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:0.22.5"    // Kotlin UI context
     implementation "com.android.support:design:$supportLibVersion"              // Material design support lib
@@ -94,9 +94,9 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'                          // android http client
     implementation 'com.afollestad.material-dialogs:core:0.9.5.0'               // material design for dialogs
     implementation 'com.github.Adonai.convalida-extended:convalida:1.1.0'       // validation of text inputs
-    implementation 'moe.banana:moshi-jsonapi:3.3.0'                             // JSON-API parser
-    implementation 'com.squareup.moshi:moshi-kotlin:1.5.0'                      // Moshi Kotlin support
-    implementation 'com.squareup.moshi:moshi-adapters:1.5.0'                    // Moshi serializers collection
+    implementation 'moe.banana:moshi-jsonapi:3.5.0'                             // JSON-API parser
+    implementation 'com.squareup.moshi:moshi-kotlin:1.6.0'                      // Moshi Kotlin support
+    implementation 'com.squareup.moshi:moshi-adapters:1.6.0'                    // Moshi serializers collection
     implementation 'ru.noties:markwon:1.0.4'                                    // markdown rendering
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.12'           // show gif in posts
     //implementation 'com.github.clans:fab:1.6.4'                               // Floating action button with menu
@@ -114,6 +114,7 @@ dependencies {
     androidTestImplementation 'org.awaitility:awaitility:3.0.0'                        // useful wait-for-condition
     androidTestImplementation 'org.apache.commons:commons-text:1.2'                    // random string generator
 }
+
 kotlin {
     experimental {
         coroutines "enable"

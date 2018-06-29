@@ -42,7 +42,9 @@ class UtilityTests {
     @Ignore("Not yet enabled in API")
     @Test
     fun confirmTokenWorks() {
-        Network.init()
+        val context = Mockito.mock(Context::class.java)
+
+        Network.init(context)
         Auth.user = Account()
         val answer = Network.confirmRegistration("kairllur@mail.ru", "7ju_mDbt61gTTSyHN8oD")
         println(answer)
