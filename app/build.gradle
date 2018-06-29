@@ -23,10 +23,10 @@ android {
 
     signingConfigs {
         release {
-            storeFile file("${System.getProperty('user.home')}/devel/keystore/Kanedias")
-            storePassword "release"
-            keyAlias "kanedias"
-            keyPassword "release"
+            storeFile file("misc/signing.keystore")
+            storePassword System.getenv('SIGNING_KEYSTORE_PASSWORD')
+            keyAlias "release-key"
+            keyPassword System.getenv('RELEASE_KEY_PASSWORD')
         }
     }
 
