@@ -16,8 +16,8 @@ android {
         applicationId "com.kanedias.dybr.fair"
         targetSdkVersion 27 // device you test on
         minSdkVersion 16    // device you allow your users to be on :)
-        versionCode 11
-        versionName "1.2.6"
+        versionCode 12
+        versionName "1.2.7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
@@ -109,8 +109,9 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-core:2.18.0'
 
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test:rules:1.0.2'
     androidTestImplementation 'org.awaitility:awaitility:3.0.0'                        // useful wait-for-condition
     androidTestImplementation 'org.apache.commons:commons-text:1.2'                    // random string generator
 }

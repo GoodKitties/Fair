@@ -70,7 +70,7 @@
     <string name="next_steps">Next steps</string>
     <string name="registered_please_confirm_mail">Registration complete! Please check your email and follow activation instructions.</string>
     <string name="nickname">Nickname</string>
-    <string name="birthday_dd_mm">Birthday: DD-MM</string>
+    <string name="birthday_dd_mm">Birthday: YYYY-MM-DD</string>
     <string name="description">Description</string>
     <string name="create">Create</string>
     <string name="create_new">Create new</string>

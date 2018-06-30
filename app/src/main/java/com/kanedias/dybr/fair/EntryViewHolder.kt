@@ -23,7 +23,8 @@ import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import java.text.SimpleDateFormat
 import java.util.*
-
+import android.content.ComponentName
+import android.content.pm.PackageManager
 
 /**
  * View holder for showing regular entries in diary view.
@@ -156,7 +157,24 @@ class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : R
                 .appendPath(entry.id)
                 .build()
 
-        itemView.context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+        openUrlExternally(uri)
+    }
+
+    /**
+     * Open the URL using the default browser on this device
+     */
+    private fun openUrlExternally(uri: Uri) {
+        val ctx = itemView.context
+        val pkgMgr = ctx.packageManager
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+
+        // detect default browser
+        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://"))
+        val defaultBrowser = pkgMgr.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
+
+        // use default browser to open the url
+        intent.component = with(defaultBrowser.activityInfo) { ComponentName(applicationInfo.packageName, name) }
+        ctx.startActivity(intent)
     }
 
     /**

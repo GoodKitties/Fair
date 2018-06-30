@@ -19,6 +19,7 @@ import org.junit.*
 import org.junit.runner.RunWith
 
 import org.junit.runners.MethodSorters
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -38,7 +39,9 @@ class AddAccountTest {
 
     // need to remember these to reuse in other tests
     companion object {
-        private val strGen = RandomStringGenerator.Builder().withinRange('a'.toInt(), 'z'.toInt()).build()
+        private val strGen = RandomStringGenerator.Builder()
+                .usingRandom { maxInt -> Random().nextInt(maxInt) }
+                .withinRange('a'.toInt(), 'z'.toInt()).build()
 
         private val email = "${strGen.generate(10)}@${strGen.generate(5)}.${strGen.generate(2, 4)}"
         private val password = strGen.generate(12)
@@ -87,7 +90,7 @@ class AddAccountTest {
         onView(withId(R.id.accounts_area)).check(matches(hasDescendant(withText(email))))
         onView(withText(email)).check(matches(hasSibling(allOf(withId(R.id.switch_profile), isDisplayed()))))
 
-        deleteAccount(email)
+        deleteAccount(activity, email)
     }
 
     private fun performRegistration(email: String, password: String) {
@@ -133,7 +136,7 @@ class AddAccountTest {
         // click "ok" on success dialog
         onView(withText(android.R.string.ok)).inRoot(isDialog()).perform(click())
 
-        deleteAccount(randEmail)
+        deleteAccount(activity, randEmail)
 
         // check that greeting is now for guest user
         onView(withId(R.id.current_user_name)).check(matches(withText((R.string.guest))))
@@ -141,7 +144,7 @@ class AddAccountTest {
 
     @Test
     fun test4AddingAccountWithoutProfilesAsksToCreateOne() {
-        addKnownAccount()
+        addKnownAccount(activity)
 
         // dialog should pop up, asking to create profile
         onView(withText(R.string.switch_profile)).inRoot(isDialog()).check(matches(isDisplayed()))
@@ -151,38 +154,6 @@ class AddAccountTest {
         // we don't want to.. we're just checking
         onView(withText(android.R.string.no)).perform(click())
 
-        deleteAccount("testaccount1@mail.ru")
-    }
-
-    private fun deleteAccount(email: String) {
-        if (!activity.drawer.isDrawerOpen(Gravity.START)) {
-            // open drawer
-            onView(withContentDescription(R.string.open)).perform(click())
-        }
-
-        // click on delete account icon
-        onView(allOf(withId(R.id.account_remove), hasSibling(withText(email)))).perform(click())
-
-        // dialog should open
-        onView(withText(R.string.delete_account)).inRoot(isDialog()).check(matches(isDisplayed()))
-        onView(withText(android.R.string.yes)).inRoot(isDialog()).perform(click()) // confirm
-    }
-
-    private fun addKnownAccount() {
-        if (!activity.drawer.isDrawerOpen(Gravity.START)) {
-            // open drawer
-            onView(withContentDescription(R.string.open)).perform(click())
-        }
-
-        // click "add account"
-        onView(withText(R.string.add_an_account)).perform(click())
-
-        // fill reg form
-        onView(withId(R.id.acc_email_input)).perform(typeText("testaccount1@mail.ru"))
-        onView(withId(R.id.acc_password_input)).perform(typeText("123"))
-        closeSoftKeyboard()
-
-        // click register button
-        onView(withId(R.id.confirm_button)).perform(click())
+        deleteAccount(activity, "testaccount1@mail.ru")
     }
 }

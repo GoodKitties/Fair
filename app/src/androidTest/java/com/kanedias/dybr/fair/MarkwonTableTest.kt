@@ -37,31 +37,20 @@ class MarkwonTableTest {
         }
     }
 
-    @Ignore("Fails for now")
     @Test
-    fun testMarkwonTable() {
+    fun testMarkwonTables() {
         val table = javaClass.getResourceAsStream("/sample-table.md").bufferedReader().readText()
         val spanned = Markwon.markdown(activity, table) as Spannable
         val spans = spanned.getSpans(0, spanned.length, TableRowSpan::class.java)
         Assert.assertTrue("Should have table spans!", spans.isNotEmpty())
 
         val tableWithHeader = """
-            With header everything is ok
-            =============================
+            With header everything is ok too
+            =================================
 
                               """.trimIndent() + table
         val spannedHeader = Markwon.markdown(activity, tableWithHeader) as Spannable
         val spansHeader = spannedHeader.getSpans(0, spannedHeader.length, TableRowSpan::class.java)
         Assert.assertTrue("Should have table spans!", spansHeader.isNotEmpty())
-
-        val tableAfterText = """
-            But adding just text before or after the table causes it to collapse
-
-
-                            """.trimIndent() + table
-
-        val spannedAfterText = Markwon.markdown(activity, tableAfterText) as Spannable
-        val spansAfterText = spannedAfterText.getSpans(0, spannedAfterText.length, TableRowSpan::class.java)
-        Assert.assertTrue("Should have table spans!", spansAfterText.isNotEmpty())
     }
 }

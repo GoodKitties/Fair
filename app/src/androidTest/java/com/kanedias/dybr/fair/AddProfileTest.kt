@@ -4,7 +4,6 @@ import android.support.test.espresso.Espresso.closeSoftKeyboard
 import android.support.test.espresso.Espresso.onView
 import android.support.test.espresso.IdlingPolicies
 import android.support.test.espresso.action.ViewActions.*
-import android.support.test.espresso.assertion.ViewAssertions.doesNotExist
 import android.support.test.espresso.assertion.ViewAssertions.matches
 import android.support.test.espresso.matcher.RootMatchers.isDialog
 import android.support.test.espresso.matcher.ViewMatchers.*
@@ -22,6 +21,7 @@ import org.junit.*
 import org.junit.runner.RunWith
 
 import org.junit.runners.MethodSorters
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -39,13 +39,12 @@ class AddProfileTest {
 
     private lateinit var activity: MainActivity
 
-    private val KNOWN_ACCOUNT_EMAIL = "kairllur@mail.ru"
-    private val KNOWN_ACCOUNT_PASSWORD = "123"
-
     // need to remember these to reuse in other tests
     companion object {
 
-        private val strGen = RandomStringGenerator.Builder().withinRange('a'.toInt(), 'z'.toInt()).build()
+        private val strGen = RandomStringGenerator.Builder()
+                .usingRandom { maxInt -> Random().nextInt(maxInt)  }
+                .withinRange('a'.toInt(), 'z'.toInt()).build()
         private val nickname = strGen.generate(10)
 
     }
@@ -72,7 +71,7 @@ class AddProfileTest {
         IdlingPolicies.setMasterPolicyTimeout(30, TimeUnit.SECONDS)
     }
 
-    @Before
+    @After
     fun getRidOfAllAccounts() {
         TableUtils.clearTable(DbProvider.helper.connectionSource, Account::class.java)
     }
@@ -87,7 +86,7 @@ class AddProfileTest {
 
     @Test
     fun test1AddDeleteRandomProfile() {
-        addKnownAccount()
+        addKnownAccount(activity)
 
         // it has quite a lot of profiles already and profile deletion doesn't work... yet... so let's pretend
         // it was all just as planned!
@@ -96,9 +95,8 @@ class AddProfileTest {
         onView(withText(R.string.create_new)).inRoot(isDialog()).perform(click())
 
         // fragment with profile addition should now be active
-        waitForDialog()
         onView(withId(R.id.prof_nickname_input)).perform(typeText(nickname))
-        onView(withId(R.id.prof_birthday_input)).perform(typeText("10-12"))
+        onView(withId(R.id.prof_birthday_input)).perform(typeText("1992-10-12"))
         onView(withId(R.id.prof_description_input)).perform(typeText("${gen10()}\n${gen10()}\n${gen10()}"))
         closeSoftKeyboard()
 
@@ -112,33 +110,19 @@ class AddProfileTest {
         onView(withId(R.id.current_user_name)).check(matches(withText((nickname))))
 
         // click on profile switcher button
-        onView(allOf(withId(R.id.switch_profile), hasSibling(withText(KNOWN_ACCOUNT_EMAIL)))).perform(click())
+        onView(withId(R.id.switch_profile)).perform(click())
 
-        waitForDialog()
         onView(withText(nickname)).inRoot(isDialog()).check(matches(isDisplayed()))
         onView(allOf(withId(R.id.profile_remove), hasSibling(withText(nickname)))).inRoot(isDialog()).perform(click())
 
-        waitForDialog() // this one is above previous
-        onView(withText(nickname)).inRoot(isDialog()).check(doesNotExist())
-    }
+        // this one is above previous
+        onView(withText(R.string.confirm_profile_deletion)).inRoot(isDialog()).check(matches(isDisplayed()))
+        onView(withText(R.string.confirm)).inRoot(isDialog()).perform(click())
 
-    private fun waitForDialog() {
-        Thread.sleep(500) // somewhy dialog is not detected instantly
-    }
+        // now return back to the main one, should disappear
+        onView(withText(R.string.no_profile)).inRoot(isDialog()).perform(click())
 
-    private fun addKnownAccount() {
-        // open drawer
-        onView(withContentDescription(R.string.open)).perform(click())
-
-        // click "add account"
-        onView(withText(R.string.add_an_account)).perform(click())
-
-        // fill reg form
-        onView(withId(R.id.acc_email_input)).perform(typeText(KNOWN_ACCOUNT_EMAIL))
-        onView(withId(R.id.acc_password_input)).perform(typeText(KNOWN_ACCOUNT_PASSWORD))
-        closeSoftKeyboard()
-
-        // click register button
-        onView(withId(R.id.confirm_button)).perform(click())
+        // check we're the guest now
+        onView(withId(R.id.current_user_name)).check(matches(withText((R.string.guest))))
     }
 }
