@@ -14,6 +14,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import convalida.library.Convalida
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.entities.Account
+import com.kanedias.dybr.fair.entities.Auth
 import com.kanedias.dybr.fair.entities.RegisterRequest
 import com.kanedias.dybr.fair.ui.LoginInputs
 import com.kanedias.dybr.fair.ui.RegisterInputs
@@ -203,6 +204,7 @@ class AddAccountFragment : Fragment() {
                         .show()
 
                 // return to main activity
+                Auth.updateCurrentUser(acc)
                 handleSuccess()
             } catch (ex: Exception) {
                 Network.reportErrors(activity, ex, mapOf(422 to R.string.invalid_credentials))

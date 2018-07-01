@@ -10,7 +10,6 @@ import android.support.test.espresso.matcher.ViewMatchers.*
 import android.support.test.filters.LargeTest
 import android.support.test.rule.ActivityTestRule
 import android.support.test.runner.AndroidJUnit4
-import android.view.Gravity
 import android.view.WindowManager
 import org.apache.commons.text.RandomStringGenerator
 import org.hamcrest.Matchers.*
@@ -88,7 +87,7 @@ class AddAccountTest {
 
         // check there's account added
         onView(withId(R.id.accounts_area)).check(matches(hasDescendant(withText(email))))
-        onView(withText(email)).check(matches(hasSibling(allOf(withId(R.id.switch_profile), isDisplayed()))))
+        onView(withId(R.id.add_profile)).check(matches(allOf(isDisplayed(), isEnabled())))
 
         deleteAccount(activity, email)
     }
@@ -152,8 +151,8 @@ class AddAccountTest {
         onView(withText(R.string.create_new)).inRoot(isDialog()).check(matches(isDisplayed()))
 
         // we don't want to.. we're just checking
-        onView(withText(android.R.string.no)).perform(click())
+        onView(withText(R.string.no_profile)).perform(click())
 
-        deleteAccount(activity, "testaccount1@mail.ru")
+        deleteAccount(activity, KNOWN_ACCOUNT_EMAIL)
     }
 }
