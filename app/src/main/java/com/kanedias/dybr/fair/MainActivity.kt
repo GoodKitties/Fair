@@ -443,7 +443,6 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        appBar.setExpanded(false)
         currFragment.addCreateNewEntryForm()
     }
 

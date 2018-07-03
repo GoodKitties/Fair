@@ -68,7 +68,7 @@ class AddProfileTest {
 
     @Before
     fun espressoPreconditions() {
-        IdlingPolicies.setMasterPolicyTimeout(30, TimeUnit.SECONDS)
+        IdlingPolicies.setMasterPolicyTimeout(2, TimeUnit.MINUTES)
     }
 
     @After

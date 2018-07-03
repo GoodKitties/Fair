@@ -34,10 +34,10 @@ class CommentListFragment : Fragment() {
     @BindView(R.id.comments_toolbar)
     lateinit var toolbar: Toolbar
 
-    @BindView(R.id.comment_list_area)
+    @BindView(R.id.comments_list_area)
     lateinit var refresher: SwipeRefreshLayout
 
-    @BindView(R.id.comment_ribbon)
+    @BindView(R.id.comments_ribbon)
     lateinit var commentRibbon: RecyclerView
 
     var entry: Entry? = null
@@ -96,7 +96,7 @@ class CommentListFragment : Fragment() {
         fragmentManager!!.beginTransaction()
                 .addToBackStack("Showing comment add fragment")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .replace(R.id.main_drawer_layout, commentAdd)
+                .add(R.id.main_drawer_layout, commentAdd)
                 .commit()
     }
 

@@ -211,7 +211,7 @@ open class EntryListFragment: Fragment() {
         fragmentManager!!.beginTransaction()
                 .addToBackStack("Showing entry add fragment")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .replace(R.id.main_drawer_layout, entryAdd)
+                .add(R.id.main_drawer_layout, entryAdd)
                 .commit()
     }
 

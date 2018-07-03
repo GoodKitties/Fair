@@ -1,10 +1,12 @@
 package com.kanedias.dybr.fair
 
+import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import butterknife.BindView
 import butterknife.ButterKnife
@@ -156,6 +158,10 @@ class CreateNewEntryFragment : Fragment() {
      */
     @OnClick(R.id.entry_submit)
     fun submit() {
+        // hide keyboard
+        val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view!!.windowToken, 0)
+
         // hide edit form, show loading spinner
         val extensions = listOf(StrikethroughExtension.create(), TablesExtension.create())
         val parser = Parser.builder().extensions(extensions).build()
@@ -188,7 +194,7 @@ class CreateNewEntryFragment : Fragment() {
                 // if we have current tab set, refresh it
                 val plPredicate = { it: Fragment -> it is EntryListFragment && it.userVisibleHint }
                 val currentTab = fragmentManager!!.fragments.find(plPredicate) as EntryListFragment?
-                currentTab?.refreshEntries()
+                currentTab?.refreshEntries(reset = true)
             } catch (ex: Exception) {
                 // don't close the fragment, just report errors
                 Network.reportErrors(activity, ex)

@@ -76,7 +76,6 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
                 try {
                     async { Network.deleteComment(comment) }.await()
                     Toast.makeText(activity, R.string.comment_deleted, Toast.LENGTH_SHORT).show()
-                    activity.supportFragmentManager.popBackStack()
 
                     // if we have current tab, refresh it
                     val plPredicate = { it: Fragment -> it is CommentListFragment && it.userVisibleHint }

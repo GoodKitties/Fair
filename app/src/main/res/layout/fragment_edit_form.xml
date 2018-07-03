@@ -134,7 +134,7 @@
         android:id="@+id/source_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textAutoComplete|textMultiLine"
+        android:inputType="textCapSentences"
         android:hint="@string/content"
         android:textAppearance="@android:style/TextAppearance.Medium"
         android:minLines="2"/>
