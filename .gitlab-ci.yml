@@ -2,7 +2,7 @@ image: openjdk:8-jdk
 
 variables:
   ANDROID_COMPILE_SDK: "27"
-  ANDROID_TEST_SDK: "24"
+  ANDROID_TEST_SDK: "16"
   ANDROID_BUILD_TOOLS: "27.0.3"
   ANDROID_SDK_TOOLS: "4333796" # 26.1.1
 
@@ -17,8 +17,6 @@ before_script:
   - echo y | android-sdk-linux/tools/bin/sdkmanager --install "build-tools;${ANDROID_BUILD_TOOLS}" &> /dev/null
   - echo y | android-sdk-linux/tools/bin/sdkmanager --install "extras;android;m2repository" &> /dev/null
   - echo y | android-sdk-linux/tools/bin/sdkmanager --install "extras;google;m2repository" &> /dev/null
-  - echo y | android-sdk-linux/tools/bin/sdkmanager --install "emulator" &> /dev/null
-  - echo y | android-sdk-linux/tools/bin/sdkmanager --install "system-images;android-${ANDROID_TEST_SDK};default;x86" &> /dev/null
   - export ANDROID_HOME=$PWD/android-sdk-linux/
   - export PATH=$PATH:$PWD/android-sdk-linux/platform-tools/
   - export GRADLE_USER_HOME=$PWD/.gradle
@@ -41,6 +39,8 @@ functional-tests:
   script:
     - wget --quiet --output-document=android-wait-for-emulator https://raw.githubusercontent.com/travis-ci/travis-cookbooks/0f497eb71291b52a703143c5cd63a217c8766dc9/community-cookbooks/android-sdk/files/default/android-wait-for-emulator
     - chmod +x android-wait-for-emulator
+    - echo y | android-sdk-linux/tools/bin/sdkmanager --install "system-images;android-${ANDROID_TEST_SDK};default;x86" &> /dev/null
+    - echo y | android-sdk-linux/tools/bin/sdkmanager --install "emulator" &> /dev/null
     - echo no | android-sdk-linux/tools/bin/avdmanager create avd --name test --package "system-images;android-${ANDROID_TEST_SDK};default;x86"
     - android-sdk-linux/tools/emulator -avd test -no-window -no-audio &
     - ./android-wait-for-emulator

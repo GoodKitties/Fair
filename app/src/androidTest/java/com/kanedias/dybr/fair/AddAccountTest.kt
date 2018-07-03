@@ -55,6 +55,10 @@ class AddAccountTest {
         activity.runOnUiThread {
             activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
+            // API 24
+            //activity.setTurnScreenOn(true)
+            //activity.setShowWhenLocked(true)
+
             // API 26 is Google API only for now
             //val km: KeyguardManager = activity.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
             //km.requestDismissKeyguard(activity, null)
