@@ -94,7 +94,7 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
                 .negativeText(android.R.string.no)
                 .positiveText(android.R.string.yes)
                 .positiveColorRes(R.color.md_red_800)
-                .onPositive({ _, _ -> delete() })
+                .onPositive { _, _ -> delete() }
                 .show()
     }
 

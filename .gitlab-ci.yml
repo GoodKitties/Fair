@@ -8,6 +8,8 @@ variables:
 
   GIT_STRATEGY: clone
 
+  GOOGLE_PUBLISH_JSON: app/misc/android-publisher-account.json
+
 before_script:
   - apt-get --quiet update --yes
   - wget --quiet --output-document=android-sdk-linux.zip https://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_SDK_TOOLS}.zip
@@ -55,7 +57,11 @@ release-alpha:
   only:
     - tags
   script:
-    - ./gradlew publishApkGoogleplayRelease
+    - apt-get install gnupg2
+    - gpg --batch --decrypt --output ${GOOGLE_PUBLISH_JSON} --passphrase ${GOOGLE_ACCOUNT_DECRYPTION_KEY} ${GOOGLE_PUBLISH_JSON}.gpg
+    - ./gradlew app:publishApkGoogleplayRelease
+  after_script:
+    - rm -f ${GOOGLE_PUBLISH_JSON}
   artifacts:
     paths:
       - app/build/outputs/apk
@@ -65,7 +71,11 @@ release-gold:
   only:
     - web
   script:
+    - apt-get install gnupg2
+    - gpg --batch --decrypt --output ${GOOGLE_PUBLISH_JSON} --passphrase ${GOOGLE_ACCOUNT_DECRYPTION_KEY} ${GOOGLE_PUBLISH_JSON}.gpg
     - ./gradlew publishGoogleplayRelease -PreleaseType=production
+  after_script:
+    - rm -f ${GOOGLE_PUBLISH_JSON}
   artifacts:
     paths:
       - app/build/outputs/apk
