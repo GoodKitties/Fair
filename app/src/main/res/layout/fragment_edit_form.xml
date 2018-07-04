@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:padding="4dp"
     android:orientation="vertical">
 
     <GridLayout
@@ -134,9 +135,17 @@
         android:id="@+id/source_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textCapSentences"
+        android:inputType="textCapSentences|textMultiLine"
         android:hint="@string/content"
         android:textAppearance="@android:style/TextAppearance.Medium"
         android:minLines="2"/>
+
+    <TextView
+        android:id="@+id/edit_formatting_helper_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:layout_gravity="end"
+        android:text="@string/placeholder_link"/>
 
 </LinearLayout>

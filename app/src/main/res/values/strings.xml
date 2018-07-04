@@ -8,9 +8,20 @@
     <string name="placeholder_short" translatable="false">Placeholder</string>
     <string name="placeholder_number_short" translatable="false">1</string>
     <string name="placeholder_number_long" translatable="false">65536</string>
+    <string name="placeholder_link" translatable="false">Link: www.example.com</string>
 
     <!-- static data -->
     <string name="zero" translatable="false">0</string>
+
+    <!-- arrays -->
+    <string-array name="image_sizes">
+        <item>100px</item>
+        <item>200px</item>
+        <item>300px</item>
+        <item>500px</item>
+        <item>800px</item>
+        <item>Full size</item>
+    </string-array>
 
     <string name="my_profile">My Profile</string>
     <string name="my_diary">My Diary</string>
@@ -140,4 +151,6 @@
     <string name="read_more">Read more</string>
     <string name="last_page">No more pages for you!</string>
     <string name="participants_number_indicator">Participants number indicator</string>
+    <string name="markdown_basics"><![CDATA[About formatting: <a href="https://en.wikipedia.org/wiki/Markdown">Markdown</a>]]></string>
+    <string name="select_image_height">Select image height:</string>
 </resources>

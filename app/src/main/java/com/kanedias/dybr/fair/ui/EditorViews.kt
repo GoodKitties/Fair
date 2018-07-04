@@ -8,11 +8,15 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
+import android.text.Html
+import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import butterknife.BindView
 import butterknife.ButterKnife
@@ -45,9 +49,22 @@ class EditorViews : Fragment() {
     @BindView(R.id.edit_insert_from_clipboard)
     lateinit var clipboardSwitch: CheckBox
 
+    @BindView(R.id.edit_formatting_helper_label)
+    lateinit var mdLabel: TextView
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.fragment_edit_form, container, false)
         ButterKnife.bind(this, root)
+
+        @Suppress("DEPRECATION") // we need to support API < 24
+        mdLabel.text = Html.fromHtml(getString(R.string.markdown_basics))
+        mdLabel.movementMethod = LinkMovementMethod.getInstance()
+
+        // start editing content right away
+        contentInput.requestFocus()
+        val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+        imm?.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY)
+
         return root
     }
 
@@ -80,7 +97,7 @@ class EditorViews : Fragment() {
             R.id.edit_quick_image -> insertInCursorPosition("<img src='", paste, "' />")
         }
 
-        clipboardSwitch.isEnabled = false
+        clipboardSwitch.isChecked = false
     }
 
     /**
@@ -136,7 +153,21 @@ class EditorViews : Fragment() {
 
             try {
                 val link = async(CommonPool) { Network.uploadImage(stream.readBytes()) }.await()
-                insertInCursorPosition("<img src='", link, "' />")
+                MaterialDialog.Builder(activity!!)
+                        .title(R.string.insert_image)
+                        .content(R.string.select_image_height)
+                        .items(R.array.image_sizes)
+                        .itemsCallback { _, _, pos, _ ->
+                            val spec = when (pos) {
+                                0 -> "100"
+                                1 -> "200"
+                                2 -> "300"
+                                3 -> "500"
+                                4 -> "800"
+                                else -> "auto"
+                            }
+                            insertInCursorPosition("<img height='$spec' width='auto' src='", link, "' />")
+                        }.show()
             } catch (ex: Exception) {
                 Network.reportErrors(activity!!, ex)
             }

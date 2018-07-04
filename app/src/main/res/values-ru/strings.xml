@@ -49,4 +49,5 @@
     <string name="diary_title">Название дневника</string>
     <string name="still_loading">Загрузка продолжается</string>
     <string name="entry_content">Содержимое записи</string>
+    <string name="markdown_basics"><![CDATA[О форматировании: <a href="https://ru.wikipedia.org/wiki/Markdown">Markdown</a>]]></string>
 </resources>
