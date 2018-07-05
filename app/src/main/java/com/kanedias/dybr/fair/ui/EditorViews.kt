@@ -1,12 +1,15 @@
 package com.kanedias.dybr.fair.ui
 
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.text.Html
 import android.text.method.LinkMovementMethod
@@ -14,10 +17,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
@@ -28,7 +28,6 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
-import java.io.InputStream
 
 /**
  * Fragment to hold all editing-related functions in all edit views where possible.
@@ -41,6 +40,8 @@ class EditorViews : Fragment() {
 
     companion object {
         const val ACTIVITY_REQUEST_IMAGE_UPLOAD = 0
+
+        const val PERMISSION_REQUEST_STORAGE_FOR_IMAGE_UPLOAD = 0
     }
 
     @BindView(R.id.source_text)
@@ -51,6 +52,9 @@ class EditorViews : Fragment() {
 
     @BindView(R.id.edit_formatting_helper_label)
     lateinit var mdLabel: TextView
+
+    @BindView(R.id.edit_quick_image)
+    lateinit var imageUpload: ImageView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.fragment_edit_form, container, false)
@@ -100,11 +104,34 @@ class EditorViews : Fragment() {
         clipboardSwitch.isChecked = false
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (permissions.isEmpty()) {
+            return // request cancelled
+        }
+
+        // Return from the permission request we sent in [uploadImage]
+        if (requestCode == PERMISSION_REQUEST_STORAGE_FOR_IMAGE_UPLOAD) {
+            val result = permissions.filterIndexed { idx, pm -> pm == WRITE_EXTERNAL_STORAGE && grantResults[idx] == PERMISSION_GRANTED }
+            when (result.any()) {
+                true -> uploadImage(imageUpload)
+                false -> Toast.makeText(requireContext(), R.string.no_permissions, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     /**
      * Image upload button requires special handling
      */
     @OnClick(R.id.edit_quick_image)
     fun uploadImage(clicked: View) {
+        // sometimes we need SD-card access to load the image
+        if (ContextCompat.checkSelfPermission(requireContext(), WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(WRITE_EXTERNAL_STORAGE), PERMISSION_REQUEST_STORAGE_FOR_IMAGE_UPLOAD)
+            return
+        }
+
         if (clipboardSwitch.isChecked) {
             // delegate to just paste image link from clipboard
             editSelection(clicked)

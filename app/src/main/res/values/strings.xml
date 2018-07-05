@@ -153,4 +153,5 @@
     <string name="participants_number_indicator">Participants number indicator</string>
     <string name="markdown_basics"><![CDATA[About formatting: <a href="https://en.wikipedia.org/wiki/Markdown">Markdown</a>]]></string>
     <string name="select_image_height">Select image height:</string>
+    <string name="no_permissions">Permission denied, can\'t perform action</string>
 </resources>
