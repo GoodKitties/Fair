@@ -305,7 +305,7 @@ class MainActivity : AppCompatActivity() {
      */
     suspend fun selectProfile(showIfOne: Boolean = false) {
         // retrieve profiles from server
-        val profiles = async(CommonPool) { Network.loadProfiles() }.await()
+        val profiles = async(CommonPool) { Network.loadUserProfiles() }.await()
 
         // predefine what to do if new profile is needed
 

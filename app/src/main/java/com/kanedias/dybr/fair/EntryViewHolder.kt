@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.content.ComponentName
 import android.content.pm.PackageManager
+import com.kanedias.dybr.fair.entities.OwnProfile
 
 /**
  * View holder for showing regular entries in diary view.
@@ -130,7 +131,7 @@ class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : R
                 .negativeText(android.R.string.no)
                 .positiveText(android.R.string.yes)
                 .positiveColorRes(R.color.md_red_800)
-                .onPositive({ _, _ -> delete() })
+                .onPositive { _, _ -> delete() }
                 .show()
     }
 
@@ -151,15 +152,28 @@ class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : R
 
     @OnClick(R.id.entry_author)
     fun showAuthorProfile() {
-        val author = entry.profile.get(entry.document) ?: return
         val activity = itemView.context as AppCompatActivity
 
-        val profShow = ProfileFragment().apply { profile = author }
-        activity.supportFragmentManager.beginTransaction()
-                .addToBackStack("Showing user profile fragment")
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .add(R.id.main_drawer_layout, profShow)
-                .commit()
+        val dialog = MaterialDialog.Builder(activity)
+                .progress(true, 0)
+                .cancelable(false)
+                .title(R.string.please_wait)
+                .content(R.string.loading_profile)
+                .build()
+
+        launch(UI) {
+            dialog.show()
+
+            try {
+                val prof = async(CommonPool) { Network.loadProfile(entry.profile.get().id) }.await()
+                val profShow = ProfileFragment().apply { profile = prof }
+                profShow.show(activity.supportFragmentManager, "Showing user profile fragment")
+            } catch (ex: Exception) {
+                Network.reportErrors(itemView.context, ex)
+            }
+
+            dialog.dismiss()
+        }
     }
 
     private fun showInWebView() {

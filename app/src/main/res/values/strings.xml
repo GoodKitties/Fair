@@ -6,6 +6,7 @@
     <!-- placeholders -->
     <string name="placeholder_long" translatable="false">Sample placeholder text</string>
     <string name="placeholder_short" translatable="false">Placeholder</string>
+    <string name="placeholder_date" translatable="false">10.13.2015</string>
     <string name="placeholder_number_short" translatable="false">1</string>
     <string name="placeholder_number_long" translatable="false">65536</string>
     <string name="placeholder_link" translatable="false">Link: www.example.com</string>
@@ -155,4 +156,9 @@
     <string name="select_image_height">Select image height:</string>
     <string name="no_permissions">Permission denied, can\'t perform action</string>
     <string name="world">World</string>
+    <string name="user_avatar">User\'s avatar</string>
+    <string name="author_name_label">Name:</string>
+    <string name="registration_date_label">Registration date:</string>
+    <string name="blog_label">Blog:</string>
+    <string name="view_profile">View profile</string>
 </resources>

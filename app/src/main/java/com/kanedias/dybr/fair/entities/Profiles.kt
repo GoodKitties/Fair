@@ -110,7 +110,7 @@ class ProfileResponse : Resource() {
      * Settings structure for this profile
      */
     @field:Json(name = "settings")
-    lateinit var settings: ProfileSettings
+    var settings: ProfileSettings? = null
 
     /**
      * Link to the user this profile belongs to
@@ -121,10 +121,10 @@ class ProfileResponse : Resource() {
     /**
      * Link to the blog of this profile
      */
-    @field:Json(name = "blog")
-    var blog = HasOne<Blog>()
+    @field:Json(name = "blogs")// TODO: fix on backend
+    var blogs = HasMany<Blog>()
 }
 
-data class ProfileSettings(val avatar: String, val private: Boolean)
+data class ProfileSettings(val avatar: String?, val private: Boolean)
 
 typealias OwnProfile = ProfileResponse

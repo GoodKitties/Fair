@@ -290,7 +290,7 @@ object Network {
 
     /**
      * Pull profile of current user. Account should have selected last profile and relevant access token by this point.
-     * Don't invoke this for accounts that are logging in for the first time, use [loadProfiles] instead.
+     * Don't invoke this for accounts that are logging in for the first time, use [loadUserProfiles] instead.
      * After the completion [Auth.profile] will be populated.
      *
      * @throws IOException on connection fail
@@ -349,7 +349,7 @@ object Network {
      * Guests can't request any profiles.
      * @return list of profiles that are bound to currently logged in user
      */
-    fun loadProfiles(): List<OwnProfile> {
+    fun loadUserProfiles(): List<OwnProfile> {
         val req = Request.Builder().url("$USERS_ENDPOINT/${Auth.user.serverId}?include=profiles").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
@@ -358,6 +358,20 @@ object Network {
         // there's an edge-case when user is deleted on server but we still have Auth.user.serverId set
         val user = fromWrappedJson(resp.body()!!.source(), User::class.java) ?: return emptyList()
         return user.profiles.get(user.document)
+    }
+
+    /**
+     * fully loads profile, with blog and favorites
+     */
+    fun loadProfile(id: String): OwnProfile {
+        val req = Request.Builder().url("$PROFILES_ENDPOINT/$id?include=blog").build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful) {
+            throw HttpException(resp)
+        }
+
+        // response is returned after execute call, body is not null
+        return fromWrappedJson(resp.body()!!.source(), OwnProfile::class.java)!!
     }
 
     /**
