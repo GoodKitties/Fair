@@ -3,7 +3,6 @@ package com.kanedias.dybr.fair
 import android.app.FragmentTransaction
 import android.content.Intent
 import android.content.SharedPreferences
-import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -44,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val MY_DIARY_TAB = 0
         private const val FAV_TAB = 1
+        private const val WORLD_TAB = 2
     }
 
 
@@ -278,7 +278,7 @@ class MainActivity : AppCompatActivity() {
                         val entry = async(CommonPool) { Network.loadEntry(address[2]) }.await()
                         CommentListFragment().apply { this.entry = entry }
                     }
-                    else -> EntryListFragment().apply { blog = Auth.favorites }
+                    else -> EntryListFragment().apply { blog = Auth.worldMarker }
                 }
 
                 supportFragmentManager.beginTransaction()
@@ -462,7 +462,7 @@ class MainActivity : AppCompatActivity() {
                 return 0
             }
 
-            return 2 // favorites and own blog
+            return 3 // favorites, world and own blog
         }
 
         override fun getItemPosition(fragment: Any): Int {
@@ -478,13 +478,15 @@ class MainActivity : AppCompatActivity() {
 
         override fun getItem(position: Int) = when(position) {
             MY_DIARY_TAB -> EntryListFragment().apply { blog = this@TabAdapter.blog }
-            FAV_TAB -> EntryListFragment().apply { blog = Auth.favorites }
+            FAV_TAB  -> EntryListFragment().apply { blog = Auth.favoritesMarker }
+            WORLD_TAB -> EntryListFragment().apply { blog = Auth.worldMarker }
             else -> EntryListFragment().apply { blog = null }
         }
 
         override fun getPageTitle(position: Int): CharSequence? = when (position) {
             MY_DIARY_TAB -> getString(R.string.my_diary)
             FAV_TAB -> getString(R.string.favorite)
+            WORLD_TAB -> getString(R.string.world)
             else -> ""
         }
     }

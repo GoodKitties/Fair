@@ -12,8 +12,10 @@ import com.kanedias.dybr.fair.database.DbProvider
  * Created on 05.11.17
  */
 object Auth {
+    // service variables, changed only once
     lateinit var guest: Account
-    lateinit var favorites: Blog
+    lateinit var favoritesMarker: Blog
+    lateinit var worldMarker: Blog
 
     lateinit var user: Account
 
@@ -28,9 +30,15 @@ object Auth {
      */
     var blog: Blog? = null
 
+    /**
+     * Favorites of currently loaded [profile]
+     */
+    var favorites: Favorites? = null
+
     fun init(ctx: Context) {
         // setup special values
-        this.favorites = Blog().apply { title = ctx.getString(R.string.favorite) }
+        this.worldMarker = Blog().apply { id = "world"; title = ctx.getString(R.string.world) }
+        this.favoritesMarker = Blog().apply { id = "favorites"; title = ctx.getString(R.string.favorite) }
         this.guest = Account().apply { email = ctx.getString(R.string.guest) }
 
         this.user = guest
@@ -40,17 +48,23 @@ object Auth {
         this.user = acc
         this.profile = null
         this.blog = null
+        this.favorites = null
     }
 
     fun updateCurrentProfile(prof: OwnProfile) {
         this.user.lastProfileId = prof.id
         this.profile = prof
         this.blog = null
+        this.favorites = null
 
         DbProvider.helper.accDao.update(Auth.user)
     }
 
     fun updateBlog(blog: Blog) {
         this.blog = blog
+    }
+
+    fun updateFavorites(favorites: Favorites) {
+        this.favorites = favorites
     }
 }

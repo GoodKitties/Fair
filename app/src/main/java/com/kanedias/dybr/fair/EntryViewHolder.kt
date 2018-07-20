@@ -149,6 +149,19 @@ class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : R
                 }.show()
     }
 
+    @OnClick(R.id.entry_author)
+    fun showAuthorProfile() {
+        val author = entry.profile.get(entry.document) ?: return
+        val activity = itemView.context as AppCompatActivity
+
+        val profShow = ProfileFragment().apply { profile = author }
+        activity.supportFragmentManager.beginTransaction()
+                .addToBackStack("Showing user profile fragment")
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .add(R.id.main_drawer_layout, profShow)
+                .commit()
+    }
+
     private fun showInWebView() {
         val blog = entry.blog.get(entry.document)
         val uri = Uri.Builder()

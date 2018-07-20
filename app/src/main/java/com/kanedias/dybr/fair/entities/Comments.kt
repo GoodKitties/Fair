@@ -8,15 +8,14 @@ import moe.banana.jsonapi2.Resource
 import java.util.*
 
 /**
- * Comment creation request. Text is mandatory and represented in form of
- * [draft.js](https://medium.com/@rajaraodv/how-draft-js-represents-rich-text-data-eeabb5f25cf2) blocks
+ * Comment creation request. Text is mandatory and represented in html
  * Example:
  * ```
  * {
  *   "data": {
  *     "type": "comments",
  *     "attributes": {
- *       "content": "{\"entityMap\": {}, \"blocks\": []}"
+ *       "content": "<div/>"
  *     },
  *     "relationships": {
  *       "entry": {

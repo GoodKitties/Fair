@@ -44,7 +44,7 @@ class ProfileCreateRequest: Resource() {
 
 /**
  * OwnProfile is an actual identity that user wants to be associated with.
- * Has description, nickname, readers/favorites, diary info, address and so on.
+ * Has description, nickname, readers/world, diary info, address and so on.
  * Example (result of `/v1/own-profiles/{id}` call):
  * ```
  * {
