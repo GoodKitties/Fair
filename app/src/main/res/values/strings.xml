@@ -161,4 +161,6 @@
     <string name="registration_date_label">Registration date:</string>
     <string name="blog_label">Blog:</string>
     <string name="view_profile">View profile</string>
+    <string name="removed_from_favorites">Removed from favorites</string>
+    <string name="added_to_favorites">Added to favorites</string>
 </resources>

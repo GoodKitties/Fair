@@ -362,6 +362,7 @@ object Network {
 
     /**
      * fully loads profile, with blog and favorites
+     * @param id identifier of profile to load
      */
     fun loadProfile(id: String): OwnProfile {
         val req = Request.Builder().url("$PROFILES_ENDPOINT/$id?include=blog").build()
@@ -403,6 +404,34 @@ object Network {
 
         // response is returned after execute call, body is not null
         return fromWrappedJson(resp.body()!!.source(), OwnProfile::class.java)!!
+    }
+
+    /**
+     * Add the requested profile to the favorites of current user's profile
+     * @param prof profile to add to favorites
+     */
+    fun addFavorite(prof: OwnProfile) {
+        val favRequest = CreateFavoriteRequest().apply {
+            reader = HasOne(Auth.profile)
+            subscription = HasOne(prof)
+        }
+
+        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(favRequest))
+        val req = Request.Builder().url(FAVORITES_ENDPOINT).post(reqBody).build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful)
+            throw extractErrors(resp)
+    }
+
+    /**
+     * Remove requested profile from favorites of current user's profile
+     * @param prof profile to remove from favorites
+     */
+    fun removeFavorite(prof: OwnProfile) {
+        val req = Request.Builder().url("$PROFILES_ENDPOINT/${Auth.profile?.id}/favorites/${prof.id}").delete().build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful)
+            throw extractErrors(resp)
     }
 
     /**

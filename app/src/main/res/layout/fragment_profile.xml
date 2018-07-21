@@ -15,6 +15,17 @@
         android:scaleType="centerCrop"
         android:contentDescription="@string/user_avatar" />
 
+    <ImageView
+        android:id="@+id/author_add_to_favorites"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_alignTop="@+id/author_avatar"
+        android:layout_toRightOf="@+id/author_avatar"
+        android:layout_toEndOf="@+id/author_avatar"
+        android:src="@drawable/star_border"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/user_avatar" />
+
     <TextView
         android:id="@+id/author_name_label"
         android:layout_width="wrap_content"

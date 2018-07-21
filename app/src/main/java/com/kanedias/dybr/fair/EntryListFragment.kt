@@ -118,18 +118,18 @@ open class EntryListFragment: Fragment() {
      * @param reset if true, clear current entries before populating from [loaded]
      */
     private fun updateRibbonPage(loaded: ArrayDocument<Entry>, reset: Boolean) {
+        if (reset) {
+            entryAdapter.entries.clear()
+        }
+
         if (loaded.isEmpty()) {
             lastPage = true
             entryAdapter.notifyDataSetChanged()
             return
         }
-        nextPage += 1
 
+        nextPage += 1
         entryAdapter.apply {
-            if (reset) {
-                entries.clear()
-            }
-            loaded.included
             entries.addAll(loaded)
             notifyDataSetChanged()
         }

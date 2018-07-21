@@ -1,24 +1,29 @@
 package com.kanedias.dybr.fair
 
 import android.app.Dialog
+import android.app.FragmentTransaction
 import android.graphics.BitmapFactory
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.text.Html
-import android.text.method.LinkMovementMethod
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import butterknife.BindView
 import butterknife.ButterKnife
+import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
+import com.kanedias.dybr.fair.entities.Auth
+import com.kanedias.dybr.fair.entities.Blog
 import com.kanedias.dybr.fair.entities.OwnProfile
+import com.kanedias.dybr.fair.misc.idMatches
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import okhttp3.Request
-import ru.noties.markwon.spans.AsyncDrawable
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -42,7 +47,13 @@ class ProfileFragment: DialogFragment() {
     @BindView(R.id.author_blog)
     lateinit var authorBlog: TextView
 
+    @BindView(R.id.author_add_to_favorites)
+    lateinit var favoritesToggle: ImageView
+
     lateinit var profile: OwnProfile
+
+    private lateinit var filledStar: Drawable
+    private lateinit var emptyStar: Drawable
 
     private lateinit var activity: MainActivity
 
@@ -60,22 +71,27 @@ class ProfileFragment: DialogFragment() {
                 .build()
     }
 
+    @Suppress("DEPRECATION") // we need to support API < 24 in Html.fromHtml and setImageDrawable
     private fun setupUI() {
+        filledStar = activity.resources.getDrawable(R.drawable.star_filled)
+        emptyStar = activity.resources.getDrawable(R.drawable.star_border)
+
+        // set names and dates
         authorName.text = profile.nickname
         registrationDate.text = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(profile.createdAt)
 
         val blog = profile.blogs.get(profile.document)?.first()
         if (blog != null) {
-            @Suppress("DEPRECATION") // we need to support API < 24
             authorBlog.text = Html.fromHtml("<a href='https://dybr.ru/blog/${blog.slug}'>${blog.title}</a>")
-            authorBlog.movementMethod = LinkMovementMethod.getInstance()
+            authorBlog.setOnClickListener { dismiss(); showBlog(blog) }
         } else {
             authorBlog.text = ""
         }
 
+        // set avatar
         val avatarUrl = profile.settings?.avatar
         if (!avatarUrl.isNullOrBlank()) {
-            // load avatar asyncchronously
+            // load avatar asynchronously
             launch(UI) {
                 try {
                     val req = Request.Builder().url(avatarUrl!!).build()
@@ -89,8 +105,47 @@ class ProfileFragment: DialogFragment() {
                 }
             }
         } else {
-            @Suppress("DEPRECATION") // we need to support API < 26
             authorAvatar.setImageDrawable(ColorDrawable(activity.resources.getColor(R.color.md_grey_600)))
         }
+
+        // set favorite status
+        when {
+            Auth.favorites?.subscriptions?.any { it.idMatches(profile) } == true -> favoritesToggle.setImageDrawable(filledStar)
+            else -> favoritesToggle.setImageDrawable(emptyStar)
+        }
+    }
+
+    @OnClick(R.id.author_add_to_favorites)
+    fun toggleFavorite() {
+        // if it's clicked then it's visible
+        launch(UI) {
+            try {
+                if (Auth.favorites?.subscriptions?.any { it.idMatches(profile) } == true) {
+                    // remove from favorites
+                    async(CommonPool) { Network.removeFavorite(profile) }.await()
+                    Auth.favorites?.subscriptions?.remove(profile)
+                    favoritesToggle.setImageDrawable(emptyStar)
+                    Toast.makeText(activity, R.string.removed_from_favorites, Toast.LENGTH_SHORT).show()
+                } else {
+                    // add to favorites
+                    async(CommonPool) { Network.addFavorite(profile) }.await()
+                    Auth.favorites?.subscriptions?.add(profile)
+                    favoritesToggle.setImageDrawable(filledStar)
+                    Toast.makeText(activity, R.string.added_to_favorites, Toast.LENGTH_SHORT).show()
+                }
+            } catch (ioex: IOException) {
+                Network.reportErrors(activity, ioex)
+            }
+        }
+    }
+
+    private fun showBlog(blog: Blog) {
+        val browseFragment = EntryListFragmentFull().apply { this.blog = blog }
+
+        activity.supportFragmentManager.beginTransaction()
+                .addToBackStack("Showing blog from profile")
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .add(R.id.main_drawer_layout, browseFragment)
+                .commit()
     }
 }

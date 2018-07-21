@@ -142,11 +142,13 @@ class EntryResponse: Resource() {
     /**
      * Blog this entry belongs to
      */
+    @field:Json(name = "blog")
     var blog = HasOne<Blog>()
 
     /**
      * Profile this entry was written by
      */
+    @field:Json(name = "profile")
     var profile = HasOne<OwnProfile>()
 
     /**

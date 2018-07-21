@@ -39,11 +39,13 @@ class CreateFavoriteRequest: Resource() {
     /**
      * Link to favorite blog to persist
      */
+    @field:Json(name = "subscription")
     var subscription: HasOne<OwnProfile>? = null
 
     /**
      * Our own profile, which will be the reader of the favorite blog
      */
+    @field:Json(name = "reader")
     var reader: HasOne<OwnProfile>? = null
 }
 
@@ -85,12 +87,14 @@ class FavoritesResponse: Resource() {
     /**
      * Link to favorite blog to persist
      */
-    var profiles: HasOne<OwnProfile>? = null
+    @field:Json(name = "profiles")
+    var profile: HasOne<OwnProfile> = HasOne()
 
     /**
      * Our own profile, which will be the reader of the favorite blog
      */
-    var subscriptions: HasMany<OwnProfile>? = null
+    @field:Json(name = "subscriptions")
+    var subscriptions: HasMany<OwnProfile> = HasMany()
 }
 
 typealias Favorites = FavoritesResponse
