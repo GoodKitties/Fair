@@ -58,6 +58,8 @@ class ProfileFragment: DialogFragment() {
     private lateinit var activity: MainActivity
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        savedInstanceState?.getSerializable("profile")?.let { profile = it as OwnProfile }
+
         activity = context as MainActivity
 
         val view = activity.layoutInflater.inflate(R.layout.fragment_profile, null)
@@ -69,6 +71,11 @@ class ProfileFragment: DialogFragment() {
                 .customView(view, true)
                 .neutralText(android.R.string.ok)
                 .build()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putSerializable("profile", profile)
     }
 
     @Suppress("DEPRECATION") // we need to support API < 24 in Html.fromHtml and setImageDrawable

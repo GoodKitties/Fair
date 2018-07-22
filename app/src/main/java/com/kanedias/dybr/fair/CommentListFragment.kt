@@ -47,6 +47,8 @@ class CommentListFragment : Fragment() {
     private lateinit var activity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        savedInstanceState?.get("entry")?.let { entry = it as Entry }
+
         val view = inflater.inflate(R.layout.fragment_comment_list, container, false)
         activity = context as MainActivity
 
@@ -54,6 +56,11 @@ class CommentListFragment : Fragment() {
         setupUI()
         refreshComments()
         return view
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putSerializable("entry", entry)
     }
 
     private fun setupUI() {

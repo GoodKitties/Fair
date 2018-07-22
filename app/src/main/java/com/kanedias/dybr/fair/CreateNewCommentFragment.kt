@@ -68,11 +68,15 @@ class CreateNewCommentFragment : Fragment() {
     lateinit var editComment : Comment
 
     /**
-     * Entry this comment belongs to
+     * Entry this comment belongs to. Only set if [editMode] is `false`
      */
     lateinit var entry: Entry
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        savedInstanceState?.getBoolean("editMode")?.let { editMode = it }
+        savedInstanceState?.getSerializable("editComment")?.let { editComment = it as Comment }
+        savedInstanceState?.getSerializable("entry")?.let { entry = it as Entry }
+
         val root = inflater.inflate(R.layout.fragment_create_comment, container, false)
         ButterKnife.bind(this, root)
 
@@ -82,6 +86,15 @@ class CreateNewCommentFragment : Fragment() {
         }
 
         return root
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("editMode", editMode)
+        when (editMode) {
+            true -> outState.putSerializable("editComment", editComment)
+            false -> outState.putSerializable("entry", entry)
+        }
     }
 
     /**

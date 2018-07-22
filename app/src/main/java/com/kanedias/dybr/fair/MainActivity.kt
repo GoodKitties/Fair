@@ -278,7 +278,7 @@ class MainActivity : AppCompatActivity() {
                         val entry = async(CommonPool) { Network.loadEntry(address[2]) }.await()
                         CommentListFragment().apply { this.entry = entry }
                     }
-                    else -> EntryListFragment().apply { blog = Auth.worldMarker }
+                    else -> EntryListFragmentFull().apply { blog = Auth.worldMarker }
                 }
 
                 supportFragmentManager.beginTransaction()

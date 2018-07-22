@@ -78,6 +78,8 @@ class CreateNewEntryFragment : Fragment() {
     lateinit var blog: Blog
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        savedInstanceState?.getSerializable("blog")?.let { blog = it as Blog }
+
         val root = inflater.inflate(R.layout.fragment_create_entry, container, false)
         ButterKnife.bind(this, root)
 
@@ -87,6 +89,11 @@ class CreateNewEntryFragment : Fragment() {
         }
 
         return root
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putSerializable("blog", blog)
     }
 
     /**

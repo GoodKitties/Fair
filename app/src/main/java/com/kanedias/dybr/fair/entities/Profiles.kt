@@ -2,6 +2,7 @@ package com.kanedias.dybr.fair.entities
 
 import com.squareup.moshi.Json
 import moe.banana.jsonapi2.*
+import java.io.Serializable
 import java.util.*
 
 /**
@@ -125,6 +126,6 @@ class ProfileResponse : Resource() {
     var blogs = HasMany<Blog>()
 }
 
-data class ProfileSettings(val avatar: String?, val private: Boolean)
+data class ProfileSettings(val avatar: String?, val private: Boolean) : Serializable
 
 typealias OwnProfile = ProfileResponse
