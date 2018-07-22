@@ -74,11 +74,9 @@ object Network {
 
     private const val DEFAULT_DYBR_API_ENDPOINT = "https://dybr.ru/v2"
 
-    private val MAIN_STORAGE_HOST = "https://slonopotam.net"
-    private val IMG_UPLOAD_ENDPOINT = "$MAIN_STORAGE_HOST/upload"
-
     private var MAIN_DYBR_API_ENDPOINT = DEFAULT_DYBR_API_ENDPOINT
 
+    private val IMG_UPLOAD_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/image-upload"
     private var USERS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/users"
     private var SESSIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/sessions"
     private var PROFILES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/profiles"
@@ -645,7 +643,7 @@ object Network {
     fun uploadImage(image: ByteArray): String {
         val body = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
-                .addFormDataPart("file", "master-foo", RequestBody.create(MediaType.parse("image/*"), image))
+                .addFormDataPart("file", "android-${Auth.profile?.nickname?:"nobody"}", RequestBody.create(MediaType.parse("image/*"), image))
                 .build()
 
         val req = Request.Builder().post(body).url(IMG_UPLOAD_ENDPOINT).build()
@@ -668,6 +666,10 @@ object Network {
      */
     private fun extractErrors(resp: Response) : HttpException {
         if (resp.code() in HTTP_BAD_REQUEST until HTTP_INTERNAL_ERROR) { // 400-499: client error
+            if (resp.body()?.contentType() != MIME_JSON_API) {
+                return HttpException(resp)
+            }
+
             // try to get error info
             val errAdapter = jsonConverter.adapter(Document::class.java)
             val body = resp.body()!!.source()

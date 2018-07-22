@@ -15,6 +15,7 @@ import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.entities.*
 import com.kanedias.dybr.fair.ui.md.handleMarkdown
+import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
@@ -123,5 +124,31 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
         // time diff must be lower than 15 minutes
         val timeDiff = (Date().time - comment.createdAt.time) / 1000 // in seconds
         toggleEditButtons(profile == Auth.profile && timeDiff < 60 * 15)
+    }
+
+    @OnClick(R.id.comment_author)
+    fun showAuthorProfile() {
+        val activity = itemView.context as AppCompatActivity
+
+        val dialog = MaterialDialog.Builder(activity)
+                .progress(true, 0)
+                .cancelable(false)
+                .title(R.string.please_wait)
+                .content(R.string.loading_profile)
+                .build()
+
+        launch(UI) {
+            dialog.show()
+
+            try {
+                val prof = async(CommonPool) { Network.loadProfile(comment.profile.get().id) }.await()
+                val profShow = ProfileFragment().apply { profile = prof }
+                profShow.show(activity.supportFragmentManager, "Showing user profile fragment")
+            } catch (ex: Exception) {
+                Network.reportErrors(itemView.context, ex)
+            }
+
+            dialog.dismiss()
+        }
     }
 }
