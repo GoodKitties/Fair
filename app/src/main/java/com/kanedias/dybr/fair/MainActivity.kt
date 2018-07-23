@@ -91,11 +91,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sidebar: Sidebar
 
     /**
-     * ancillary progress dialog for use in various places
-     */
-    private lateinit var progressDialog: MaterialDialog
-
-    /**
      * App-global shared preferences for small config changes not suitable for database
      * (seen-marks, first launch options etc.)
      */
@@ -134,13 +129,6 @@ class MainActivity : AppCompatActivity() {
         sidebarContent.addHeaderView(header)
         sidebarContent.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, emptyList<Int>())
         sidebar = Sidebar(drawer, this)
-
-        progressDialog = MaterialDialog.Builder(this@MainActivity)
-                .progress(true, 0)
-                .cancelable(false)
-                .title(R.string.please_wait)
-                .content(R.string.logging_in)
-                .build()
 
         // cross-join drawer and menu item in header
         val drawerToggle = ActionBarDrawerToggle(this, drawer, toolbar, R.string.open, R.string.close)
@@ -198,11 +186,6 @@ class MainActivity : AppCompatActivity() {
         super.onBackPressed()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        progressDialog.dismiss()
-    }
-
     /**
      * Logs in with specified account. This must be the very first action after opening the app.
      *
@@ -217,7 +200,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         launch(UI) {
-            progressDialog.setContent(R.string.logging_in)
+            val progressDialog = MaterialDialog.Builder(this@MainActivity)
+                    .progress(true, 0)
+                    .cancelable(false)
+                    .title(R.string.please_wait)
+                    .content(R.string.logging_in)
+                    .build()
             progressDialog.show()
 
             try {
@@ -242,7 +230,7 @@ class MainActivity : AppCompatActivity() {
                 consumeCallingUrl()
             }
 
-            progressDialog.hide()
+            progressDialog.dismiss()
             refresh()
         }
     }
@@ -268,25 +256,42 @@ class MainActivity : AppCompatActivity() {
     private suspend fun consumeCallingUrl() {
         try {
             val address = intent.data.pathSegments // it's in the form of /blog/<slug>/[<entry>]
-            if (!address.isEmpty() && address[0] == "blog") {
-                val fragment = when (address.size) {
-                    2 -> {  // the case for /blog/<slug>
-                        val blog = async(CommonPool) { Network.loadBlog(address[1]) }.await()
-                        EntryListFragmentFull().apply { this.blog = blog }
+            when(address[0]) {
+                "blog" -> {
+                    val fragment = when (address.size) {
+                        2 -> {  // the case for /blog/<slug>
+                            val blog = async(CommonPool) { Network.loadBlog(address[1]) }.await()
+                            EntryListFragmentFull().apply { this.blog = blog }
+                        }
+                        3 -> { // the case for /blog/<slug>/<entry>
+                            val entry = async(CommonPool) { Network.loadEntry(address[2]) }.await()
+                            CommentListFragment().apply { this.entry = entry }
+                        }
+                        else -> return
                     }
-                    3 -> { // the case for /blog/<slug>/<entry>
-                        val entry = async(CommonPool) { Network.loadEntry(address[2]) }.await()
-                        CommentListFragment().apply { this.entry = entry }
-                    }
-                    else -> EntryListFragmentFull().apply { blog = Auth.worldMarker }
-                }
 
-                supportFragmentManager.beginTransaction()
-                        .addToBackStack("Showing intent-requested address")
-                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                        .replace(R.id.main_drawer_layout, fragment)
-                        .commit()
+                    supportFragmentManager.beginTransaction()
+                            .addToBackStack("Showing intent-requested address")
+                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                            .replace(R.id.main_drawer_layout, fragment)
+                            .commit()
+                }
+                "profile" -> {
+                    val fragment = when (address.size) {
+                        2 -> { // the case for /profile/<id>
+                            val profile = async(CommonPool) { Network.loadProfile(address[1]) }.await()
+                            ProfileFragment().apply { this.profile = profile }
+                        }
+                        else -> return
+                    }
+
+                    fragment.show(supportFragmentManager, "Showing intent-requested profile fragment")
+                }
+                else -> return
             }
+
+
+
         } catch (ex: Exception) {
             Network.reportErrors(this@MainActivity, ex)
         } finally {

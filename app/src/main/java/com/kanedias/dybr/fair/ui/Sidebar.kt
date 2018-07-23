@@ -17,8 +17,11 @@ import com.kanedias.dybr.fair.*
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.entities.Auth
 import com.kanedias.dybr.fair.entities.Account
+import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.channels.actor
+import kotlinx.coroutines.experimental.launch
 
 /**
  * Sidebar views and controls.
@@ -99,6 +102,54 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
     @OnClick(R.id.settings_area)
     fun goToSettings() {
         activity.startActivity(Intent(activity, SettingsActivity::class.java))
+    }
+
+    @OnClick(R.id.my_profile)
+    fun goToProfile() {
+        if (Auth.profile == null)
+            return
+
+        val dialog = MaterialDialog.Builder(activity)
+                .progress(true, 0)
+                .cancelable(false)
+                .title(R.string.please_wait)
+                .content(R.string.loading_profile)
+                .build()
+
+        launch(UI) {
+            dialog.show()
+
+            try {
+                val prof = async(CommonPool) { Network.loadProfile(Auth.profile!!.id) }.await()
+                val profShow = ProfileFragment().apply { profile = prof }
+                profShow.show(activity.supportFragmentManager, "Showing my profile fragment")
+            } catch (ex: Exception) {
+                Network.reportErrors(activity, ex)
+            }
+
+            dialog.dismiss()
+        }
+    }
+
+    @OnClick(R.id.my_blog)
+    fun goToMyBlog() {
+        if (Auth.blog == null)
+            return
+
+        launch(UI) {
+            try {
+                val blog = async(CommonPool) { Network.loadBlog(Auth.blog!!.slug) }.await()
+                val myBlog = EntryListFragmentFull().apply { this.blog = blog }
+
+                activity.supportFragmentManager.beginTransaction()
+                        .addToBackStack("Showing my blog fragment")
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                        .replace(R.id.main_drawer_layout, myBlog)
+                        .commit()
+            }  catch (ex: Exception) {
+                Network.reportErrors(activity, ex)
+            }
+        }
     }
 
     /**

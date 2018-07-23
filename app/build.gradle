@@ -92,7 +92,7 @@ dependencies {
     implementation 'com.jakewharton:butterknife:8.8.1'                          // Annotation processor
     implementation 'com.j256.ormlite:ormlite-android:5.0'                       // ORM for local storage
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'                          // android http client
-    implementation 'com.afollestad.material-dialogs:core:0.9.5.0'               // material design for dialogs
+    implementation 'com.afollestad.material-dialogs:core:0.9.6.0'               // material design for dialogs
     implementation 'com.github.Adonai.convalida-extended:convalida:1.1.0'       // validation of text inputs
     implementation 'moe.banana:moshi-jsonapi:3.5.0'                             // JSON-API parser
     implementation 'com.squareup.moshi:moshi-kotlin:1.6.0'                      // Moshi Kotlin support
