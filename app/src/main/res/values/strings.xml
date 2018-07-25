@@ -75,7 +75,6 @@
     <string name="still_loading">Still loading…</string>
     <string name="entry_content">Entry content</string>
     <string name="entry_title">Entry title</string>
-    <string name="previewing_in_n_seconds">Previewing in %s seconds…</string>
     <string name="submit">Submit</string>
     <string name="termsofservice_accept">I accept Terms of Service</string>
     <string name="i_am_over_eighteen">I am over eighteen</string>
@@ -98,7 +97,7 @@
     <string name="no_profile">No profile</string>
     <string name="add_profile">Add profile</string>
     <string name="create_blog">Create blog</string>
-    <string name="blog_address"><![CDATA[dybr.ru/<address>]]></string>
+    <string name="blog_address" translatable="false"><![CDATA[dybr.ru/<address>]]></string>
     <string name="blog_title">Blog title</string>
     <string name="blog_created">Blog created</string>
     <string name="add_blog">Add blog</string>
@@ -127,7 +126,7 @@
     <string name="underlined_font">Underlined font</string>
     <string name="strikethrough_font">Strikethrough font</string>
     <string name="insert_code_block">Insert code block</string>
-    <string name="insert_quote_block">Inser quote block</string>
+    <string name="insert_quote_block">Insert quote block</string>
     <string name="insert_numbered_list">Insert numbered list</string>
     <string name="insert_bulleted_list">Insert bulleted list</string>
     <string name="insert_link">Insert link</string>

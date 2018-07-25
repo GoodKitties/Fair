@@ -1,2 +1,63 @@
 <resources>
+    <!-- arrays -->
+    <string-array name="image_sizes">
+        <item>100px</item>
+        <item>200px</item>
+        <item>300px</item>
+        <item>500px</item>
+        <item>800px</item>
+        <item>поўны памер</item>
+    </string-array>
+
+    <string name="my_profile">Мой профiль</string>
+    <string name="my_diary">Мой дзеннiк</string>
+    <string name="refresh">Абнавiць</string>
+    <string name="search">Пошук</string>
+    <string name="hello_plus_comma">Прывiтанне,</string>
+    <string name="add_an_account">Дадаць акаунт</string>
+    <string name="guest">Госць</string>
+    <string name="open">Адкрыць</string>
+    <string name="close">Зачынiць</string>
+    <string name="inbox">Пошта</string>
+    <string name="settings">Налады</string>
+    <string name="go_to">Перайсцi да...</string>
+    <string name="register_new_account">Рэгiстрацыя акаунта</string>
+    <string name="email">E-Mail</string>
+    <string name="password">Пароль</string>
+    <string name="confirm_password">Пацвердзiце пароль</string>
+    <string name="enter">Уваход</string>
+    <string name="invalid_email">Невалiдны / няверны / недапушчальны E-Mail</string>
+    <string name="passwords_not_match">Паролi не супадаюць. А павiнны</string>
+    <string name="invalid_password">Невалiдны / няверны / недапушчальны пароль</string>
+    <string name="should_not_be_empty">Павінна быць запоўненым</string>
+    <string name="should_only_contain_alphanumeric">Павiiна ўтрымлiваць толькi a-z і 0-9</string>
+    <string name="register">Рэгiстрацыя</string>
+    <string name="username">Нiк</string>
+    <string name="checking_in_progress">Праверка</string>
+    <string name="checking_nickname">Праверка нiка...</string>
+    <string name="nickname_already_taken">Нiк ужо заняты</string>
+    <string name="error_connecting">Памылка сувязi</string>
+    <string name="unexpected_website_error">Нечаканая памылка сайта</string>
+    <string name="checking_email">Праверка E-Mail…</string>
+    <string name="checking_namespace">Праверка адрасу...</string>
+    <string name="email_already_registered">Такi E-Mail ужо зарэгiстраваны</string>
+    <string name="namespace_already_taken">Такi адрас ужо заняты</string>
+    <string name="congrats_diary_registered">Вiншуем, дзеннiк зарэгiстраваны</string>
+    <string name="registration_failed">Непаспяховая рэгiстрацыя :(</string>
+    <string name="error_in_website_answer">Памылка адказу сайта</string>
+    <string name="delete_account">Выдалiць акаунт</string>
+    <string name="are_you_sure">Вы ўпэўнены?</string>
+    <string name="invalid_credentials">Няверны лагiн/пароль!</string>
+    <string name="login_successful">Паспяховы ўваход</string>
+    <string name="profile_not_found">Профiль ня знойдзены!</string>
+    <string name="loading">Загрузка...</string>
+    <string name="loading_profile">Загрузка профiлю...</string>
+    <string name="please_wait">Пачакайце калi ласка</string>
+    <string name="logging_in">Уваход...</string>
+    <string name="action">Дзеяннi</string>
+    <string name="favorite">Адабранае</string>
+    <string name="diary_title">Назва дзеннiка</string>
+    <string name="still_loading">Загрузка працягваецца...</string>
+    <string name="entry_content">Змест запiсу</string>
+    <string name="entry_title">Загаловак запісу</string>
     </resources>

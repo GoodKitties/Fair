@@ -1,4 +1,14 @@
 <resources>
+    <!-- arrays -->
+    <string-array name="image_sizes">
+        <item>100px</item>
+        <item>200px</item>
+        <item>300px</item>
+        <item>500px</item>
+        <item>800px</item>
+        <item>Полный размер</item>
+    </string-array>
+
     <string name="my_profile">Мой профиль</string>
     <string name="my_diary">Мой дневник</string>
     <string name="refresh">Обновить</string>
@@ -16,38 +26,95 @@
     <string name="password">Пароль</string>
     <string name="confirm_password">Подтвердите пароль</string>
     <string name="enter">Вход</string>
-    <string name="invalid_email">Невалидный E-Mail!</string>
-    <string name="passwords_not_match">Пароли не совпадают! А должны</string>
-    <string name="invalid_password">Невалидный пароль!</string>
-    <string name="should_not_be_empty">Не должно быть пустым!</string>
+    <string name="invalid_email">Некорректный E-Mail</string>
+    <string name="passwords_not_match">Пароли не совпадают. А должны</string>
+    <string name="invalid_password">Неверный пароль</string>
+    <string name="should_not_be_empty">Должно быть заполнено</string>
     <string name="should_only_contain_alphanumeric">Должно содержать только a–z и 0–9</string>
     <string name="register">Регистрация</string>
-    <string name="username">Никнейм</string>
+    <string name="username">Ник</string>
     <string name="checking_in_progress">Проверка…</string>
     <string name="checking_nickname">Проверка ника…</string>
-    <string name="nickname_already_taken">Ник уже занят!</string>
+    <string name="nickname_already_taken">Ник уже занят</string>
     <string name="error_connecting">Ошибка подключения</string>
     <string name="unexpected_website_error">Неожиданная ошибка сайта</string>
     <string name="checking_email">Проверка E-Mail…</string>
-    <string name="checking_namespace">Проверка адреса…</string>
-    <string name="email_already_registered">Такой E-Mail уже зарегистрирован!</string>
-    <string name="namespace_already_taken">Такой адрес уже занят!</string>
-    <string name="congrats_diary_registered">Поздравления, успешно зарегистрированы!</string>
+    <string name="checking_namespace">Проверка адреса дневника…</string>
+    <string name="email_already_registered">Такой E-Mail уже зарегистрирован</string>
+    <string name="namespace_already_taken">Такой адрес дневника уже занят</string>
+    <string name="congrats_diary_registered">Поздравляем, дневник зарегистрирован</string>
     <string name="registration_failed">Регистрация неуспешна :(</string>
     <string name="error_in_website_answer">Ошибка в ответе от сайта</string>
     <string name="delete_account">Удалить аккаунт</string>
     <string name="are_you_sure">Вы уверены?</string>
-    <string name="invalid_credentials">Неправильные логин/пароль!</string>
+    <string name="invalid_credentials">Неверный логин/пароль</string>
     <string name="login_successful">Успешный вход</string>
-    <string name="profile_not_found">Профиль не найден!</string>
+    <string name="profile_not_found">Профиль не найден</string>
     <string name="loading">Загрузка…</string>
     <string name="loading_profile">Загрузка профиля…</string>
-    <string name="please_wait">Пожалуйста подождите</string>
+    <string name="please_wait">Пожалуйста, подождите</string>
     <string name="logging_in">Вход…</string>
     <string name="action">Действие</string>
     <string name="favorite">Избранное</string>
     <string name="diary_title">Название дневника</string>
     <string name="still_loading">Загрузка продолжается</string>
     <string name="entry_content">Содержимое записи</string>
-    <string name="markdown_basics"><![CDATA[О форматировании: <a href="https://ru.wikipedia.org/wiki/Markdown">Markdown</a>]]></string>
+    <string name="entry_title">Заголовок записи</string>
+    <string name="submit">Отправить</string>
+    <string name="termsofservice_accept">Я принимаю условия предоставления услуг</string>
+    <string name="i_am_over_eighteen">Мне есть 18 лет</string>
+    <string name="next_steps">Следующие шаги</string>
+    <string name="registered_please_confirm_mail">Регистрация завершена! Проверьте почту и следуйте инструкциям по активации.</string>
+    <string name="nickname">Никнейм</string>
+    <string name="birthday_dd_mm">Дата рождения ГГГГ-ММ-ДД</string>
+    <string name="description">Описание</string>
+    <string name="create">Создать</string>
+    <string name="create_new">Создать новый</string>
+    <string name="new_profile">Новый профиль</string>
+    <string name="no_profiles_create_one">Мы не нашли ни одного профиля для этого аккаунта. Создать профиль?</string>
+    <string name="confirm_action">Подтвердить действие</string>
+    <string name="confirm_profile_deletion">Подтвердите удаление профиля. Внимание: дневник и все записи, сделанные от этого профиля, будут удалены!</string>
+    <string name="confirm">Подтвердить</string>
+    <string name="profile_deleted">Профиль удален</string>
+    <string name="switch_profile">Сменить профиль</string>
+    <string name="remove_profile">Удалить профиль</string>
+    <string name="profile_created">Профиль создан</string>
+    <string name="no_profile">Нет профиля</string>
+    <string name="add_profile">Добавить профиль</string>
+    <string name="create_blog">Создать дневник</string>
+    <string name="blog_title">Название дневника</string>
+    <string name="blog_created">Дневник создан</string>
+    <string name="add_blog">Добавить дневник</string>
+    <string name="my_blog">Мой дневник</string>
+    <string name="preview">Предпросмотр</string>
+    <string name="edit_entry">Изменить запись</string>
+    <string name="delete_entry">Удалить запись</string>
+    <string name="entry_deleted">Запись удалена</string>
+    <string name="entry_updated">Запись изменена</string>
+    <string name="entry_created">Запись создана</string>
+    <string name="delete_comment">Удалить комментарий</string>
+    <string name="edit_comment">Изменить комментарий</string>
+    <string name="comment_deleted">Комментарий удален</string>
+    <string name="comment_updated">Комментарий изменен</string>
+    <string name="comment_created">Комментарий создан</string>
+    <string name="comments">Комментарии</string>
+    <string name="underlined_font">Подчеркнутый шрифт</string>
+    <string name="strikethrough_font">Зачеркнутый шрифт</string>
+    <string name="insert_numbered_list">Вставить нумерованный список</string>
+    <string name="insert_bulleted_list">Вставить маркированный список</string>
+    <string name="insert_link">Вставить ссылку</string>
+    <string name="insert_image">Вставить изображение</string>
+    <string name="insert_from_clipboard">Вставить из буфера обмена</string>
+    <string name="select_image_to_upload">Выберите изображение для загрузки</string>
+    <string name="no_file_manager_found">Менеджер файлов не найден</string>
+    <string name="publish_entry">Опубликовать запись</string>
+    <string name="draft">Черновик</string>
+    <string name="read_more">Читать дальше</string>
+    <string name="select_image_height">Выберите высоту изображения:</string>
+    <string name="user_avatar">Аватар пользователя</string>
+    <string name="author_name_label">Имя:</string>
+    <string name="registration_date_label">Дата регистрации:</string>
+    <string name="blog_label">Дневник:</string>
+    <string name="removed_from_favorites">Удалить из Избранного</string>
+    <string name="added_to_favorites">Добавлено в Избранное</string>
 </resources>

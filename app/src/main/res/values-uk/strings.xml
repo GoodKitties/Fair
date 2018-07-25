@@ -1,4 +1,14 @@
 <resources>
+    <!-- arrays -->
+    <string-array name="image_sizes">
+        <item>100px</item>
+        <item>200px</item>
+        <item>300px</item>
+        <item>500px</item>
+        <item>800px</item>
+        <item>Повний розмір</item>
+    </string-array>
+
     <string name="my_profile">Мій профіль</string>
     <string name="my_diary">Мій щоденник</string>
     <string name="refresh">Оновити</string>
@@ -10,8 +20,8 @@
     <string name="close">Закрити</string>
     <string name="inbox">Пошта / Вхідні</string>
     <string name="settings">Налаштування</string>
-    <string name="go_to">Перейти до…</string>
-    <string name="register_new_account">Реєстрація нового аккаунту</string>
+    <string name="go_to">Перейти до...</string>
+    <string name="register_new_account">Реєстрація аккаунту</string>
     <string name="email">E-Mail</string>
     <string name="password">Пароль</string>
     <string name="confirm_password">Підтвердіть пароль</string>
@@ -19,16 +29,16 @@
     <string name="invalid_email">Невалідний / невірний / неприпустимий E-Mail</string>
     <string name="passwords_not_match">Паролі не співпадають. А повинні</string>
     <string name="invalid_password">Невалідний / невірний / неприпустимий пароль</string>
-    <string name="should_not_be_empty">Не повинно бути пустим / Має бути заповненим</string>
-    <string name="should_only_contain_alphanumeric">Має містити лише a–z і 0–9</string>
+    <string name="should_not_be_empty">Має бути заповненим</string>
+    <string name="should_only_contain_alphanumeric">Має містити лише a-z і 0-9</string>
     <string name="register">Реєстрація</string>
-    <string name="username">Нікнейм / Ім\'я користувача</string>
-    <string name="checking_in_progress">Перевірка…</string>
-    <string name="checking_nickname">Перевірка ніку…</string>
+    <string name="username">Нік</string>
+    <string name="checking_in_progress">Перевірка...</string>
+    <string name="checking_nickname">Перевірка ніку...</string>
     <string name="nickname_already_taken">Нік вже зайнято</string>
     <string name="error_connecting">Помилка з\'єднання</string>
     <string name="unexpected_website_error">Неочікувана помилка сайту</string>
-    <string name="checking_email">Перевірка E-Mail…</string>
+    <string name="checking_email">Перевірка E-Mail...</string>
     <string name="checking_namespace">Перевірка адреси</string>
     <string name="email_already_registered">Такий E-Mail вже зареєстровано</string>
     <string name="namespace_already_taken">Таку адресу вже зайнято</string>
@@ -40,13 +50,91 @@
     <string name="invalid_credentials">Невірні логін/пароль</string>
     <string name="login_successful">Вхід успішний</string>
     <string name="profile_not_found">Профіль не знайдено</string>
-    <string name="loading">Завантаження…</string>
-    <string name="loading_profile">Завантаження профілю…</string>
+    <string name="loading">Завантаження...</string>
+    <string name="loading_profile">Завантаження профілю...</string>
     <string name="please_wait">Будь ласка, зачекайте</string>
-    <string name="logging_in">Вхід…</string>
+    <string name="logging_in">Вхід...</string>
     <string name="action">Дія</string>
     <string name="favorite">Вибране</string>
     <string name="diary_title">Назва щоденника</string>
-    <string name="still_loading">Завантаження продовжується…</string>
+    <string name="still_loading">Завантаження продовжується...</string>
     <string name="entry_content">Вміст запису</string>
+    <string name="entry_title">Заголовок запису</string>
+    <string name="termsofservice_accept">Я приймаю умови надання послуг</string>
+    <string name="i_am_over_eighteen">Мені вже є вісімнадцять</string>
+    <string name="next_steps">Наступні кроки</string>
+    <string name="registered_please_confirm_mail">Реєстрацію завершено! Будь ласка, перевірте вашу пошту та дотримуйтеся інструкцій для активації.</string>
+    <string name="nickname">Нік</string>
+    <string name="birthday_dd_mm">Дата нарождення: РРРР-ММ-ДД</string>
+    <string name="description">Опис</string>
+    <string name="create">Створити</string>
+    <string name="create_new">Створити новий</string>
+    <string name="new_profile">Новий профіль</string>
+    <string name="no_profiles_create_one">Не знайдено профилей для цього аккаунта, створити новий?</string>
+    <string name="confirm_action">Підтвердити дію</string>
+    <string name="confirm_profile_deletion">Підтвердити видалення профиля. Увага: щоденник та усі записи, що належать до цього профилю, буде видалено!</string>
+    <string name="confirm">Підтвердити</string>
+    <string name="profile_deleted">Профіль видалено</string>
+    <string name="switch_profile">Змінити профіль</string>
+    <string name="remove_profile">Видалити профіль</string>
+    <string name="profile_created">Профіль створено</string>
+    <string name="no_profile">Немає профилю</string>
+    <string name="add_profile">Додати профіль</string>
+    <string name="create_blog">Створити блог</string>
+    <string name="blog_title">Назва блогу</string>
+    <string name="blog_created">Блог створено</string>
+    <string name="add_blog">Додати блог</string>
+    <string name="my_blog">Мій блог</string>
+    <string name="preview">Попередній перегляд</string>
+    <string name="leave_crash_comment">Будь ласка, опишіть вашу останню дію перед аварійним завершенням роботи</string>
+    <string name="app_crashed">Вибачте, роботу додатку аварійно завершено</string>
+    <string name="edit_entry">Редагувати запис</string>
+    <string name="delete_entry">Видалити запис</string>
+    <string name="more_options">Більше опцій</string>
+    <string name="entry_deleted">Запис видалено</string>
+    <string name="entry_updated">Запис змінено</string>
+    <string name="entry_created">Запис створено</string>
+    <string name="delete_comment">Видалити коментар</string>
+    <string name="edit_comment">Редагувати коментар</string>
+    <string name="comment_deleted">Коментар видалено</string>
+    <string name="comment_content">Текст коментаря</string>
+    <string name="comment_updated">Коментар змінено</string>
+    <string name="comment_created">Коментар створено</string>
+    <string name="comments">Коментарі</string>
+    <string name="entry_menu">Меню запису</string>
+    <string name="show_web_version">Показати веб-версію</string>
+    <string name="bold_font">Жирний</string>
+    <string name="italic_font">Курсив</string>
+    <string name="underlined_font">Підкреслений</string>
+    <string name="strikethrough_font">Закреслений</string>
+    <string name="insert_code_block">Вставити блок коду</string>
+    <string name="insert_quote_block">Вставити цитату</string>
+    <string name="insert_numbered_list">Вставити нумерований список</string>
+    <string name="insert_bulleted_list">Вставити маркований список</string>
+    <string name="insert_link">Вставити посилання</string>
+    <string name="insert_image">Вставити зображення</string>
+    <string name="upload_public_image">Завантажити загальнодоступне зображення</string>
+    <string name="insert_from_clipboard">Вставити з буферу обміну</string>
+    <string name="select_image_to_upload">Обрати зображення для завантаження</string>
+    <string name="no_file_manager_found">Менеджер файлів не знайдено</string>
+    <string name="uploading">Завантаження...</string>
+    <string name="donate">Пожертвувати</string>
+    <string name="create_issue">Ви збираєтеся перейти до трекеру проекту. Будь ласка, створіть там нову проблему.</string>
+    <string name="understood">Зрозуміло</string>
+    <string name="make_draft_entry">Створити чорновик</string>
+    <string name="publish_entry">Опублікувати запис</string>
+    <string name="draft">Чорновик</string>
+    <string name="api_home_server_sum">Не змінюйте, якщо не розумієте, що саме ви робите</string>
+    <string name="read_more">Читати далі</string>
+    <string name="last_page">Для вас більше немає сторінок!</string>
+    <string name="participants_number_indicator">Індикатор кількості учасників</string>
+    <string name="select_image_height">Оберіть висоту зображення:</string>
+    <string name="no_permissions">Доступ видхилено, неможливо виконати дію</string>
+    <string name="user_avatar">Аватар користувача</string>
+    <string name="author_name_label">Ім\'я:</string>
+    <string name="registration_date_label">Дата реєстрації:</string>
+    <string name="blog_label">Блог:</string>
+    <string name="view_profile">Подивитися профіль</string>
+    <string name="removed_from_favorites">Видалено із вибраного</string>
+    <string name="added_to_favorites">Додано у вибране</string>
 </resources>
