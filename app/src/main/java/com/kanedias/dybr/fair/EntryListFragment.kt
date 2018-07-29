@@ -43,20 +43,14 @@ open class EntryListFragment: Fragment() {
     private lateinit var activity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        savedInstanceState?.get("blog")?.let { blog = it as Blog }
-
         val view = inflater.inflate(layoutToUse(), container, false)
         activity = context as MainActivity
 
         ButterKnife.bind(this, view)
         setupUI(view)
+        setupTheming()
         refreshEntries()
         return view
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putSerializable("blog", blog)
     }
 
     open fun layoutToUse() = R.layout.fragment_entry_list
@@ -65,6 +59,9 @@ open class EntryListFragment: Fragment() {
         refresher.setOnRefreshListener { refreshEntries(true) }
         entryRibbon.layoutManager = LinearLayoutManager(activity)
         entryRibbon.adapter = entryAdapter
+    }
+
+    private fun setupTheming() {
     }
 
     /**

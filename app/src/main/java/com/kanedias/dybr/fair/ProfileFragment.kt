@@ -117,7 +117,7 @@ class ProfileFragment: DialogFragment() {
 
         // set favorite status
         when {
-            Auth.favorites?.subscriptions?.any { it.idMatches(profile) } == true -> favoritesToggle.setImageDrawable(filledStar)
+            Auth.profile?.favorites?.any { it.idMatches(profile) } == true -> favoritesToggle.setImageDrawable(filledStar)
             else -> favoritesToggle.setImageDrawable(emptyStar)
         }
     }
@@ -127,16 +127,16 @@ class ProfileFragment: DialogFragment() {
         // if it's clicked then it's visible
         launch(UI) {
             try {
-                if (Auth.favorites?.subscriptions?.any { it.idMatches(profile) } == true) {
+                if (Auth.profile?.favorites?.any { it.idMatches(profile) } == true) {
                     // remove from favorites
                     async(CommonPool) { Network.removeFavorite(profile) }.await()
-                    Auth.favorites?.subscriptions?.remove(profile)
+                    Auth.profile?.favorites?.remove(profile)
                     favoritesToggle.setImageDrawable(emptyStar)
                     Toast.makeText(activity, R.string.removed_from_favorites, Toast.LENGTH_SHORT).show()
                 } else {
                     // add to favorites
                     async(CommonPool) { Network.addFavorite(profile) }.await()
-                    Auth.favorites?.subscriptions?.add(profile)
+                    Auth.profile?.favorites?.add(profile)
                     favoritesToggle.setImageDrawable(filledStar)
                     Toast.makeText(activity, R.string.added_to_favorites, Toast.LENGTH_SHORT).show()
                 }

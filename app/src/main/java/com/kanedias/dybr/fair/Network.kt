@@ -83,7 +83,6 @@ object Network {
     private var BLOGS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/blogs"
     private var ENTRIES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/entries"
     private var COMMENTS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/comments"
-    private var FAVORITES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/favorites"
 
     private val MIME_JSON_API = MediaType.parse("application/vnd.api+json")
 
@@ -172,7 +171,6 @@ object Network {
         BLOGS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/blogs"
         ENTRIES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/entries"
         COMMENTS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/comments"
-        FAVORITES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/favorites"
     }
 
     /**
@@ -247,13 +245,19 @@ object Network {
 
         // last profile exists, try to load it
         populateProfile()
-        populateFavorites()
         populateBlog()
     }
 
     private fun <T: ResourceIdentifier> toWrappedJson(obj: T): String {
         val wrapped = ObjectDocument<T>().apply { set(obj) }
         val type = Types.newParameterizedType(Document::class.java, obj::class.java)
+        val reqAdapter = jsonConverter.adapter<Document>(type)
+        return reqAdapter.toJson(wrapped)
+    }
+
+    private fun <T: ResourceIdentifier> toWrappedListJson(obj: T): String {
+        val wrapped = ArrayDocument<T>().apply { add(obj) }
+        val type = Types.newParameterizedType(ArrayDocument::class.java, obj::class.java)
         val reqAdapter = jsonConverter.adapter<Document>(type)
         return reqAdapter.toJson(wrapped)
     }
@@ -297,28 +301,8 @@ object Network {
         if (Auth.user.lastProfileId == null)
             return // no profile selected, nothing to populate
 
-        val req = Request.Builder().url("$PROFILES_ENDPOINT/${Auth.user.lastProfileId}").build()
-        val resp = httpClient.newCall(req).execute()
-        if (!resp.isSuccessful)
-            throw extractErrors(resp)
-
-        // response is returned after execute call, body is not null
-        val profile = fromWrappedJson(resp.body()!!.source(), OwnProfile::class.java)
-        profile?.let { Auth.updateCurrentProfile(profile) } // all steps aren't required here, use this just to have all in one place
-    }
-
-    private fun populateFavorites() {
-        if (Auth.profile?.id == null)
-            return // no profile ->no favorites, nothing to populate
-
-        val req = Request.Builder().url("$FAVORITES_ENDPOINT/${Auth.profile?.id}").build()
-        val resp = httpClient.newCall(req).execute()
-        if (!resp.isSuccessful)
-            throw extractErrors(resp)
-
-        // response is returned after execute call, body is not null
-        val favorites = fromWrappedJson(resp.body()!!.source(), Favorites::class.java)
-        favorites?.let { Auth.updateFavorites(favorites) }
+        val profile = loadProfile(Auth.user.lastProfileId!!)
+        Auth.updateCurrentProfile(profile) // all steps aren't required here, use this just to have all in one place
     }
 
     /**
@@ -363,7 +347,7 @@ object Network {
      * @param id identifier of profile to load
      */
     fun loadProfile(id: String): OwnProfile {
-        val req = Request.Builder().url("$PROFILES_ENDPOINT/$id?include=blog").build()
+        val req = Request.Builder().url("$PROFILES_ENDPOINT/$id?include=blog,favorites").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw HttpException(resp)
@@ -409,13 +393,12 @@ object Network {
      * @param prof profile to add to favorites
      */
     fun addFavorite(prof: OwnProfile) {
-        val favRequest = CreateFavoriteRequest().apply {
-            reader = HasOne(Auth.profile)
-            subscription = HasOne(prof)
-        }
+        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedListJson(ResourceIdentifier(prof)))
+        val req = Request.Builder()
+                .url("$PROFILES_ENDPOINT/${Auth.profile!!.id}/relationships/favorites")
+                .post(reqBody)
+                .build()
 
-        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(favRequest))
-        val req = Request.Builder().url(FAVORITES_ENDPOINT).post(reqBody).build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
             throw extractErrors(resp)
@@ -426,7 +409,12 @@ object Network {
      * @param prof profile to remove from favorites
      */
     fun removeFavorite(prof: OwnProfile) {
-        val req = Request.Builder().url("$PROFILES_ENDPOINT/${Auth.profile?.id}/favorites/${prof.id}").delete().build()
+        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedListJson(ResourceIdentifier(prof)))
+        val req = Request.Builder()
+                .url("$PROFILES_ENDPOINT/${Auth.profile!!.id}/relationships/favorites")
+                .delete(reqBody)
+                .build()
+
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
             throw extractErrors(resp)
@@ -472,7 +460,7 @@ object Network {
         // handle special case when we selected tab with favorites
         val builder = when (blog) {
             Auth.favoritesMarker -> { // workaround, filter entries by profile ids
-                val favProfiles = Auth.favorites?.subscriptions?.joinToString(separator = ",", transform = { res -> res.id })
+                val favProfiles = Auth.profile?.favorites?.joinToString(separator = ",", transform = { res -> res.id })
                 if (favProfiles.isNullOrBlank()) {
                     HttpUrl.parse(ENTRIES_ENDPOINT)!!.newBuilder()
                             .addQueryParameter("filters[profile_id]", "0")

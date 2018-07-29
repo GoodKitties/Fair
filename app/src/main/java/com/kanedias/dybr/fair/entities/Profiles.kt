@@ -11,7 +11,7 @@ import java.util.*
  * ```
  * {
  *   "data": {
- *     "type": "own-profiles",
+ *     "type": "profiles",
  *     "attributes": {
  *       "nickname": "olaf",
  *       "birthday": "02-01",
@@ -51,7 +51,7 @@ class ProfileCreateRequest: Resource() {
  * {
  *   "data": {
  *     "id": "2",
- *     "type": "own-profiles",
+ *     "type": "profiles",
  *     "links": {
  *       "self": "http://www.example.com/v1/own-profiles/2"
  *     },
@@ -124,8 +124,18 @@ class ProfileResponse : Resource() {
      */
     @field:Json(name = "blogs")// TODO: fix on backend
     var blogs = HasMany<Blog>()
-}
 
-data class ProfileSettings(val avatar: String?, val private: Boolean) : Serializable
+    /**
+     * Link to the readers of this profile
+     */
+    @field:Json(name = "readers")
+    var readers = HasMany<OwnProfile>()
+
+    /**
+     * Link to the subscribers of this profile
+     */
+    @field:Json(name = "favorites")
+    var favorites = HasMany<OwnProfile>()
+}
 
 typealias OwnProfile = ProfileResponse

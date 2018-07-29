@@ -30,11 +30,6 @@ object Auth {
      */
     var blog: Blog? = null
 
-    /**
-     * Favorites of currently loaded [profile]
-     */
-    var favorites: Favorites? = null
-
     fun init(ctx: Context) {
         // setup special values
         this.worldMarker = Blog().apply { id = "world"; title = ctx.getString(R.string.world) }
@@ -48,23 +43,17 @@ object Auth {
         this.user = acc
         this.profile = null
         this.blog = null
-        this.favorites = null
     }
 
     fun updateCurrentProfile(prof: OwnProfile) {
         this.user.lastProfileId = prof.id
         this.profile = prof
         this.blog = null
-        this.favorites = null
 
         DbProvider.helper.accDao.update(Auth.user)
     }
 
     fun updateBlog(blog: Blog) {
         this.blog = blog
-    }
-
-    fun updateFavorites(favorites: Favorites) {
-        this.favorites = favorites
     }
 }
