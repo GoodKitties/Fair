@@ -1,14 +1,37 @@
 package com.kanedias.dybr.fair.themes
 
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.support.design.widget.TabLayout
-import com.ftinc.scoop.adapters.ColorAdapter
-import android.support.v4.view.ViewCompat.getBackgroundTintList
 import android.support.design.widget.FloatingActionButton
-import android.content.res.ColorStateList
 import android.support.annotation.ColorInt
-import com.ftinc.scoop.util.Utils
+import android.view.View
 
+
+/**
+ * An adapter that dictates how a color property or change is applied
+ * to a given view
+ */
+interface ColorAdapter<T : View> {
+
+    /**
+     * Apply the color to the given view
+     *
+     * @param view      the view to apply the color to
+     * @param color     the color to apply
+     */
+    fun applyColor(view: T, @ColorInt color: Int)
+
+    /**
+     * Get the current color for the element
+     *
+     * @param view      the view to get the color from
+     * @return          the current color
+     */
+    @ColorInt
+    fun getColor(view: T): Int
+
+}
 
 /**
  * @author Kanedias
@@ -33,11 +56,27 @@ class TabUnderlineAdapter: ColorAdapter<TabLayout> {
 class FABColorAdapter : ColorAdapter<FloatingActionButton> {
 
     override fun applyColor(view: FloatingActionButton, @ColorInt color: Int) {
-        val colorStateList = Utils.colorToStateList(color)
+        val colorStateList = colorToStateList(color)
         view.backgroundTintList = colorStateList
     }
 
     override fun getColor(view: FloatingActionButton): Int {
         return view.backgroundTintList!!.defaultColor
+    }
+}
+
+/**
+ * The default color adapter that just applies the color to the View background
+ *
+ */
+class DefaultColorAdapter : ColorAdapter<View> {
+
+    override fun applyColor(view: View, @ColorInt color: Int) {
+        view.setBackgroundColor(color)
+    }
+
+    override fun getColor(view: View): Int {
+        val bg = view.background
+        return (bg as? ColorDrawable)?.color ?: 0
     }
 }

@@ -2,6 +2,7 @@ package com.kanedias.dybr.fair
 
 import android.app.FragmentTransaction
 import android.os.Bundle
+import android.support.design.widget.FloatingActionButton
 import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.graphics.drawable.DrawerArrowDrawable
@@ -39,6 +40,9 @@ class CommentListFragment : Fragment() {
 
     @BindView(R.id.comments_ribbon)
     lateinit var commentRibbon: RecyclerView
+
+    @BindView(R.id.add_comment_button)
+    lateinit var addCommentButton: FloatingActionButton
 
     var entry: Entry? = null
 

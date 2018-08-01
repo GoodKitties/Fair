@@ -6,8 +6,6 @@ import android.support.v7.widget.Toolbar
 import android.view.View
 import butterknife.BindView
 import butterknife.ButterKnife
-import com.ftinc.scoop.BindTopping
-import com.ftinc.scoop.Topping
 import com.kanedias.dybr.fair.entities.isBlogWritable
 
 /**
@@ -46,5 +44,4 @@ class EntryListFragmentFull: EntryListFragment() {
             addEntryButton.setOnClickListener { addCreateNewEntryForm() }
         }
     }
-
 }

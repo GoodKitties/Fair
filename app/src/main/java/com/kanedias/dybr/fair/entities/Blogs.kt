@@ -129,5 +129,6 @@ class BlogResponse : Resource() {
 }
 
 fun isBlogWritable(blog: Blog?) = blog == Auth.blog
+fun isMarkerBlog(blog: Blog?) = blog == Auth.favoritesMarker || blog == Auth.worldMarker
 
 typealias Blog = BlogResponse

@@ -33,7 +33,7 @@ data class ProfileSettings(
         val subtext: String?,
 
         @field:Json(name = "current-design")
-        val currentDesign: String?,
+        val currentDesign: Long?,
 
         @field:Json(name = "designs")
         val designs: Map<Long, DesignStyle>?,

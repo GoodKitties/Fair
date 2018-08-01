@@ -3,7 +3,6 @@ package com.kanedias.dybr.fair
 import android.app.FragmentTransaction
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -26,10 +25,7 @@ import butterknife.BindView
 import butterknife.OnClick
 import butterknife.ButterKnife
 import com.afollestad.materialdialogs.MaterialDialog
-import com.ftinc.scoop.BindTopping
-import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.entities.*
-import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.Sidebar
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
@@ -80,8 +76,8 @@ class MainActivity : AppCompatActivity() {
     /**
      * Top-level sidebar content list view
      */
-    @BindView(R.id.sidebar_content)
-    lateinit var sidebarContent: ListView
+    @BindView(R.id.main_sidebar_area)
+    lateinit var sidebarArea: LinearLayout
 
     /**
      * Floating button
@@ -120,30 +116,23 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         // setup click listeners, adapters etc.
         setupUI()
-        // setup theme update anchors
-        setupTheming()
         // load user profile and initialize tabs
         reLogin(Auth.user)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        Scoop.getInstance().unbind(this)
-    }
-
     private fun setupUI() {
         // init drawer and sidebar
-        val header = layoutInflater.inflate(R.layout.activity_main_sidebar_header, sidebarContent, false)
-
-        sidebarContent.dividerHeight = 0
-        sidebarContent.descendantFocusability = ListView.FOCUS_BEFORE_DESCENDANTS
-        sidebarContent.addHeaderView(header)
-        sidebarContent.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, emptyList<Int>())
         sidebar = Sidebar(drawer, this)
 
         // cross-join drawer and menu item in header
         val drawerToggle = ActionBarDrawerToggle(this, drawer, toolbar, R.string.open, R.string.close)
         drawer.addDrawerListener(drawerToggle)
+        drawer.addDrawerListener(object: DrawerLayout.SimpleDrawerListener() {
+            override fun onDrawerOpened(drawerView: View) {
+                // without this buttons are non-clickable after activity layout changes
+                sidebarArea.bringToFront()
+            }
+        })
         drawerToggle.syncState()
 
         // setup tabs
@@ -155,18 +144,6 @@ class MainActivity : AppCompatActivity() {
             drawer.openDrawer(GravityCompat.START)
             preferences.edit().putBoolean("first-app-launch", false).apply()
         }
-    }
-
-    private fun setupTheming() {
-        Scoop.getInstance().bind(this, PRIMARY, toolbar)
-        Scoop.getInstance().bind(this, PRIMARY, tabs)
-        Scoop.getInstance().bind(this, ACCENT, tabs, TabUnderlineAdapter())
-        Scoop.getInstance().bind(this, ACCENT, actionButton, FABColorAdapter())
-        Scoop.getInstance().bindStatusBar(this, PRIMARY_DARK)
-
-        Scoop.getInstance().update(PRIMARY, resources.getColor(R.color.colorPrimary))
-        Scoop.getInstance().update(PRIMARY_DARK, resources.getColor(R.color.colorPrimaryDark))
-        Scoop.getInstance().update(ACCENT, resources.getColor(R.color.colorAccent))
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

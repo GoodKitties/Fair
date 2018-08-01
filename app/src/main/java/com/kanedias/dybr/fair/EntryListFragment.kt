@@ -61,7 +61,7 @@ open class EntryListFragment: Fragment() {
         entryRibbon.adapter = entryAdapter
     }
 
-    private fun setupTheming() {
+    open fun setupTheming() {
     }
 
     /**

@@ -51,12 +51,10 @@
 
     </android.support.design.widget.CoordinatorLayout>
 
-    <ListView
-        android:background="@color/md_grey_850"
-        android:id="@+id/sidebar_content"
-        android:layout_width="300dp"
+    <include
         android:layout_height="match_parent"
+        android:layout_width="300dp"
         android:layout_gravity="start"
-        android:orientation="vertical" />
+        layout="@layout/activity_main_sidebar" />
 
 </android.support.v4.widget.DrawerLayout>

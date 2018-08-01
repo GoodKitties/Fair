@@ -131,27 +131,6 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
         }
     }
 
-    @OnClick(R.id.my_blog)
-    fun goToMyBlog() {
-        if (Auth.blog == null)
-            return
-
-        launch(UI) {
-            try {
-                val blog = async(CommonPool) { Network.loadBlog(Auth.blog!!.slug) }.await()
-                val myBlog = EntryListFragmentFull().apply { this.blog = blog }
-
-                activity.supportFragmentManager.beginTransaction()
-                        .addToBackStack("Showing my blog fragment")
-                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                        .replace(R.id.main_drawer_layout, myBlog)
-                        .commit()
-            }  catch (ex: Exception) {
-                Network.reportErrors(activity, ex)
-            }
-        }
-    }
-
     /**
      * Update sidebar after account change/refresh
      */
@@ -310,6 +289,9 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
         blogName.text = Auth.blog?.title
         blogAdd.visibility = View.GONE
         blogName.setOnClickListener {
+            for (i in 0..fragManager.backStackEntryCount) {
+                fragManager.popBackStack()
+            }
             activity.pager.setCurrentItem(0, true)
             drawer.closeDrawers()
         }

@@ -2,7 +2,6 @@ package com.kanedias.dybr.fair.entities
 
 import com.squareup.moshi.Json
 import moe.banana.jsonapi2.*
-import java.io.Serializable
 import java.util.*
 
 /**
@@ -46,14 +45,14 @@ class ProfileCreateRequest: Resource() {
 /**
  * OwnProfile is an actual identity that user wants to be associated with.
  * Has description, nickname, readers/world, diary info, address and so on.
- * Example (result of `/v1/own-profiles/{id}` call):
+ * Example (result of `/v2/profiles/{id}` call):
  * ```
  * {
  *   "data": {
  *     "id": "2",
  *     "type": "profiles",
  *     "links": {
- *       "self": "http://www.example.com/v1/own-profiles/2"
+ *       "self": "http://www.example.com/v2/profiles/2"
  *     },
  *     "attributes": {
  *       "created-at": "2017-12-17T18:36:31.555Z",
@@ -68,8 +67,8 @@ class ProfileCreateRequest: Resource() {
  *     "relationships": {
  *       "user": {
  *         "links": {
- *           "self": "http://www.example.com/v1/own-profiles/2/relationships/user",
- *           "related": "http://www.example.com/v1/own-profiles/2/user"
+ *           "self": "http://www.example.com/v2/profiles/2/relationships/user",
+ *           "related": "http://www.example.com/v2/profiles/2/user"
  *         }
  *       }
  *     }
