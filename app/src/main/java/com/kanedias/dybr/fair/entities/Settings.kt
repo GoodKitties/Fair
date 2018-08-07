@@ -33,10 +33,10 @@ data class ProfileSettings(
         val subtext: String?,
 
         @field:Json(name = "current-design")
-        val currentDesign: Long?,
+        val currentDesign: String?,
 
         @field:Json(name = "designs")
-        val designs: Map<Long, DesignStyle>?,
+        val designs: Map<String, DesignStyle>?,
 
         @field:Json(name = "notifications")
         val notifications: NotificationSettings?,
@@ -127,7 +127,7 @@ data class PrivacySettings(
 data class DesignStyle(
         val id: Long?,
         val name: String?,
-        val background: Boolean?,
+        //val background: Boolean?,
         val layout: DesignLayout?,
         val colors: DesignColors?,
         val header: DesignHeader?,

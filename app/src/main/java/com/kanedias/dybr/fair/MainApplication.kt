@@ -2,8 +2,12 @@ package com.kanedias.dybr.fair
 
 import android.app.Application
 import android.content.Context
+import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.entities.Auth
+import com.kanedias.dybr.fair.themes.ACCENT
+import com.kanedias.dybr.fair.themes.PRIMARY
+import com.kanedias.dybr.fair.themes.PRIMARY_DARK
 import org.acra.ACRA
 import org.acra.annotation.AcraCore
 import org.acra.annotation.AcraDialog
@@ -32,6 +36,11 @@ class MainApplication : Application() {
         DbProvider.setHelper(this)
         Network.init(this)
         Auth.init(this)
+        Scoop.getInstance().initialize(mapOf(
+                PRIMARY to resources.getColor(R.color.colorPrimary),
+                PRIMARY_DARK to resources.getColor(R.color.colorPrimaryDark),
+                ACCENT to resources.getColor(R.color.colorAccent))
+        )
 
 
 

@@ -25,7 +25,10 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.content.ComponentName
 import android.content.pm.PackageManager
+import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.entities.OwnProfile
+import com.kanedias.dybr.fair.themes.TEXT
+import com.kanedias.dybr.fair.themes.TEXT_BLOCK
 
 /**
  * View holder for showing regular entries in diary view.
@@ -80,6 +83,12 @@ class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : R
 
     init {
         ButterKnife.bind(this, iv)
+
+        Scoop.getInstance().bind(this, TEXT_BLOCK, iv)
+        Scoop.getInstance().bind(this, TEXT, titleView)
+        Scoop.getInstance().bind(this, TEXT, authorView)
+        Scoop.getInstance().bind(this, TEXT, dateView)
+        Scoop.getInstance().bind(this, TEXT, bodyView)
 
         iv.setOnClickListener(commentShow)
         if (allowSelection) {
