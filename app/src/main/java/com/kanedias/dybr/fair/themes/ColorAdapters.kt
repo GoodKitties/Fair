@@ -5,6 +5,7 @@ import android.graphics.drawable.ColorDrawable
 import android.support.design.widget.TabLayout
 import android.support.design.widget.FloatingActionButton
 import android.support.annotation.ColorInt
+import android.support.v7.widget.CardView
 import android.view.View
 import com.ftinc.scoop.adapters.ColorAdapter
 import com.ftinc.scoop.util.Utils
@@ -38,5 +39,16 @@ class FABColorAdapter : ColorAdapter<FloatingActionButton> {
 
     override fun getColor(view: FloatingActionButton): Int {
         return view.backgroundTintList!!.defaultColor
+    }
+}
+
+class CardViewColorAdapter : ColorAdapter<CardView> {
+
+    override fun applyColor(view: CardView, @ColorInt color: Int) {
+        view.setCardBackgroundColor(color)
+    }
+
+    override fun getColor(view: CardView): Int {
+        return view.cardBackgroundColor.defaultColor
     }
 }

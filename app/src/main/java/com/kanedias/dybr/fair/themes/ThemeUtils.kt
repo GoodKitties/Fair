@@ -56,16 +56,16 @@ fun applyTheme(blog: Blog?, target: Any) {
         val currentDesign = relatedProf.settings?.currentDesign ?: return@launch
         val design: DesignStyle = relatedProf.settings?.designs?.get(currentDesign) ?: return@launch
 
-        design.colors?.headers?.colorFromCss(toDark = true)?.let {
+        design.colors?.headers?.colorFromCss(toDark = false)?.let {
             // use for toolbar color
             Scoop.getInstance().update(PRIMARY, it)
             Scoop.getInstance().update(PRIMARY_DARK, ColorUtils.blendARGB(it, Color.BLACK, 0.2f))
         }
 
-        design.colors?.background?.colorFromCss(toDark = true)?.let { Scoop.getInstance().update(BACKGROUND, it) }
-        design.colors?.blocks?.colorFromCss(toDark = true)?.let { Scoop.getInstance().update(TEXT_BLOCK, it) }
-        design.colors?.text?.colorFromCss(toDark = true)?.let { Scoop.getInstance().update(TEXT, it) }
-        design.colors?.actions?.colorFromCss(toDark = true)?.let { Scoop.getInstance().update(ACCENT, it) }
+        design.colors?.background?.colorFromCss(toDark = false)?.let { Scoop.getInstance().update(BACKGROUND, it) }
+        design.colors?.blocks?.colorFromCss(toDark = false)?.let { Scoop.getInstance().update(TEXT_BLOCK, it) }
+        design.colors?.text?.colorFromCss(toDark = false)?.let { Scoop.getInstance().update(TEXT, it) }
+        design.colors?.elements?.colorFromCss(toDark = false)?.let { Scoop.getInstance().update(ACCENT, it) }
     }
 }
 

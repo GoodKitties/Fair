@@ -15,8 +15,10 @@ import android.view.ViewGroup
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
+import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.entities.Comment
 import com.kanedias.dybr.fair.entities.Entry
+import com.kanedias.dybr.fair.themes.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
@@ -68,12 +70,31 @@ class CommentListFragment : Fragment() {
     }
 
     private fun setupUI() {
+        // this is a fullscreen fragment, add new style
+        Scoop.getInstance().addStyleLevel()
+
         toolbar.title = entry?.title
         toolbar.navigationIcon = DrawerArrowDrawable(activity).apply { progress = 1.0f }
         toolbar.setNavigationOnClickListener { fragmentManager?.popBackStack() }
 
         refresher.setOnRefreshListener { refreshComments() }
         commentRibbon.layoutManager = LinearLayoutManager(activity)
+
+        setBlogTheme()
+    }
+
+    private fun setBlogTheme() {
+        Scoop.getInstance().bind(this, PRIMARY, toolbar)
+        Scoop.getInstance().bind(this, ACCENT, addCommentButton, FABColorAdapter())
+        Scoop.getInstance().bind(this, BACKGROUND, commentRibbon)
+        Scoop.getInstance().bindStatusBar(activity, activity, PRIMARY_DARK)
+
+        applyTheme(entry?.blog?.get(entry?.document), this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Scoop.getInstance().popStyleLevel()
     }
 
     fun refreshComments() {

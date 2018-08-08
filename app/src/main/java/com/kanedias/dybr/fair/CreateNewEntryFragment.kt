@@ -165,10 +165,6 @@ class CreateNewEntryFragment : Fragment() {
      */
     @OnClick(R.id.entry_submit)
     fun submit() {
-        // hide keyboard
-        val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(view!!.windowToken, 0)
-
         // hide edit form, show loading spinner
         val extensions = listOf(StrikethroughExtension.create(), TablesExtension.create())
         val parser = Parser.builder().extensions(extensions).build()

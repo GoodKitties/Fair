@@ -25,8 +25,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.content.ComponentName
 import android.content.pm.PackageManager
+import android.support.v7.widget.CardView
 import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.entities.OwnProfile
+import com.kanedias.dybr.fair.themes.ACCENT
+import com.kanedias.dybr.fair.themes.CardViewColorAdapter
 import com.kanedias.dybr.fair.themes.TEXT
 import com.kanedias.dybr.fair.themes.TEXT_BLOCK
 
@@ -57,6 +60,9 @@ class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : R
     @BindViews(R.id.entry_edit, R.id.entry_delete, R.id.entry_more_options)
     lateinit var buttons: List<@JvmSuppressWildcards ImageView>
 
+    @BindViews(R.id.entry_participants_indicator, R.id.entry_comments_indicator)
+    lateinit var indicators: List<@JvmSuppressWildcards ImageView>
+
     @BindView(R.id.entry_comments_text)
     lateinit var comments: TextView
 
@@ -77,14 +83,16 @@ class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : R
         activity.supportFragmentManager.beginTransaction()
                 .addToBackStack("Showing comment list fragment")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .replace(R.id.main_drawer_layout, commentsPage)
+                .add(R.id.main_drawer_layout, commentsPage)
                 .commit()
     }
 
     init {
         ButterKnife.bind(this, iv)
 
-        Scoop.getInstance().bind(this, TEXT_BLOCK, iv)
+        // theming setup
+        (buttons + indicators + participants + comments).forEach { Scoop.getInstance().bind(this, ACCENT, it) }
+        Scoop.getInstance().bind(this, TEXT_BLOCK, iv, CardViewColorAdapter())
         Scoop.getInstance().bind(this, TEXT, titleView)
         Scoop.getInstance().bind(this, TEXT, authorView)
         Scoop.getInstance().bind(this, TEXT, dateView)
