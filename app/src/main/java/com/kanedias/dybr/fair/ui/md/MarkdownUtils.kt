@@ -37,11 +37,23 @@ val CONTENT_TYPE_GIF = MediaType.parse("image/gif")
  * @param html input markdown to show
  */
 infix fun TextView.handleMarkdown(html: String) {
-    val mdConfig = SpannableConfiguration.builder(this.context).asyncDrawableLoader(DrawableLoader(this)).build()
-    val spanned = Markwon.markdown(mdConfig, Html2Markdown().parse(html)) as SpannableStringBuilder
-    postProcessSpans(this, spanned)
+    val label = this
 
-    this.text = spanned
+    launch(UI) {
+        // this is computation-intensive task, better do it smoothly
+        val span = async {
+            val mdConfig = SpannableConfiguration.builder(label.context).asyncDrawableLoader(DrawableLoader(label)).build()
+            val spanned = Markwon.markdown(mdConfig, Html2Markdown().parse(html)) as SpannableStringBuilder
+            postProcessSpans(label, spanned)
+
+            spanned
+        }
+
+        label.text = span.await()
+        Markwon.scheduleDrawables(label)
+    }
+
+
 }
 
 /**
@@ -89,9 +101,6 @@ fun postProcessMore(spanned: SpannableStringBuilder, view: TextView) {
         }
         spanned.setSpan(wrapper, outerRange.start, outerRange.start + moreText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
-
-    view.text = spanned
-    Markwon.scheduleDrawables(view)
 }
 
 /**
@@ -165,7 +174,7 @@ class DrawableLoader(private val view: TextView): AsyncDrawable.Loader {
                     delay(500)
 
                 val req = Request.Builder().url(destination).build()
-                pendingImages[destination] = async(CommonPool) {
+                pendingImages[destination] = async {
                     val resp = Network.httpClient.newCall(req).execute()
                     when (resp.body()!!.contentType()) {
                         CONTENT_TYPE_GIF -> handleGif(resp)

@@ -66,7 +66,7 @@ class AddProfileFragment: Fragment() {
             progressDialog.show()
 
             try {
-                val profile = async(CommonPool) { Network.createProfile(profReq) }.await()
+                val profile = async { Network.createProfile(profReq) }.await()
                 Auth.updateCurrentProfile(profile)
 
                 //we created profile successfully, return to main activity

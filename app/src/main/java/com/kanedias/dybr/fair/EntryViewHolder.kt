@@ -122,7 +122,7 @@ class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : R
         val delete = {
             launch(UI) {
                 try {
-                    async(CommonPool) { Network.deleteEntry(entry) }.await()
+                    async { Network.deleteEntry(entry) }.await()
                     Toast.makeText(activity, R.string.entry_deleted, Toast.LENGTH_SHORT).show()
                     activity.supportFragmentManager.popBackStack()
 
@@ -177,7 +177,7 @@ class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : R
             dialog.show()
 
             try {
-                val prof = async(CommonPool) { Network.loadProfile(entry.profile.get().id) }.await()
+                val prof = async { Network.loadProfile(entry.profile.get().id) }.await()
                 val profShow = ProfileFragment().apply { profile = prof }
                 profShow.show(activity.supportFragmentManager, "Showing user profile fragment")
             } catch (ex: Exception) {

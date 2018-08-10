@@ -120,7 +120,7 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
             dialog.show()
 
             try {
-                val prof = async(CommonPool) { Network.loadProfile(Auth.profile!!.id) }.await()
+                val prof = async { Network.loadProfile(Auth.profile!!.id) }.await()
                 val profShow = ProfileFragment().apply { profile = prof }
                 profShow.show(activity.supportFragmentManager, "Showing my profile fragment")
             } catch (ex: Exception) {

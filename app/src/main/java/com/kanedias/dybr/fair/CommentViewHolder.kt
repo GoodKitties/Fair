@@ -150,7 +150,7 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
             dialog.show()
 
             try {
-                val prof = async(CommonPool) { Network.loadProfile(comment.profile.get().id) }.await()
+                val prof = async { Network.loadProfile(comment.profile.get().id) }.await()
                 val profShow = ProfileFragment().apply { profile = prof }
                 profShow.show(activity.supportFragmentManager, "Showing user profile fragment")
             } catch (ex: Exception) {

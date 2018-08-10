@@ -102,7 +102,7 @@ class ProfileFragment: DialogFragment() {
             launch(UI) {
                 try {
                     val req = Request.Builder().url(avatarUrl!!).build()
-                    val bitmap = async(CommonPool) {
+                    val bitmap = async {
                         val resp = Network.httpClient.newCall(req).execute()
                         BitmapFactory.decodeStream(resp.body()?.byteStream())
                     }.await()
@@ -129,13 +129,13 @@ class ProfileFragment: DialogFragment() {
             try {
                 if (Auth.profile?.favorites?.any { it.idMatches(profile) } == true) {
                     // remove from favorites
-                    async(CommonPool) { Network.removeFavorite(profile) }.await()
+                    async { Network.removeFavorite(profile) }.await()
                     Auth.profile?.favorites?.remove(profile)
                     favoritesToggle.setImageDrawable(emptyStar)
                     Toast.makeText(activity, R.string.removed_from_favorites, Toast.LENGTH_SHORT).show()
                 } else {
                     // add to favorites
-                    async(CommonPool) { Network.addFavorite(profile) }.await()
+                    async { Network.addFavorite(profile) }.await()
                     Auth.profile?.favorites?.add(profile)
                     favoritesToggle.setImageDrawable(filledStar)
                     Toast.makeText(activity, R.string.added_to_favorites, Toast.LENGTH_SHORT).show()

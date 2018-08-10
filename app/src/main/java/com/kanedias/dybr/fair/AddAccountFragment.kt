@@ -149,7 +149,7 @@ class AddAccountFragment : Fragment() {
             progressDialog.show()
 
             try {
-                async(CommonPool) { Network.login(acc) }.await()
+                async { Network.login(acc) }.await()
 
                 Toast.makeText(activity, R.string.login_successful, Toast.LENGTH_SHORT).show()
                 activity.selectProfile() // shows profile selection dialog
@@ -182,7 +182,7 @@ class AddAccountFragment : Fragment() {
             progressDialog.show()
 
             try {
-                val response = async(CommonPool) { Network.createAccount(req) }.await()
+                val response = async { Network.createAccount(req) }.await()
                 val acc = Account().apply {
                     serverId = response.id
                     email = response.email

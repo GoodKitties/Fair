@@ -176,7 +176,7 @@ class EditorViews : Fragment() {
                     .show()
 
             try {
-                val link = async(CommonPool) { Network.uploadImage(stream.readBytes()) }.await()
+                val link = async { Network.uploadImage(stream.readBytes()) }.await()
                 MaterialDialog.Builder(activity!!)
                         .title(R.string.insert_image)
                         .content(R.string.select_image_height)

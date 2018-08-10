@@ -102,7 +102,7 @@ open class EntryListFragment: Fragment() {
             refresher.isRefreshing = true
 
             try {
-                val success = async(CommonPool) { Network.loadEntries(blog!!, nextPage) }
+                val success = async { Network.loadEntries(blog!!, nextPage) }
                 updateRibbonPage(success.await(), reset)
             } catch (ex: Exception) {
                 Network.reportErrors(activity, ex)

@@ -211,7 +211,7 @@ class MainActivity : AppCompatActivity() {
 
             try {
                 // login with this account and reset profile/blog links
-                async(CommonPool) { Network.login(acc) }.await()
+                async { Network.login(acc) }.await()
 
                 if (Auth.user.lastProfileId == null) {
                     // first time we're loading this account, select profile
@@ -261,11 +261,11 @@ class MainActivity : AppCompatActivity() {
                 "blog" -> {
                     val fragment = when (address.size) {
                         2 -> {  // the case for /blog/<slug>
-                            val blog = async(CommonPool) { Network.loadBlog(address[1]) }.await()
+                            val blog = async { Network.loadBlog(address[1]) }.await()
                             EntryListFragmentFull().apply { this.blog = blog }
                         }
                         3 -> { // the case for /blog/<slug>/<entry>
-                            val entry = async(CommonPool) { Network.loadEntry(address[2]) }.await()
+                            val entry = async { Network.loadEntry(address[2]) }.await()
                             CommentListFragment().apply { this.entry = entry }
                         }
                         else -> return
@@ -280,7 +280,7 @@ class MainActivity : AppCompatActivity() {
                 "profile" -> {
                     val fragment = when (address.size) {
                         2 -> { // the case for /profile/<id>
-                            val profile = async(CommonPool) { Network.loadProfile(address[1]) }.await()
+                            val profile = async { Network.loadProfile(address[1]) }.await()
                             ProfileFragment().apply { this.profile = profile }
                         }
                         else -> return
@@ -311,7 +311,7 @@ class MainActivity : AppCompatActivity() {
      */
     suspend fun selectProfile(showIfOne: Boolean = false) {
         // retrieve profiles from server
-        val profiles = async(CommonPool) { Network.loadUserProfiles() }.await()
+        val profiles = async { Network.loadUserProfiles() }.await()
 
         // predefine what to do if new profile is needed
 
@@ -379,7 +379,7 @@ class MainActivity : AppCompatActivity() {
     private fun deleteProfile(prof: OwnProfile) {
         launch(UI) {
             try {
-                async(CommonPool) { Network.removeProfile(prof) }.await()
+                async { Network.removeProfile(prof) }.await()
                 Toast.makeText(this@MainActivity, R.string.profile_deleted, Toast.LENGTH_SHORT).show()
             } catch (ex: Exception) {
                 Network.reportErrors(this@MainActivity, ex)
@@ -413,7 +413,7 @@ class MainActivity : AppCompatActivity() {
             if (Auth.profile != null && Auth.blog == null) {
                 // we have loaded profile, try to load our blog
                 try {
-                    async(CommonPool) { Network.populateBlog() }.await()
+                    async { Network.populateBlog() }.await()
 
                 } catch (ex: Exception) {
                     Network.reportErrors(this@MainActivity, ex)

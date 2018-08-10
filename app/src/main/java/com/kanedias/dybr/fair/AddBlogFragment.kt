@@ -63,7 +63,7 @@ class AddBlogFragment: Fragment() {
             progressDialog.show()
 
             try {
-                val blog = async(CommonPool) { Network.createBlog(blogReq) }.await()
+                val blog = async { Network.createBlog(blogReq) }.await()
                 Auth.updateBlog(blog)
 
                 //we created blog successfully, return to main activity

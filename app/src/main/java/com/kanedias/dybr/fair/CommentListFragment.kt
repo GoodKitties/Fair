@@ -107,8 +107,8 @@ class CommentListFragment : Fragment() {
             refresher.isRefreshing = true
 
             try {
-                val entryDemand = async(CommonPool) { Network.loadEntry(entry!!.id) }
-                val commentsDemand = async(CommonPool) { Network.loadComments(entry!!) }
+                val entryDemand = async { Network.loadEntry(entry!!.id) }
+                val commentsDemand = async { Network.loadComments(entry!!) }
                 commentAdapter.comments = commentsDemand.await() // refresh comments of this entry
                 commentAdapter.entry = entry!!.apply { meta = entryDemand.await().meta } // refresh comment num and participants
                 commentRibbon.adapter = commentAdapter
