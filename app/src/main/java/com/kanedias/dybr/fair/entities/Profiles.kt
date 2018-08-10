@@ -107,7 +107,7 @@ class ProfileResponse : Resource() {
     lateinit var birthday: String
 
     /**
-     * Settings structure for this profile
+     * Preferences structure for this profile
      */
     @field:Json(name = "settings")
     var settings: ProfileSettings? = null

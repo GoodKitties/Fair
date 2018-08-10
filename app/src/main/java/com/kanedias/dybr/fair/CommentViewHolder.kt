@@ -15,10 +15,7 @@ import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.entities.*
-import com.kanedias.dybr.fair.themes.ACCENT
-import com.kanedias.dybr.fair.themes.CardViewColorAdapter
-import com.kanedias.dybr.fair.themes.TEXT
-import com.kanedias.dybr.fair.themes.TEXT_BLOCK
+import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.md.handleMarkdown
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
@@ -54,7 +51,7 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
         ButterKnife.bind(this, iv)
 
         // theming setup
-        buttons.forEach { Scoop.getInstance().bind(this, ACCENT, it) }
+        buttons.forEach { Scoop.getInstance().bind(this, TEXT, it) }
         Scoop.getInstance().bind(this, TEXT_BLOCK, iv, CardViewColorAdapter())
         Scoop.getInstance().bind(this, TEXT, authorView)
         Scoop.getInstance().bind(this, TEXT, dateView)

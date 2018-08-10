@@ -25,13 +25,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.content.ComponentName
 import android.content.pm.PackageManager
-import android.support.v7.widget.CardView
 import com.ftinc.scoop.Scoop
-import com.kanedias.dybr.fair.entities.OwnProfile
-import com.kanedias.dybr.fair.themes.ACCENT
-import com.kanedias.dybr.fair.themes.CardViewColorAdapter
-import com.kanedias.dybr.fair.themes.TEXT
-import com.kanedias.dybr.fair.themes.TEXT_BLOCK
+import com.kanedias.dybr.fair.themes.*
 
 /**
  * View holder for showing regular entries in diary view.
@@ -91,7 +86,7 @@ class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : R
         ButterKnife.bind(this, iv)
 
         // theming setup
-        (buttons + indicators + participants + comments).forEach { Scoop.getInstance().bind(this, ACCENT, it) }
+        (buttons + indicators + participants + comments).forEach { Scoop.getInstance().bind(this, TEXT, it) }
         Scoop.getInstance().bind(this, TEXT_BLOCK, iv, CardViewColorAdapter())
         Scoop.getInstance().bind(this, TEXT, titleView)
         Scoop.getInstance().bind(this, TEXT, authorView)
