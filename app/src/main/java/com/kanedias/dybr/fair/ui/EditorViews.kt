@@ -101,6 +101,16 @@ class EditorViews : Fragment() {
         clipboardSwitch.isChecked = false
     }
 
+    @OnClick(R.id.edit_save_offline_draft)
+    fun saveDraft() {
+        Toast.makeText(context, R.string.offline_draft_saved, Toast.LENGTH_SHORT).show()
+    }
+
+    @OnClick(R.id.edit_load_offline_draft)
+    fun loadDraft() {
+
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 

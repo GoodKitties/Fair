@@ -165,4 +165,8 @@
     <string name="apply_blog_theme">Apply blog theme</string>
     <string name="apply_blog_theme_on">The application will take blog theme if it\'s available</string>
     <string name="apply_blog_theme_off">The application won\'t change its theme</string>
+    <string name="save_offline_draft">Save offline draft</string>
+    <string name="load_offline_draft">Load offline draft</string>
+    <string name="offline_draft_saved">Offline draft saved</string>
+    <string name="offline_draft_loaded">Offline draft loaded</string>
 </resources>

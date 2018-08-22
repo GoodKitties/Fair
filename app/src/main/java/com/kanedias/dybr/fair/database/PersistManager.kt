@@ -8,6 +8,7 @@ import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
 import com.kanedias.dybr.fair.entities.Account
+import com.kanedias.dybr.fair.entities.OfflineDraft
 import com.kanedias.dybr.fair.entities.OwnProfile
 
 import java.sql.SQLException
@@ -21,25 +22,30 @@ class PersistManager(context: Context) : OrmLiteSqliteOpenHelper(context, DATABA
 
     // Dao fast access links
     val accDao: Dao<Account, Long> = getDao(Account::class.java)
+    val draftDao: Dao<OfflineDraft, Long> = getDao(OfflineDraft::class.java)
 
     override fun onCreate(db: SQLiteDatabase, connectionSource: ConnectionSource) {
         try {
             TableUtils.createTable<Account>(connectionSource, Account::class.java)
+            TableUtils.createTable<OfflineDraft>(connectionSource, OfflineDraft::class.java)
         } catch (e: SQLException) {
-            Log.e(TAG, "error creating DB " + DATABASE_NAME)
+            Log.e(TAG, "error creating DB $DATABASE_NAME")
             throw RuntimeException(e)
         }
-
     }
 
     override fun onUpgrade(db: SQLiteDatabase, connectionSource: ConnectionSource, oldVer: Int, newVer: Int) {
-
+        when(oldVer) {
+            1 -> TableUtils.createTable<OfflineDraft>(connectionSource, OfflineDraft::class.java)
+            newVer -> return
+        }
+        onUpgrade(db, connectionSource, oldVer + 1, newVer)
     }
 
     fun clearAllTables() {
         try {
             TableUtils.clearTable<Account>(DbProvider.helper.getConnectionSource(), Account::class.java)
-            TableUtils.clearTable<OwnProfile>(DbProvider.helper.getConnectionSource(), OwnProfile::class.java)
+            TableUtils.clearTable<OfflineDraft>(DbProvider.helper.getConnectionSource(), OfflineDraft::class.java)
         } catch (e: SQLException) {
             throw RuntimeException(e)
         }
@@ -52,6 +58,6 @@ class PersistManager(context: Context) : OrmLiteSqliteOpenHelper(context, DATABA
 
         private val DATABASE_NAME = "fair.db"
 
-        private val DATABASE_VERSION = 1
+        private val DATABASE_VERSION = 2
     }
 }
