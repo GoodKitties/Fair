@@ -1,10 +1,9 @@
-package com.kanedias.dybr.fair.entities
+package com.kanedias.dybr.fair.database.entities
 
 import com.j256.ormlite.field.DataType
 import com.j256.ormlite.field.DatabaseField
 import com.j256.ormlite.table.DatabaseTable
 import java.util.*
-import com.kanedias.dybr.fair.Network
 
 /**
  * Account class for logging in.

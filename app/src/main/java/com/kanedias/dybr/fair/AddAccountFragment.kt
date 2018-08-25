@@ -13,16 +13,15 @@ import butterknife.*
 import com.afollestad.materialdialogs.MaterialDialog
 import convalida.library.Convalida
 import com.kanedias.dybr.fair.database.DbProvider
-import com.kanedias.dybr.fair.entities.Account
-import com.kanedias.dybr.fair.entities.Auth
-import com.kanedias.dybr.fair.entities.RegisterRequest
+import com.kanedias.dybr.fair.database.entities.Account
+import com.kanedias.dybr.fair.dto.Auth
+import com.kanedias.dybr.fair.dto.RegisterRequest
 import com.kanedias.dybr.fair.ui.LoginInputs
 import com.kanedias.dybr.fair.ui.RegisterInputs
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.delay
 import java.util.concurrent.TimeUnit
 import com.kanedias.dybr.fair.ui.Sidebar
-import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 

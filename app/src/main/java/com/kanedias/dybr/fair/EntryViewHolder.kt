@@ -15,9 +15,8 @@ import butterknife.BindViews
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
-import com.kanedias.dybr.fair.entities.Entry
+import com.kanedias.dybr.fair.dto.Entry
 import com.kanedias.dybr.fair.ui.md.handleMarkdown
-import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch

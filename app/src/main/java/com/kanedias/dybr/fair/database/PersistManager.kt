@@ -7,9 +7,8 @@ import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper
 import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
-import com.kanedias.dybr.fair.entities.Account
-import com.kanedias.dybr.fair.entities.OfflineDraft
-import com.kanedias.dybr.fair.entities.OwnProfile
+import com.kanedias.dybr.fair.database.entities.Account
+import com.kanedias.dybr.fair.database.entities.OfflineDraft
 
 import java.sql.SQLException
 

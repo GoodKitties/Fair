@@ -16,10 +16,9 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.ftinc.scoop.Scoop
-import com.kanedias.dybr.fair.entities.Comment
-import com.kanedias.dybr.fair.entities.Entry
+import com.kanedias.dybr.fair.dto.Comment
+import com.kanedias.dybr.fair.dto.Entry
 import com.kanedias.dybr.fair.themes.*
-import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch

@@ -6,9 +6,9 @@ import android.support.v4.graphics.ColorUtils
 import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.Network
 import com.kanedias.dybr.fair.R
-import com.kanedias.dybr.fair.entities.Blog
-import com.kanedias.dybr.fair.entities.DesignStyle
-import com.kanedias.dybr.fair.entities.isMarkerBlog
+import com.kanedias.dybr.fair.dto.Blog
+import com.kanedias.dybr.fair.dto.DesignStyle
+import com.kanedias.dybr.fair.dto.isMarkerBlog
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch

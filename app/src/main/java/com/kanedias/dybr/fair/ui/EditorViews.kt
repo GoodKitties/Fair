@@ -11,6 +11,8 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
@@ -23,10 +25,15 @@ import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.Network
 import com.kanedias.dybr.fair.R
+import com.kanedias.dybr.fair.database.DbProvider
+import com.kanedias.dybr.fair.database.entities.OfflineDraft
+import com.kanedias.dybr.fair.ui.md.handleMarkdown
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Fragment to hold all editing-related functions in all edit views where possible.
@@ -103,12 +110,35 @@ class EditorViews : Fragment() {
 
     @OnClick(R.id.edit_save_offline_draft)
     fun saveDraft() {
+        if (contentInput.text.isNullOrEmpty())
+            return
+
+        // persist new draft
+        DbProvider.helper.draftDao.create(OfflineDraft(contentInput))
+
+        // clear the context and show notification
+        contentInput.setText("")
         Toast.makeText(context, R.string.offline_draft_saved, Toast.LENGTH_SHORT).show()
     }
 
+    /**
+     * Loads a list of drafts from database and shows a dialog with list items to be selected.
+     * After offline draft item is selected, this offline draft is deleted from the database and its contents
+     * are applied to content of the editor.
+     */
     @OnClick(R.id.edit_load_offline_draft)
     fun loadDraft() {
+        val drafts = DbProvider.helper.draftDao.queryBuilder().orderBy("createdAt", false).query()
+        if (drafts.isEmpty())
+            return
 
+        val adapter = DraftViewAdapter(drafts)
+        val dialog = MaterialDialog.Builder(context!!)
+                .title(R.string.select_offline_draft)
+                .adapter(adapter, LinearLayoutManager(context))
+                .build()
+        adapter.toDismiss = dialog
+        dialog.show()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -239,6 +269,58 @@ class EditorViews : Fragment() {
             afterCursor.isEmpty() -> contentInput.setSelection(contentInput.text.length)
         // insert inside text, set cursor at the end of paste
             else -> contentInput.setSelection(contentInput.text.indexOf(afterCursor, cursorPos))
+        }
+    }
+
+    /**
+     * Recycler adapter to hold list of offline drafts that user saved
+     */
+    inner class DraftViewAdapter(private val drafts: List<OfflineDraft>) : RecyclerView.Adapter<DraftViewAdapter.DraftViewHolder>() {
+
+        /**
+         * Dismiss this if item is selected
+         */
+        lateinit var toDismiss: MaterialDialog
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DraftViewHolder {
+            val inflater = LayoutInflater.from(context)
+            val v = inflater.inflate(R.layout.fragment_edit_form_draft_selection_row, parent, false)
+            return DraftViewHolder(v)
+        }
+
+        override fun getItemCount() = drafts.size
+
+        override fun onBindViewHolder(holder: DraftViewHolder, position: Int) = holder.setup(position)
+
+        /**
+         * View holder to show one draft as a recycler view item
+         */
+        inner class DraftViewHolder(v: View): RecyclerView.ViewHolder(v) {
+
+            private lateinit var draft: OfflineDraft
+
+            @BindView(R.id.draft_date)
+            lateinit var draftDate: TextView
+
+            @BindView(R.id.draft_content)
+            lateinit var draftContent: TextView
+
+            init {
+                ButterKnife.bind(this, v)
+                v.setOnClickListener {
+                    contentInput.setText(draft.content)
+                    DbProvider.helper.draftDao.deleteById(draft.id)
+
+                    Toast.makeText(context, R.string.offline_draft_loaded, Toast.LENGTH_SHORT).show()
+                    toDismiss.dismiss()
+                }
+            }
+
+            fun setup(position: Int) {
+                draft = drafts[position]
+                draftDate.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(draft.createdAt)
+                draftContent.text = draft.content
+            }
         }
     }
 

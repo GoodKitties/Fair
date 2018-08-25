@@ -5,9 +5,10 @@ import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.preference.PreferenceManager
 import android.widget.Toast
+import com.kanedias.dybr.fair.database.entities.Account
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
-import com.kanedias.dybr.fair.entities.*
+import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.misc.HttpApiException
 import com.kanedias.dybr.fair.misc.HttpException
 import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter

@@ -11,9 +11,8 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
-import com.kanedias.dybr.fair.entities.Auth
-import com.kanedias.dybr.fair.entities.ProfileCreateRequest
-import kotlinx.coroutines.experimental.CommonPool
+import com.kanedias.dybr.fair.dto.Auth
+import com.kanedias.dybr.fair.dto.ProfileCreateRequest
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch

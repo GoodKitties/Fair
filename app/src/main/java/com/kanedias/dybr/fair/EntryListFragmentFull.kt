@@ -5,13 +5,9 @@ import android.support.v7.graphics.drawable.DrawerArrowDrawable
 import android.support.v7.widget.Toolbar
 import android.view.View
 import butterknife.BindView
-import butterknife.ButterKnife
 import com.ftinc.scoop.Scoop
-import com.kanedias.dybr.fair.entities.*
+import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
 
 /**
  * Fragment that shows list of posts in someone's blog. This is the extension of tab-viewed [EntryListFragment]

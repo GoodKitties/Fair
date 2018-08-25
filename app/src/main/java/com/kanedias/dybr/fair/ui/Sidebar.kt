@@ -15,9 +15,8 @@ import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.*
 import com.kanedias.dybr.fair.database.DbProvider
-import com.kanedias.dybr.fair.entities.Auth
-import com.kanedias.dybr.fair.entities.Account
-import kotlinx.coroutines.experimental.CommonPool
+import com.kanedias.dybr.fair.dto.Auth
+import com.kanedias.dybr.fair.database.entities.Account
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.channels.actor

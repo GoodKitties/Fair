@@ -1,4 +1,4 @@
-package com.kanedias.dybr.fair.entities
+package com.kanedias.dybr.fair.dto
 
 import com.squareup.moshi.Json
 import moe.banana.jsonapi2.HasOne

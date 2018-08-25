@@ -13,7 +13,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
-import com.kanedias.dybr.fair.entities.*
+import com.kanedias.dybr.fair.dto.*
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
 import moe.banana.jsonapi2.ArrayDocument

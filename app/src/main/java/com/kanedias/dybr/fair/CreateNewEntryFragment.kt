@@ -1,21 +1,21 @@
 package com.kanedias.dybr.fair
 
-import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnCheckedChanged
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
-import com.kanedias.dybr.fair.entities.Blog
-import com.kanedias.dybr.fair.entities.Entry
-import com.kanedias.dybr.fair.entities.EntryCreateRequest
+import com.kanedias.dybr.fair.database.DbProvider
+import com.kanedias.dybr.fair.database.entities.OfflineDraft
+import com.kanedias.dybr.fair.dto.Blog
+import com.kanedias.dybr.fair.dto.Entry
+import com.kanedias.dybr.fair.dto.EntryCreateRequest
 import com.kanedias.dybr.fair.ui.md.handleMarkdownRaw
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.*
@@ -154,6 +154,12 @@ class CreateNewEntryFragment : Fragment() {
                 .title(android.R.string.dialog_alert_title)
                 .content(R.string.are_you_sure)
                 .negativeText(android.R.string.no)
+                .neutralColorRes(R.color.green_600)
+                .neutralText(R.string.save_offline_draft)
+                .onNeutral { _, _ ->
+                    DbProvider.helper.draftDao.create(OfflineDraft(contentInput))
+                    fragmentManager!!.popBackStack()
+                }
                 .positiveColorRes(R.color.md_red_900)
                 .positiveText(android.R.string.yes)
                 .onPositive { _, _ -> fragmentManager!!.popBackStack() }

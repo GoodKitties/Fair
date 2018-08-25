@@ -1,8 +1,9 @@
-package com.kanedias.dybr.fair.entities
+package com.kanedias.dybr.fair.dto
 
 import android.content.Context
 import com.kanedias.dybr.fair.R
 import com.kanedias.dybr.fair.database.DbProvider
+import com.kanedias.dybr.fair.database.entities.Account
 
 /**
  * Auth static entity providing info about user login status

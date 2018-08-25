@@ -6,6 +6,14 @@
     <!-- placeholders -->
     <string name="placeholder_long" translatable="false">Sample placeholder text</string>
     <string name="placeholder_short" translatable="false">Placeholder</string>
+    <string name="placeholder_huge" translatable="false">
+        <![CDATA[
+            All eyes see the figure of the wizard\n
+            As he climbs to the top of the world\n
+            No sound as he falls instead of rising\n
+            Time's standing still, then there's blood on the sand\n
+        ]]>
+    </string>
     <string name="placeholder_date" translatable="false">10.13.2015</string>
     <string name="placeholder_number_short" translatable="false">1</string>
     <string name="placeholder_number_long" translatable="false">65536</string>
@@ -169,4 +177,5 @@
     <string name="load_offline_draft">Load offline draft</string>
     <string name="offline_draft_saved">Offline draft saved</string>
     <string name="offline_draft_loaded">Offline draft loaded</string>
+    <string name="select_offline_draft">Select offline draft</string>
 </resources>

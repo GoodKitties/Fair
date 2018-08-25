@@ -1,6 +1,5 @@
 package com.kanedias.dybr.fair
 
-import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -14,7 +13,9 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
-import com.kanedias.dybr.fair.entities.*
+import com.kanedias.dybr.fair.database.DbProvider
+import com.kanedias.dybr.fair.database.entities.OfflineDraft
+import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.ui.md.handleMarkdown
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.android.UI
@@ -139,6 +140,12 @@ class CreateNewCommentFragment : Fragment() {
                 .title(android.R.string.dialog_alert_title)
                 .content(R.string.are_you_sure)
                 .negativeText(android.R.string.no)
+                .neutralColorRes(R.color.green_600)
+                .neutralText(R.string.save_offline_draft)
+                .onNeutral { _, _ ->
+                    DbProvider.helper.draftDao.create(OfflineDraft(contentInput))
+                    fragmentManager!!.popBackStack()
+                }
                 .positiveColorRes(R.color.md_red_900)
                 .positiveText(android.R.string.yes)
                 .onPositive { _, _ -> fragmentManager!!.popBackStack() }

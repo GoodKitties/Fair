@@ -13,7 +13,7 @@ import android.support.test.runner.AndroidJUnit4
 import android.view.WindowManager
 import com.j256.ormlite.table.TableUtils
 import com.kanedias.dybr.fair.database.DbProvider
-import com.kanedias.dybr.fair.entities.Account
+import com.kanedias.dybr.fair.database.entities.Account
 import org.apache.commons.text.RandomStringGenerator
 import org.hamcrest.Matchers.*
 import org.junit.*

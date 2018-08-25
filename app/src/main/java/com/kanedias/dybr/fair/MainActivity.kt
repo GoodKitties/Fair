@@ -25,9 +25,9 @@ import butterknife.BindView
 import butterknife.OnClick
 import butterknife.ButterKnife
 import com.afollestad.materialdialogs.MaterialDialog
-import com.kanedias.dybr.fair.entities.*
+import com.kanedias.dybr.fair.database.entities.Account
+import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.ui.Sidebar
-import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
@@ -512,13 +512,9 @@ class MainActivity : AppCompatActivity() {
             return ProfileViewHolder(v)
         }
 
-        override fun onBindViewHolder(holder: ProfileViewHolder, position: Int) {
-            holder.setup(position)
-        }
+        override fun onBindViewHolder(holder: ProfileViewHolder, position: Int) = holder.setup(position)
 
-        override fun getItemCount(): Int {
-            return profiles.size
-        }
+        override fun getItemCount() = profiles.size
 
         inner class ProfileViewHolder(v: View): RecyclerView.ViewHolder(v) {
 

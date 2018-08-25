@@ -4,7 +4,7 @@ import android.app.Application
 import android.content.Context
 import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.database.DbProvider
-import com.kanedias.dybr.fair.entities.Auth
+import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.themes.ACCENT
 import com.kanedias.dybr.fair.themes.PRIMARY
 import com.kanedias.dybr.fair.themes.PRIMARY_DARK

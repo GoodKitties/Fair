@@ -15,11 +15,10 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
-import com.kanedias.dybr.fair.entities.Auth
-import com.kanedias.dybr.fair.entities.Blog
-import com.kanedias.dybr.fair.entities.OwnProfile
+import com.kanedias.dybr.fair.dto.Auth
+import com.kanedias.dybr.fair.dto.Blog
+import com.kanedias.dybr.fair.dto.OwnProfile
 import com.kanedias.dybr.fair.misc.idMatches
-import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
