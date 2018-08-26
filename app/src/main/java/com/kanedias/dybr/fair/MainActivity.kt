@@ -3,6 +3,8 @@ package com.kanedias.dybr.fair
 import android.app.FragmentTransaction
 import android.content.Intent
 import android.content.SharedPreferences
+import android.database.Cursor
+import android.database.MatrixCursor
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -14,18 +16,26 @@ import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewPager
 import android.support.v4.widget.DrawerLayout
+import android.support.v4.widget.SimpleCursorAdapter
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.SearchView
 import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.*
-import android.widget.*
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
 import butterknife.BindView
 import butterknife.OnClick
 import butterknife.ButterKnife
 import com.afollestad.materialdialogs.MaterialDialog
+import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.database.entities.Account
+import com.kanedias.dybr.fair.database.entities.SearchGotoInfo
+import com.kanedias.dybr.fair.database.entities.SearchGotoInfo.*
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.ui.Sidebar
 import kotlinx.coroutines.experimental.android.UI
@@ -147,9 +157,120 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val menuInflater = MenuInflater(this)
         menuInflater.inflate(R.menu.main_action_bar_menu, menu)
         return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        setupTopSearch(menu)
+        return super.onPrepareOptionsMenu(menu)
+    }
+
+    private fun setupTopSearch(menu: Menu) {
+        val searchItem = menu.findItem(R.id.menu_search)
+        val searchView = searchItem.actionView as SearchView
+        val initialSuggestions = constructSuggestions("")
+        val searchAdapter = SimpleCursorAdapter(this, R.layout.activity_main_search_row, initialSuggestions,
+                arrayOf("name", "type", "source"),
+                intArrayOf(R.id.search_name, R.id.search_type, R.id.search_source), 0)
+
+        // initialize adapter, text listener and click handler
+        searchView.queryHint = getString(R.string.go_to)
+        searchView.suggestionsAdapter = searchAdapter
+        searchView.setOnQueryTextFocusChangeListener { v, hasFocus ->  }
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+
+            private fun handle(query: String?): Boolean {
+                if (query.isNullOrEmpty())
+                    return true
+
+                searchAdapter.changeCursor(constructSuggestions(query!!))
+                return true
+            }
+
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return handle(query)
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return handle(newText)
+            }
+
+        })
+        searchView.setOnSuggestionListener(object: SearchView.OnSuggestionListener {
+            override fun onSuggestionSelect(position: Int): Boolean {
+                return false
+            }
+
+            override fun onSuggestionClick(position: Int): Boolean {
+                searchItem.collapseActionView()
+
+                val cursor = searchAdapter.getItem(position) as Cursor
+                val name = cursor.getString(cursor.getColumnIndex("name"))
+                val type = EntityType.valueOf(cursor.getString(cursor.getColumnIndex("type")))
+
+                // jump to respective blog or profile if they exist
+                launch(UI) {
+                    try {
+                        when (type) {
+                            EntityType.PROFILE -> {
+                                val prof = async { Network.loadProfileByNickname(name) }.await()
+                                val fragment = ProfileFragment().apply { profile = prof }
+                                fragment.show(supportFragmentManager, "Showing search-requested profile fragment")
+                            }
+                            EntityType.BLOG -> {
+                                val blog = async { Network.loadBlogBySlug(name) }.await()
+                                val fragment = EntryListFragmentFull().apply { this.blog = blog }
+                                supportFragmentManager.beginTransaction()
+                                        .addToBackStack("Showing search-requested address")
+                                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                                        .replace(R.id.main_drawer_layout, fragment)
+                                        .commit()
+                            }
+                        }
+                        persistSearchSuggestion(type, name)
+                    } catch (ex: Exception) {
+                        Network.reportErrors(this@MainActivity, ex, mapOf(404 to R.string.not_found))
+                    }
+                }
+
+                return true
+            }
+
+            private fun persistSearchSuggestion(type: EntityType, name: String) {
+                // persist to saved searches if unique index does not object
+                val dao = DbProvider.helper.gotoDao
+                val unique = dao.queryBuilder().apply { where().eq("type", type).and().eq("name", name) }.query()
+                if (unique.isEmpty()) { // don't know how to make this check better, like "replace-on-conflict"
+                    dao.createOrUpdate(SearchGotoInfo(type, name))
+                }
+            }
+        })
+    }
+
+    private fun constructSuggestions(prefix: String): Cursor {
+        // first, collect suggestions from the favorites if we have them
+        val favProfiles = Auth.profile?.favorites?.get(Auth.profile?.document) ?: emptyList()
+        val suitableFavs = favProfiles.filter { it.nickname.startsWith(prefix) }
+
+        // second, collect suggestions that we already searched for
+        val suitableSaved = DbProvider.helper.gotoDao.queryBuilder()
+                .where().like("name", "$prefix%").query()
+
+        // we need a counter as MatrixCursor requires _id field unfortunately
+        var counter = 0
+        val cursor = MatrixCursor(arrayOf("_id", "name", "type", "source"), suitableFavs.size)
+        if (prefix.isNotEmpty()) {
+            // add two service rows with just prefix
+            cursor.addRow(arrayOf(++counter, prefix, EntityType.BLOG.name, getString(R.string.direct_jump)))
+            cursor.addRow(arrayOf(++counter, prefix, EntityType.PROFILE.name, getString(R.string.direct_jump)))
+        }
+
+        // add suitable addresses from favorites and database
+        suitableFavs.forEach { cursor.addRow(arrayOf(++counter, it.nickname, EntityType.PROFILE.name, getString(R.string.from_profile_favorites))) }
+        suitableSaved.forEach { cursor.addRow(arrayOf(++counter, it.name, it.type, getString(R.string.from_saved_searches))) }
+
+        return cursor
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
@@ -261,7 +382,7 @@ class MainActivity : AppCompatActivity() {
                 "blog" -> {
                     val fragment = when (address.size) {
                         2 -> {  // the case for /blog/<slug>
-                            val blog = async { Network.loadBlog(address[1]) }.await()
+                            val blog = async { Network.loadBlogBySlug(address[1]) }.await()
                             EntryListFragmentFull().apply { this.blog = blog }
                         }
                         3 -> { // the case for /blog/<slug>/<entry>

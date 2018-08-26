@@ -115,6 +115,11 @@ fun postProcessMore(spanned: SpannableStringBuilder, view: TextView) {
 private fun postProcessDrawables(spanned: SpannableStringBuilder, view: TextView) {
     val spans = spanned.getSpans(0, spanned.length, AsyncDrawableSpan::class.java)
     for (span in spans) {
+        // skip static images
+        if (span.drawable.destination.contains("static")) {
+            continue
+        }
+
         val start = spanned.getSpanStart(span)
         val end = spanned.getSpanEnd(span)
         val spansToWrap = spanned.getSpans(start, end, CharacterStyle::class.java)

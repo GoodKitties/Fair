@@ -30,14 +30,14 @@ class OfflineDraft {
     var id: Long = 0
 
     /**
-     * Contents of this draft
-     */
-    @DatabaseField(canBeNull = false, unique = true)
-    lateinit var content: String
-
-    /**
      * Date this draft was created
      */
     @DatabaseField(dataType = DataType.DATE_LONG, canBeNull = false)
     var createdAt = Date()
+
+    /**
+     * Contents of this draft
+     */
+    @DatabaseField(canBeNull = false)
+    lateinit var content: String
 }

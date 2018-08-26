@@ -344,7 +344,7 @@ object Network {
     }
 
     /**
-     * fully loads profile, with blog and favorites
+     * Fully loads profile, with blog and favorites
      * @param id identifier of profile to load
      */
     fun loadProfile(id: String): OwnProfile {
@@ -356,6 +356,25 @@ object Network {
 
         // response is returned after execute call, body is not null
         return fromWrappedJson(resp.body()!!.source(), OwnProfile::class.java)!!
+    }
+
+    /**
+     * Fully loads profile, with blog and favorites
+     * @param nickname nickname of profile to load
+     */
+    fun loadProfileByNickname(nickname: String): OwnProfile {
+        val req = Request.Builder().url("$PROFILES_ENDPOINT?filters[nickname]=$nickname&include=blog,favorites").build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful) {
+            throw HttpException(resp)
+        }
+
+        // response is returned after execute call, body is not null
+        val filtered = fromWrappedListJson(resp.body()!!.source(), OwnProfile::class.java)
+        if (filtered.isEmpty())
+            throw HttpException(404, "", "")
+
+        return filtered[0]
     }
 
     /**
@@ -440,7 +459,7 @@ object Network {
      * Load one particular blog by slug
      * @param slug slug of requested entry
      */
-    fun loadBlog(slug: String): Blog {
+    fun loadBlogBySlug(slug: String): Blog {
         val req = Request.Builder().url("$BLOGS_ENDPOINT?filters[slug]=$slug&include=profile").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
@@ -448,7 +467,11 @@ object Network {
         }
 
         // response is returned after execute call, body is not null
-        return fromWrappedJson(resp.body()!!.source(), Blog::class.java)!!
+        val filtered = fromWrappedListJson(resp.body()!!.source(), Blog::class.java)
+        if (filtered.isEmpty())
+            throw HttpException(404, "", "")
+
+        return filtered[0]
     }
 
     /**

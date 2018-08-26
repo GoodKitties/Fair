@@ -9,6 +9,7 @@ import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
 import com.kanedias.dybr.fair.database.entities.Account
 import com.kanedias.dybr.fair.database.entities.OfflineDraft
+import com.kanedias.dybr.fair.database.entities.SearchGotoInfo
 
 import java.sql.SQLException
 
@@ -22,6 +23,7 @@ class PersistManager(context: Context) : OrmLiteSqliteOpenHelper(context, DATABA
     // Dao fast access links
     val accDao: Dao<Account, Long> = getDao(Account::class.java)
     val draftDao: Dao<OfflineDraft, Long> = getDao(OfflineDraft::class.java)
+    val gotoDao: Dao<SearchGotoInfo, Long> = getDao(SearchGotoInfo::class.java)
 
     override fun onCreate(db: SQLiteDatabase, connectionSource: ConnectionSource) {
         try {
@@ -36,6 +38,7 @@ class PersistManager(context: Context) : OrmLiteSqliteOpenHelper(context, DATABA
     override fun onUpgrade(db: SQLiteDatabase, connectionSource: ConnectionSource, oldVer: Int, newVer: Int) {
         when(oldVer) {
             1 -> TableUtils.createTable<OfflineDraft>(connectionSource, OfflineDraft::class.java)
+            2 -> TableUtils.createTable<SearchGotoInfo>(connectionSource, SearchGotoInfo::class.java)
             newVer -> return
         }
         onUpgrade(db, connectionSource, oldVer + 1, newVer)
@@ -57,6 +60,6 @@ class PersistManager(context: Context) : OrmLiteSqliteOpenHelper(context, DATABA
 
         private val DATABASE_NAME = "fair.db"
 
-        private val DATABASE_VERSION = 2
+        private val DATABASE_VERSION = 3
     }
 }

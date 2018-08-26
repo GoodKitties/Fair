@@ -178,4 +178,8 @@
     <string name="offline_draft_saved">Offline draft saved</string>
     <string name="offline_draft_loaded">Offline draft loaded</string>
     <string name="select_offline_draft">Select offline draft</string>
+    <string name="direct_jump">Direct jump</string>
+    <string name="from_profile_favorites">From profile favorites</string>
+    <string name="from_saved_searches">From saved searches</string>
+    <string name="not_found">Not found</string>
 </resources>

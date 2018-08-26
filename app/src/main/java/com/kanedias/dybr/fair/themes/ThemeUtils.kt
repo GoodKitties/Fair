@@ -51,7 +51,7 @@ fun applyTheme(blog: Blog?, target: Any) {
         return
 
     launch(UI) {
-        val fullBlog = async { Network.loadBlog(blog?.slug!!) }.await()
+        val fullBlog = async { Network.loadBlogBySlug(blog?.slug!!) }.await()
         val relatedProf = fullBlog.profile.get(fullBlog.document) ?: return@launch
         val currentDesign = relatedProf.settings?.currentDesign ?: return@launch
         val design: DesignStyle = relatedProf.settings?.designs?.get(currentDesign) ?: return@launch
