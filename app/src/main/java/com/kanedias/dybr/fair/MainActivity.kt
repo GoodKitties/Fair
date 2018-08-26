@@ -177,7 +177,6 @@ class MainActivity : AppCompatActivity() {
         // initialize adapter, text listener and click handler
         searchView.queryHint = getString(R.string.go_to)
         searchView.suggestionsAdapter = searchAdapter
-        searchView.setOnQueryTextFocusChangeListener { v, hasFocus ->  }
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
 
             private fun handle(query: String?): Boolean {

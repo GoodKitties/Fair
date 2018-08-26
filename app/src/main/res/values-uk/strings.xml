@@ -108,7 +108,6 @@
     <string name="underlined_font">Підкреслений</string>
     <string name="strikethrough_font">Закреслений</string>
     <string name="insert_code_block">Вставити блок коду</string>
-    <string name="insert_quote_block">Вставити цитату</string>
     <string name="insert_numbered_list">Вставити нумерований список</string>
     <string name="insert_bulleted_list">Вставити маркований список</string>
     <string name="insert_link">Вставити посилання</string>
