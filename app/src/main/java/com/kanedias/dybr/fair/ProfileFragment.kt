@@ -22,6 +22,7 @@ import com.kanedias.dybr.fair.misc.idMatches
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
+import okhttp3.HttpUrl
 import okhttp3.Request
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -100,7 +101,8 @@ class ProfileFragment: DialogFragment() {
             // load avatar asynchronously
             launch(UI) {
                 try {
-                    val req = Request.Builder().url(avatarUrl!!).build()
+                    val url = HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT)?.resolve(avatarUrl!!) ?: return@launch
+                    val req = Request.Builder().url(url).build()
                     val bitmap = async {
                         val resp = Network.httpClient.newCall(req).execute()
                         BitmapFactory.decodeStream(resp.body()?.byteStream())

@@ -48,6 +48,9 @@ class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : R
     @BindView(R.id.entry_message)
     lateinit var bodyView: TextView
 
+    @BindView(R.id.entry_divider)
+    lateinit var divider: View
+
     @BindView(R.id.entry_draft_state)
     lateinit var draftStateView: TextView
 
@@ -85,12 +88,13 @@ class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : R
         ButterKnife.bind(this, iv)
 
         // theming setup
-        (buttons + indicators + participants + comments).forEach { Scoop.getInstance().bind(this, TEXT, it) }
         Scoop.getInstance().bind(this, TEXT_BLOCK, iv, CardViewColorAdapter())
-        Scoop.getInstance().bind(this, TEXT, titleView)
+        Scoop.getInstance().bind(this, TEXT_HEADERS, titleView)
         Scoop.getInstance().bind(this, TEXT, authorView)
         Scoop.getInstance().bind(this, TEXT, dateView)
         Scoop.getInstance().bind(this, TEXT, bodyView)
+        Scoop.getInstance().bind(this, DIVIDER, divider)
+        (buttons + indicators + participants + comments).forEach { Scoop.getInstance().bind(this, TEXT_LINKS, it) }
 
         iv.setOnClickListener(commentShow)
         if (allowSelection) {

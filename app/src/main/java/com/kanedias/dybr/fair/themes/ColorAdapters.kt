@@ -6,7 +6,9 @@ import android.support.design.widget.TabLayout
 import android.support.design.widget.FloatingActionButton
 import android.support.annotation.ColorInt
 import android.support.v7.widget.CardView
+import android.support.v7.widget.Toolbar
 import android.view.View
+import android.widget.TextView
 import com.ftinc.scoop.adapters.ColorAdapter
 import com.ftinc.scoop.util.Utils
 
@@ -50,5 +52,20 @@ class CardViewColorAdapter : ColorAdapter<CardView> {
 
     override fun getColor(view: CardView): Int {
         return view.cardBackgroundColor.defaultColor
+    }
+}
+
+class ToolbarTextAdapter : ColorAdapter<Toolbar> {
+
+    override fun applyColor(view: Toolbar, @ColorInt color: Int) {
+        view.setTitleTextColor(color)
+    }
+
+    override fun getColor(view: Toolbar): Int {
+        val field = view::class.java.getDeclaredField("mTitleTextView")
+        field.isAccessible = true
+
+        val title = field.get(view) as TextView
+        return title.textColors.defaultColor
     }
 }

@@ -6,8 +6,8 @@ import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.themes.ACCENT
-import com.kanedias.dybr.fair.themes.PRIMARY
-import com.kanedias.dybr.fair.themes.PRIMARY_DARK
+import com.kanedias.dybr.fair.themes.TOOLBAR
+import com.kanedias.dybr.fair.themes.STATUS_BAR
 import org.acra.ACRA
 import org.acra.annotation.AcraCore
 import org.acra.annotation.AcraDialog
@@ -37,8 +37,8 @@ class MainApplication : Application() {
         Network.init(this)
         Auth.init(this)
         Scoop.getInstance().initialize(mapOf(
-                PRIMARY to resources.getColor(R.color.colorPrimary),
-                PRIMARY_DARK to resources.getColor(R.color.colorPrimaryDark),
+                TOOLBAR to resources.getColor(R.color.colorPrimary),
+                STATUS_BAR to resources.getColor(R.color.colorPrimaryDark),
                 ACCENT to resources.getColor(R.color.colorAccent))
         )
 

@@ -40,9 +40,11 @@ open class EntryListFragment: Fragment() {
     private var nextPage = 1
     private var lastPage = false
 
-    private lateinit var activity: MainActivity
+    lateinit var activity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        savedInstanceState?.get("blog")?.let { blog = it as Blog }
+
         val view = inflater.inflate(layoutToUse(), container, false)
         activity = context as MainActivity
 
@@ -51,6 +53,11 @@ open class EntryListFragment: Fragment() {
         setupTheming()
         refreshEntries()
         return view
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putSerializable("blog", blog)
     }
 
     open fun layoutToUse() = R.layout.fragment_entry_list

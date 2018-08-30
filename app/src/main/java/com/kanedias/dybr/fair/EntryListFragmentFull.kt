@@ -48,12 +48,13 @@ class EntryListFragmentFull: EntryListFragment() {
     }
 
     private fun setBlogTheme() {
-        Scoop.getInstance().bind(this, PRIMARY, toolbar)
+        Scoop.getInstance().bind(this, TOOLBAR, toolbar)
+        Scoop.getInstance().bind(this, TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
         Scoop.getInstance().bind(this, ACCENT, addEntryButton, FABColorAdapter())
         Scoop.getInstance().bind(this, BACKGROUND, entryRibbon)
-        Scoop.getInstance().bindStatusBar(activity, activity, PRIMARY_DARK)
+        Scoop.getInstance().bindStatusBar(activity, activity, STATUS_BAR)
 
-        applyTheme(blog, this)
+        blog?.let { applyTheme(it, activity) }
     }
 
     override fun onDestroy() {

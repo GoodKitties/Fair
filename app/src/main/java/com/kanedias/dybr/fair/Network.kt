@@ -75,7 +75,7 @@ object Network {
 
     private const val DEFAULT_DYBR_API_ENDPOINT = "https://dybr.ru/v2"
 
-    private var MAIN_DYBR_API_ENDPOINT = DEFAULT_DYBR_API_ENDPOINT
+    var MAIN_DYBR_API_ENDPOINT = DEFAULT_DYBR_API_ENDPOINT
 
     private val IMG_UPLOAD_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/image-upload"
     private var USERS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/users"
@@ -100,6 +100,7 @@ object Network {
             .add(EntryResponse::class.java)
             .add(CreateCommentRequest::class.java)
             .add(CommentResponse::class.java)
+            .add(DesignResponse::class.java)
             .build()
 
     private val jsonConverter = Moshi.Builder()
@@ -137,7 +138,7 @@ object Network {
         val pref = PreferenceManager.getDefaultSharedPreferences(ctx)
         setupEndpoints(ctx, pref)
 
-        prefChangeListener = OnSharedPreferenceChangeListener {preferences, _ -> setupEndpoints(ctx, preferences) }
+        prefChangeListener = OnSharedPreferenceChangeListener { preferences, _ -> setupEndpoints(ctx, preferences) }
         pref.registerOnSharedPreferenceChangeListener(prefChangeListener)
 
         // setup http client
@@ -453,6 +454,41 @@ object Network {
 
         // response is returned after execute call, body is not null
         return fromWrappedJson(resp.body()!!.source(), Blog::class.java)!!
+    }
+
+    /**
+     * Load one particular blog by id
+     * @param slug slug of requested entry
+     */
+    fun loadBlog(id: String): Blog {
+        val req = Request.Builder().url("$BLOGS_ENDPOINT/$id/?include=profile").build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful) {
+            throw HttpException(resp)
+        }
+
+        // response is returned after execute call, body is not null
+        val filtered = fromWrappedListJson(resp.body()!!.source(), Blog::class.java)
+        if (filtered.isEmpty())
+            throw HttpException(404, "", "")
+
+        return filtered[0]
+    }
+
+    fun loadProfileDesign(prof: OwnProfile): Design? {
+        val req = Request.Builder().url("$PROFILES_ENDPOINT/${prof.id}/relationships/designs").build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful) {
+            throw HttpException(resp)
+        }
+
+        // response is returned after execute call, body is not null
+        val profileDesigns = fromWrappedListJson(resp.body()!!.source(), Design::class.java)
+        val filtered = profileDesigns.filter { it.id == prof.settings?.currentDesign }
+        if (filtered.isEmpty())
+            return null
+
+        return filtered[0]
     }
 
     /**

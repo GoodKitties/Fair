@@ -70,15 +70,24 @@
             android:padding="5dp"
             android:minLines="3"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="@string/placeholder_short"/>
+            android:text="@string/placeholder_huge"/>
+
+        <View
+            android:id="@+id/entry_divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/entry_message"
+            android:layout_marginTop="8dp"
+            android:alpha="0.3"
+            android:background="@android:color/white"/>
 
         <LinearLayout
             android:id="@+id/entry_meta_area"
             android:orientation="horizontal"
-            android:layout_marginTop="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/entry_message"
+            android:layout_below="@id/entry_divider"
+            android:layout_marginTop="8dp"
             android:layout_alignParentStart="true"
             android:layout_alignParentLeft="true">
 
@@ -125,10 +134,10 @@
         <LinearLayout
             android:id="@+id/entry_icon_area"
             android:orientation="horizontal"
-            android:layout_marginTop="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/entry_message"
+            android:layout_marginTop="8dp"
+            android:layout_below="@id/entry_divider"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"> <!-- invisible for entries you don't own -->
 

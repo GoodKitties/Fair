@@ -50,7 +50,7 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
         ButterKnife.bind(this, iv)
 
         // theming setup
-        buttons.forEach { Scoop.getInstance().bind(this, TEXT, it) }
+        buttons.forEach { Scoop.getInstance().bind(this, TEXT_LINKS, it) }
         Scoop.getInstance().bind(this, TEXT_BLOCK, iv, CardViewColorAdapter())
         Scoop.getInstance().bind(this, TEXT, authorView)
         Scoop.getInstance().bind(this, TEXT, dateView)
@@ -129,9 +129,7 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
         authorView.text = profile.nickname
         bodyView.handleMarkdown(comment.content)
 
-        // time diff must be lower than 15 minutes
-        val timeDiff = (Date().time - comment.createdAt.time) / 1000 // in seconds
-        toggleEditButtons(profile == Auth.profile && timeDiff < 60 * 15)
+        toggleEditButtons(profile == Auth.profile)
     }
 
     @OnClick(R.id.comment_author)

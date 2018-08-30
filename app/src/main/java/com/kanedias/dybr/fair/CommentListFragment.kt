@@ -83,12 +83,13 @@ class CommentListFragment : Fragment() {
     }
 
     private fun setBlogTheme() {
-        Scoop.getInstance().bind(this, PRIMARY, toolbar)
+        Scoop.getInstance().bind(this, TOOLBAR, toolbar)
+        Scoop.getInstance().bind(this, TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
         Scoop.getInstance().bind(this, ACCENT, addCommentButton, FABColorAdapter())
         Scoop.getInstance().bind(this, BACKGROUND, commentRibbon)
-        Scoop.getInstance().bindStatusBar(activity, activity, PRIMARY_DARK)
+        Scoop.getInstance().bindStatusBar(activity, activity, STATUS_BAR)
 
-        applyTheme(entry?.blog?.get(entry?.document), this)
+        entry?.blog?.get(entry?.document)?.let {applyTheme(it, activity) }
     }
 
     override fun onDestroy() {

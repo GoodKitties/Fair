@@ -5,13 +5,14 @@
         android:icon="@drawable/home"
         android:key="home-server"
         android:defaultValue="https://dybr-staging-api.herokuapp.com/v1"
+        android:hint="@string/api_home_server_hint"
         android:title="@string/api_home_server"
         android:summary="@string/api_home_server_sum"/>
 
     <CheckBoxPreference
         android:icon="@drawable/community"
         android:key="apply-blog-theme"
-        android:defaultValue="false"
+        android:defaultValue="true"
         android:title="@string/apply_blog_theme"
         android:summaryOn="@string/apply_blog_theme_on"
         android:summaryOff="@string/apply_blog_theme_off"/>
