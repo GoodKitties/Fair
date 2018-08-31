@@ -468,13 +468,14 @@ object Network {
         }
 
         // response is returned after execute call, body is not null
-        val filtered = fromWrappedListJson(resp.body()!!.source(), Blog::class.java)
-        if (filtered.isEmpty())
-            throw HttpException(404, "", "")
-
-        return filtered[0]
+        return fromWrappedJson(resp.body()!!.source(), Blog::class.java)!!
     }
 
+    /**
+     * Loads current design of the profile. Retrieves all profile designs and filters by `settings.currentDesign`
+     * @param prof profile to load design from
+     * @return current design of the profile or null if nothing found
+     */
     fun loadProfileDesign(prof: OwnProfile): Design? {
         val req = Request.Builder().url("$PROFILES_ENDPOINT/${prof.id}/relationships/designs").build()
         val resp = httpClient.newCall(req).execute()

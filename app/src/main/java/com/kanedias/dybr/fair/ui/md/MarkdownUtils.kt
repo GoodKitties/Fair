@@ -10,6 +10,7 @@ import android.text.Spanned
 import android.text.style.CharacterStyle
 import android.text.style.ClickableSpan
 import android.text.style.ImageSpan
+import android.util.Log
 import android.view.View
 import android.widget.TextView
 import com.kanedias.dybr.fair.Network
@@ -17,6 +18,7 @@ import com.kanedias.dybr.fair.R
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
+import okhttp3.HttpUrl
 import okhttp3.MediaType
 import okhttp3.Request
 import okhttp3.Response
@@ -27,6 +29,7 @@ import ru.noties.markwon.SpannableConfiguration
 import ru.noties.markwon.spans.AsyncDrawable
 import ru.noties.markwon.spans.AsyncDrawableSpan
 import java.io.IOException
+import java.net.URI
 import kotlin.math.ceil
 
 val CONTENT_TYPE_GIF = MediaType.parse("image/gif")
@@ -166,29 +169,36 @@ infix fun TextView.handleMarkdownRaw(markdown: String) {
  */
 class DrawableLoader(private val view: TextView): AsyncDrawable.Loader {
 
-    private val pendingImages: MutableMap<String, Deferred<Drawable?>> = HashMap()
-
     override fun cancel(destination: String) {
-        //pendingImages[destination]?.cancel(null)
+        // we don't need to cancel load as we replace images with placeholders
     }
 
-    override fun load(destination: String, drawable: AsyncDrawable) {
+    override fun load(imageUrl: String, drawable: AsyncDrawable) {
         launch(UI) {
             try {
                 while (view.width == 0) // just inflated
                     delay(500)
 
+                // resolve URL if it's not absolute
+                val parsed = URI.create(imageUrl)
+                val destination = when(parsed.isAbsolute) {
+                    true -> HttpUrl.get(parsed)
+                    false -> HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT)?.resolve(imageUrl!!)
+                } ?: return@launch
+
+                // load image
                 val req = Request.Builder().url(destination).build()
-                pendingImages[destination] = async {
+                val pending = async {
                     val resp = Network.httpClient.newCall(req).execute()
                     when (resp.body()!!.contentType()) {
                         CONTENT_TYPE_GIF -> handleGif(resp)
                         else -> handleGeneric(resp)
                     }
                 }
-                pendingImages[destination]?.await()?.let { drawable.result = it }
+                pending.await()?.let { drawable.result = it }
             } catch (ioex: IOException) {
                 // ignore, just don't load image
+                Log.e("ImageLoader", "Couldn't load image", ioex)
             }
         }
     }

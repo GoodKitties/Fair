@@ -25,6 +25,7 @@ import kotlinx.coroutines.experimental.launch
 import okhttp3.HttpUrl
 import okhttp3.Request
 import java.io.IOException
+import java.net.URI
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -101,8 +102,12 @@ class ProfileFragment: DialogFragment() {
             // load avatar asynchronously
             launch(UI) {
                 try {
-                    val url = HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT)?.resolve(avatarUrl!!) ?: return@launch
-                    val req = Request.Builder().url(url).build()
+                    val parsed = URI.create(avatarUrl)
+                    val destination = when(parsed.isAbsolute) {
+                        true -> HttpUrl.get(parsed)
+                        false -> HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT)?.resolve(avatarUrl!!)
+                    } ?: return@launch
+                    val req = Request.Builder().url(destination).build()
                     val bitmap = async {
                         val resp = Network.httpClient.newCall(req).execute()
                         BitmapFactory.decodeStream(resp.body()?.byteStream())

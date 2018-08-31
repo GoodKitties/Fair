@@ -1,13 +1,11 @@
 package com.kanedias.dybr.fair.themes
 
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.support.design.widget.TabLayout
 import android.support.design.widget.FloatingActionButton
 import android.support.annotation.ColorInt
 import android.support.v7.widget.CardView
 import android.support.v7.widget.Toolbar
-import android.view.View
 import android.widget.TextView
 import com.ftinc.scoop.adapters.ColorAdapter
 import com.ftinc.scoop.util.Utils
@@ -65,7 +63,7 @@ class ToolbarTextAdapter : ColorAdapter<Toolbar> {
         val field = view::class.java.getDeclaredField("mTitleTextView")
         field.isAccessible = true
 
-        val title = field.get(view) as TextView
-        return title.textColors.defaultColor
+        val title = field.get(view) as TextView?
+        return title?.textColors?.defaultColor ?: Color.TRANSPARENT
     }
 }
