@@ -1,11 +1,19 @@
 package com.kanedias.dybr.fair.themes
 
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.support.design.widget.TabLayout
 import android.support.design.widget.FloatingActionButton
 import android.support.annotation.ColorInt
+import android.support.v4.graphics.ColorUtils
+import android.support.v4.view.TintableBackgroundView
+import android.support.v4.widget.CompoundButtonCompat
+import android.support.v7.graphics.drawable.DrawerArrowDrawable
 import android.support.v7.widget.CardView
 import android.support.v7.widget.Toolbar
+import android.view.View
+import android.widget.CheckBox
+import android.widget.EditText
 import android.widget.TextView
 import com.ftinc.scoop.adapters.ColorAdapter
 import com.ftinc.scoop.util.Utils
@@ -65,5 +73,97 @@ class ToolbarTextAdapter : ColorAdapter<Toolbar> {
 
         val title = field.get(view) as TextView?
         return title?.textColors?.defaultColor ?: Color.TRANSPARENT
+    }
+}
+
+class ToolbarIconAdapter : ColorAdapter<Toolbar> {
+
+    override fun applyColor(view: Toolbar, @ColorInt color: Int) {
+        val icon = view.navigationIcon as DrawerArrowDrawable?
+        icon?.color = color
+    }
+
+    override fun getColor(view: Toolbar): Int {
+        val icon = view.navigationIcon as DrawerArrowDrawable?
+        return icon?.color ?: Color.TRANSPARENT
+    }
+}
+
+class TextViewLinksAdapter: ColorAdapter<TextView> {
+
+    override fun applyColor(view: TextView, color: Int) {
+        view.setLinkTextColor(color)
+    }
+
+    override fun getColor(view: TextView): Int {
+        return view.linkTextColors.defaultColor
+    }
+}
+
+class CheckBoxAdapter: ColorAdapter<CheckBox> {
+
+    override fun applyColor(view: CheckBox, color: Int) {
+        CompoundButtonCompat.setButtonTintList(view, Utils.colorToStateList(color))
+    }
+
+    override fun getColor(view: CheckBox): Int {
+        return CompoundButtonCompat.getButtonTintList(view)?.defaultColor ?: Color.TRANSPARENT
+    }
+
+}
+
+class EditTextAdapter: ColorAdapter<EditText> {
+
+    override fun applyColor(view: EditText, color: Int) {
+        view.setTextColor(color)
+    }
+
+    override fun getColor(view: EditText): Int {
+        return view.textColors.defaultColor
+    }
+}
+
+class EditTextLineAdapter: ColorAdapter<EditText> {
+
+    override fun applyColor(view: EditText, color: Int) {
+        if (view is TintableBackgroundView) {
+            view.supportBackgroundTintList = Utils.colorToStateList(color)
+        }
+    }
+
+    override fun getColor(view: EditText): Int {
+        if (view is TintableBackgroundView) {
+            return view.supportBackgroundTintList?.defaultColor ?: Color.TRANSPARENT
+        }
+
+        return Color.TRANSPARENT
+    }
+}
+
+class EditTextHintAdapter: ColorAdapter<EditText> {
+
+    override fun applyColor(view: EditText, color: Int) {
+        view.setHintTextColor(color)
+    }
+
+    override fun getColor(view: EditText): Int {
+        return view.currentHintTextColor
+    }
+}
+
+/**
+ * Don't make background transparent!
+ */
+class BackgroundNoAlphaAdapter: ColorAdapter<View> {
+    override fun applyColor(view: View, color: Int) {
+        when {
+            Color.alpha(color) < 255 -> view.setBackgroundColor(ColorUtils.setAlphaComponent(color, 255))
+            else -> view.setBackgroundColor(color)
+        }
+    }
+
+    override fun getColor(view: View): Int {
+        val bg = view.background
+        return (bg as? ColorDrawable)?.color ?: Color.TRANSPARENT
     }
 }

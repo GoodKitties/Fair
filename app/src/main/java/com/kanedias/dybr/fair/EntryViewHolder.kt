@@ -93,6 +93,7 @@ class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : R
         Scoop.getInstance().bind(this, TEXT, authorView)
         Scoop.getInstance().bind(this, TEXT, dateView)
         Scoop.getInstance().bind(this, TEXT, bodyView)
+        Scoop.getInstance().bind(this, TEXT_LINKS, bodyView, TextViewLinksAdapter())
         Scoop.getInstance().bind(this, DIVIDER, divider)
         (buttons + indicators + participants + comments).forEach { Scoop.getInstance().bind(this, TEXT_LINKS, it) }
 

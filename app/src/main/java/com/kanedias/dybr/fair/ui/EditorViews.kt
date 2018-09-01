@@ -23,12 +23,13 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
+import com.ftinc.scoop.Scoop
+import com.ftinc.scoop.adapters.TextViewColorAdapter
 import com.kanedias.dybr.fair.Network
 import com.kanedias.dybr.fair.R
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.database.entities.OfflineDraft
-import com.kanedias.dybr.fair.ui.md.handleMarkdown
-import kotlinx.coroutines.experimental.CommonPool
+import com.kanedias.dybr.fair.themes.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
@@ -62,6 +63,12 @@ class EditorViews : Fragment() {
     @BindView(R.id.edit_quick_image)
     lateinit var imageUpload: ImageView
 
+    @BindView(R.id.edit_quick_button_area)
+    lateinit var buttonArea: GridLayout
+
+    @BindView(R.id.edit_top_divider)
+    lateinit var topDivider: View
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.fragment_edit_form, container, false)
         ButterKnife.bind(this, root)
@@ -72,8 +79,23 @@ class EditorViews : Fragment() {
 
         // start editing content right away
         contentInput.requestFocus()
+        setupTheming()
 
         return root
+    }
+
+    private fun setupTheming() {
+        for (idx in 0 until buttonArea.childCount) {
+            Scoop.getInstance().bind(this, TEXT_LINKS, buttonArea.getChildAt(idx))
+        }
+        Scoop.getInstance().bind(this, TEXT, clipboardSwitch, TextViewColorAdapter())
+        Scoop.getInstance().bind(this, TEXT_LINKS, clipboardSwitch, CheckBoxAdapter())
+        Scoop.getInstance().bind(this, DIVIDER, topDivider)
+        Scoop.getInstance().bind(this, TEXT, contentInput, EditTextAdapter())
+        Scoop.getInstance().bind(this, TEXT_LINKS, contentInput, EditTextLineAdapter())
+        Scoop.getInstance().bind(this, TEXT_OFFTOP, contentInput, EditTextHintAdapter())
+        Scoop.getInstance().bind(this, TEXT, mdLabel)
+        Scoop.getInstance().bind(this, TEXT_LINKS, mdLabel, TextViewLinksAdapter())
     }
 
     /**
@@ -85,7 +107,7 @@ class EditorViews : Fragment() {
             R.id.edit_quick_link
     )
     fun editSelection(clicked: View) {
-        val clipboard = clicked.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipboard = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val paste = if (clipboardSwitch.isChecked && clipboard.hasPrimaryClip() && clipboard.primaryClip.itemCount > 0) {
             clipboard.primaryClip.getItemAt(0).text.toString()
         } else {
@@ -176,7 +198,7 @@ class EditorViews : Fragment() {
         }
 
         // not from clipboard, show upload dialog
-        val ctx = clicked.context as AppCompatActivity
+        val ctx = context as AppCompatActivity
         try {
             val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
                 type = "image/*"

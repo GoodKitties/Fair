@@ -4,7 +4,7 @@
     <EditTextPreference
         android:icon="@drawable/home"
         android:key="home-server"
-        android:defaultValue="https://dybr-staging-api.herokuapp.com/v1"
+        android:defaultValue="https://dybr.ru/v2"
         android:hint="@string/api_home_server_hint"
         android:title="@string/api_home_server"
         android:summary="@string/api_home_server_sum"/>

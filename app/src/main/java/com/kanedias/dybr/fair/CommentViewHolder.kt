@@ -50,11 +50,12 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
         ButterKnife.bind(this, iv)
 
         // theming setup
-        buttons.forEach { Scoop.getInstance().bind(this, TEXT_LINKS, it) }
         Scoop.getInstance().bind(this, TEXT_BLOCK, iv, CardViewColorAdapter())
         Scoop.getInstance().bind(this, TEXT, authorView)
         Scoop.getInstance().bind(this, TEXT, dateView)
         Scoop.getInstance().bind(this, TEXT, bodyView)
+        Scoop.getInstance().bind(this, TEXT_LINKS, bodyView, TextViewLinksAdapter())
+        buttons.forEach { Scoop.getInstance().bind(this, TEXT_LINKS, it) }
 
         // make text selectable
         bodyView.isLongClickable = true

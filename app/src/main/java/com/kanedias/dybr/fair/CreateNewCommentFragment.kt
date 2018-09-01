@@ -7,17 +7,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
-import android.widget.ViewSwitcher
+import android.widget.*
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
+import com.ftinc.scoop.Scoop
+import com.ftinc.scoop.adapters.TextViewColorAdapter
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.database.entities.OfflineDraft
 import com.kanedias.dybr.fair.dto.*
+import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.md.handleMarkdown
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.android.UI
@@ -57,6 +57,12 @@ class CreateNewCommentFragment : Fragment() {
     @BindView(R.id.comment_preview_switcher)
     lateinit var previewSwitcher: ViewSwitcher
 
+    @BindView(R.id.comment_preview)
+    lateinit var previewButton: Button
+
+    @BindView(R.id.comment_submit)
+    lateinit var submitButton: Button
+
     private var previewShown = false
 
     private lateinit var activity: MainActivity
@@ -86,7 +92,17 @@ class CreateNewCommentFragment : Fragment() {
             populateUI()
         }
 
+        setupTheming(root)
+
         return root
+    }
+
+    private fun setupTheming(root: View) {
+        Scoop.getInstance().bind(this, TEXT_BLOCK, root, BackgroundNoAlphaAdapter())
+        Scoop.getInstance().bind(this, TEXT, preview)
+        Scoop.getInstance().bind(this, TEXT_LINKS, preview, TextViewLinksAdapter())
+        Scoop.getInstance().bind(this, TEXT_LINKS, previewButton, TextViewColorAdapter())
+        Scoop.getInstance().bind(this, TEXT_LINKS, submitButton, TextViewColorAdapter())
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

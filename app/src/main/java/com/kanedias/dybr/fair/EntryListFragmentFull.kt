@@ -31,8 +31,6 @@ class EntryListFragmentFull: EntryListFragment() {
     override fun setupUI(view: View) {
         super.setupUI(view)
 
-        Scoop.getInstance().addStyleLevel()
-
         // setup toolbar
         toolbar.title = blog?.title
         toolbar.navigationIcon = DrawerArrowDrawable(activity).apply { progress = 1.0f }
@@ -48,8 +46,11 @@ class EntryListFragmentFull: EntryListFragment() {
     }
 
     private fun setBlogTheme() {
+        // this is a fullscreen fragment, add new style
+        Scoop.getInstance().addStyleLevel()
         Scoop.getInstance().bind(this, TOOLBAR, toolbar)
         Scoop.getInstance().bind(this, TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
+        Scoop.getInstance().bind(this, TOOLBAR_TEXT, toolbar, ToolbarIconAdapter())
         Scoop.getInstance().bind(this, ACCENT, addEntryButton, FABColorAdapter())
         Scoop.getInstance().bind(this, BACKGROUND, entryRibbon)
         Scoop.getInstance().bindStatusBar(activity, activity, STATUS_BAR)

@@ -69,9 +69,6 @@ class CommentListFragment : Fragment() {
     }
 
     private fun setupUI() {
-        // this is a fullscreen fragment, add new style
-        Scoop.getInstance().addStyleLevel()
-
         toolbar.title = entry?.title
         toolbar.navigationIcon = DrawerArrowDrawable(activity).apply { progress = 1.0f }
         toolbar.setNavigationOnClickListener { fragmentManager?.popBackStack() }
@@ -83,13 +80,16 @@ class CommentListFragment : Fragment() {
     }
 
     private fun setBlogTheme() {
+        // this is a fullscreen fragment, add new style
+        Scoop.getInstance().addStyleLevel()
         Scoop.getInstance().bind(this, TOOLBAR, toolbar)
         Scoop.getInstance().bind(this, TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
+        Scoop.getInstance().bind(this, TOOLBAR_TEXT, toolbar, ToolbarIconAdapter())
         Scoop.getInstance().bind(this, ACCENT, addCommentButton, FABColorAdapter())
         Scoop.getInstance().bind(this, BACKGROUND, commentRibbon)
         Scoop.getInstance().bindStatusBar(activity, activity, STATUS_BAR)
 
-        entry?.blog?.get(entry?.document)?.let {applyTheme(it, activity) }
+        entry?.blog?.get(entry?.document)?.let { applyTheme(it, activity) }
     }
 
     override fun onDestroy() {

@@ -13,11 +13,14 @@ import butterknife.ButterKnife
 import butterknife.OnCheckedChanged
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
+import com.ftinc.scoop.Scoop
+import com.ftinc.scoop.adapters.TextViewColorAdapter
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.database.entities.OfflineDraft
 import com.kanedias.dybr.fair.dto.Blog
 import com.kanedias.dybr.fair.dto.Entry
 import com.kanedias.dybr.fair.dto.EntryCreateRequest
+import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.md.handleMarkdownRaw
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.*
@@ -63,6 +66,12 @@ class CreateNewEntryFragment : Fragment() {
     @BindView(R.id.entry_draft_switch)
     lateinit var draftSwitch: CheckBox
 
+    @BindView(R.id.entry_preview)
+    lateinit var previewButton: Button
+
+    @BindView(R.id.entry_submit)
+    lateinit var submitButton: Button
+
     private var previewShown = false
 
     private lateinit var activity: MainActivity
@@ -90,7 +99,22 @@ class CreateNewEntryFragment : Fragment() {
             populateUI()
         }
 
+        setupTheming(root)
+
         return root
+    }
+
+    private fun setupTheming(root: View) {
+        Scoop.getInstance().bind(this, TEXT_BLOCK, root, BackgroundNoAlphaAdapter())
+        Scoop.getInstance().bind(this, TEXT, titleInput, EditTextAdapter())
+        Scoop.getInstance().bind(this, TEXT_LINKS, titleInput, EditTextLineAdapter())
+        Scoop.getInstance().bind(this, TEXT_OFFTOP, titleInput, EditTextHintAdapter())
+        Scoop.getInstance().bind(this, TEXT, preview)
+        Scoop.getInstance().bind(this, TEXT_LINKS, preview, TextViewLinksAdapter())
+        Scoop.getInstance().bind(this, TEXT_LINKS, previewButton, TextViewColorAdapter())
+        Scoop.getInstance().bind(this, TEXT_LINKS, submitButton, TextViewColorAdapter())
+        Scoop.getInstance().bind(this, TEXT, draftSwitch, TextViewColorAdapter())
+        Scoop.getInstance().bind(this, TEXT_LINKS, draftSwitch, CheckBoxAdapter())
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

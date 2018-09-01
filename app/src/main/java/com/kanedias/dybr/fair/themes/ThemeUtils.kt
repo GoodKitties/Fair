@@ -17,16 +17,17 @@ import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import java.util.regex.Pattern
 
-const val TOOLBAR = 0
-const val STATUS_BAR = 1
-const val TOOLBAR_TEXT = 2
-const val ACCENT = 3
-const val BACKGROUND = 4
-const val DIVIDER = 5
-const val TEXT_BLOCK = 6
-const val TEXT = 7
-const val TEXT_HEADERS = 8
-const val TEXT_LINKS = 9
+const val TOOLBAR = 0       // top toolbar color
+const val STATUS_BAR = 1    // status bar color (a thin bar above toolbar)
+const val TOOLBAR_TEXT = 2  // toolbar title text
+const val ACCENT = 3        // floating button color
+const val BACKGROUND = 4    // background for main view
+const val DIVIDER = 5       // color of divider lines (between text and edit/delete buttons)
+const val TEXT_BLOCK = 6    // background for text cards
+const val TEXT = 7          // color of main text
+const val TEXT_HEADERS = 8  // color of entry titles
+const val TEXT_LINKS = 9    // color of links in text
+const val TEXT_OFFTOP = 10  // color of offtop and hints in text
 
 /**
  * Converts rgba string to standard color integer notation
@@ -134,6 +135,9 @@ fun updateColorBindings(design: Design) {
 
     // color of text on the cards
     design.data.colors?.text?.colorFromCss()?.let { Scoop.getInstance().update(TEXT, it) }
+
+    // color of offtop and hints in text
+    design.data.colors?.offtop?.colorFromCss()?.let { Scoop.getInstance().update(TEXT_OFFTOP, it) }
 
     // color of entry titles on the cards
     design.data.colors?.headers?.colorFromCss()?.let { Scoop.getInstance().update(TEXT_HEADERS, it) }
