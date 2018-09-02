@@ -30,7 +30,7 @@ import java.util.*
  * @see CommentListFragment.commentRibbon
  * @author Kanedias
  */
-class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
+class CommentViewHolder(iv: View, private val parent: View) : RecyclerView.ViewHolder(iv) {
 
     @BindView(R.id.comment_date)
     lateinit var dateView: TextView
@@ -48,17 +48,19 @@ class CommentViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
     init {
         ButterKnife.bind(this, iv)
-
-        // theming setup
-        Scoop.getInstance().bind(this, TEXT_BLOCK, iv, CardViewColorAdapter())
-        Scoop.getInstance().bind(this, TEXT, authorView)
-        Scoop.getInstance().bind(this, TEXT, dateView)
-        Scoop.getInstance().bind(this, TEXT, bodyView)
-        Scoop.getInstance().bind(this, TEXT_LINKS, bodyView, TextViewLinksAdapter())
-        buttons.forEach { Scoop.getInstance().bind(this, TEXT_LINKS, it) }
+        setupTheming()
 
         // make text selectable
         bodyView.isLongClickable = true
+    }
+
+    private fun setupTheming() {
+        Scoop.getInstance().bind(this, TEXT_BLOCK, itemView, parent, CardViewColorAdapter())
+        Scoop.getInstance().bind(this, TEXT, authorView, parent)
+        Scoop.getInstance().bind(this, TEXT, dateView, parent)
+        Scoop.getInstance().bind(this, TEXT, bodyView, parent)
+        Scoop.getInstance().bind(this, TEXT_LINKS, bodyView, parent, TextViewLinksAdapter())
+        buttons.forEach { Scoop.getInstance().bind(this, TEXT_LINKS, it) }
     }
 
     @OnClick(R.id.comment_edit)

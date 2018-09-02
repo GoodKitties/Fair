@@ -1,5 +1,6 @@
 package com.kanedias.dybr.fair.themes
 
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.support.design.widget.TabLayout
@@ -155,6 +156,7 @@ class EditTextHintAdapter: ColorAdapter<EditText> {
  * Don't make background transparent!
  */
 class BackgroundNoAlphaAdapter: ColorAdapter<View> {
+
     override fun applyColor(view: View, color: Int) {
         when {
             Color.alpha(color) < 255 -> view.setBackgroundColor(ColorUtils.setAlphaComponent(color, 255))
@@ -165,5 +167,43 @@ class BackgroundNoAlphaAdapter: ColorAdapter<View> {
     override fun getColor(view: View): Int {
         val bg = view.background
         return (bg as? ColorDrawable)?.color ?: Color.TRANSPARENT
+    }
+}
+
+class TabLayoutTextAdapter: ColorAdapter<TabLayout> {
+
+    override fun applyColor(view: TabLayout, color: Int) {
+        view.tabTextColors = ColorStateList(
+                arrayOf(
+                        intArrayOf(-android.R.attr.state_selected),
+                        intArrayOf()
+                ),
+                intArrayOf(
+                        ColorUtils.setAlphaComponent(color, 127),
+                        color
+                )
+        )
+    }
+
+    override fun getColor(view: TabLayout): Int {
+        return view.tabTextColors?.defaultColor ?: Color.TRANSPARENT
+    }
+}
+
+/**
+ * Current tab selection line adapter
+ */
+class TabLayoutLineAdapter: ColorAdapter<TabLayout> {
+
+    private var color = Color.TRANSPARENT
+
+    override fun applyColor(view: TabLayout, color: Int) {
+        this.color = color
+        view.setSelectedTabIndicatorColor(color)
+    }
+
+    override fun getColor(view: TabLayout): Int {
+        // can't retrieve it without resorting to reflection, ugh
+        return color
     }
 }

@@ -104,6 +104,16 @@ class CreateNewEntryFragment : Fragment() {
         return root
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Scoop.getInstance().addStyleLevel()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Scoop.getInstance().popStyleLevel(false)
+    }
+
     private fun setupTheming(root: View) {
         Scoop.getInstance().bind(this, TEXT_BLOCK, root, BackgroundNoAlphaAdapter())
         Scoop.getInstance().bind(this, TEXT, titleInput, EditTextAdapter())

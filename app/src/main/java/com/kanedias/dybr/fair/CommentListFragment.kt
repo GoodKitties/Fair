@@ -58,7 +58,7 @@ class CommentListFragment : Fragment() {
         activity = context as MainActivity
 
         ButterKnife.bind(this, view)
-        setupUI()
+        setupUI(view)
         refreshComments()
         return view
     }
@@ -68,7 +68,7 @@ class CommentListFragment : Fragment() {
         outState.putSerializable("entry", entry)
     }
 
-    private fun setupUI() {
+    private fun setupUI(view: View) {
         toolbar.title = entry?.title
         toolbar.navigationIcon = DrawerArrowDrawable(activity).apply { progress = 1.0f }
         toolbar.setNavigationOnClickListener { fragmentManager?.popBackStack() }
@@ -76,12 +76,12 @@ class CommentListFragment : Fragment() {
         refresher.setOnRefreshListener { refreshComments() }
         commentRibbon.layoutManager = LinearLayoutManager(activity)
 
-        setBlogTheme()
+        setBlogTheme(view)
     }
 
-    private fun setBlogTheme() {
+    private fun setBlogTheme(view: View) {
         // this is a fullscreen fragment, add new style
-        Scoop.getInstance().addStyleLevel()
+        Scoop.getInstance().addStyleLevel(view)
         Scoop.getInstance().bind(this, TOOLBAR, toolbar)
         Scoop.getInstance().bind(this, TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
         Scoop.getInstance().bind(this, TOOLBAR_TEXT, toolbar, ToolbarIconAdapter())
@@ -92,9 +92,9 @@ class CommentListFragment : Fragment() {
         entry?.blog?.get(entry?.document)?.let { applyTheme(it, activity) }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        Scoop.getInstance().popStyleLevel()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        Scoop.getInstance().popStyleLevel(false)
     }
 
     fun refreshComments() {
@@ -170,10 +170,10 @@ class CommentListFragment : Fragment() {
             val inflater = LayoutInflater.from(activity)
             return if (viewType == TYPE_ENTRY) {
                 val view = inflater.inflate(R.layout.fragment_entry_list_item, parent, false)
-                EntryViewHolder(view, allowSelection = true)
+                EntryViewHolder(view, parent as View, allowSelection = true)
             } else {
                 val view = inflater.inflate(R.layout.fragment_comment_list_item, parent, false)
-                CommentViewHolder(view)
+                CommentViewHolder(view, parent as View)
             }
         }
 

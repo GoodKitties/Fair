@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
+import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.dto.*
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
@@ -184,7 +185,7 @@ open class EntryListFragment: Fragment() {
             return when (viewType) {
                 REGULAR_POST -> {
                     val view = inflater.inflate(R.layout.fragment_entry_list_item, parent, false)
-                    EntryViewHolder(view)
+                    EntryViewHolder(view, parent as View)
                 }
                 LOAD_MORE -> {
                     val pbar = inflater.inflate(R.layout.view_load_more, parent, false)

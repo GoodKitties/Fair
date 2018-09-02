@@ -32,11 +32,13 @@ import butterknife.BindView
 import butterknife.OnClick
 import butterknife.ButterKnife
 import com.afollestad.materialdialogs.MaterialDialog
+import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.database.entities.Account
 import com.kanedias.dybr.fair.database.entities.SearchGotoInfo
 import com.kanedias.dybr.fair.database.entities.SearchGotoInfo.*
 import com.kanedias.dybr.fair.dto.*
+import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.Sidebar
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
@@ -154,6 +156,16 @@ class MainActivity : AppCompatActivity() {
             drawer.openDrawer(GravityCompat.START)
             preferences.edit().putBoolean("first-app-launch", false).apply()
         }
+
+        setupTheming()
+    }
+
+    private fun setupTheming() {
+        Scoop.getInstance().bind(this, TOOLBAR, toolbar)
+        Scoop.getInstance().bind(this, TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
+        Scoop.getInstance().bind(this, TOOLBAR, tabs)
+        Scoop.getInstance().bind(this, TOOLBAR_TEXT, tabs, TabLayoutTextAdapter())
+        Scoop.getInstance().bind(this, ACCENT, tabs, TabLayoutLineAdapter())
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

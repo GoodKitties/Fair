@@ -34,7 +34,7 @@ import com.kanedias.dybr.fair.themes.*
  * @see EntryListFragment.entryRibbon
  * @author Kanedias
  */
-class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : RecyclerView.ViewHolder(iv) {
+class EntryViewHolder(iv: View, private val parent: View, private val allowSelection: Boolean = false) : RecyclerView.ViewHolder(iv) {
 
     @BindView(R.id.entry_author)
     lateinit var authorView: TextView
@@ -86,21 +86,23 @@ class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : R
 
     init {
         ButterKnife.bind(this, iv)
-
-        // theming setup
-        Scoop.getInstance().bind(this, TEXT_BLOCK, iv, CardViewColorAdapter())
-        Scoop.getInstance().bind(this, TEXT_HEADERS, titleView)
-        Scoop.getInstance().bind(this, TEXT, authorView)
-        Scoop.getInstance().bind(this, TEXT, dateView)
-        Scoop.getInstance().bind(this, TEXT, bodyView)
-        Scoop.getInstance().bind(this, TEXT_LINKS, bodyView, TextViewLinksAdapter())
-        Scoop.getInstance().bind(this, DIVIDER, divider)
-        (buttons + indicators + participants + comments).forEach { Scoop.getInstance().bind(this, TEXT_LINKS, it) }
+        setupTheming()
 
         iv.setOnClickListener(commentShow)
         if (allowSelection) {
             bodyView.isLongClickable = true
         }
+    }
+
+    private fun setupTheming() {
+        Scoop.getInstance().bind(this, TEXT_BLOCK, itemView, parent, CardViewColorAdapter())
+        Scoop.getInstance().bind(this, TEXT_HEADERS, titleView, parent)
+        Scoop.getInstance().bind(this, TEXT, authorView, parent)
+        Scoop.getInstance().bind(this, TEXT, dateView, parent)
+        Scoop.getInstance().bind(this, TEXT, bodyView, parent)
+        Scoop.getInstance().bind(this, TEXT_LINKS, bodyView, parent, TextViewLinksAdapter())
+        Scoop.getInstance().bind(this, DIVIDER, divider, parent)
+        (buttons + indicators + participants + comments).forEach { Scoop.getInstance().bind(this, TEXT_LINKS, it, parent) }
     }
 
     @OnClick(R.id.entry_edit)
