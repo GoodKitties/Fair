@@ -47,7 +47,7 @@ data class DesignStyle(
  * Example:
  * ```
  * "layout": {
- *     "align": 2,
+ *     "align": "left,
  *     "blocks": true,
  *     "epigraph": true,
  *     "layout": 1,
@@ -56,7 +56,7 @@ data class DesignStyle(
  * ```
  */
 data class DesignLayout(
-        val align: Int?, // 1 - left, 2 - center, 3 - right
+        val align: String?, // left, center, right
         val blocks: Boolean?,
         val epigraph: Boolean?,
         val layout: Int?, // 1 - one column, 2 - two column left menu,  3 - two column right menu
