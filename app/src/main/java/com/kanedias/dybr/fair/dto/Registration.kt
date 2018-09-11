@@ -127,6 +127,7 @@ class RegisterResponse : Resource() {
     /**
      * Available when requested with `include=profiles`
      */
+    @field:Json(name = "profiles")
     var profiles = HasMany<OwnProfile>()
 }
 

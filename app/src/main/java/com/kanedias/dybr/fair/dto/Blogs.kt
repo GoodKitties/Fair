@@ -48,6 +48,11 @@ class BlogCreateRequest : Resource() {
     @field:Json(name = "title")
     lateinit var title: String
 
+
+    /**
+     * Profile for new blog to be linked to
+     */
+    @field:Json(name = "profile")
     var profile = HasOne<OwnProfile>()
 }
 
@@ -120,11 +125,13 @@ class BlogResponse : Resource() {
     /**
      * Profile this blog belongs to
      */
+    @field:Json(name = "profile")
     var profile = HasOne<OwnProfile>()
 
     /**
      * Comments related to this blog. This is link relation, thus One-to-One.
      */
+    @field:Json(name = "comments")
     var comments = HasOne<Comment>()
 }
 

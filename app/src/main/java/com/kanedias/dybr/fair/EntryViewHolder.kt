@@ -25,6 +25,7 @@ import java.util.*
 import android.content.ComponentName
 import android.content.pm.PackageManager
 import com.ftinc.scoop.Scoop
+import com.kanedias.dybr.fair.dto.EntryMeta
 import com.kanedias.dybr.fair.themes.*
 
 /**
@@ -250,9 +251,9 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         toggleEditButtons(editable)
 
         // setup bottom row of metadata buttons
-        val metadata = Network.bufferToMap(entry.meta)
-        metadata["comments"]?.let { comments.text = it }
-        metadata["commenters"]?.let { participants.text = it }
+        val metadata = Network.bufferToObject<EntryMeta>(entry.meta)
+        metadata?.let { comments.text = it.comments.toString() }
+        metadata?.let { participants.text = it.commenters.toString() }
 
         bodyView.handleMarkdown(entry.content)
     }

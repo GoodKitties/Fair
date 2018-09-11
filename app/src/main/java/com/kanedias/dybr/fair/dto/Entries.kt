@@ -60,6 +60,7 @@ class EntryCreateRequest : Resource() {
      * Blog that this entry belongs to.
      * Must be set if it's new entry.
      */
+    @field:Json(name = "blog")
     var blog: HasOne<Blog>? = null
 }
 
@@ -154,7 +155,17 @@ class EntryResponse: Resource() {
     /**
      * Comments of this entry. This is link relationship, thus One-to-One
      */
+    @field:Json(name = "comments")
     var comments = HasOne<Comment>()
+}
+
+/**
+ * Metadata of the retrieved entity. Contains info about properties not directly related to the entry
+ * e.g. number of comments and commenting participants
+ */
+class EntryMeta {
+    var commenters = 0
+    var comments = 0
 }
 
 typealias Entry = EntryResponse

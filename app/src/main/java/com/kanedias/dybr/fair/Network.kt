@@ -279,17 +279,16 @@ object Network {
     }
 
     /**
-     * Converts links/metadata json buffer object from document to map string<->string
+     * Converts links/metadata json buffer from document to object
      * @param buffer Json-API buffer containing map-like structure
      * @return string<->string map or empty if buffer is null
      */
-    fun bufferToMap(buffer: JsonBuffer<Any>?): Map<String, String> {
+    inline fun <reified T> bufferToObject(buffer: JsonBuffer<Any>?): T? {
         if (buffer == null)
-            return emptyMap()
+            return null
 
-        val mapType = Types.newParameterizedType(Map::class.java, String::class.java, String::class.java)
-        val mapAdapter = Moshi.Builder().build().adapter<Map<String, String>>(mapType)
-        return buffer.get<Map<String, String>>(mapAdapter) as Map<String, String>
+        val mapAdapter = Moshi.Builder().build().adapter<T>(T::class.java)
+        return buffer.get<T>(mapAdapter)
     }
 
     /**

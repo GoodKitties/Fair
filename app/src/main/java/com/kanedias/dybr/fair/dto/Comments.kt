@@ -44,16 +44,19 @@ class CreateCommentRequest: Resource() {
     /**
      * Content of this comment. Represented in HTML format
      */
+    @field:Json(name = "content")
     lateinit var content: String
 
     /**
      * Entry for which this comment is being created for
      */
+    @field:Json(name = "entry")
     var entry : HasOne<Entry>? = null
 
     /**
      * Profile this comment is being created with
      */
+    @field:Json(name = "profile")
     var profile : HasOne<OwnProfile>? = null
 }
 
@@ -110,6 +113,7 @@ class CommentResponse: Resource() {
     /**
      * Text of this comment in HTML format
      */
+    @field:Json(name = "content")
     lateinit var content: String
 
     /**
@@ -128,16 +132,19 @@ class CommentResponse: Resource() {
     /**
      * Blog this comment was posted in
      */
+    @field:Json(name = "blog")
     val blog = HasOne<Blog>()
 
     /**
      * Entry this comment was posted for
      */
+    @field:Json(name = "entry")
     val entry = HasOne<Entry>()
 
     /**
      * Profile this comment was posted by
      */
+    @field:Json(name = "profile")
     val profile = HasOne<OwnProfile>()
 }
 
