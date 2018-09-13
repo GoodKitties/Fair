@@ -18,7 +18,7 @@ import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.database.entities.OfflineDraft
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
-import com.kanedias.dybr.fair.ui.md.handleMarkdown
+import com.kanedias.dybr.fair.ui.md.handleMarkdownRaw
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
@@ -143,7 +143,7 @@ class CreateNewCommentFragment : Fragment() {
 
         if (previewShown) {
             //preview.setBackgroundResource(R.drawable.white_border_line) // set border when previewing
-            preview.handleMarkdown(contentInput.text.toString())
+            preview.handleMarkdownRaw(contentInput.text.toString())
             previewSwitcher.showNext()
         } else {
             previewSwitcher.showPrevious()

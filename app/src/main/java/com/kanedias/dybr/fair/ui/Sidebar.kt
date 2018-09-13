@@ -94,7 +94,7 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
         fragManager.beginTransaction()
                 .addToBackStack("Showing account fragment")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .replace(R.id.main_drawer_layout, AddAccountFragment())
+                .add(R.id.main_drawer_layout, AddAccountFragment())
                 .commit()
     }
 

@@ -235,7 +235,7 @@ class MainActivity : AppCompatActivity() {
                                 supportFragmentManager.beginTransaction()
                                         .addToBackStack("Showing search-requested address")
                                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                                        .replace(R.id.main_drawer_layout, fragment)
+                                        .add(R.id.main_drawer_layout, fragment)
                                         .commit()
                             }
                         }
@@ -406,7 +406,7 @@ class MainActivity : AppCompatActivity() {
                     supportFragmentManager.beginTransaction()
                             .addToBackStack("Showing intent-requested address")
                             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                            .replace(R.id.main_drawer_layout, fragment)
+                            .add(R.id.main_drawer_layout, fragment)
                             .commit()
                 }
                 "profile" -> {
@@ -488,7 +488,7 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.beginTransaction()
                 .addToBackStack("Showing profile creation fragment")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .replace(R.id.main_drawer_layout, AddProfileFragment())
+                .add(R.id.main_drawer_layout, AddProfileFragment())
                 .commit()
     }
 
@@ -499,7 +499,7 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.beginTransaction()
                 .addToBackStack("Showing blog creation fragment")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .replace(R.id.main_drawer_layout, AddBlogFragment())
+                .add(R.id.main_drawer_layout, AddBlogFragment())
                 .commit()
     }
 

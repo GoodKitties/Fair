@@ -117,7 +117,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         activity.supportFragmentManager.beginTransaction()
                 .addToBackStack("Showing entry edit fragment")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .replace(R.id.main_drawer_layout, entryEdit)
+                .add(R.id.main_drawer_layout, entryEdit)
                 .commit()
     }
 

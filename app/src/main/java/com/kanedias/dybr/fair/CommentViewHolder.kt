@@ -60,7 +60,7 @@ class CommentViewHolder(iv: View, private val parent: View) : RecyclerView.ViewH
         Scoop.getInstance().bind(this, TEXT, dateView, parent)
         Scoop.getInstance().bind(this, TEXT, bodyView, parent)
         Scoop.getInstance().bind(this, TEXT_LINKS, bodyView, parent, TextViewLinksAdapter())
-        buttons.forEach { Scoop.getInstance().bind(this, TEXT_LINKS, it) }
+        buttons.forEach { Scoop.getInstance().bind(this, TEXT_LINKS, it, parent) }
     }
 
     @OnClick(R.id.comment_edit)
@@ -74,7 +74,7 @@ class CommentViewHolder(iv: View, private val parent: View) : RecyclerView.ViewH
         activity.supportFragmentManager.beginTransaction()
                 .addToBackStack("Showing comment edit fragment")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .replace(R.id.main_drawer_layout, commentEdit)
+                .add(R.id.main_drawer_layout, commentEdit)
                 .commit()
     }
 
