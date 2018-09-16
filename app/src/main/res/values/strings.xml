@@ -183,4 +183,7 @@
     <string name="from_profile_favorites">From profile favorites</string>
     <string name="from_saved_searches">From saved searches</string>
     <string name="not_found">Not found</string>
+    <string name="auto_load_images">Auto-load images</string>
+    <string name="auto_load_images_on">Images will be auto-loaded immediately</string>
+    <string name="auto_load_images_off">Images will be only loaded on demand</string>
 </resources>

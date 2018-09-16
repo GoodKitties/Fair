@@ -147,6 +147,22 @@ open class EntryListFragment: Fragment() {
         }
     }
 
+    /**
+     * Create new entry in current blog. Shows fragment over the main content allowing to enter the
+     * title and the text with an editor.
+     */
+    fun addCreateNewEntryForm() {
+        val entryAdd = CreateNewEntryFragment().apply {
+            this.blog = this@EntryListFragment.blog!! // at this point we know we have the blog
+        }
+
+        fragmentManager!!.beginTransaction()
+                .addToBackStack("Showing entry add fragment")
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .add(R.id.main_drawer_layout, entryAdd)
+                .commit()
+    }
+
     inner class EntryListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         private val REGULAR_POST = 0
@@ -209,22 +225,6 @@ open class EntryListFragment: Fragment() {
             // we have something in the view already
             return entries.size + 1
         }
-    }
-
-    /**
-     * Create new entry in current blog. Shows fragment over the main content allowing to enter the
-     * title and the text with an editor.
-     */
-    fun addCreateNewEntryForm() {
-        val entryAdd = CreateNewEntryFragment().apply {
-            this.blog = this@EntryListFragment.blog!! // at this point we know we have the blog
-        }
-
-        fragmentManager!!.beginTransaction()
-                .addToBackStack("Showing entry add fragment")
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .add(R.id.main_drawer_layout, entryAdd)
-                .commit()
     }
 
 }
