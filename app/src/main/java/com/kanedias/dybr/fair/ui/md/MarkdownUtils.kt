@@ -21,16 +21,12 @@ import com.kanedias.dybr.fair.R
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
-import okhttp3.HttpUrl
-import okhttp3.MediaType
 import ru.noties.markwon.Markwon
 import ru.noties.markwon.SpannableConfiguration
 import ru.noties.markwon.spans.AsyncDrawable
 import ru.noties.markwon.spans.AsyncDrawableSpan
 import java.io.IOException
 import java.net.URI
-
-val CONTENT_TYPE_GIF = MediaType.parse("image/gif")
 
 /**
  * Perform all necessary steps to view Markdown in this text view.
@@ -65,7 +61,7 @@ infix fun TextView.handleMarkdown(html: String) {
 fun postProcessSpans(view: TextView, spanned: SpannableStringBuilder) {
     val prefs = PreferenceManager.getDefaultSharedPreferences(view.context)
 
-    if (!prefs.getBoolean("auto-load-images", false)) {
+    if (!prefs.getBoolean("auto-load-images", true)) {
         postProcessDrawables(spanned, view)
     }
     postProcessMore(spanned, view)

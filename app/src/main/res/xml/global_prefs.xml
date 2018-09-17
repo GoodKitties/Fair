@@ -20,7 +20,7 @@
     <CheckBoxPreference
         android:icon="@drawable/image"
         android:key="auto-load-images"
-        android:defaultValue="false"
+        android:defaultValue="true"
         android:title="@string/auto_load_images"
         android:summaryOn="@string/auto_load_images_on"
         android:summaryOff="@string/auto_load_images_off"/>

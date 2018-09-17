@@ -62,13 +62,13 @@ android {
             enable true
             reset()
             include 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
-            universalApk true
+            universalApk false
         }
     }
 
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
-            def versionCodes = ["universal": 0, "armeabi-v7a": 1, "mips": 2, "arm64-v8a": 3, "x86": 4, "x86_64": 5]
+            def versionCodes = ["universal": 0, "armeabi-v7a": 1, "arm64-v8a": 2, "x86": 3, "x86_64": 4]
             int abiVersionCode = versionCodes.get(output.getFilter(com.android.build.OutputFile.ABI) ?: "universal")
             output.versionCodeOverride = abiVersionCode + android.defaultConfig.versionCode * 10
         }
@@ -99,7 +99,7 @@ dependencies {
     implementation 'moe.banana:moshi-jsonapi:3.5.0'                             // JSON-API parser
     implementation 'com.squareup.moshi:moshi-kotlin:1.6.0'                      // Moshi Kotlin support
     implementation 'com.squareup.moshi:moshi-adapters:1.6.0'                    // Moshi serializers collection
-    implementation 'ru.noties:markwon:2.0.0-SNAPSHOT'                           // markdown rendering
+    implementation 'ru.noties:markwon:2.0.0'                                    // markdown rendering
     //implementation 'com.github.clans:fab:1.6.4'                               // Floating action button with menu
     implementation "com.github.bumptech.glide:okhttp3-integration:4.8.0"
     implementation "com.github.bumptech.glide:glide:4.8.0"                      // image processing/caching lib
