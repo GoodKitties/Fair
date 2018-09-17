@@ -108,11 +108,11 @@ class CreateNewCommentFragment : Fragment() {
     }
 
     private fun setupTheming(root: View) {
-        Scoop.getInstance().bind(this, TEXT_BLOCK, root, BackgroundNoAlphaAdapter())
-        Scoop.getInstance().bind(this, TEXT, preview)
-        Scoop.getInstance().bind(this, TEXT_LINKS, preview, TextViewLinksAdapter())
-        Scoop.getInstance().bind(this, TEXT_LINKS, previewButton, TextViewColorAdapter())
-        Scoop.getInstance().bind(this, TEXT_LINKS, submitButton, TextViewColorAdapter())
+        Scoop.getInstance().bind(TEXT_BLOCK, root, BackgroundNoAlphaAdapter())
+        Scoop.getInstance().bind(TEXT, preview)
+        Scoop.getInstance().bind(TEXT_LINKS, preview, TextViewLinksAdapter())
+        Scoop.getInstance().bind(TEXT_LINKS, previewButton, TextViewColorAdapter())
+        Scoop.getInstance().bind(TEXT_LINKS, submitButton, TextViewColorAdapter())
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

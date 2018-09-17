@@ -55,12 +55,12 @@ class CommentViewHolder(iv: View, private val parent: View) : RecyclerView.ViewH
     }
 
     private fun setupTheming() {
-        Scoop.getInstance().bind(this, TEXT_BLOCK, itemView, parent, CardViewColorAdapter())
-        Scoop.getInstance().bind(this, TEXT, authorView, parent)
-        Scoop.getInstance().bind(this, TEXT, dateView, parent)
-        Scoop.getInstance().bind(this, TEXT, bodyView, parent)
-        Scoop.getInstance().bind(this, TEXT_LINKS, bodyView, parent, TextViewLinksAdapter())
-        buttons.forEach { Scoop.getInstance().bind(this, TEXT_LINKS, it, parent) }
+        Scoop.getInstance().bind(TEXT_BLOCK, itemView, parent, CardViewColorAdapter())
+        Scoop.getInstance().bind(TEXT, authorView, parent)
+        Scoop.getInstance().bind(TEXT, dateView, parent)
+        Scoop.getInstance().bind(TEXT, bodyView, parent)
+        Scoop.getInstance().bind(TEXT_LINKS, bodyView, parent, TextViewLinksAdapter())
+        buttons.forEach { Scoop.getInstance().bind(TEXT_LINKS, it, parent) }
     }
 
     @OnClick(R.id.comment_edit)

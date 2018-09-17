@@ -115,16 +115,16 @@ class CreateNewEntryFragment : Fragment() {
     }
 
     private fun setupTheming(root: View) {
-        Scoop.getInstance().bind(this, TEXT_BLOCK, root, BackgroundNoAlphaAdapter())
-        Scoop.getInstance().bind(this, TEXT, titleInput, EditTextAdapter())
-        Scoop.getInstance().bind(this, TEXT_LINKS, titleInput, EditTextLineAdapter())
-        Scoop.getInstance().bind(this, TEXT_OFFTOP, titleInput, EditTextHintAdapter())
-        Scoop.getInstance().bind(this, TEXT, preview)
-        Scoop.getInstance().bind(this, TEXT_LINKS, preview, TextViewLinksAdapter())
-        Scoop.getInstance().bind(this, TEXT_LINKS, previewButton, TextViewColorAdapter())
-        Scoop.getInstance().bind(this, TEXT_LINKS, submitButton, TextViewColorAdapter())
-        Scoop.getInstance().bind(this, TEXT, draftSwitch, TextViewColorAdapter())
-        Scoop.getInstance().bind(this, TEXT_LINKS, draftSwitch, CheckBoxAdapter())
+        Scoop.getInstance().bind(TEXT_BLOCK, root, BackgroundNoAlphaAdapter())
+        Scoop.getInstance().bind(TEXT, titleInput, EditTextAdapter())
+        Scoop.getInstance().bind(TEXT_LINKS, titleInput, EditTextLineAdapter())
+        Scoop.getInstance().bind(TEXT_OFFTOP, titleInput, EditTextHintAdapter())
+        Scoop.getInstance().bind(TEXT, preview)
+        Scoop.getInstance().bind(TEXT_LINKS, preview, TextViewLinksAdapter())
+        Scoop.getInstance().bind(TEXT_LINKS, previewButton, TextViewColorAdapter())
+        Scoop.getInstance().bind(TEXT_LINKS, submitButton, TextViewColorAdapter())
+        Scoop.getInstance().bind(TEXT, draftSwitch, TextViewColorAdapter())
+        Scoop.getInstance().bind(TEXT_LINKS, draftSwitch, CheckBoxAdapter())
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

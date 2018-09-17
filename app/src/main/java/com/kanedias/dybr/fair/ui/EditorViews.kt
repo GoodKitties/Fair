@@ -86,16 +86,16 @@ class EditorViews : Fragment() {
 
     private fun setupTheming() {
         for (idx in 0 until buttonArea.childCount) {
-            Scoop.getInstance().bind(this, TEXT_LINKS, buttonArea.getChildAt(idx))
+            Scoop.getInstance().bind(TEXT_LINKS, buttonArea.getChildAt(idx))
         }
-        Scoop.getInstance().bind(this, TEXT, clipboardSwitch, TextViewColorAdapter())
-        Scoop.getInstance().bind(this, TEXT_LINKS, clipboardSwitch, CheckBoxAdapter())
-        Scoop.getInstance().bind(this, DIVIDER, topDivider)
-        Scoop.getInstance().bind(this, TEXT, contentInput, EditTextAdapter())
-        Scoop.getInstance().bind(this, TEXT_LINKS, contentInput, EditTextLineAdapter())
-        Scoop.getInstance().bind(this, TEXT_OFFTOP, contentInput, EditTextHintAdapter())
-        Scoop.getInstance().bind(this, TEXT, mdLabel)
-        Scoop.getInstance().bind(this, TEXT_LINKS, mdLabel, TextViewLinksAdapter())
+        Scoop.getInstance().bind(TEXT, clipboardSwitch, TextViewColorAdapter())
+        Scoop.getInstance().bind(TEXT_LINKS, clipboardSwitch, CheckBoxAdapter())
+        Scoop.getInstance().bind(DIVIDER, topDivider)
+        Scoop.getInstance().bind(TEXT, contentInput, EditTextAdapter())
+        Scoop.getInstance().bind(TEXT_LINKS, contentInput, EditTextLineAdapter())
+        Scoop.getInstance().bind(TEXT_OFFTOP, contentInput, EditTextHintAdapter())
+        Scoop.getInstance().bind(TEXT, mdLabel)
+        Scoop.getInstance().bind(TEXT_LINKS, mdLabel, TextViewLinksAdapter())
     }
 
     /**

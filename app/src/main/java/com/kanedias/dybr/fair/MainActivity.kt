@@ -161,11 +161,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupTheming() {
-        Scoop.getInstance().bind(this, TOOLBAR, toolbar)
-        Scoop.getInstance().bind(this, TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
-        Scoop.getInstance().bind(this, TOOLBAR, tabs)
-        Scoop.getInstance().bind(this, TOOLBAR_TEXT, tabs, TabLayoutTextAdapter())
-        Scoop.getInstance().bind(this, ACCENT, tabs, TabLayoutLineAdapter())
+        Scoop.getInstance().bind(TOOLBAR, toolbar)
+        Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
+        Scoop.getInstance().bind(TOOLBAR, tabs)
+        Scoop.getInstance().bind(TOOLBAR_TEXT, tabs, TabLayoutTextAdapter())
+        Scoop.getInstance().bind(ACCENT, tabs, TabLayoutLineAdapter())
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

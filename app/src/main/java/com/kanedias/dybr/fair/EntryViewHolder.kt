@@ -96,14 +96,14 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     }
 
     private fun setupTheming() {
-        Scoop.getInstance().bind(this, TEXT_BLOCK, itemView, parent, CardViewColorAdapter())
-        Scoop.getInstance().bind(this, TEXT_HEADERS, titleView, parent)
-        Scoop.getInstance().bind(this, TEXT, authorView, parent)
-        Scoop.getInstance().bind(this, TEXT, dateView, parent)
-        Scoop.getInstance().bind(this, TEXT, bodyView, parent)
-        Scoop.getInstance().bind(this, TEXT_LINKS, bodyView, parent, TextViewLinksAdapter())
-        Scoop.getInstance().bind(this, DIVIDER, divider, parent)
-        (buttons + indicators + participants + comments).forEach { Scoop.getInstance().bind(this, TEXT_LINKS, it, parent) }
+        Scoop.getInstance().bind(TEXT_BLOCK, itemView, parent, CardViewColorAdapter())
+        Scoop.getInstance().bind(TEXT_HEADERS, titleView, parent)
+        Scoop.getInstance().bind(TEXT, authorView, parent)
+        Scoop.getInstance().bind(TEXT, dateView, parent)
+        Scoop.getInstance().bind(TEXT, bodyView, parent)
+        Scoop.getInstance().bind(TEXT_LINKS, bodyView, parent, TextViewLinksAdapter())
+        Scoop.getInstance().bind(DIVIDER, divider, parent)
+        (buttons + indicators + participants + comments).forEach { Scoop.getInstance().bind(TEXT_LINKS, it, parent) }
     }
 
     @OnClick(R.id.entry_edit)
