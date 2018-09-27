@@ -456,8 +456,8 @@ object Network {
     }
 
     /**
-     * Load one particular blog by id
-     * @param slug slug of requested entry
+     * Load one particular blog by id, with profile
+     * @param id id of requested blog
      */
     fun loadBlog(id: String): Blog {
         val req = Request.Builder().url("$BLOGS_ENDPOINT/$id/?include=profile").build()
@@ -492,8 +492,8 @@ object Network {
     }
 
     /**
-     * Load one particular blog by slug
-     * @param slug slug of requested entry
+     * Load one particular blog by slug, with profile
+     * @param slug slug of requested blog
      */
     fun loadBlogBySlug(slug: String): Blog {
         val req = Request.Builder().url("$BLOGS_ENDPOINT?filters[slug]=$slug&include=profile").build()
@@ -524,16 +524,17 @@ object Network {
                 if (favProfiles.isNullOrBlank()) {
                     HttpUrl.parse(ENTRIES_ENDPOINT)!!.newBuilder()
                             .addQueryParameter("filters[profile_id]", "0")
-                            .build()
                 } else {
                     HttpUrl.parse(ENTRIES_ENDPOINT)!!.newBuilder()
                             .addQueryParameter("filters[profile_id]", favProfiles)
-                            .build()
                 }
             }
-            Auth.worldMarker -> HttpUrl.parse(ENTRIES_ENDPOINT)
-            else -> HttpUrl.parse("$BLOGS_ENDPOINT/${blog.id}/entries")
-        }!!.newBuilder()
+
+            Auth.worldMarker -> HttpUrl.parse(ENTRIES_ENDPOINT)!!.newBuilder()
+                    .addQueryParameter("filters[feed]", "1")
+
+            else -> HttpUrl.parse("$BLOGS_ENDPOINT/${blog.id}/entries")!!.newBuilder()
+        }
 
         builder.addQueryParameter("sort", "-created-at")
                 .addQueryParameter("page[number]", pageNum.toString())
@@ -661,6 +662,13 @@ object Network {
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
             throw extractErrors(resp)
+    }
+
+    /**
+     * Load notifications for current profile
+     */
+    fun loadNotifications() : List<Notification> {
+        return emptyList()
     }
 
     fun confirmRegistration(emailToConfirm: String, tokenFromMail: String): LoginResponse {

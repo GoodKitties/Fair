@@ -1,6 +1,7 @@
 package com.kanedias.dybr.fair
 
 import android.app.FragmentTransaction
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.support.v4.app.Fragment
@@ -157,7 +158,10 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     @OnClick(R.id.entry_more_options)
     fun showOverflowMenu() {
         val ctx = itemView.context
-        val items = listOf(ctx.getString(R.string.show_web_version))
+        val items = listOf(
+                ctx.getString(R.string.open_in_browser),
+                ctx.getString(R.string.share)
+                )
 
         MaterialDialog.Builder(itemView.context)
                 .title(R.string.entry_menu)
@@ -165,8 +169,24 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
                 .itemsCallback { _, _, position, _ ->
                     when (position) {
                         0 -> showInWebView()
+                        1 -> sharePost()
                     }
                 }.show()
+    }
+
+    private fun sharePost() {
+        val ctx = itemView.context
+        val blog = entry.blog.get(entry.document) ?: return
+
+        try {
+            val intent = Intent(Intent.ACTION_SEND)
+            intent.type = "text/plain"
+            intent.putExtra(Intent.EXTRA_TEXT, "https://dybr.ru/blog/${blog.slug}/${entry.id}")
+            ctx.startActivity(Intent.createChooser(intent, ctx.getString(R.string.share_link_using)))
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(ctx, R.string.no_browser_found, Toast.LENGTH_SHORT).show()
+        }
+
     }
 
     @OnClick(R.id.entry_author)
