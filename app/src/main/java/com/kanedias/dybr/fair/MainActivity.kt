@@ -347,7 +347,7 @@ class MainActivity : AppCompatActivity() {
 
                 if (Auth.user.lastProfileId == null) {
                     // first time we're loading this account, select profile
-                    selectProfile()
+                    startProfileSelector()
                 } else {
                     // we already have loaded profile
                     // all went well, report if we should
@@ -441,7 +441,7 @@ class MainActivity : AppCompatActivity() {
      *
      * @param showIfOne whether to show dialog if only one profile is available
      */
-    suspend fun selectProfile(showIfOne: Boolean = false) {
+    suspend fun startProfileSelector(showIfOne: Boolean = false) {
         // retrieve profiles from server
         val profiles = async { Network.loadUserProfiles() }.await()
 
@@ -479,6 +479,18 @@ class MainActivity : AppCompatActivity() {
                 .onPositive { _, _ -> addProfile() }
                 .show()
         profAdapter.toDismiss = dialog
+    }
+
+    /**
+     * Called when user selects profile from a dialog
+     */
+    private fun selectProfile(prof: OwnProfile) {
+        // need to retrieve selected profile fully, i.e. with favorites and stuff
+        launch(UI) {
+            val fullProf = async { Network.loadProfile(prof.id) }.await()
+            Auth.updateCurrentProfile(fullProf)
+            refresh()
+        }
     }
 
     /**
@@ -560,7 +572,7 @@ class MainActivity : AppCompatActivity() {
     private fun refreshTabs() {
         tabAdapter.apply {
             account = Auth.user
-            blog = Auth.blog
+            blog = Auth.blog ?: Auth.emptyBlogMarker
         }
         tabAdapter.notifyDataSetChanged()
     }
@@ -678,9 +690,8 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 itemView.setOnClickListener {
-                    Auth.updateCurrentProfile(prof)
+                    selectProfile(prof)
                     toDismiss.dismiss()
-                    refresh()
                 }
             }
         }

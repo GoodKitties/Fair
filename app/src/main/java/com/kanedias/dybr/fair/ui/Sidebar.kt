@@ -238,7 +238,7 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
 
                 try {
                     // force profile selection even if we only have one
-                    activity.selectProfile(true)
+                    activity.startProfileSelector(true)
                     drawer.closeDrawers()
                 } catch (ex: Exception) {
                     Network.reportErrors(activity, ex)

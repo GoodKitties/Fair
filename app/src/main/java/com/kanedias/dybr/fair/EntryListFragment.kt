@@ -13,7 +13,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
-import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.dto.*
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
@@ -44,7 +43,10 @@ open class EntryListFragment: Fragment() {
     lateinit var activity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        savedInstanceState?.get("blog")?.let { blog = it as Blog }
+        if (blog == null) {
+            // restore only if we are recreating old fragment
+            savedInstanceState?.get("blog")?.let { blog = it as Blog }
+        }
 
         val view = inflater.inflate(layoutToUse(), container, false)
         activity = context as MainActivity
@@ -97,6 +99,12 @@ open class EntryListFragment: Fragment() {
     fun refreshEntries(reset: Boolean = false) {
         if (blog == null) { // we don't have a blog, just show empty list
             refresher.isRefreshing = false
+            return
+        }
+
+        if (blog === Auth.emptyBlogMarker) {
+            // profile doesn't have a blog yet, ask to create
+            entryRibbon.adapter = EmptyBlogAdapter()
             return
         }
 
@@ -163,6 +171,29 @@ open class EntryListFragment: Fragment() {
                 .commit()
     }
 
+    /**
+     * Adapter for showing "create blog" button if selected profile doesn't yet have a blog
+     */
+    inner class EmptyBlogAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+            val inflater = LayoutInflater.from(activity)
+            val view = inflater.inflate(R.layout.fragment_entry_list_no_blog_item, parent, false)
+            return object: RecyclerView.ViewHolder(view) {}
+        }
+
+        override fun getItemCount() = 1
+
+        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+            holder.itemView.setOnClickListener { activity.createBlog() }
+        }
+
+    }
+
+    /**
+     * Main adapter of this fragment's recycler view. Shows posts in the blog and handles
+     * refreshing and page loading.
+     */
     inner class EntryListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         private val REGULAR_POST = 0

@@ -151,7 +151,7 @@ class AddAccountFragment : Fragment() {
                 async { Network.login(acc) }.await()
 
                 Toast.makeText(activity, R.string.login_successful, Toast.LENGTH_SHORT).show()
-                activity.selectProfile() // shows profile selection dialog
+                activity.startProfileSelector() // shows profile selection dialog
 
                 //we logged in successfully, return to main activity
                 DbProvider.helper.accDao.create(acc)
