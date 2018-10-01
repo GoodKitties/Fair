@@ -667,8 +667,17 @@ object Network {
     /**
      * Load notifications for current profile
      */
-    fun loadNotifications() : List<Notification> {
-        return emptyList()
+    fun loadNotifications(prof: OwnProfile) : List<Notification> {
+        val url = HttpUrl.parse("$PROFILES_ENDPOINT/${prof.id}/relationships/notifications/")
+
+        val req = Request.Builder().url(url).build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful) {
+            throw HttpException(resp)
+        }
+
+        // response is returned after execute call, body is not null
+        return fromWrappedListJson(resp.body()!!.source(), Notification::class.java)
     }
 
     fun confirmRegistration(emailToConfirm: String, tokenFromMail: String): LoginResponse {

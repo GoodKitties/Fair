@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity() {
         private const val MY_DIARY_TAB = 0
         private const val FAV_TAB = 1
         private const val WORLD_TAB = 2
+        private const val NOTIFICATIONS_TAB = 3
     }
 
 
