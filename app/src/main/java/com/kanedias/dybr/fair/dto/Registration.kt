@@ -53,16 +53,23 @@ class RegisterRequest : Resource() {
     lateinit var confirmPassword: String
 
     /**
+     * Currently active profile for this user. Usually used in PATCH requests
+     * after user is already created
+     */
+    @field:Json(name = "active-profile")
+    var activeProfile: String? = null
+
+    /**
      * If this is unchecked server throws error that ToS are not accepted
      */
     @field:Json(name = "terms-of-service")
-    var termsOfService: Boolean = false
+    var termsOfService: Boolean? = null
 
     /**
      * Whether to show non-SFW content
      */
     @field:Json(name = "is-adult")
-    var isAdult: Boolean = false
+    var isAdult: Boolean? = null
 
     /**
      * Timezone like 'Europe/Moscow', optional

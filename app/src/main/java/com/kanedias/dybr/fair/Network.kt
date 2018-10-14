@@ -21,6 +21,7 @@ import java.util.*
 import java.net.HttpURLConnection.*
 import okhttp3.RequestBody
 import org.json.JSONObject
+import java.lang.IllegalStateException
 import java.net.HttpURLConnection
 
 
@@ -341,6 +342,27 @@ object Network {
         // there's an edge-case when user is deleted on server but we still have Auth.user.serverId set
         val user = fromWrappedJson(resp.body()!!.source(), User::class.java) ?: return emptyList()
         return user.profiles.get(user.document)
+    }
+
+    /**
+     * Mark profile active for current user
+     * @param prof profile to make active
+     */
+    fun makeProfileActive(prof: OwnProfile) {
+        if (Auth.user === Auth.guest)
+            throw IllegalStateException("Guest users don't have profiles!")
+
+        val user = RegisterRequest().apply {
+            id = Auth.user.serverId
+            activeProfile = prof.id
+        }
+
+        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(user))
+        val req = Request.Builder().url(USERS_ENDPOINT).patch(reqBody).build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful) {
+            throw HttpException(resp)
+        }
     }
 
     /**
@@ -668,7 +690,7 @@ object Network {
      * Load notifications for current profile
      */
     fun loadNotifications(prof: OwnProfile) : List<Notification> {
-        val url = HttpUrl.parse("$PROFILES_ENDPOINT/${prof.id}/relationships/notifications/")
+        val url = HttpUrl.parse("$PROFILES_ENDPOINT/${prof.id}/relationships/notifications")
 
         val req = Request.Builder().url(url).build()
         val resp = httpClient.newCall(req).execute()

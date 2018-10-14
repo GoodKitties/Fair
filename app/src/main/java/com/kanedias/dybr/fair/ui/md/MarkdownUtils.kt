@@ -1,6 +1,7 @@
 package com.kanedias.dybr.fair.ui.md
 
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.preference.PreferenceManager
 import android.text.SpannableStringBuilder
 import android.text.Spanned
@@ -183,9 +184,9 @@ class DrawableLoader(private val view: TextView): AsyncDrawable.Loader {
                 drawable.initWithKnownDimensions(view.width, 18F)
 
                 // resolve URL if it's not absolute
-                var parsed = URI.create(imageUrl)
+                var parsed = URI.create(Uri.encode(imageUrl))
                 if (!parsed.isAbsolute) {
-                    parsed = URI.create(Network.MAIN_DYBR_API_ENDPOINT)!!.resolve(imageUrl)
+                    parsed = URI.create(Network.MAIN_DYBR_API_ENDPOINT)!!.resolve(parsed)
                 }
 
                 // load image

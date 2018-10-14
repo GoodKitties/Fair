@@ -488,9 +488,14 @@ class MainActivity : AppCompatActivity() {
     private fun selectProfile(prof: OwnProfile) {
         // need to retrieve selected profile fully, i.e. with favorites and stuff
         launch(UI) {
-            val fullProf = async { Network.loadProfile(prof.id) }.await()
-            Auth.updateCurrentProfile(fullProf)
-            refresh()
+            try {
+                async { Network.makeProfileActive(prof) }.await()
+                val fullProf = async { Network.loadProfile(prof.id) }.await()
+                Auth.updateCurrentProfile(fullProf)
+                refresh()
+            } catch (ex: Exception) {
+                Network.reportErrors(this@MainActivity, ex)
+            }
         }
     }
 

@@ -32,7 +32,7 @@ stages:
 smoke-build:
   stage: build
   script:
-    - ./gradlew assembleDebug
+    - ./gradlew assembleRelease
 
 functional-tests:
   stage: test
