@@ -22,12 +22,14 @@ import com.kanedias.dybr.fair.R
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
+import okhttp3.HttpUrl
 import ru.noties.markwon.Markwon
 import ru.noties.markwon.SpannableConfiguration
 import ru.noties.markwon.spans.AsyncDrawable
 import ru.noties.markwon.spans.AsyncDrawableSpan
 import java.io.IOException
 import java.net.URI
+import java.net.URLEncoder
 
 /**
  * Perform all necessary steps to view Markdown in this text view.
@@ -175,6 +177,10 @@ class DrawableLoader(private val view: TextView): AsyncDrawable.Loader {
     }
 
     override fun load(imageUrl: String, drawable: AsyncDrawable) {
+        // resolve URL if it's not absolute
+        val base = HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT) ?: return
+        val resolved = base.resolve(imageUrl) ?: return
+
         launch(UI) {
             try {
                 while (view.width == 0) // just inflated
@@ -183,15 +189,9 @@ class DrawableLoader(private val view: TextView): AsyncDrawable.Loader {
                 // initialize bounds
                 drawable.initWithKnownDimensions(view.width, 18F)
 
-                // resolve URL if it's not absolute
-                var parsed = URI.create(Uri.encode(imageUrl))
-                if (!parsed.isAbsolute) {
-                    parsed = URI.create(Network.MAIN_DYBR_API_ENDPOINT)!!.resolve(parsed)
-                }
-
                 // load image
                 Glide.with(view)
-                        .load(parsed.toString())
+                        .load(resolved.toString())
                         .apply(RequestOptions()
                                 .override(view.width)
                                 .placeholder(android.R.drawable.progress_indeterminate_horizontal)

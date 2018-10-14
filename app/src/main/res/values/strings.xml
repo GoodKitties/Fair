@@ -126,6 +126,7 @@
     <string name="comment_content">Comment content</string>
     <string name="comment_updated">Comment updated</string>
     <string name="comment_created">Comment created</string>
+    <string name="comment">Comment</string>
     <string name="comments">Comments</string>
     <string name="entry_menu">Entry menu</string>
     <string name="show_web_version">Show web version</string>
@@ -191,4 +192,9 @@
     <string name="no_browser_found">No browser found</string>
     <string name="share_link_using">Share link using…</string>
     <string name="no_blog_yet">You don\'t have a blog yet!</string>
+    <string name="mark_read">Mark read</string>
+    <string name="text_divider">·</string>
+    <string name="notifications">Notifications</string>
+    <string name="mark_all_read">Mark all read</string>
+    <string name="mark_all_notifications_read">Mark all notifications as read?</string>
 </resources>

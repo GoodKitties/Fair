@@ -1,0 +1,112 @@
+package com.kanedias.dybr.fair
+
+import android.app.FragmentTransaction
+import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.RecyclerView
+import android.view.View
+import android.widget.TextView
+import butterknife.BindView
+import butterknife.ButterKnife
+import butterknife.OnClick
+import com.kanedias.dybr.fair.ui.md.handleMarkdown
+import java.text.SimpleDateFormat
+import java.util.*
+import com.kanedias.dybr.fair.dto.Notification
+import com.kanedias.dybr.fair.dto.NotificationRequest
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.launch
+
+/**
+ * View holder for showing notifications in main tab.
+ * @param iv inflated view to be used by this holder
+ * @see NotificationListFragment.notifRibbon
+ * @author Kanedias
+ */
+class NotificationViewHolder(iv: View, private val adapter: NotificationListFragment.NotificationListAdapter) : RecyclerView.ViewHolder(iv) {
+
+    @BindView(R.id.notification_cause)
+    lateinit var causeView: TextView
+
+    @BindView(R.id.notification_profile)
+    lateinit var authorView: TextView
+
+    @BindView(R.id.notification_date)
+    lateinit var dateView: TextView
+
+    @BindView(R.id.notification_blog)
+    lateinit var blogView: TextView
+
+    @BindView(R.id.notification_message)
+    lateinit var bodyView: TextView
+
+    @BindView(R.id.notification_divider)
+    lateinit var divider: View
+
+    /**
+     * Entry that this holder represents
+     */
+    private lateinit var notification: Notification
+
+    /**
+     * Listener to show comments of this entry
+     */
+    private val commentShow  = View.OnClickListener { it ->
+        val activity = it.context as AppCompatActivity
+
+        launch(UI) {
+            try {
+                val linkedEntry = async { Network.loadEntry(notification.entryId) }.await()
+                val commentsPage = CommentListFragment().apply { entry = linkedEntry }
+                activity.supportFragmentManager.beginTransaction()
+                        .addToBackStack("Showing comment list fragment from notification")
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                        .add(R.id.main_drawer_layout, commentsPage)
+                        .commit()
+            } catch (ex: Exception) {
+                Network.reportErrors(itemView.context, ex)
+            }
+        }
+
+    }
+
+    init {
+        ButterKnife.bind(this, iv)
+
+        iv.setOnClickListener(commentShow)
+    }
+
+    @OnClick(R.id.notification_read)
+    fun markRead() {
+        val marked = NotificationRequest().apply {
+            id = notification.id
+            state = "read"
+        }
+
+        launch(UI) {
+            try {
+                async { Network.updateNotification(marked) }.await()
+                adapter.removeItem(adapterPosition)
+            } catch (ex: Exception) {
+                Network.reportErrors(itemView.context, ex)
+            }
+        }
+    }
+
+    /**
+     * Called when this holder should be refreshed based on what it must show now
+     */
+    fun setup(notification: Notification) {
+        this.notification = notification
+
+        val comment = notification.comment.get(notification.document)
+        val profile = notification.profile.get(notification.document)
+
+        // setup text views from entry data
+        dateView.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(comment.createdAt)
+        causeView.setText(R.string.comment)
+        authorView.text = profile.nickname
+        blogView.text = profile.blogTitle
+        bodyView.handleMarkdown(comment.content)
+    }
+}

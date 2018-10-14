@@ -13,7 +13,7 @@ import java.io.IOException
  */
 open class HttpException(val code: Int, message: String, val body: String) : IOException(message) {
 
-    constructor(resp: Response): this(resp.code(), resp.message(), resp.body()!!.string())
+    constructor(resp: Response, message: String): this(resp.code(), message, resp.body()!!.string())
 
     // we always have message in http exception via primary constructor
     override val message: String
@@ -27,4 +27,4 @@ open class HttpException(val code: Int, message: String, val body: String) : IOE
  *
  * Created on 10.12.17
  */
-class HttpApiException(resp: Response, val errors: List<Error>) : HttpException(resp)
+class HttpApiException(resp: Response, val errors: List<Error>) : HttpException(resp, resp.message())

@@ -100,15 +100,14 @@ class ProfileFragment: DialogFragment() {
         // set avatar
         val avatarUrl = profile.settings?.avatar
         if (!avatarUrl.isNullOrBlank()) {
+            // resolve URL if it's not absolute
+            val base = HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT) ?: return
+            val resolved = base.resolve(avatarUrl!!) ?: return
+
             // load avatar asynchronously
             launch(UI) {
                 try {
-                    val parsed = URI.create(URLEncoder.encode(avatarUrl, "UTF-8"))
-                    val destination = when(parsed.isAbsolute) {
-                        true -> HttpUrl.get(parsed)
-                        false -> HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT)?.resolve(avatarUrl!!)
-                    } ?: return@launch
-                    val req = Request.Builder().url(destination).build()
+                    val req = Request.Builder().url(resolved).build()
                     val bitmap = async {
                         val resp = Network.httpClient.newCall(req).execute()
                         BitmapFactory.decodeStream(resp.body()?.byteStream())

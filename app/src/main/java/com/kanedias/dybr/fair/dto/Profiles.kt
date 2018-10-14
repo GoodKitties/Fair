@@ -107,6 +107,24 @@ class ProfileResponse : Resource() {
     lateinit var birthday: String
 
     /**
+     * Id of the blog associated with this profile
+     */
+    @field:Json(name = "blog-id")
+    var blogId: String? = null
+
+    /**
+     * Slug of the blog associated with this profile
+     */
+    @field:Json(name = "blog-slug")
+    var blogSlug: String? = null
+
+    /**
+     * Title of the blog associated with this profile
+     */
+    @field:Json(name = "blog-title")
+    var blogTitle: String? = null
+
+    /**
      * Preferences structure for this profile
      */
     @field:Json(name = "settings")

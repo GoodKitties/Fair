@@ -85,6 +85,7 @@ object Network {
     private var BLOGS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/blogs"
     private var ENTRIES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/entries"
     private var COMMENTS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/comments"
+    private var NOTIFICATIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/notifications"
 
     private val MIME_JSON_API = MediaType.parse("application/vnd.api+json")
 
@@ -187,7 +188,7 @@ object Network {
         val req = Request.Builder().post(reqBody).url(USERS_ENDPOINT).header("Authorization", "").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
-            throw extractErrors(resp)
+            throw extractErrors(resp, "Can't create account")
         }
 
         // response is successful, should have register response in answer
@@ -219,7 +220,7 @@ object Network {
 
         // unprocessable entity error can be returned when something is wrong with your input
         if (!resp.isSuccessful) {
-            throw extractErrors(resp)
+            throw extractErrors(resp, "Can't login with email ${acc.email}")
         }
 
         // if response is successful we should have login response in body
@@ -322,7 +323,7 @@ object Network {
         }
 
         if (!resp.isSuccessful)
-            throw extractErrors(resp)
+            throw extractErrors(resp, "Can't load current profile blog")
 
         val blog = fromWrappedJson(resp.body()!!.source(), Blog::class.java)
         blog?.let { Auth.updateBlog(it) }
@@ -337,7 +338,7 @@ object Network {
         val req = Request.Builder().url("$USERS_ENDPOINT/${Auth.user.serverId}?include=profiles").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw extractErrors(resp)
+            throw extractErrors(resp, "Can't load user profiles")
 
         // there's an edge-case when user is deleted on server but we still have Auth.user.serverId set
         val user = fromWrappedJson(resp.body()!!.source(), User::class.java) ?: return emptyList()
@@ -361,7 +362,7 @@ object Network {
         val req = Request.Builder().url(USERS_ENDPOINT).patch(reqBody).build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
-            throw HttpException(resp)
+            throw extractErrors(resp, "Can't activate profile")
         }
     }
 
@@ -373,7 +374,7 @@ object Network {
         val req = Request.Builder().url("$PROFILES_ENDPOINT/$id?include=blog,favorites").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
-            throw HttpException(resp)
+            throw extractErrors(resp, "Can't load profile $id")
         }
 
         // response is returned after execute call, body is not null
@@ -388,7 +389,7 @@ object Network {
         val req = Request.Builder().url("$PROFILES_ENDPOINT?filters[nickname]=$nickname&include=blog,favorites").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
-            throw HttpException(resp)
+            throw extractErrors(resp, "Can't load profile for nickname $nickname")
         }
 
         // response is returned after execute call, body is not null
@@ -410,7 +411,7 @@ object Network {
         val req = Request.Builder().delete().url("$PROFILES_ENDPOINT/${prof.id}").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw extractErrors(resp)
+            throw extractErrors(resp, "Can't remove profile ${prof.nickname}")
 
         // we don't need answer body
     }
@@ -424,7 +425,7 @@ object Network {
         val req = Request.Builder().url(PROFILES_ENDPOINT).post(reqBody).build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw extractErrors(resp)
+            throw extractErrors(resp, "Can't create profile")
 
         // response is returned after execute call, body is not null
         return fromWrappedJson(resp.body()!!.source(), OwnProfile::class.java)!!
@@ -443,7 +444,7 @@ object Network {
 
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw extractErrors(resp)
+            throw extractErrors(resp, "Can't add favorite to profile ${prof.nickname}")
     }
 
     /**
@@ -459,7 +460,7 @@ object Network {
 
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw extractErrors(resp)
+            throw extractErrors(resp, "Can't remove favorite for profile ${prof.nickname}")
     }
 
     /**
@@ -471,7 +472,7 @@ object Network {
         val req = Request.Builder().url(BLOGS_ENDPOINT).post(reqBody).build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw extractErrors(resp)
+            throw extractErrors(resp, "Can't create blog")
 
         // response is returned after execute call, body is not null
         return fromWrappedJson(resp.body()!!.source(), Blog::class.java)!!
@@ -485,7 +486,7 @@ object Network {
         val req = Request.Builder().url("$BLOGS_ENDPOINT/$id/?include=profile").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
-            throw HttpException(resp)
+            throw extractErrors(resp, "Can't load blog $id")
         }
 
         // response is returned after execute call, body is not null
@@ -501,7 +502,7 @@ object Network {
         val req = Request.Builder().url("$PROFILES_ENDPOINT/${prof.id}/relationships/designs").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
-            throw HttpException(resp)
+            throw extractErrors(resp, "Can't load profile design for ${prof.nickname}")
         }
 
         // response is returned after execute call, body is not null
@@ -521,13 +522,13 @@ object Network {
         val req = Request.Builder().url("$BLOGS_ENDPOINT?filters[slug]=$slug&include=profile").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
-            throw HttpException(resp)
+            throw extractErrors(resp, "Can't load blog with name $slug")
         }
 
         // response is returned after execute call, body is not null
         val filtered = fromWrappedListJson(resp.body()!!.source(), Blog::class.java)
         if (filtered.isEmpty())
-            throw HttpException(404, "", "")
+            throw HttpException(404, "", "No such blog found: $slug")
 
         return filtered[0]
     }
@@ -558,15 +559,15 @@ object Network {
             else -> HttpUrl.parse("$BLOGS_ENDPOINT/${blog.id}/entries")!!.newBuilder()
         }
 
-        builder.addQueryParameter("sort", "-created-at")
-                .addQueryParameter("page[number]", pageNum.toString())
+        builder.addQueryParameter("page[number]", pageNum.toString())
                 .addQueryParameter("page[size]", "20")
                 .addQueryParameter("include", "profile,blog")
+                .addQueryParameter("sort", "-created-at")
 
         val req = Request.Builder().url(builder.build()).build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
-            throw HttpException(resp)
+            throw extractErrors(resp, "Can't load entries for blog ${blog.slug}")
         }
 
         // response is returned after execute call, body is not null
@@ -581,7 +582,7 @@ object Network {
         val req = Request.Builder().url("$ENTRIES_ENDPOINT/$id?include=blog,profile").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
-            throw HttpException(resp)
+            throw extractErrors(resp, "Can't load entry $id")
         }
 
         // response is returned after execute call, body is not null
@@ -597,7 +598,7 @@ object Network {
         val req = Request.Builder().url("$ENTRIES_ENDPOINT/${entry.id}/comments?sort=created-at&page[number]=$pageNum&page[size]=20&include=profile").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
-            throw HttpException(resp)
+            throw extractErrors(resp, "Can't load comments for entry ${entry.id}")
         }
 
         // response is returned after execute call, body is not null
@@ -613,7 +614,7 @@ object Network {
         val req = Request.Builder().url(COMMENTS_ENDPOINT).post(reqBody).build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw extractErrors(resp)
+            throw extractErrors(resp, "Can't create comment")
 
         // response is returned after execute call, body is not null
         return fromWrappedJson(resp.body()!!.source(), Comment::class.java)!!
@@ -628,7 +629,7 @@ object Network {
         val req = Request.Builder().url("$COMMENTS_ENDPOINT/${comment.id}").patch(reqBody).build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw extractErrors(resp)
+            throw extractErrors(resp, "Can't update comment ${comment.id}")
 
         // response is returned after execute call, body is not null
         return fromWrappedJson(resp.body()!!.source(), Comment::class.java)!!
@@ -642,7 +643,7 @@ object Network {
         val req = Request.Builder().url("$COMMENTS_ENDPOINT/${comment.id}").delete().build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw extractErrors(resp)
+            throw extractErrors(resp, "Can't delete comment ${comment.id}")
     }
 
     /**
@@ -654,7 +655,7 @@ object Network {
         val req = Request.Builder().url(ENTRIES_ENDPOINT).post(reqBody).build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw extractErrors(resp)
+            throw extractErrors(resp, "Can't create entry")
 
         // response is returned after execute call, body is not null
         return fromWrappedJson(resp.body()!!.source(), Entry::class.java)!!
@@ -669,7 +670,7 @@ object Network {
         val req = Request.Builder().url("$ENTRIES_ENDPOINT/${entry.id}").patch(reqBody).build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw extractErrors(resp)
+            throw extractErrors(resp, "Can't update entry ${entry.id}")
 
         // response is returned after execute call, body is not null
         return fromWrappedJson(resp.body()!!.source(), Entry::class.java)!!
@@ -683,23 +684,54 @@ object Network {
         val req = Request.Builder().url("$ENTRIES_ENDPOINT/${entry.id}").delete().build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw extractErrors(resp)
+            throw extractErrors(resp, "Can't delete entry ${entry.id}")
     }
 
     /**
-     * Load notifications for current profile
+     * Loads non-read notifications for current profile
      */
-    fun loadNotifications(prof: OwnProfile) : List<Notification> {
-        val url = HttpUrl.parse("$PROFILES_ENDPOINT/${prof.id}/relationships/notifications")
+    fun loadNotifications(pageNum: Int = 1) : ArrayDocument<Notification> {
+        val builder = HttpUrl.parse("$PROFILES_ENDPOINT/${Auth.profile?.id}/relationships/notifications")!!.newBuilder()
+        builder.addQueryParameter("page[number]", pageNum.toString())
+                .addQueryParameter("page[size]", "20")
+                .addQueryParameter("filters[state]", "new")
+                .addQueryParameter("include", "comments")
+                //.addQueryParameter("sort", "-created-at") // doest'n work
 
-        val req = Request.Builder().url(url).build()
+        val req = Request.Builder().url(builder.build()).build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
-            throw HttpException(resp)
+            throw extractErrors(resp, "Can't load notifications for profile ${Auth.profile?.nickname}")
         }
 
         // response is returned after execute call, body is not null
         return fromWrappedListJson(resp.body()!!.source(), Notification::class.java)
+    }
+
+    /**
+     * Updates existing notification. Only state attribute is changeable.
+     * @param notification notification to update. Must exist on server. Must have id field set.
+     */
+    fun updateNotification(notification: NotificationRequest): Notification {
+        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(notification))
+        val req = Request.Builder().url("$NOTIFICATIONS_ENDPOINT/${notification.id}").patch(reqBody).build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful)
+            throw extractErrors(resp, "Can't update notification ${notification.id}")
+
+        // response is returned after execute call, body is not null
+        return fromWrappedJson(resp.body()!!.source(), Notification::class.java)!!
+    }
+
+    /**
+     * Marks all notifications read for current profile
+     */
+    fun markAllNotificationsRead() {
+        val reqBody = RequestBody.create(MIME_JSON_API, "")
+        val req = Request.Builder().url("$PROFILES_ENDPOINT/${Auth.profile?.id}/relationships/notifications/read-all").post(reqBody).build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful)
+            throw extractErrors(resp, "Can't mark notifications read")
     }
 
     fun confirmRegistration(emailToConfirm: String, tokenFromMail: String): LoginResponse {
@@ -715,7 +747,7 @@ object Network {
 
         // unprocessable entity error can be returned when something is wrong with your input
         if (!resp.isSuccessful) {
-            throw extractErrors(resp)
+            throw extractErrors(resp, "Can't confirm registration for email $emailToConfirm")
         }
 
         // if response is successful we should have login response in body
@@ -738,7 +770,7 @@ object Network {
 
         // unprocessable entity error can be returned when something is wrong with your input
         if (!resp.isSuccessful) {
-            throw extractErrors(resp)
+            throw extractErrors(resp, "Can't upload image")
         }
 
         // if response is successful we should have login response in body
@@ -751,23 +783,23 @@ object Network {
      * @param resp http response that was not successful
      * @return [HttpApiException] if specific errors were found or generic [HttpException] for this response
      */
-    private fun extractErrors(resp: Response) : HttpException {
+    private fun extractErrors(resp: Response, message: String) : HttpException {
         if (resp.code() in HTTP_BAD_REQUEST until HTTP_INTERNAL_ERROR) { // 400-499: client error
             if (resp.body()?.contentType() != MIME_JSON_API) {
-                return HttpException(resp)
+                return HttpException(resp, message)
             }
 
             // try to get error info
-            val errAdapter = jsonConverter.adapter(Document::class.java)
             val body = resp.body()!!.source()
             if (body.exhausted()) // no content
-                return HttpException(resp)
+                return HttpException(resp, message)
 
+            val errAdapter = jsonConverter.adapter(Document::class.java)
             val errDoc = errAdapter.fromJson(body)!!
             if (errDoc.errors.isNotEmpty()) // likely
                 return HttpApiException(resp, errDoc.errors)
         }
-        return HttpException(resp)
+        return HttpException(resp, message)
     }
 
     /**

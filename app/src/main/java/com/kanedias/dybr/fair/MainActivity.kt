@@ -290,10 +290,7 @@ class MainActivity : AppCompatActivity() {
             R.id.menu_donate -> donateHelper.donate()
             R.id.menu_settings -> startActivity(Intent(this, SettingsActivity::class.java))
             R.id.menu_refresh -> refreshCurrentTab()
-            else -> {
-                Log.w("[Main]", "Unknown menu item selected: ${item?.title}")
-                return super.onOptionsItemSelected(item)
-            }
+            else -> return super.onOptionsItemSelected(item)
         }
 
         // it was handled in `when` block or we wouldn't be at this point
@@ -617,7 +614,7 @@ class MainActivity : AppCompatActivity() {
                 return 0
             }
 
-            return 3 // favorites, world and own blog
+            return 4 // favorites, world and own blog
         }
 
         override fun getItemPosition(fragment: Any): Int {
@@ -635,6 +632,7 @@ class MainActivity : AppCompatActivity() {
             MY_DIARY_TAB -> EntryListFragment().apply { blog = this@TabAdapter.blog }
             FAV_TAB  -> EntryListFragment().apply { blog = Auth.favoritesMarker }
             WORLD_TAB -> EntryListFragment().apply { blog = Auth.worldMarker }
+            NOTIFICATIONS_TAB -> NotificationListFragment()
             else -> EntryListFragment().apply { blog = null }
         }
 
@@ -642,6 +640,7 @@ class MainActivity : AppCompatActivity() {
             MY_DIARY_TAB -> getString(R.string.my_diary)
             FAV_TAB -> getString(R.string.favorite)
             WORLD_TAB -> getString(R.string.world)
+            NOTIFICATIONS_TAB -> getString(R.string.notifications)
             else -> ""
         }
     }

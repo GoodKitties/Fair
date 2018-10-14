@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/notification_card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp"
+    android:foreground="?android:attr/selectableItemBackground"
+    app:cardCornerRadius="2dp"
+    app:cardElevation="2dp"
+    app:cardMaxElevation="4dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/notification_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:padding="5dp"
+            android:text="@string/placeholder_date"/>
+
+        <TextView
+            android:id="@+id/notification_cause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:padding="5dp"
+            android:textStyle="bold"
+            android:text="@string/placeholder_short"
+            android:maxEms="20"/>
+
+        <TextView
+            android:id="@+id/notification_profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/notification_cause"
+            android:padding="5dp"
+            android:text="@string/placeholder_short"
+            android:maxEms="20"/>
+
+        <TextView
+            android:id="@+id/notification_divider"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/notification_cause"
+            android:layout_toRightOf="@id/notification_profile"
+            android:layout_toEndOf="@id/notification_profile"
+            android:padding="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:textStyle="bold"
+            android:text="@string/text_divider"/>
+
+        <TextView
+            android:id="@+id/notification_blog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/notification_cause"
+            android:layout_toRightOf="@id/notification_divider"
+            android:layout_toEndOf="@id/notification_divider"
+            android:padding="5dp"
+            android:maxEms="20"
+            android:text="@string/placeholder_short"/>
+
+        <com.kanedias.dybr.fair.misc.ClickPreventingTextView
+            android:id="@+id/notification_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@id/notification_profile"
+            android:padding="5dp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/placeholder_huge"/>
+
+        <LinearLayout
+            android:id="@+id/notification_icon_area"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/notification_message"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true">
+
+            <ImageView
+                style="@style/Ripple.Item"
+                android:id="@+id/notification_read"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="8dp"
+                android:src="@drawable/done"
+                android:contentDescription="@string/mark_read"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+</android.support.v7.widget.CardView>
