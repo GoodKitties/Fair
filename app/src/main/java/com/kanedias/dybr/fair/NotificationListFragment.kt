@@ -114,7 +114,7 @@ open class NotificationListFragment: Fragment() {
             refresher.isRefreshing = true
 
             try {
-                val success = async { Network.loadNotifications(nextPage) }
+                val success = async { Network.loadNotifications(pageNum = nextPage) }
                 updateRibbonPage(success.await(), reset)
             } catch (ex: Exception) {
                 Network.reportErrors(activity, ex)
@@ -217,6 +217,11 @@ open class NotificationListFragment: Fragment() {
         fun removeItem(position: Int) {
             notifications.removeAt(position)
             notifyItemRemoved(position)
+        }
+
+        fun addItem(notification: Notification) {
+            notifications.add(notification)
+            notifyItemInserted(notifications.size)
         }
     }
 

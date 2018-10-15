@@ -690,7 +690,7 @@ object Network {
     /**
      * Loads non-read notifications for current profile
      */
-    fun loadNotifications(pageNum: Int = 1) : ArrayDocument<Notification> {
+    fun loadNotifications(pageSize: Int = 20, pageNum: Int = 1) : ArrayDocument<Notification> {
         val builder = HttpUrl.parse("$PROFILES_ENDPOINT/${Auth.profile?.id}/relationships/notifications")!!.newBuilder()
         builder.addQueryParameter("page[number]", pageNum.toString())
                 .addQueryParameter("page[size]", "20")

@@ -4,6 +4,8 @@ import android.app.FragmentTransaction
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
 import android.view.View
+import android.widget.ImageView
+import android.widget.RelativeLayout
 import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
@@ -13,6 +15,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import com.kanedias.dybr.fair.dto.Notification
 import com.kanedias.dybr.fair.dto.NotificationRequest
+import com.kanedias.dybr.fair.ui.toggleEnableRecursive
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
@@ -24,6 +27,9 @@ import kotlinx.coroutines.experimental.launch
  * @author Kanedias
  */
 class NotificationViewHolder(iv: View, private val adapter: NotificationListFragment.NotificationListAdapter) : RecyclerView.ViewHolder(iv) {
+
+    @BindView(R.id.notification_area)
+    lateinit var notificationArea: RelativeLayout
 
     @BindView(R.id.notification_cause)
     lateinit var causeView: TextView
@@ -42,6 +48,9 @@ class NotificationViewHolder(iv: View, private val adapter: NotificationListFrag
 
     @BindView(R.id.notification_divider)
     lateinit var divider: View
+
+    @BindView(R.id.notification_read)
+    lateinit var readButton: ImageView
 
     /**
      * Entry that this holder represents
@@ -63,6 +72,7 @@ class NotificationViewHolder(iv: View, private val adapter: NotificationListFrag
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                         .add(R.id.main_drawer_layout, commentsPage)
                         .commit()
+                markRead()
             } catch (ex: Exception) {
                 Network.reportErrors(itemView.context, ex)
             }
@@ -86,7 +96,8 @@ class NotificationViewHolder(iv: View, private val adapter: NotificationListFrag
         launch(UI) {
             try {
                 async { Network.updateNotification(marked) }.await()
-                adapter.removeItem(adapterPosition)
+                readButton.setImageResource(R.drawable.done_all)
+                toggleEnableRecursive(notificationArea, enabled = false)
             } catch (ex: Exception) {
                 Network.reportErrors(itemView.context, ex)
             }
@@ -97,6 +108,10 @@ class NotificationViewHolder(iv: View, private val adapter: NotificationListFrag
      * Called when this holder should be refreshed based on what it must show now
      */
     fun setup(notification: Notification) {
+        // reset read state
+        readButton.setImageResource(R.drawable.done)
+        toggleEnableRecursive(notificationArea, enabled = true)
+
         this.notification = notification
 
         val comment = notification.comment.get(notification.document)

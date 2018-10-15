@@ -7,7 +7,7 @@
     <item
         android:id="@+id/menu_notifications_mark_all_read"
         android:title="@string/mark_all_read"
-        android:icon="@drawable/done_all"
+        android:icon="@drawable/eye"
         app:showAsAction="always" />
 
 </menu>
