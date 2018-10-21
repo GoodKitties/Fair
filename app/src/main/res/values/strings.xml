@@ -197,4 +197,6 @@
     <string name="notifications">Notifications</string>
     <string name="mark_all_read">Mark all read</string>
     <string name="mark_all_notifications_read">Mark all notifications as read?</string>
+    <string name="new_comments">New comments</string>
+    <string name="youve_received_new_comments">You\'ve received new comments</string>
 </resources>

@@ -1,7 +1,6 @@
 package com.kanedias.dybr.fair
 
 import android.os.Bundle
-import android.preference.PreferenceActivity
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import butterknife.BindView

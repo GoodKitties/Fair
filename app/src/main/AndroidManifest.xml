@@ -15,6 +15,12 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <receiver android:name=".scheduling.InternalReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="com.kanedias.dybr.fair.action.notif.MARK_READ" />
+                <action android:name="com.kanedias.dybr.fair.action.notif.SKIP" />
+            </intent-filter>
+        </receiver>
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"

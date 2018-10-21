@@ -688,15 +688,18 @@ object Network {
     }
 
     /**
-     * Loads non-read notifications for current profile
+     * Loads notifications for current profile
      */
     fun loadNotifications(pageSize: Int = 20, pageNum: Int = 1) : ArrayDocument<Notification> {
+        if (Auth.profile == null)
+            return ArrayDocument()
+
         val builder = HttpUrl.parse("$PROFILES_ENDPOINT/${Auth.profile?.id}/relationships/notifications")!!.newBuilder()
         builder.addQueryParameter("page[number]", pageNum.toString())
                 .addQueryParameter("page[size]", "20")
-                .addQueryParameter("filters[state]", "new")
-                .addQueryParameter("include", "comments")
-                //.addQueryParameter("sort", "-created-at") // doest'n work
+                //.addQueryParameter("filters[state]", "new")
+                .addQueryParameter("include", "comments,profiles")
+                .addQueryParameter("sort", "state,-comment_id")
 
         val req = Request.Builder().url(builder.build()).build()
         val resp = httpClient.newCall(req).execute()

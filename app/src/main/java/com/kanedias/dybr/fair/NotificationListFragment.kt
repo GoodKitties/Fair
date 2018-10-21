@@ -15,7 +15,6 @@ import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
 import moe.banana.jsonapi2.ArrayDocument
 
-
 /**
  * Fragment which displays list of notifications for current profile.
  *
@@ -153,32 +152,28 @@ open class NotificationListFragment: Fragment() {
      */
     inner class NotificationListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-        private val REGULAR = 0
-        private val LOAD_MORE = 1
-        private val LAST_PAGE = 2
-
         var notifications: MutableList<Notification> = ArrayList()
 
         override fun getItemViewType(position: Int): Int {
             if (position < notifications.size) {
-                return REGULAR
+                return ITEM_REGULAR
             }
 
             if (lastPage) {
-                return  LAST_PAGE
+                return  ITEM_LAST_PAGE
             }
 
-            return LOAD_MORE
+            return ITEM_LOAD_MORE
         }
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             when (getItemViewType(position)) {
-                REGULAR -> {
+                ITEM_REGULAR -> {
                     val entryHolder = holder as NotificationViewHolder
                     val notification = notifications[position]
                     entryHolder.setup(notification)
                 }
-                LOAD_MORE -> refreshNotifications()
+                ITEM_LOAD_MORE -> refreshNotifications()
                 // Nothing needed for LAST_PAGE
             }
 
@@ -187,15 +182,15 @@ open class NotificationListFragment: Fragment() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
             val inflater = LayoutInflater.from(activity)
             return when (viewType) {
-                REGULAR -> {
+                ITEM_REGULAR -> {
                     val view = inflater.inflate(R.layout.fragment_notification_list_item, parent, false)
-                    NotificationViewHolder(view, this)
+                    NotificationViewHolder(view)
                 }
-                LOAD_MORE -> {
+                ITEM_LOAD_MORE -> {
                     val pbar = inflater.inflate(R.layout.view_load_more, parent, false)
                     object: RecyclerView.ViewHolder(pbar) {}
                 }
-                else -> { // LAST_PAGE
+                else -> { // ITEM_LAST_PAGE
                     val lastPage = inflater.inflate(R.layout.view_last_page, parent, false)
                     lastPage.findViewById<TextView>(R.id.last_page_reload).setOnClickListener { refreshNotifications(true) }
                     object: RecyclerView.ViewHolder(lastPage) {}
@@ -214,6 +209,7 @@ open class NotificationListFragment: Fragment() {
             return notifications.size + 1
         }
 
+        /*
         fun removeItem(position: Int) {
             notifications.removeAt(position)
             notifyItemRemoved(position)
@@ -223,6 +219,7 @@ open class NotificationListFragment: Fragment() {
             notifications.add(notification)
             notifyItemInserted(notifications.size)
         }
+        */
     }
 
 }

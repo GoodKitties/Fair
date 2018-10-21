@@ -13,6 +13,7 @@ import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentStatePagerAdapter
+import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewPager
 import android.support.v4.widget.DrawerLayout
@@ -38,6 +39,7 @@ import com.kanedias.dybr.fair.database.entities.Account
 import com.kanedias.dybr.fair.database.entities.SearchGotoInfo
 import com.kanedias.dybr.fair.database.entities.SearchGotoInfo.*
 import com.kanedias.dybr.fair.dto.*
+import com.kanedias.dybr.fair.scheduling.SyncNotificationsJob
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.Sidebar
 import kotlinx.coroutines.experimental.android.UI
@@ -57,6 +59,8 @@ class MainActivity : AppCompatActivity() {
         private const val FAV_TAB = 1
         private const val WORLD_TAB = 2
         private const val NOTIFICATIONS_TAB = 3
+
+        var onScreen = false
     }
 
 
@@ -131,6 +135,23 @@ class MainActivity : AppCompatActivity() {
         setupUI()
         // load user profile and initialize tabs
         reLogin(Auth.user)
+
+        // start notification job
+        SyncNotificationsJob.scheduleJob()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        onScreen = true
+
+        // cancel all notifications
+        val nm = NotificationManagerCompat.from(this)
+        nm.cancelAll()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        onScreen = false
     }
 
     private fun setupUI() {

@@ -26,7 +26,7 @@ import kotlinx.coroutines.experimental.launch
  * @see NotificationListFragment.notifRibbon
  * @author Kanedias
  */
-class NotificationViewHolder(iv: View, private val adapter: NotificationListFragment.NotificationListAdapter) : RecyclerView.ViewHolder(iv) {
+class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
     @BindView(R.id.notification_area)
     lateinit var notificationArea: RelativeLayout
@@ -108,9 +108,13 @@ class NotificationViewHolder(iv: View, private val adapter: NotificationListFrag
      * Called when this holder should be refreshed based on what it must show now
      */
     fun setup(notification: Notification) {
-        // reset read state
-        readButton.setImageResource(R.drawable.done)
-        toggleEnableRecursive(notificationArea, enabled = true)
+        if (notification.state == "read") {
+            readButton.setImageResource(R.drawable.done_all)
+            toggleEnableRecursive(notificationArea, enabled = false)
+        } else {
+            readButton.setImageResource(R.drawable.done)
+            toggleEnableRecursive(notificationArea, enabled = true)
+        }
 
         this.notification = notification
 

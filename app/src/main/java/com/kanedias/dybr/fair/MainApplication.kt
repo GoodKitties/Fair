@@ -1,7 +1,11 @@
 package com.kanedias.dybr.fair
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import android.os.Build
+import android.support.v4.app.NotificationManagerCompat
 import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.dto.Auth
@@ -11,6 +15,9 @@ import org.acra.annotation.AcraCore
 import org.acra.annotation.AcraDialog
 import org.acra.annotation.AcraMailSender
 import org.acra.data.StringFormat
+import com.evernote.android.job.JobManager
+import com.kanedias.dybr.fair.scheduling.SyncJobCreator
+
 
 /**
  * Place to initialize all data prior to launching activities
@@ -34,13 +41,27 @@ class MainApplication : Application() {
         DbProvider.setHelper(this)
         Network.init(this)
         Auth.init(this)
+        JobManager.create(this).addJobCreator(SyncJobCreator())
         initTheming()
+        initStatusNotifications()
         @Suppress("DEPRECATION")
 
         // load last account if it exists
         val acc = DbProvider.helper.accDao.queryBuilder().where().eq("current", true).queryForFirst()
         acc?.let {
             Auth.updateCurrentUser(acc)
+        }
+    }
+
+    private fun initStatusNotifications() {
+        val notifMgr = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val syncNotifChannel = NotificationChannel(NC_SYNC_NOTIFICATIONS,
+                    getString(R.string.notifications),
+                    NotificationManager.IMPORTANCE_DEFAULT)
+
+            notifMgr.createNotificationChannel(syncNotifChannel)
         }
     }
 

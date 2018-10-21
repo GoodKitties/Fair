@@ -196,33 +196,29 @@ open class EntryListFragment: Fragment() {
      */
     inner class EntryListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-        private val REGULAR_POST = 0
-        private val LOAD_MORE = 1
-        private val LAST_PAGE = 2
-
         var entries: MutableList<Entry> = ArrayList()
 
         override fun getItemViewType(position: Int): Int {
             if (position < entries.size) {
-                return REGULAR_POST
+                return ITEM_REGULAR
             }
 
             if (lastPage) {
-                return  LAST_PAGE
+                return  ITEM_LAST_PAGE
             }
 
-            return LOAD_MORE
+            return ITEM_LOAD_MORE
         }
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             when (getItemViewType(position)) {
-                REGULAR_POST -> {
+                ITEM_REGULAR -> {
                     val entryHolder = holder as EntryViewHolder
                     val entry = entries[position]
                     entryHolder.setup(entry, isBlogWritable(blog))
                 }
-                LOAD_MORE -> refreshEntries()
-                // Nothing needed for LAST_PAGE
+                ITEM_LOAD_MORE -> refreshEntries()
+                // Nothing needed for ITEM_LAST_PAGE
             }
 
         }
@@ -230,15 +226,15 @@ open class EntryListFragment: Fragment() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
             val inflater = LayoutInflater.from(activity)
             return when (viewType) {
-                REGULAR_POST -> {
+                ITEM_REGULAR -> {
                     val view = inflater.inflate(R.layout.fragment_entry_list_item, parent, false)
                     EntryViewHolder(view, parent as View)
                 }
-                LOAD_MORE -> {
+                ITEM_LOAD_MORE -> {
                     val pbar = inflater.inflate(R.layout.view_load_more, parent, false)
                     object: RecyclerView.ViewHolder(pbar) {}
                 }
-                else -> { // LAST_PAGE
+                else -> { // ITEM_LAST_PAGE
                     val lastPage = inflater.inflate(R.layout.view_last_page, parent, false)
                     lastPage.findViewById<TextView>(R.id.last_page_reload).setOnClickListener { refreshEntries(true) }
                     object: RecyclerView.ViewHolder(lastPage) {}
