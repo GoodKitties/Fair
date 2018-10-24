@@ -23,7 +23,6 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
 import android.support.v7.widget.Toolbar
-import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -377,24 +376,39 @@ class MainActivity : AppCompatActivity() {
                 becomeGuest()
             }
 
-            // the whole application may be started because of link click
-            if (intent.data != null && intent.data.authority.contains("dybr.ru")) {
-                consumeCallingUrl()
-            }
-
             progressDialog.dismiss()
             refresh()
         }
     }
 
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        this.intent = intent
+    override fun onNewIntent(received: Intent) {
+        super.onNewIntent(received)
+        handleIntent(received)
+    }
 
-        // try to detect if it's someone trying to open the dybr.ru link with us
-        launch(UI) {
-            if (intent.data != null && intent.data.authority.contains("dybr.ru")) {
-                consumeCallingUrl()
+    /**
+     * Handle the passed intent. This is invoked whenever we need to actually react to the intent that was
+     * passed to this activity, this can be just activity start from the app manager, click on a link or
+     * on a notification belonging to this app
+     * @param cause the passed intent. It will not be modified within this function.
+     */
+    private fun handleIntent(cause: Intent?) {
+        if (cause == null)
+            return
+
+        when (cause.action) {
+            ACTION_NOTIF_OPEN -> {
+                for (i in 0..supportFragmentManager.backStackEntryCount) {
+                    supportFragmentManager.popBackStack()
+                }
+                pager.setCurrentItem(NOTIFICATIONS_TAB, true)
+            }
+
+            Intent.ACTION_VIEW -> launch(UI) {
+                // try to detect if it's someone trying to open the dybr.ru link with us
+                if (cause.data?.authority?.contains("dybr.ru") == true) {
+                    consumeCallingUrl(cause)
+                }
             }
         }
     }
@@ -405,9 +419,9 @@ class MainActivity : AppCompatActivity() {
      * https://dybr.ru/blog/... should open that blog or entry inside the app so try
      * to guess what user wanted with it as much as possible.
      */
-    private suspend fun consumeCallingUrl() {
+    private suspend fun consumeCallingUrl(cause: Intent) {
         try {
-            val address = intent.data.pathSegments // it's in the form of /blog/<slug>/[<entry>]
+            val address = cause.data.pathSegments // it's in the form of /blog/<slug>/[<entry>]
             when(address[0]) {
                 "blog" -> {
                     val fragment = when (address.size) {
@@ -441,13 +455,8 @@ class MainActivity : AppCompatActivity() {
                 }
                 else -> return
             }
-
-
-
         } catch (ex: Exception) {
             Network.reportErrors(this@MainActivity, ex)
-        } finally {
-            intent.data = null
         }
     }
 
@@ -582,7 +591,6 @@ class MainActivity : AppCompatActivity() {
                 // we have loaded profile, try to load our blog
                 try {
                     async { Network.populateBlog() }.await()
-
                 } catch (ex: Exception) {
                     Network.reportErrors(this@MainActivity, ex)
                 }
@@ -590,6 +598,10 @@ class MainActivity : AppCompatActivity() {
 
             sidebar.updateSidebar()
             refreshTabs()
+
+            // the whole application may be started because of link click
+            handleIntent(intent)
+            intent = null // reset intent of the activity
         }
     }
 

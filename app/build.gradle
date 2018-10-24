@@ -5,7 +5,7 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
 
     lintOptions {
         disable 'MissingTranslation'
@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId "com.kanedias.dybr.fair"
-        targetSdkVersion 27 // device you test on
+        targetSdkVersion 28 // device you test on
         minSdkVersion 16    // device you allow your users to be on :)
         versionCode 29
         versionName "1.6.0"

@@ -25,8 +25,18 @@ class NotificationRequest : Resource() {
     @field:Json(name = "comment")
     var comment: HasOne<Comment>? = null
 
+    /**
+     * The profile and blog of the comment author
+     */
     @field:Json(name = "profile")
     var profile: HasOne<OwnProfile>? = null
+
+    /**
+     * The profile and blog where the notification originates from
+     * i.e. where the comment was written
+     */
+    @field:Json(name = "source")
+    var source: HasOne<OwnProfile>? = null
 }
 
 /**
@@ -94,6 +104,13 @@ class NotificationResponse : Resource() {
      */
     @field:Json(name = "profiles")
     var profile = HasOne<OwnProfile>()
+
+    /**
+     * The profile and blog where the notification originates from
+     * i.e. where the comment was written
+     */
+    @field:Json(name = "source")
+    var source = HasOne<OwnProfile>()
 }
 
 typealias Notification = NotificationResponse

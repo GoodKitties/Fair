@@ -10,6 +10,9 @@ import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.html2md.Html2Markdown
 import java.util.concurrent.TimeUnit
 import android.content.Intent
+import com.kanedias.dybr.fair.dto.Notification
+import ru.noties.markwon.Markwon
+import java.lang.Exception
 
 /**
  * Sync job that periodically retrieves notifications and notifies user about non-read ones in status bar.
@@ -29,7 +32,13 @@ class SyncNotificationsJob: Job() {
         }
 
         // retrieve non-read non-skipped notifications
-        val notifications = Network.loadNotifications()
+        val notifications = try {
+            Network.loadNotifications()
+        } catch (ex: Exception) {
+            Network.reportErrors(context, ex)
+            emptyList<Notification>()
+        }
+
         val nonRead = notifications.filter { it.state == "new" }
         val nonSkipped = nonRead.filter { !skippedNotificationIds.contains(it.id) }
 
@@ -42,11 +51,12 @@ class SyncNotificationsJob: Job() {
         // create a notification for each item
         for (notification in nonSkipped) {
             val me = Auth.profile?.nickname ?: return Result.SUCCESS // shouldn't happen
-            val comment = notification.comment.get(notification.document) ?: continue
-            val profile = notification.profile.get(notification.document) ?: continue
+            val comment = notification.comment.get(notification.document) ?: continue // comment itself
+            val author = notification.profile.get(notification.document) ?: continue // profile of person who wrote the comment
             val text = Html2Markdown().parse(comment.content).lines().first() + "..."
+            val converted = Markwon.markdown(context, text).toString()
             val msgStyle = NotificationCompat.MessagingStyle(me)
-                    .addMessage(text, comment.createdAt.time, profile.nickname)
+                    .addMessage(converted, comment.createdAt.time, author.nickname)
 
             val markReadIntent = Intent(context, InternalReceiver::class.java).apply {
                 action = ACTION_NOTIF_MARK_READ
@@ -63,6 +73,7 @@ class SyncNotificationsJob: Job() {
             val skipPI = PendingIntent.getBroadcast(context, 1, skipIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
             val openIntent = Intent(context, MainActivity::class.java).apply {
+                action = ACTION_NOTIF_OPEN
                 addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 putExtra(EXTRA_NOTIF_ID, notification.id)
             }
@@ -72,6 +83,7 @@ class SyncNotificationsJob: Job() {
                     .setSmallIcon(R.drawable.app_icon)
                     .setContentTitle(context.getString(R.string.new_comments))
                     .setContentText(context.getString(R.string.youve_received_new_comments))
+                    .setGroup(context.getString(R.string.notifications))
                     .setStyle(msgStyle)
                     .setDeleteIntent(skipPI)
                     .setContentIntent(openPI)

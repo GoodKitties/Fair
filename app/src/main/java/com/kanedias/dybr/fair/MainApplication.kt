@@ -59,7 +59,7 @@ class MainApplication : Application() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val syncNotifChannel = NotificationChannel(NC_SYNC_NOTIFICATIONS,
                     getString(R.string.notifications),
-                    NotificationManager.IMPORTANCE_DEFAULT)
+                    NotificationManager.IMPORTANCE_HIGH)
 
             notifMgr.createNotificationChannel(syncNotifChannel)
         }

@@ -120,12 +120,13 @@ class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
         val comment = notification.comment.get(notification.document)
         val profile = notification.profile.get(notification.document)
+        val source = notification.source.get(notification.document)
 
         // setup text views from entry data
         dateView.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(comment.createdAt)
         causeView.setText(R.string.comment)
         authorView.text = profile.nickname
-        blogView.text = profile.blogTitle
+        blogView.text = source.blogTitle
         bodyView.handleMarkdown(comment.content)
     }
 }

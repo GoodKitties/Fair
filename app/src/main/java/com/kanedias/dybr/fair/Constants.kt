@@ -23,3 +23,4 @@ const val EXTRA_NOTIF_ID = "notification-id"
 // intent actions
 const val ACTION_NOTIF_MARK_READ = "com.kanedias.dybr.fair.action.notif.MARK_READ"
 const val ACTION_NOTIF_SKIP = "com.kanedias.dybr.fair.action.notif.SKIP"
+const val ACTION_NOTIF_OPEN = "com.kanedias.dybr.fair.action.notif.OPEN"
