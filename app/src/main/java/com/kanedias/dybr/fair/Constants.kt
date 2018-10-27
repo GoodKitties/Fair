@@ -15,7 +15,8 @@ const val JOB_TAG_NOTIFICATIONS_PERIODIC = "Notifications-periodic"
 const val NC_SYNC_NOTIFICATIONS = "sync-notifications"
 
 // Notification IDs in notification manager
-const val NEW_COMMENTS_NOTIFICATION = 0
+const val NEW_COMMENTS_NOTIFICATION = 1000
+const val NEW_COMMENTS_NOTIFICATION_SUMMARY_TAG = "sync-notif-group"
 
 // intent extras
 const val EXTRA_NOTIF_ID = "notification-id"

@@ -134,9 +134,6 @@ class MainActivity : AppCompatActivity() {
         setupUI()
         // load user profile and initialize tabs
         reLogin(Auth.user)
-
-        // start notification job
-        SyncNotificationsJob.scheduleJob()
     }
 
     override fun onResume() {
@@ -522,6 +519,7 @@ class MainActivity : AppCompatActivity() {
                 refresh()
             } catch (ex: Exception) {
                 Network.reportErrors(this@MainActivity, ex)
+                becomeGuest()
             }
         }
     }

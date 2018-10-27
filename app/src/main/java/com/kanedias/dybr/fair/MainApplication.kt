@@ -1,5 +1,6 @@
 package com.kanedias.dybr.fair
 
+import android.annotation.TargetApi
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -17,6 +18,7 @@ import org.acra.annotation.AcraMailSender
 import org.acra.data.StringFormat
 import com.evernote.android.job.JobManager
 import com.kanedias.dybr.fair.scheduling.SyncJobCreator
+import com.kanedias.dybr.fair.scheduling.SyncNotificationsJob
 
 
 /**
@@ -28,6 +30,8 @@ import com.kanedias.dybr.fair.scheduling.SyncJobCreator
 @AcraMailSender(mailTo = "kanedias@xaker.ru", resSubject = R.string.app_crash_report, reportFileName = "crash-report.json")
 @AcraCore(buildConfigClass = BuildConfig::class, reportFormat = StringFormat.JSON, alsoReportToAndroidFramework = true)
 class MainApplication : Application() {
+
+    private var syncNotificationsJobId: Int = 0
 
     override fun attachBaseContext(base: Context?) {
         super.attachBaseContext(base)
@@ -44,7 +48,6 @@ class MainApplication : Application() {
         JobManager.create(this).addJobCreator(SyncJobCreator())
         initTheming()
         initStatusNotifications()
-        @Suppress("DEPRECATION")
 
         // load last account if it exists
         val acc = DbProvider.helper.accDao.queryBuilder().where().eq("current", true).queryForFirst()
@@ -54,15 +57,18 @@ class MainApplication : Application() {
     }
 
     private fun initStatusNotifications() {
-        val notifMgr = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notifMgr = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
             val syncNotifChannel = NotificationChannel(NC_SYNC_NOTIFICATIONS,
                     getString(R.string.notifications),
                     NotificationManager.IMPORTANCE_HIGH)
 
             notifMgr.createNotificationChannel(syncNotifChannel)
         }
+
+        // start notification job
+        syncNotificationsJobId = SyncNotificationsJob.scheduleJob()
     }
 
     private fun initTheming() {

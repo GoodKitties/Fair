@@ -9,6 +9,7 @@ import com.kanedias.dybr.fair.dto.NotificationRequest
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
+import java.lang.Exception
 
 /**
  * Broadcast receiver for handling internal intents within the application
@@ -30,14 +31,17 @@ class InternalReceiver: BroadcastReceiver() {
 
                 // mark notification as read and get rid of status bar item
                 launch(UI) {
-                    async { Network.updateNotification(marked) }.await()
-                    val nm = NotificationManagerCompat.from(context)
-                    nm.cancel(notifId, NEW_COMMENTS_NOTIFICATION)
+                    try {
+                        async { Network.updateNotification(marked) }.await()
+                        SyncNotificationsJob.markRead(context, notifId)
+                    } catch (ex: Exception) {
+                        Network.reportErrors(context, ex)
+                    }
                 }
             }
             ACTION_NOTIF_SKIP -> {
                 val notifId = intent.getStringExtra(EXTRA_NOTIF_ID) ?: return
-                SyncNotificationsJob.skippedNotificationIds.add(notifId)
+                SyncNotificationsJob.markSkipped(context, notifId)
             }
             else -> return
         }
