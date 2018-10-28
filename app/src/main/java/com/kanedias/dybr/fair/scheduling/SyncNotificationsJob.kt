@@ -11,7 +11,14 @@ import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.html2md.Html2Markdown
 import java.util.concurrent.TimeUnit
 import android.content.Intent
+import android.support.v4.app.Person
+import android.support.v4.graphics.drawable.IconCompat
+import android.util.Log
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
+import com.bumptech.glide.request.RequestOptions
 import com.kanedias.dybr.fair.dto.Notification
+import com.kanedias.dybr.fair.dto.OwnProfile
 import ru.noties.markwon.Markwon
 import java.lang.Exception
 import java.util.*
@@ -55,14 +62,6 @@ class SyncNotificationsJob: Job() {
             return Result.SUCCESS
         }
 
-        // create grouping android notification
-        val groupStyle = NotificationCompat.InboxStyle()
-        nonSkipped.forEach { msgNotif ->
-            val author = msgNotif.profile.get(msgNotif.document) ?: return@forEach
-            val source = msgNotif.source.get(msgNotif.document)
-            groupStyle.addLine("${author.nickname} · ${source.blogTitle}")
-        }
-
         // what to do on android notification click
         // currently simple and same for all notifications - just opens notifications tab in main activity
         val openIntent = Intent(context, MainActivity::class.java).apply {
@@ -71,33 +70,24 @@ class SyncNotificationsJob: Job() {
         }
         val openPI = PendingIntent.getActivity(context, 0, openIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        val groupNotif = NotificationCompat.Builder(context, NC_SYNC_NOTIFICATIONS)
-                .setSmallIcon(R.drawable.app_icon)
-                .setContentTitle(context.getString(R.string.new_comments))
-                .setContentText(context.getString(R.string.youve_received_new_comments))
-                .setGroup(context.getString(R.string.notifications))
-                .setGroupSummary(true)
-                .setOnlyAlertOnce(true)
-                .setCategory(NotificationCompat.CATEGORY_SOCIAL)
-                .setStyle(groupStyle)
-                .setContentIntent(openPI)
-                .build()
-
-        NotificationManagerCompat.from(context).notify(NEW_COMMENTS_NOTIFICATION_SUMMARY_TAG, NEW_COMMENTS_NOTIFICATION, groupNotif)
+        // configure own avatar
+        val userProfile = Auth.profile ?: return Result.SUCCESS // shouldn't happen
+        val userPerson = Person.Builder().setName(userProfile.nickname).setIcon(loadAvatar(userProfile)).build()
 
         // convert each website notification to android notification
         for (msgNotif in nonSkipped) {
-            val me = Auth.profile?.nickname ?: return Result.SUCCESS // shouldn't happen
             val comment = msgNotif.comment.get(msgNotif.document) ?: continue // comment itself
             val author = msgNotif.profile.get(msgNotif.document) ?: continue // profile of person who wrote the comment
             val source = msgNotif.source.get(msgNotif.document)
 
+            val authorPerson = Person.Builder().setName(author.nickname).setIcon(loadAvatar(author)).build()
+
             // get data from website notification
             val text = Html2Markdown().parse(comment.content).lines().first() + "..."
             val converted = Markwon.markdown(context, text).toString()
-            val msgStyle = NotificationCompat.MessagingStyle(me)
+            val msgStyle = NotificationCompat.MessagingStyle(userPerson)
                     .setConversationTitle(source.blogTitle)
-                    .addMessage(converted, comment.createdAt.time, author.nickname)
+                    .addMessage(converted, comment.createdAt.time, authorPerson)
 
             // fill Android notification intents
             // what to do on action click
@@ -135,11 +125,48 @@ class SyncNotificationsJob: Job() {
             NotificationManagerCompat.from(context).notify(msgNotif.id, NEW_COMMENTS_NOTIFICATION, statusUpdate)
         }
 
+        // create grouping android notification
+        val groupStyle = NotificationCompat.InboxStyle()
+        nonSkipped.forEach { msgNotif ->
+            val author = msgNotif.profile.get(msgNotif.document) ?: return@forEach
+            val source = msgNotif.source.get(msgNotif.document)
+            groupStyle.addLine("${author.nickname} · ${source.blogTitle}")
+        }
+
+        val groupNotif = NotificationCompat.Builder(context, NC_SYNC_NOTIFICATIONS)
+                .setSmallIcon(R.drawable.app_icon)
+                .setContentTitle(context.getString(R.string.new_comments))
+                .setContentText(context.getString(R.string.youve_received_new_comments))
+                .setGroup(context.getString(R.string.notifications))
+                .setGroupSummary(true)
+                .setOnlyAlertOnce(true)
+                .setCategory(NotificationCompat.CATEGORY_SOCIAL)
+                .setStyle(groupStyle)
+                .setContentIntent(openPI)
+                .build()
+
+        NotificationManagerCompat.from(context).notify(NEW_COMMENTS_NOTIFICATION_SUMMARY_TAG, NEW_COMMENTS_NOTIFICATION, groupNotif)
+
         // track what's shown currently in status bar
         // Keep in mind that this is a set so duplicates will be skipped
         currentlyShownIds.addAll(nonSkipped.map { it -> it.id })
 
         return Result.SUCCESS
+    }
+
+    private fun loadAvatar(prof: OwnProfile): IconCompat? {
+        if (prof.settings?.avatar == null)
+            return null
+
+        return try {
+            val bitmap = Glide.with(context).asBitmap()
+                    .apply(RequestOptions().transform(CircleCrop()))
+                    .load(prof.settings?.avatar).submit().get(5, TimeUnit.SECONDS)
+            IconCompat.createWithBitmap(bitmap)
+        } catch (ex: Exception) {
+            Log.e("SyncJob", "Couldn't load avatar for profile ${prof.nickname}")
+            null
+        }
     }
 
     companion object {
