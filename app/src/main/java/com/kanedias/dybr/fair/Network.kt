@@ -359,7 +359,7 @@ object Network {
         }
 
         val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(user))
-        val req = Request.Builder().url(USERS_ENDPOINT).patch(reqBody).build()
+        val req = Request.Builder().url("$USERS_ENDPOINT/${Auth.user.serverId}").patch(reqBody).build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw extractErrors(resp, "Can't activate profile")

@@ -207,6 +207,7 @@ class SyncNotificationsJob: Job() {
             currentlyShownIds.remove(notifId)
 
             // hide summary android notification if there's nothing to group
+            // not actually required, android deletes group one along with the last
             if (currentlyShownIds.isEmpty()) {
                 nm.cancel(NEW_COMMENTS_NOTIFICATION_SUMMARY_TAG, NEW_COMMENTS_NOTIFICATION)
             }

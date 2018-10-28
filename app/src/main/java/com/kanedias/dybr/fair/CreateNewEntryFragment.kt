@@ -89,6 +89,8 @@ class CreateNewEntryFragment : Fragment() {
     lateinit var blog: Blog
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        savedInstanceState?.getBoolean("editMode")?.let { editMode = it }
+        savedInstanceState?.getSerializable("editEntry")?.let { editEntry = it as Entry }
         savedInstanceState?.getSerializable("blog")?.let { blog = it as Blog }
 
         val root = inflater.inflate(R.layout.fragment_create_entry, container, false)
@@ -129,7 +131,12 @@ class CreateNewEntryFragment : Fragment() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putSerializable("blog", blog)
+
+        outState.putBoolean("editMode", editMode)
+        when (editMode) {
+            false -> outState.putSerializable("blog", blog)
+            true -> outState.putSerializable("editEntry", editEntry)
+        }
     }
 
     /**

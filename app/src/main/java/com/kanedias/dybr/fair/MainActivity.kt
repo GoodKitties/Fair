@@ -619,7 +619,8 @@ class MainActivity : AppCompatActivity() {
     fun addEntry() {
         // use `instantiate` here because getItem returns new item with each invocation
         // we know that fragment is already present so it will return cached one
-        val currFragment = tabAdapter.instantiateItem(pager, pager.currentItem) as EntryListFragment
+        val currFragment = tabAdapter.instantiateItem(pager, pager.currentItem) as? EntryListFragment ?: return
+
         if (currFragment.refresher.isRefreshing) {
             // diary is not loaded yet
             Toast.makeText(this, R.string.still_loading, Toast.LENGTH_SHORT).show()
