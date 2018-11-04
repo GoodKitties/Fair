@@ -1,6 +1,5 @@
 package com.kanedias.dybr.fair
 
-import android.app.FragmentTransaction
 import android.content.Intent
 import android.content.SharedPreferences
 import android.database.Cursor
@@ -13,6 +12,7 @@ import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentStatePagerAdapter
+import android.support.v4.app.FragmentTransaction
 import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewPager
@@ -38,12 +38,10 @@ import com.kanedias.dybr.fair.database.entities.Account
 import com.kanedias.dybr.fair.database.entities.SearchGotoInfo
 import com.kanedias.dybr.fair.database.entities.SearchGotoInfo.*
 import com.kanedias.dybr.fair.dto.*
-import com.kanedias.dybr.fair.scheduling.SyncNotificationsJob
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.Sidebar
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.android.Main
 
 /**
  * Main activity with drawer and sliding tabs where most of user interaction happens.
@@ -213,7 +211,7 @@ class MainActivity : AppCompatActivity() {
                 if (query.isNullOrEmpty())
                     return true
 
-                searchAdapter.changeCursor(constructSuggestions(query!!))
+                searchAdapter.changeCursor(constructSuggestions(query))
                 return true
             }
 
@@ -239,16 +237,16 @@ class MainActivity : AppCompatActivity() {
                 val type = EntityType.valueOf(cursor.getString(cursor.getColumnIndex("type")))
 
                 // jump to respective blog or profile if they exist
-                launch(UI) {
+                GlobalScope.launch(Dispatchers.Main) {
                     try {
                         when (type) {
                             EntityType.PROFILE -> {
-                                val prof = async { Network.loadProfileByNickname(name) }.await()
+                                val prof = async(Dispatchers.IO) { Network.loadProfileByNickname(name) }.await()
                                 val fragment = ProfileFragment().apply { profile = prof }
                                 fragment.show(supportFragmentManager, "Showing search-requested profile fragment")
                             }
                             EntityType.BLOG -> {
-                                val blog = async { Network.loadBlogBySlug(name) }.await()
+                                val blog = async(Dispatchers.IO) { Network.loadBlogBySlug(name) }.await()
                                 val fragment = EntryListFragmentFull().apply { this.blog = blog }
                                 supportFragmentManager.beginTransaction()
                                         .addToBackStack("Showing search-requested address")
@@ -347,7 +345,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             val progressDialog = MaterialDialog.Builder(this@MainActivity)
                     .progress(true, 0)
                     .cancelable(false)
@@ -358,7 +356,7 @@ class MainActivity : AppCompatActivity() {
 
             try {
                 // login with this account and reset profile/blog links
-                async { Network.login(acc) }.await()
+                async(Dispatchers.IO) { Network.login(acc) }.await()
 
                 if (Auth.user.lastProfileId == null) {
                     // first time we're loading this account, select profile
@@ -401,7 +399,7 @@ class MainActivity : AppCompatActivity() {
                 pager.setCurrentItem(NOTIFICATIONS_TAB, true)
             }
 
-            Intent.ACTION_VIEW -> launch(UI) {
+            Intent.ACTION_VIEW -> GlobalScope.launch(Dispatchers.Main) {
                 // try to detect if it's someone trying to open the dybr.ru link with us
                 if (cause.data?.authority?.contains("dybr.ru") == true) {
                     consumeCallingUrl(cause)
@@ -418,16 +416,16 @@ class MainActivity : AppCompatActivity() {
      */
     private suspend fun consumeCallingUrl(cause: Intent) {
         try {
-            val address = cause.data.pathSegments // it's in the form of /blog/<slug>/[<entry>]
+            val address = cause.data?.pathSegments ?: return // it's in the form of /blog/<slug>/[<entry>]
             when(address[0]) {
                 "blog" -> {
                     val fragment = when (address.size) {
                         2 -> {  // the case for /blog/<slug>
-                            val blog = async { Network.loadBlogBySlug(address[1]) }.await()
+                            val blog = GlobalScope.async(Dispatchers.IO) { Network.loadBlogBySlug(address[1]) }.await()
                             EntryListFragmentFull().apply { this.blog = blog }
                         }
                         3 -> { // the case for /blog/<slug>/<entry>
-                            val entry = async { Network.loadEntry(address[2]) }.await()
+                            val entry = GlobalScope.async(Dispatchers.IO) { Network.loadEntry(address[2]) }.await()
                             CommentListFragment().apply { this.entry = entry }
                         }
                         else -> return
@@ -442,7 +440,7 @@ class MainActivity : AppCompatActivity() {
                 "profile" -> {
                     val fragment = when (address.size) {
                         2 -> { // the case for /profile/<id>
-                            val profile = async { Network.loadProfile(address[1]) }.await()
+                            val profile = GlobalScope.async(Dispatchers.IO) { Network.loadProfile(address[1]) }.await()
                             ProfileFragment().apply { this.profile = profile }
                         }
                         else -> return
@@ -468,7 +466,7 @@ class MainActivity : AppCompatActivity() {
      */
     suspend fun startProfileSelector(showIfOne: Boolean = false) {
         // retrieve profiles from server
-        val profiles = async { Network.loadUserProfiles() }.await()
+        val profiles = GlobalScope.async(Dispatchers.IO) { Network.loadUserProfiles() }.await()
 
         // predefine what to do if new profile is needed
 
@@ -511,10 +509,10 @@ class MainActivity : AppCompatActivity() {
      */
     private fun selectProfile(prof: OwnProfile) {
         // need to retrieve selected profile fully, i.e. with favorites and stuff
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             try {
-                async { Network.makeProfileActive(prof) }.await()
-                val fullProf = async { Network.loadProfile(prof.id) }.await()
+                async(Dispatchers.IO) { Network.makeProfileActive(prof) }.await()
+                val fullProf = async(Dispatchers.IO) { Network.loadProfile(prof.id) }.await()
                 Auth.updateCurrentProfile(fullProf)
                 refresh()
             } catch (ex: Exception) {
@@ -552,9 +550,9 @@ class MainActivity : AppCompatActivity() {
      * @param prof profile to remove
      */
     private fun deleteProfile(prof: OwnProfile) {
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             try {
-                async { Network.removeProfile(prof) }.await()
+                async(Dispatchers.IO) { Network.removeProfile(prof) }.await()
                 Toast.makeText(this@MainActivity, R.string.profile_deleted, Toast.LENGTH_SHORT).show()
             } catch (ex: Exception) {
                 Network.reportErrors(this@MainActivity, ex)
@@ -583,12 +581,12 @@ class MainActivity : AppCompatActivity() {
     fun refresh() {
 
         // load current blog and favorites
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
 
             if (Auth.profile != null && Auth.blog == null) {
                 // we have loaded profile, try to load our blog
                 try {
-                    async { Network.populateBlog() }.await()
+                    async(Dispatchers.IO) { Network.populateBlog() }.await()
                 } catch (ex: Exception) {
                     Network.reportErrors(this@MainActivity, ex)
                 }

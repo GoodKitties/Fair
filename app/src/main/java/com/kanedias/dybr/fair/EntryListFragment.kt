@@ -1,9 +1,9 @@
 package com.kanedias.dybr.fair
 
-import android.app.FragmentTransaction
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentStatePagerAdapter
+import android.support.v4.app.FragmentTransaction
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -14,8 +14,8 @@ import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
 import com.kanedias.dybr.fair.dto.*
-import kotlinx.coroutines.experimental.*
-import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.*
+import kotlinx.coroutines.android.Main
 import moe.banana.jsonapi2.ArrayDocument
 
 
@@ -114,11 +114,11 @@ open class EntryListFragment: Fragment() {
             lastPage = false
         }
 
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             refresher.isRefreshing = true
 
             try {
-                val success = async { Network.loadEntries(blog!!, nextPage) }
+                val success = async(Dispatchers.IO) { Network.loadEntries(blog!!, nextPage) }
                 updateRibbonPage(success.await(), reset)
             } catch (ex: Exception) {
                 Network.reportErrors(activity, ex)

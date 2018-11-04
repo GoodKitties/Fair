@@ -23,8 +23,8 @@ import com.kanedias.dybr.fair.dto.EntryCreateRequest
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.md.handleMarkdownRaw
 import com.kanedias.html2md.Html2Markdown
-import kotlinx.coroutines.experimental.*
-import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.*
+import kotlinx.coroutines.android.Main
 import moe.banana.jsonapi2.HasOne
 import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
 import org.commonmark.ext.gfm.tables.TablesExtension
@@ -232,17 +232,17 @@ class CreateNewEntryFragment : Fragment() {
         }
 
         // make http request
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             try {
                 if (editMode) {
                     // alter existing entry
                     entry.id = editEntry.id
-                    async { Network.updateEntry(entry) }.await()
+                    async(Dispatchers.IO) { Network.updateEntry(entry) }.await()
                     Toast.makeText(activity, R.string.entry_updated, Toast.LENGTH_SHORT).show()
                 } else {
                     // create new
                     entry.blog = HasOne(blog)
-                    async { Network.createEntry(entry) }.await()
+                    async(Dispatchers.IO) { Network.createEntry(entry) }.await()
                     Toast.makeText(activity, R.string.entry_created, Toast.LENGTH_SHORT).show()
                 }
                 fragmentManager!!.popBackStack()

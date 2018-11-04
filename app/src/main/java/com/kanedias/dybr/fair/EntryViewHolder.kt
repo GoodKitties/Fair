@@ -1,6 +1,5 @@
 package com.kanedias.dybr.fair
 
-import android.app.FragmentTransaction
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
@@ -18,16 +17,16 @@ import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.dto.Entry
 import com.kanedias.dybr.fair.ui.md.handleMarkdown
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
 import java.text.SimpleDateFormat
 import java.util.*
 import android.content.ComponentName
 import android.content.pm.PackageManager
+import android.support.v4.app.FragmentTransaction
 import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.dto.EntryMeta
 import com.kanedias.dybr.fair.themes.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.android.Main
 
 /**
  * View holder for showing regular entries in diary view.
@@ -128,9 +127,9 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
 
         // delete callback
         val delete = {
-            launch(UI) {
+            GlobalScope.launch(Dispatchers.Main) {
                 try {
-                    async { Network.deleteEntry(entry) }.await()
+                    async(Dispatchers.IO) { Network.deleteEntry(entry) }.await()
                     Toast.makeText(activity, R.string.entry_deleted, Toast.LENGTH_SHORT).show()
                     activity.supportFragmentManager.popBackStack()
 
@@ -200,11 +199,11 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
                 .content(R.string.loading_profile)
                 .build()
 
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             dialog.show()
 
             try {
-                val prof = async { Network.loadProfile(entry.profile.get().id) }.await()
+                val prof = async(Dispatchers.IO) { Network.loadProfile(entry.profile.get().id) }.await()
                 val profShow = ProfileFragment().apply { profile = prof }
                 profShow.show(activity.supportFragmentManager, "Showing user profile fragment")
             } catch (ex: Exception) {

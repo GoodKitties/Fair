@@ -18,12 +18,10 @@ import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.dto.RegisterRequest
 import com.kanedias.dybr.fair.ui.LoginInputs
 import com.kanedias.dybr.fair.ui.RegisterInputs
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.delay
 import java.util.concurrent.TimeUnit
 import com.kanedias.dybr.fair.ui.Sidebar
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.android.Main
 
 /**
  * Fragment responsible for adding account. Appears when you click "add account" in the sidebar.
@@ -120,7 +118,7 @@ class AddAccountFragment : Fragment() {
         if (!validator.validateFields()) {
             // don't allow network request if there are errors in form
             // and hide errors after 3 seconds
-            async(UI) { delay(3, TimeUnit.SECONDS); validator.clearValidations() }
+            GlobalScope.async(Dispatchers.Main) { delay(3, TimeUnit.SECONDS); validator.clearValidations() }
             return
         }
 
@@ -144,11 +142,11 @@ class AddAccountFragment : Fragment() {
             current = true
         }
 
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             progressDialog.show()
 
             try {
-                async { Network.login(acc) }.await()
+                async(Dispatchers.IO) { Network.login(acc) }.await()
 
                 Toast.makeText(activity, R.string.login_successful, Toast.LENGTH_SHORT).show()
                 activity.startProfileSelector() // shows profile selection dialog
@@ -177,11 +175,11 @@ class AddAccountFragment : Fragment() {
             isAdult = isAdultSwitch.isChecked
         }
 
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             progressDialog.show()
 
             try {
-                val response = async { Network.createAccount(req) }.await()
+                val response = async(Dispatchers.IO) { Network.createAccount(req) }.await()
                 val acc = Account().apply {
                     serverId = response.id
                     email = response.email

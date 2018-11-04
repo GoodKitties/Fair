@@ -13,9 +13,8 @@ import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.dto.BlogCreateRequest
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.android.Main
 
 /**
  * Fragment for creating blog for currently logged in profile.
@@ -58,11 +57,11 @@ class AddBlogFragment: Fragment() {
             profile.set(Auth.profile)
         }
 
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             progressDialog.show()
 
             try {
-                val blog = async { Network.createBlog(blogReq) }.await()
+                val blog = async(Dispatchers.IO) { Network.createBlog(blogReq) }.await()
                 Auth.updateBlog(blog)
 
                 //we created blog successfully, return to main activity

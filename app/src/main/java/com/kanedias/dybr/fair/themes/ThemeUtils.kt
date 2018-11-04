@@ -12,9 +12,11 @@ import com.kanedias.dybr.fair.Network
 import com.kanedias.dybr.fair.dto.Blog
 import com.kanedias.dybr.fair.dto.Design
 import com.kanedias.dybr.fair.dto.isMarkerBlog
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.android.Main
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import java.util.regex.Pattern
 
 const val TOOLBAR = 0       // top toolbar color
@@ -31,7 +33,7 @@ const val TEXT_OFFTOP = 10  // color of offtop and hints in text
 
 /**
  * Converts rgba string to standard color integer notation
- * @param rgba css string in the form of `rgba(255, 127, 63, 0.39)`
+ * String should be css string in the form of `rgba(255, 127, 63, 0.39)`
  */
 fun String.colorFromCss() : Int? {
     val rgbaCssString = Pattern.compile("rgba\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*([\\d.]+)\\s*\\)")
@@ -77,11 +79,11 @@ fun applyTheme(blog: Blog, target: Context) {
     if (!prefs.getBoolean("apply-blog-theme", true))
         return
 
-    launch(UI) {
+    launch(Dispatchers.Main) {
         try {
-            val fullBlog = async { Network.loadBlog(blog.id) }.await()
+            val fullBlog = async(Dispatchers.IO) { Network.loadBlog(blog.id) }.await()
             val relatedProf = fullBlog.profile.get(fullBlog.document) ?: return@launch
-            val design = async { Network.loadProfileDesign(relatedProf) }.await() ?: return@launch
+            val design = async(Dispatchers.IO) { Network.loadProfileDesign(relatedProf) }.await() ?: return@launch
 
             updateColorBindings(design)
         } catch (ex: Exception) {

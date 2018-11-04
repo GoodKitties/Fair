@@ -11,8 +11,8 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.dto.*
-import kotlinx.coroutines.experimental.*
-import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.*
+import kotlinx.coroutines.android.Main
 import moe.banana.jsonapi2.ArrayDocument
 
 /**
@@ -65,9 +65,9 @@ open class NotificationListFragment: Fragment() {
 
     private fun markAllRead() {
         val markRoutine = {
-            launch(UI) {
+            GlobalScope.launch(Dispatchers.Main) {
                 try {
-                    async { Network.markAllNotificationsRead() }
+                    GlobalScope.async(Dispatchers.IO) { Network.markAllNotificationsRead() }
                     refreshNotifications(true)
                 } catch (ex: Exception) {
                     Network.reportErrors(activity, ex)
@@ -109,11 +109,11 @@ open class NotificationListFragment: Fragment() {
             lastPage = false
         }
 
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             refresher.isRefreshing = true
 
             try {
-                val success = async { Network.loadNotifications(pageNum = nextPage) }
+                val success = async(Dispatchers.IO) { Network.loadNotifications(pageNum = nextPage) }
                 updateRibbonPage(success.await(), reset)
             } catch (ex: Exception) {
                 Network.reportErrors(activity, ex)

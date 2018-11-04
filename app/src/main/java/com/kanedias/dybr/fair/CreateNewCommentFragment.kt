@@ -20,9 +20,8 @@ import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.md.handleMarkdownRaw
 import com.kanedias.html2md.Html2Markdown
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.android.Main
 import moe.banana.jsonapi2.HasOne
 import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
 import org.commonmark.ext.gfm.tables.TablesExtension
@@ -198,18 +197,18 @@ class CreateNewCommentFragment : Fragment() {
         val comment = CreateCommentRequest().apply { content = htmlContent }
 
         // make http request
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             try {
                 if (editMode) {
                     // alter existing comment
                     comment.id = editComment.id
-                    async { Network.updateComment(comment) }.await()
+                    async(Dispatchers.IO) { Network.updateComment(comment) }.await()
                     Toast.makeText(activity, R.string.comment_updated, Toast.LENGTH_SHORT).show()
                 } else {
                     // create new
                     comment.entry = HasOne(entry)
                     comment.profile = HasOne(Auth.profile)
-                    async { Network.createComment(comment) }.await()
+                    async(Dispatchers.IO) { Network.createComment(comment) }.await()
                     Toast.makeText(activity, R.string.comment_created, Toast.LENGTH_SHORT).show()
                 }
                 fragmentManager!!.popBackStack()

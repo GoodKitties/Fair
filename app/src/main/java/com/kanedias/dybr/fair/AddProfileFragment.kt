@@ -13,9 +13,11 @@ import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.dto.ProfileCreateRequest
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.android.Main
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 /**
  * Fragment for creating profile for currently logged in account.
@@ -61,11 +63,11 @@ class AddProfileFragment: Fragment() {
             description = descInput.text.toString()
         }
 
-        launch(UI) {
+        launch(Dispatchers.Main) {
             progressDialog.show()
 
             try {
-                val profile = async { Network.createProfile(profReq) }.await()
+                val profile = async(Dispatchers.IO) { Network.createProfile(profReq) }.await()
                 Auth.updateCurrentProfile(profile)
 
                 //we created profile successfully, return to main activity

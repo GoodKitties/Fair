@@ -1,12 +1,12 @@
 package com.kanedias.dybr.fair
 
 import android.app.Dialog
-import android.app.FragmentTransaction
 import android.graphics.BitmapFactory
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
+import android.support.v4.app.FragmentTransaction
 import android.text.Html
 import android.widget.ImageView
 import android.widget.TextView
@@ -19,14 +19,11 @@ import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.dto.Blog
 import com.kanedias.dybr.fair.dto.OwnProfile
 import com.kanedias.dybr.fair.misc.idMatches
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.android.Main
 import okhttp3.HttpUrl
 import okhttp3.Request
 import java.io.IOException
-import java.net.URI
-import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -102,13 +99,13 @@ class ProfileFragment: DialogFragment() {
         if (!avatarUrl.isNullOrBlank()) {
             // resolve URL if it's not absolute
             val base = HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT) ?: return
-            val resolved = base.resolve(avatarUrl!!) ?: return
+            val resolved = base.resolve(avatarUrl) ?: return
 
             // load avatar asynchronously
-            launch(UI) {
+            GlobalScope.launch(Dispatchers.Main) {
                 try {
                     val req = Request.Builder().url(resolved).build()
-                    val bitmap = async {
+                    val bitmap = async(Dispatchers.IO) {
                         val resp = Network.httpClient.newCall(req).execute()
                         BitmapFactory.decodeStream(resp.body()?.byteStream())
                     }.await()
@@ -131,17 +128,17 @@ class ProfileFragment: DialogFragment() {
     @OnClick(R.id.author_add_to_favorites)
     fun toggleFavorite() {
         // if it's clicked then it's visible
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             try {
                 if (Auth.profile?.favorites?.any { it.idMatches(profile) } == true) {
                     // remove from favorites
-                    async { Network.removeFavorite(profile) }.await()
+                    async(Dispatchers.IO) { Network.removeFavorite(profile) }.await()
                     Auth.profile?.favorites?.remove(profile)
                     favoritesToggle.setImageDrawable(emptyStar)
                     Toast.makeText(activity, R.string.removed_from_favorites, Toast.LENGTH_SHORT).show()
                 } else {
                     // add to favorites
-                    async { Network.addFavorite(profile) }.await()
+                    async(Dispatchers.IO) { Network.addFavorite(profile) }.await()
                     Auth.profile?.favorites?.add(profile)
                     favoritesToggle.setImageDrawable(filledStar)
                     Toast.makeText(activity, R.string.added_to_favorites, Toast.LENGTH_SHORT).show()

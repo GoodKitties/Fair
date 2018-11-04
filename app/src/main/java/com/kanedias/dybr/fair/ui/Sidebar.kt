@@ -3,8 +3,8 @@ package com.kanedias.dybr.fair.ui
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
-import android.app.FragmentTransaction
 import android.content.Intent
+import android.support.v4.app.FragmentTransaction
 import android.support.v4.view.animation.FastOutSlowInInterpolator
 import android.support.v4.widget.DrawerLayout
 import android.view.View
@@ -17,10 +17,9 @@ import com.kanedias.dybr.fair.*
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.database.entities.Account
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.channels.actor
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.android.Main
+import kotlinx.coroutines.channels.actor
 
 /**
  * Sidebar views and controls.
@@ -115,11 +114,11 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
                 .content(R.string.loading_profile)
                 .build()
 
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             dialog.show()
 
             try {
-                val prof = async { Network.loadProfile(Auth.profile!!.id) }.await()
+                val prof = async(Dispatchers.IO) { Network.loadProfile(Auth.profile!!.id) }.await()
                 val profShow = ProfileFragment().apply { profile = prof }
                 profShow.show(activity.supportFragmentManager, "Showing my profile fragment")
             } catch (ex: Exception) {
@@ -227,7 +226,7 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
 
         // handle click on profile change button
         // we need to ignore subsequent clicks if profiles are already loading
-        val profileSwapActor = actor<Unit>(UI) {
+        val profileSwapActor = actor<Unit>(Dispatchers.Main) {
             for (event in channel) {
                 val swapAnim = ValueAnimator.ofFloat(1f, -1f, 1f)
                 swapAnim.interpolator = FastOutSlowInInterpolator()

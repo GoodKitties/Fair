@@ -1,9 +1,9 @@
 package com.kanedias.dybr.fair
 
-import android.app.FragmentTransaction
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentTransaction
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.graphics.drawable.DrawerArrowDrawable
 import android.support.v7.widget.LinearLayoutManager
@@ -19,9 +19,8 @@ import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.dto.Comment
 import com.kanedias.dybr.fair.dto.Entry
 import com.kanedias.dybr.fair.themes.*
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.android.Main
 import moe.banana.jsonapi2.ArrayDocument
 
 /**
@@ -103,12 +102,12 @@ class CommentListFragment : Fragment() {
             return
         }
 
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             refresher.isRefreshing = true
 
             try {
-                val entryDemand = async { Network.loadEntry(entry!!.id) }
-                val commentsDemand = async { Network.loadComments(entry!!) }
+                val entryDemand = async(Dispatchers.IO) { Network.loadEntry(entry!!.id) }
+                val commentsDemand = async(Dispatchers.IO) { Network.loadComments(entry!!) }
                 commentAdapter.comments = commentsDemand.await() // refresh comments of this entry
                 commentAdapter.entry = entry!!.apply { meta = entryDemand.await().meta } // refresh comment num and participants
                 commentRibbon.adapter = commentAdapter

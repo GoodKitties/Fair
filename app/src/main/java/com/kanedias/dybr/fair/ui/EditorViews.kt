@@ -30,9 +30,8 @@ import com.kanedias.dybr.fair.R
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.database.entities.OfflineDraft
 import com.kanedias.dybr.fair.themes.*
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.android.Main
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -230,7 +229,7 @@ class EditorViews : Fragment() {
             return
 
         val stream = activity?.contentResolver?.openInputStream(intent.data) ?: return
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             val dialog = MaterialDialog.Builder(activity!!)
                     .title(R.string.please_wait)
                     .content(R.string.uploading)
@@ -238,7 +237,7 @@ class EditorViews : Fragment() {
                     .show()
 
             try {
-                val link = async { Network.uploadImage(stream.readBytes()) }.await()
+                val link = async(Dispatchers.IO) { Network.uploadImage(stream.readBytes()) }.await()
                 MaterialDialog.Builder(activity!!)
                         .title(R.string.insert_image)
                         .content(R.string.select_image_height)

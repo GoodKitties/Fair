@@ -1,7 +1,7 @@
 package com.kanedias.dybr.fair
 
-import android.app.FragmentTransaction
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentTransaction
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
 import android.view.View
@@ -17,9 +17,8 @@ import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.md.handleMarkdown
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.android.Main
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -84,9 +83,9 @@ class CommentViewHolder(iv: View, private val parent: View) : RecyclerView.ViewH
 
         // delete callback
         val delete = {
-            launch(UI) {
+            GlobalScope.launch(Dispatchers.Main) {
                 try {
-                    async { Network.deleteComment(comment) }.await()
+                    async(Dispatchers.IO) { Network.deleteComment(comment) }.await()
                     Toast.makeText(activity, R.string.comment_deleted, Toast.LENGTH_SHORT).show()
 
                     // if we have current tab, refresh it
@@ -146,11 +145,11 @@ class CommentViewHolder(iv: View, private val parent: View) : RecyclerView.ViewH
                 .content(R.string.loading_profile)
                 .build()
 
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             dialog.show()
 
             try {
-                val prof = async { Network.loadProfile(comment.profile.get().id) }.await()
+                val prof = async(Dispatchers.IO) { Network.loadProfile(comment.profile.get().id) }.await()
                 val profShow = ProfileFragment().apply { profile = prof }
                 profShow.show(activity.supportFragmentManager, "Showing user profile fragment")
             } catch (ex: Exception) {

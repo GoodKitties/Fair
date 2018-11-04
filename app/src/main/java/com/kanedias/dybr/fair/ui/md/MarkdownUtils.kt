@@ -23,8 +23,8 @@ import com.bumptech.glide.request.transition.Transition
 import com.kanedias.dybr.fair.Network
 import com.kanedias.dybr.fair.R
 import com.kanedias.html2md.Html2Markdown
-import kotlinx.coroutines.experimental.*
-import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.*
+import kotlinx.coroutines.android.Main
 import okhttp3.HttpUrl
 import ru.noties.markwon.Markwon
 import ru.noties.markwon.SpannableConfiguration
@@ -44,9 +44,9 @@ infix fun TextView.handleMarkdown(html: String) {
 
     label.text = null
 
-    launch(UI) {
+    GlobalScope.launch(Dispatchers.Main) {
         // this is computation-intensive task, better do it smoothly
-        val span = async {
+        val span = async(Dispatchers.IO) {
             val mdConfig = SpannableConfiguration.builder(label.context).asyncDrawableLoader(DrawableLoader(label)).build()
             val spanned = Markwon.markdown(mdConfig, Html2Markdown().parse(html)) as SpannableStringBuilder
             postProcessSpans(label, spanned)
@@ -184,7 +184,7 @@ class DrawableLoader(private val view: TextView): AsyncDrawable.Loader {
         val base = HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT) ?: return
         val resolved = base.resolve(imageUrl) ?: return
 
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             try {
                 while (view.width == 0) // just inflated
                     delay(500)

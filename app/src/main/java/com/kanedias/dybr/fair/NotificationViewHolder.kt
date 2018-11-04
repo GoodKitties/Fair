@@ -16,9 +16,8 @@ import java.util.*
 import com.kanedias.dybr.fair.dto.Notification
 import com.kanedias.dybr.fair.dto.NotificationRequest
 import com.kanedias.dybr.fair.ui.toggleEnableRecursive
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.android.Main
 
 /**
  * View holder for showing notifications in main tab.
@@ -63,9 +62,9 @@ class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
     private val commentShow  = View.OnClickListener { it ->
         val activity = it.context as AppCompatActivity
 
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             try {
-                val linkedEntry = async { Network.loadEntry(notification.entryId) }.await()
+                val linkedEntry = async(Dispatchers.IO) { Network.loadEntry(notification.entryId) }.await()
                 val commentsPage = CommentListFragment().apply { entry = linkedEntry }
                 activity.supportFragmentManager.beginTransaction()
                         .addToBackStack("Showing comment list fragment from notification")
@@ -93,9 +92,9 @@ class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
             state = "read"
         }
 
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             try {
-                async { Network.updateNotification(marked) }.await()
+                async(Dispatchers.IO) { Network.updateNotification(marked) }.await()
                 readButton.setImageResource(R.drawable.done_all)
                 toggleEnableRecursive(notificationArea, enabled = false)
             } catch (ex: Exception) {

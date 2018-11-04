@@ -3,12 +3,9 @@ package com.kanedias.dybr.fair.scheduling
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.support.v4.app.NotificationManagerCompat
 import com.kanedias.dybr.fair.*
 import com.kanedias.dybr.fair.dto.NotificationRequest
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.*
 import java.lang.Exception
 
 /**
@@ -30,9 +27,9 @@ class InternalReceiver: BroadcastReceiver() {
                 }
 
                 // mark notification as read and get rid of status bar item
-                launch(UI) {
+                GlobalScope.launch(Dispatchers.Main) {
                     try {
-                        async { Network.updateNotification(marked) }.await()
+                        async(Dispatchers.IO) { Network.updateNotification(marked) }.await()
                         SyncNotificationsJob.markRead(context, notifId)
                     } catch (ex: Exception) {
                         Network.reportErrors(context, ex)
