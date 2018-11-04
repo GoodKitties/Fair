@@ -26,7 +26,6 @@ import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.dto.EntryMeta
 import com.kanedias.dybr.fair.themes.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.android.Main
 
 /**
  * View holder for showing regular entries in diary view.

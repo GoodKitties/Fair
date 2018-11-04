@@ -18,8 +18,7 @@ import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.database.entities.Account
 import kotlinx.coroutines.*
-import kotlinx.coroutines.android.Main
-import kotlinx.coroutines.channels.actor
+import kotlinx.coroutines.channels.*
 
 /**
  * Sidebar views and controls.
@@ -226,7 +225,7 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
 
         // handle click on profile change button
         // we need to ignore subsequent clicks if profiles are already loading
-        val profileSwapActor = actor<Unit>(Dispatchers.Main) {
+        val profileSwapActor = GlobalScope.actor<Unit>(Dispatchers.Main) {
             for (event in channel) {
                 val swapAnim = ValueAnimator.ofFloat(1f, -1f, 1f)
                 swapAnim.interpolator = FastOutSlowInInterpolator()

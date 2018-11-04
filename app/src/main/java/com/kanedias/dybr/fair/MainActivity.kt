@@ -41,7 +41,6 @@ import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.Sidebar
 import kotlinx.coroutines.*
-import kotlinx.coroutines.android.Main
 
 /**
  * Main activity with drawer and sliding tabs where most of user interaction happens.

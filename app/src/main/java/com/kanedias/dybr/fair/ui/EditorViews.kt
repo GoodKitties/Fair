@@ -31,7 +31,6 @@ import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.database.entities.OfflineDraft
 import com.kanedias.dybr.fair.themes.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.android.Main
 import java.text.SimpleDateFormat
 import java.util.*
 

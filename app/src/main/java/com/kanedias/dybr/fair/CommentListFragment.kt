@@ -20,7 +20,6 @@ import com.kanedias.dybr.fair.dto.Comment
 import com.kanedias.dybr.fair.dto.Entry
 import com.kanedias.dybr.fair.themes.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.android.Main
 import moe.banana.jsonapi2.ArrayDocument
 
 /**

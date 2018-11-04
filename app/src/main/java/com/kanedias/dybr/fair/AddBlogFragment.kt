@@ -14,7 +14,6 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.dto.BlogCreateRequest
 import kotlinx.coroutines.*
-import kotlinx.coroutines.android.Main
 
 /**
  * Fragment for creating blog for currently logged in profile.

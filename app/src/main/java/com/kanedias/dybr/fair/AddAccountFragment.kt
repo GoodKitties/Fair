@@ -21,7 +21,6 @@ import com.kanedias.dybr.fair.ui.RegisterInputs
 import java.util.concurrent.TimeUnit
 import com.kanedias.dybr.fair.ui.Sidebar
 import kotlinx.coroutines.*
-import kotlinx.coroutines.android.Main
 
 /**
  * Fragment responsible for adding account. Appears when you click "add account" in the sidebar.
@@ -118,7 +117,7 @@ class AddAccountFragment : Fragment() {
         if (!validator.validateFields()) {
             // don't allow network request if there are errors in form
             // and hide errors after 3 seconds
-            GlobalScope.async(Dispatchers.Main) { delay(3, TimeUnit.SECONDS); validator.clearValidations() }
+            GlobalScope.async(Dispatchers.Main) { delay(TimeUnit.SECONDS.toMillis(3)); validator.clearValidations() }
             return
         }
 

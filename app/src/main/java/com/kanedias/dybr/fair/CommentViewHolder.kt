@@ -18,7 +18,6 @@ import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.md.handleMarkdown
 import kotlinx.coroutines.*
-import kotlinx.coroutines.android.Main
 import java.text.SimpleDateFormat
 import java.util.*
 

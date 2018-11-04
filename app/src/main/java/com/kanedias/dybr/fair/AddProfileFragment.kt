@@ -13,11 +13,7 @@ import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.dto.ProfileCreateRequest
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.android.Main
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 /**
  * Fragment for creating profile for currently logged in account.
@@ -63,7 +59,7 @@ class AddProfileFragment: Fragment() {
             description = descInput.text.toString()
         }
 
-        launch(Dispatchers.Main) {
+        GlobalScope.launch(Dispatchers.Main) {
             progressDialog.show()
 
             try {

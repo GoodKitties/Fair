@@ -20,7 +20,6 @@ import com.kanedias.dybr.fair.dto.Blog
 import com.kanedias.dybr.fair.dto.OwnProfile
 import com.kanedias.dybr.fair.misc.idMatches
 import kotlinx.coroutines.*
-import kotlinx.coroutines.android.Main
 import okhttp3.HttpUrl
 import okhttp3.Request
 import java.io.IOException

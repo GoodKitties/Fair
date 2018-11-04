@@ -17,7 +17,6 @@ import com.kanedias.dybr.fair.dto.Notification
 import com.kanedias.dybr.fair.dto.NotificationRequest
 import com.kanedias.dybr.fair.ui.toggleEnableRecursive
 import kotlinx.coroutines.*
-import kotlinx.coroutines.android.Main
 
 /**
  * View holder for showing notifications in main tab.

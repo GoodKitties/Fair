@@ -1,7 +1,6 @@
 package com.kanedias.dybr.fair.ui.md
 
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.preference.PreferenceManager
 import android.text.SpannableStringBuilder
 import android.text.Spanned
@@ -12,19 +11,14 @@ import android.util.Log
 import android.view.View
 import android.widget.TextView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.CenterInside
-import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
-import com.bumptech.glide.load.resource.bitmap.FitCenter
 import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.SimpleTarget
-import com.bumptech.glide.request.target.SizeReadyCallback
 import com.bumptech.glide.request.transition.Transition
 import com.kanedias.dybr.fair.Network
 import com.kanedias.dybr.fair.R
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.*
-import kotlinx.coroutines.android.Main
 import okhttp3.HttpUrl
 import ru.noties.markwon.Markwon
 import ru.noties.markwon.SpannableConfiguration

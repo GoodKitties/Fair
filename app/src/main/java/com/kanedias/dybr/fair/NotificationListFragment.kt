@@ -12,7 +12,6 @@ import butterknife.ButterKnife
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.dto.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.android.Main
 import moe.banana.jsonapi2.ArrayDocument
 
 /**
