@@ -12,11 +12,7 @@ import com.kanedias.dybr.fair.Network
 import com.kanedias.dybr.fair.dto.Blog
 import com.kanedias.dybr.fair.dto.Design
 import com.kanedias.dybr.fair.dto.isMarkerBlog
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.android.Main
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.regex.Pattern
 
 const val TOOLBAR = 0       // top toolbar color
@@ -79,7 +75,7 @@ fun applyTheme(blog: Blog, target: Context) {
     if (!prefs.getBoolean("apply-blog-theme", true))
         return
 
-    launch(Dispatchers.Main) {
+    GlobalScope.launch(Dispatchers.Main) {
         try {
             val fullBlog = async(Dispatchers.IO) { Network.loadBlog(blog.id) }.await()
             val relatedProf = fullBlog.profile.get(fullBlog.document) ?: return@launch
