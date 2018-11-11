@@ -40,6 +40,11 @@ class PersistManager(context: Context) : OrmLiteSqliteOpenHelper(context, DATABA
         when(oldVer) {
             1 -> TableUtils.createTable<OfflineDraft>(connectionSource, OfflineDraft::class.java)
             2 -> TableUtils.createTable<SearchGotoInfo>(connectionSource, SearchGotoInfo::class.java)
+            3 -> {
+                // recreate with new fields
+                TableUtils.dropTable<OfflineDraft, Long>(connectionSource, OfflineDraft::class.java, true)
+                TableUtils.createTable<OfflineDraft>(connectionSource, OfflineDraft::class.java)
+            }
             newVer -> return
         }
         onUpgrade(db, connectionSource, oldVer + 1, newVer)
@@ -57,10 +62,10 @@ class PersistManager(context: Context) : OrmLiteSqliteOpenHelper(context, DATABA
 
     companion object {
 
-        private val TAG = "DATABASE"
+        private const val TAG = "DATABASE"
 
-        private val DATABASE_NAME = "fair.db"
+        private const val DATABASE_NAME = "fair.db"
 
-        private val DATABASE_VERSION = 3
+        private const val DATABASE_VERSION = 4
     }
 }

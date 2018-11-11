@@ -23,6 +23,7 @@ import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.support.v4.app.FragmentTransaction
 import com.ftinc.scoop.Scoop
+import com.kanedias.dybr.fair.dto.Blog
 import com.kanedias.dybr.fair.dto.EntryMeta
 import com.kanedias.dybr.fair.themes.*
 import kotlinx.coroutines.*
@@ -72,6 +73,11 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     private lateinit var entry: Entry
 
     /**
+     * Blog this entry belongs to
+     */
+    private lateinit var blog: Blog
+
+    /**
      * Listener to show comments of this entry
      */
     private val commentShow  = View.OnClickListener { it ->
@@ -109,6 +115,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     fun editEntry() {
         val activity = itemView.context as AppCompatActivity
         val entryEdit = CreateNewEntryFragment().apply {
+            blog = this@EntryViewHolder.blog
             editMode = true
             editEntry = this@EntryViewHolder.entry
         }
@@ -174,7 +181,6 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
 
     private fun sharePost() {
         val ctx = itemView.context
-        val blog = entry.blog.get(entry.document) ?: return
 
         try {
             val intent = Intent(Intent.ACTION_SEND)
@@ -214,7 +220,6 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     }
 
     private fun showInWebView() {
-        val blog = entry.blog.get(entry.document)
         val uri = Uri.Builder()
                 .scheme("https").authority("dybr.ru")
                 .appendPath("blog").appendPath(blog.slug)
@@ -258,6 +263,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
      */
     fun setup(entry: Entry, editable: Boolean) {
         this.entry = entry
+        this.blog = entry.blog.get(entry.document)
 
         // setup text views from entry data
         dateView.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(entry.createdAt)

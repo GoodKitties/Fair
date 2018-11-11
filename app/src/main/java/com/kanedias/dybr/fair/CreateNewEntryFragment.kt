@@ -3,6 +3,8 @@ package com.kanedias.dybr.fair
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,6 +31,8 @@ import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
 import org.commonmark.ext.gfm.tables.TablesExtension
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Fragment responsible for showing create entry/edit entry form.
@@ -83,7 +87,7 @@ class CreateNewEntryFragment : Fragment() {
     lateinit var editEntry: Entry
 
     /**
-     * Blog this entry belongs to
+     * Blog this entry belongs to. Should be always set.
      */
     lateinit var blog: Blog
 
@@ -98,6 +102,8 @@ class CreateNewEntryFragment : Fragment() {
         activity = context as MainActivity
         if (editMode) {
             populateUI()
+        } else {
+            loadDraft()
         }
 
         setupTheming(root)
@@ -191,21 +197,10 @@ class CreateNewEntryFragment : Fragment() {
             return
         }
 
-        // entry has been written to, delete with confirmation only
-        MaterialDialog.Builder(activity)
-                .title(android.R.string.dialog_alert_title)
-                .content(R.string.are_you_sure)
-                .negativeText(android.R.string.no)
-                .neutralColorRes(R.color.green_600)
-                .neutralText(R.string.save_offline_draft)
-                .onNeutral { _, _ ->
-                    DbProvider.helper.draftDao.create(OfflineDraft(contentInput))
-                    fragmentManager!!.popBackStack()
-                }
-                .positiveColorRes(R.color.md_red_900)
-                .positiveText(android.R.string.yes)
-                .onPositive { _, _ -> fragmentManager!!.popBackStack() }
-                .show()
+        // persist draft
+        DbProvider.helper.draftDao.create(OfflineDraft(key = "entry,blog=${blog.id}", title = titleInput, base = contentInput))
+        Toast.makeText(activity, R.string.offline_draft_saved, Toast.LENGTH_SHORT).show()
+        fragmentManager!!.popBackStack()
     }
 
     /**
@@ -253,6 +248,140 @@ class CreateNewEntryFragment : Fragment() {
             } catch (ex: Exception) {
                 // don't close the fragment, just report errors
                 Network.reportErrors(activity, ex)
+            }
+        }
+    }
+
+    @OnClick(R.id.edit_save_offline_draft)
+    fun saveDraft() {
+        if (titleInput.text.isNullOrEmpty() && contentInput.text.isNullOrEmpty())
+            return
+
+        // persist new draft
+        DbProvider.helper.draftDao.create(OfflineDraft(title = titleInput, base = contentInput))
+
+        // clear the context and show notification
+        titleInput.setText("")
+        contentInput.setText("")
+        Toast.makeText(context, R.string.offline_draft_saved, Toast.LENGTH_SHORT).show()
+    }
+
+    /**
+     * Loads a list of drafts from database and shows a dialog with list items to be selected.
+     * After offline draft item is selected, this offline draft is deleted from the database and its contents
+     * are applied to content of the editor.
+     */
+    @OnClick(R.id.edit_load_offline_draft)
+    fun loadDraft(button: View? = null) {
+        val drafts = DbProvider.helper.draftDao.queryBuilder()
+                .apply {
+                    where()
+                            .eq("key", "entry,blog=${blog.id}")
+                            .or()
+                            .isNull("key")
+                }
+                .orderBy("createdAt", false)
+                .query()
+
+        if (drafts.isEmpty())
+            return
+
+        if (button == null && !drafts[0].key.isNullOrBlank()) {
+            // probably user saved it by clicking "cancel", load it
+            popDraftUI(drafts[0])
+            return
+        }
+
+        val adapter = DraftEntryViewAdapter(drafts)
+        val dialog = MaterialDialog.Builder(activity)
+                .title(R.string.select_offline_draft)
+                .adapter(adapter, LinearLayoutManager(context))
+                .build()
+        adapter.toDismiss = dialog
+        dialog.show()
+    }
+
+    /**
+     * Loads draft and deletes it from local database
+     * @param draft draft to load into UI forms and delete
+     */
+    private fun popDraftUI(draft: OfflineDraft) {
+        titleInput.setText(draft.title)
+        contentInput.setText(draft.content)
+        Toast.makeText(context, R.string.offline_draft_loaded, Toast.LENGTH_SHORT).show()
+
+        DbProvider.helper.draftDao.deleteById(draft.id)
+    }
+
+    /**
+     * Recycler adapter to hold list of offline drafts that user saved
+     */
+    inner class DraftEntryViewAdapter(private val drafts: MutableList<OfflineDraft>) : RecyclerView.Adapter<DraftEntryViewAdapter.DraftEntryViewHolder>() {
+
+        /**
+         * Dismiss this if item is selected
+         */
+        lateinit var toDismiss: MaterialDialog
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DraftEntryViewHolder {
+            val inflater = LayoutInflater.from(context)
+            val v = inflater.inflate(R.layout.fragment_edit_form_draft_selection_row, parent, false)
+            return DraftEntryViewHolder(v)
+        }
+
+        override fun getItemCount() = drafts.size
+
+        override fun onBindViewHolder(holder: DraftEntryViewHolder, position: Int) = holder.setup(position)
+
+        fun removeItem(pos: Int) {
+            drafts.removeAt(pos)
+            notifyItemRemoved(pos)
+
+            if (drafts.isEmpty()) {
+                toDismiss.dismiss()
+            }
+        }
+
+        /**
+         * View holder to show one draft as a recycler view item
+         */
+        inner class DraftEntryViewHolder(v: View): RecyclerView.ViewHolder(v) {
+
+            private var pos: Int = 0
+            private lateinit var draft: OfflineDraft
+
+            @BindView(R.id.draft_date)
+            lateinit var draftDate: TextView
+
+            @BindView(R.id.draft_delete)
+            lateinit var draftDelete: ImageView
+
+            @BindView(R.id.draft_title)
+            lateinit var draftTitle: TextView
+
+            @BindView(R.id.draft_content)
+            lateinit var draftContent: TextView
+
+            init {
+                ButterKnife.bind(this, v)
+                v.setOnClickListener {
+                    popDraftUI(draft)
+                    toDismiss.dismiss()
+                }
+
+                draftDelete.setOnClickListener {
+                    DbProvider.helper.draftDao.deleteById(draft.id)
+                    Toast.makeText(context, R.string.offline_draft_deleted, Toast.LENGTH_SHORT).show()
+                    removeItem(pos)
+                }
+            }
+
+            fun setup(position: Int) {
+                pos = position
+                draft = drafts[position]
+                draftDate.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(draft.createdAt)
+                draftContent.text = draft.content
+                draftTitle.text = draft.title
             }
         }
     }

@@ -28,7 +28,7 @@ import java.util.*
  * @see CommentListFragment.commentRibbon
  * @author Kanedias
  */
-class CommentViewHolder(iv: View, private val parent: View) : RecyclerView.ViewHolder(iv) {
+class CommentViewHolder(private val entry: Entry, iv: View, private val parent: View) : RecyclerView.ViewHolder(iv) {
 
     @BindView(R.id.comment_date)
     lateinit var dateView: TextView
@@ -65,6 +65,7 @@ class CommentViewHolder(iv: View, private val parent: View) : RecyclerView.ViewH
     fun editComment() {
         val activity = itemView.context as AppCompatActivity
         val commentEdit = CreateNewCommentFragment().apply {
+            entry = this@CommentViewHolder.entry
             editMode = true
             editComment = this@CommentViewHolder.comment
         }

@@ -83,7 +83,8 @@ class CommentListFragment : Fragment() {
         Scoop.getInstance().bind(TOOLBAR, toolbar)
         Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
         Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarIconAdapter())
-        Scoop.getInstance().bind(ACCENT, addCommentButton, FABColorAdapter())
+        Scoop.getInstance().bind(ACCENT, addCommentButton, FabColorAdapter())
+        Scoop.getInstance().bind(TEXT, addCommentButton, FabIconAdapter())
         Scoop.getInstance().bind(BACKGROUND, commentRibbon)
         Scoop.getInstance().bindStatusBar(activity, STATUS_BAR)
 
@@ -171,10 +172,11 @@ class CommentListFragment : Fragment() {
                 EntryViewHolder(view, parent as View, allowSelection = true)
             } else {
                 val view = inflater.inflate(R.layout.fragment_comment_list_item, parent, false)
-                CommentViewHolder(view, parent as View)
+                CommentViewHolder(entry, view, parent as View)
             }
         }
 
         override fun getItemCount() = comments.size + 1
     }
+
 }

@@ -19,7 +19,9 @@ class OfflineDraft {
 
     constructor()
 
-    constructor(base: TextView) {
+    constructor(key: String? = null, title: TextView? = null, base: TextView) {
+        this.key = key
+        this.title = title?.text?.toString()
         this.content = base.text.toString()
     }
 
@@ -34,6 +36,18 @@ class OfflineDraft {
      */
     @DatabaseField(dataType = DataType.DATE_LONG, canBeNull = false)
     var createdAt = Date()
+
+    /**
+     * Key to find this draft easily, must be unique
+     */
+    @DatabaseField(index = true, canBeNull = true)
+    var key: String? = null
+
+    /**
+     * Title of this draft, if applicable
+     */
+    @DatabaseField(canBeNull = true)
+    var title: String? = null
 
     /**
      * Contents of this draft

@@ -7,6 +7,7 @@ import android.support.design.widget.TabLayout
 import android.support.design.widget.FloatingActionButton
 import android.support.annotation.ColorInt
 import android.support.v4.graphics.ColorUtils
+import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v4.view.TintableBackgroundView
 import android.support.v4.widget.CompoundButtonCompat
 import android.support.v7.graphics.drawable.DrawerArrowDrawable
@@ -39,7 +40,7 @@ class TabUnderlineAdapter: ColorAdapter<TabLayout> {
     }
 }
 
-class FABColorAdapter : ColorAdapter<FloatingActionButton> {
+class FabColorAdapter : ColorAdapter<FloatingActionButton> {
 
     override fun applyColor(view: FloatingActionButton, @ColorInt color: Int) {
         val colorStateList = Utils.colorToStateList(color)
@@ -48,6 +49,22 @@ class FABColorAdapter : ColorAdapter<FloatingActionButton> {
 
     override fun getColor(view: FloatingActionButton): Int {
         return view.backgroundTintList!!.defaultColor
+    }
+}
+
+class FabIconAdapter : ColorAdapter<FloatingActionButton> {
+
+    private var color = Color.TRANSPARENT
+
+    override fun applyColor(view: FloatingActionButton, @ColorInt color: Int) {
+        this.color = color
+
+        val colorStateList = Utils.colorToStateList(color)
+        DrawableCompat.setTintList(view.drawable, colorStateList)
+    }
+
+    override fun getColor(view: FloatingActionButton): Int {
+        return color
     }
 }
 

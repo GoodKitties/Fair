@@ -534,10 +534,11 @@ object Network {
     }
 
     /**
-     * Pull diary entries from blog denoted by [blog].
+     * Pull diary entries from blog denoted by [blog]. Includes profiles and blog for returned entry list.
      * The resulting URL will be like this: http://dybr.ru/api/v1/blogs/<blog-slug>
      *
      * @param blog blog to retrieve entries from
+     * @param pageNum page number to retrieve
      */
     fun loadEntries(blog: Blog, pageNum: Int = 1): ArrayDocument<Entry> {
         // handle special case when we selected tab with favorites
@@ -575,7 +576,7 @@ object Network {
     }
 
     /**
-     * Load one particular entry by its ID
+     * Load one particular entry by its ID. Includes blog and profile.
      * @param id identifier of requested entry
      */
     fun loadEntry(id: String): Entry {

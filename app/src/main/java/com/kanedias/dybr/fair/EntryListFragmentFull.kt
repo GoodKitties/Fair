@@ -51,7 +51,8 @@ class EntryListFragmentFull: EntryListFragment() {
         Scoop.getInstance().bind(TOOLBAR, toolbar)
         Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
         Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarIconAdapter())
-        Scoop.getInstance().bind(ACCENT, addEntryButton, FABColorAdapter())
+        Scoop.getInstance().bind(ACCENT, addEntryButton, FabColorAdapter())
+        Scoop.getInstance().bind(TEXT, addEntryButton, FabIconAdapter())
         Scoop.getInstance().bind(BACKGROUND, entryRibbon)
         Scoop.getInstance().bindStatusBar(activity, STATUS_BAR)
 

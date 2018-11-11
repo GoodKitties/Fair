@@ -199,4 +199,6 @@
     <string name="mark_all_notifications_read">Mark all notifications as read?</string>
     <string name="new_comments">New comments</string>
     <string name="youve_received_new_comments">You\'ve received new comments</string>
+    <string name="delete_offline_draft">Delete offline draft</string>
+    <string name="offline_draft_deleted">Offline draft deleted</string>
 </resources>
