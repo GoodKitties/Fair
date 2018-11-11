@@ -57,7 +57,7 @@ release-alpha:
   only:
     - tags
   script:
-    - apt-get install gnupg2
+    - apt-get --quiet install gnupg2 --yes
     - gpg --batch --decrypt --output ${GOOGLE_PUBLISH_JSON} --passphrase ${GOOGLE_ACCOUNT_DECRYPTION_KEY} ${GOOGLE_PUBLISH_JSON}.gpg
     - ./gradlew app:publishApkGoogleplayRelease
   after_script:
@@ -71,7 +71,7 @@ release-gold:
   only:
     - web
   script:
-    - apt-get install gnupg2
+    - apt-get --quiet install gnupg2 --yes
     - gpg --batch --decrypt --output ${GOOGLE_PUBLISH_JSON} --passphrase ${GOOGLE_ACCOUNT_DECRYPTION_KEY} ${GOOGLE_PUBLISH_JSON}.gpg
     - ./gradlew publishGoogleplayRelease -PreleaseType=production
   after_script:
