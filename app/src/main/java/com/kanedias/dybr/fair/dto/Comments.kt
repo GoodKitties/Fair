@@ -130,12 +130,6 @@ class CommentResponse: Resource() {
     lateinit var updatedAt: Date
 
     /**
-     * Blog this comment was posted in
-     */
-    @field:Json(name = "blog")
-    val blog = HasOne<Blog>()
-
-    /**
      * Entry this comment was posted for
      */
     @field:Json(name = "entry")

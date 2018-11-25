@@ -135,7 +135,7 @@ class BlogResponse : Resource() {
     var comments = HasOne<Comment>()
 }
 
-fun isBlogWritable(blog: Blog?) = blog == Auth.blog
-fun isMarkerBlog(blog: Blog?) = blog == Auth.favoritesMarker || blog == Auth.worldMarker
+fun isBlogWritable(profile: OwnProfile?) = profile == Auth.profile
+fun isMarkerBlog(profile: OwnProfile?) = profile == Auth.favoritesMarker || profile == Auth.worldMarker
 
 typealias Blog = BlogResponse

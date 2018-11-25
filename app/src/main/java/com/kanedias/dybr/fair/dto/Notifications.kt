@@ -16,9 +16,6 @@ class NotificationRequest : Resource() {
     @field:Json(name = "state")
     lateinit var state: String // can be "new" or "read"
 
-    @field:Json(name = "blog")
-    var blog: HasOne<Blog>? = null
-
     @field:Json(name = "entry")
     var entry: HasOne<Entry>? = null
 

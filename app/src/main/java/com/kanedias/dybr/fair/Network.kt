@@ -249,7 +249,6 @@ object Network {
 
         // last profile exists, try to load it
         populateProfile()
-        populateBlog()
     }
 
     private fun <T: ResourceIdentifier> toWrappedJson(obj: T): String {
@@ -306,27 +305,6 @@ object Network {
 
         val profile = loadProfile(Auth.user.lastProfileId!!)
         Auth.updateCurrentProfile(profile) // all steps aren't required here, use this just to have all in one place
-    }
-
-    /**
-     * Loads blog for requested profile if it's present and sets it in [Auth.blog]
-     * Make sure profile is already populated in [populateProfile]
-     */
-    fun populateBlog() {
-        if (Auth.profile?.id == null)
-            return // no profile->no blog, nothing to populate
-
-        val req = Request.Builder().url("$PROFILES_ENDPOINT/${Auth.profile?.id}/blog").build()
-        val resp = httpClient.newCall(req).execute()
-        if (resp.code() == HttpURLConnection.HTTP_NOT_FOUND) {
-            return // this profile doesn't have blog
-        }
-
-        if (!resp.isSuccessful)
-            throw extractErrors(resp, "Can't load current profile blog")
-
-        val blog = fromWrappedJson(resp.body()!!.source(), Blog::class.java)
-        blog?.let { Auth.updateBlog(it) }
     }
 
     /**
@@ -515,20 +493,20 @@ object Network {
     }
 
     /**
-     * Load one particular blog by slug, with profile
-     * @param slug slug of requested blog
+     * Load one particular profile by slug
+     * @param slug slug of requested profile blog
      */
-    fun loadBlogBySlug(slug: String): Blog {
-        val req = Request.Builder().url("$BLOGS_ENDPOINT?filters[slug]=$slug&include=profile").build()
+    fun loadProfileBySlug(slug: String): OwnProfile {
+        val req = Request.Builder().url("$PROFILES_ENDPOINT?filters[blog-slug]=$slug").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw extractErrors(resp, "Can't load blog with name $slug")
         }
 
         // response is returned after execute call, body is not null
-        val filtered = fromWrappedListJson(resp.body()!!.source(), Blog::class.java)
+        val filtered = fromWrappedListJson(resp.body()!!.source(), OwnProfile::class.java)
         if (filtered.isEmpty())
-            throw HttpException(404, "", "No such blog found: $slug")
+            throw HttpException(404, "", "No such profile found: $slug")
 
         return filtered[0]
     }
@@ -537,12 +515,12 @@ object Network {
      * Pull diary entries from blog denoted by [blog]. Includes profiles and blog for returned entry list.
      * The resulting URL will be like this: http://dybr.ru/api/v1/blogs/<blog-slug>
      *
-     * @param blog blog to retrieve entries from
+     * @param prof profile with blog to retrieve entries from
      * @param pageNum page number to retrieve
      */
-    fun loadEntries(blog: Blog, pageNum: Int = 1): ArrayDocument<Entry> {
+    fun loadEntries(prof: OwnProfile, pageNum: Int = 1): ArrayDocument<Entry> {
         // handle special case when we selected tab with favorites
-        val builder = when (blog) {
+        val builder = when (prof) {
             Auth.favoritesMarker -> { // workaround, filter entries by profile ids
                 val favProfiles = Auth.profile?.favorites?.joinToString(separator = ",", transform = { res -> res.id })
                 if (favProfiles.isNullOrBlank()) {
@@ -557,7 +535,7 @@ object Network {
             Auth.worldMarker -> HttpUrl.parse(ENTRIES_ENDPOINT)!!.newBuilder()
                     .addQueryParameter("filters[feed]", "1")
 
-            else -> HttpUrl.parse("$BLOGS_ENDPOINT/${blog.id}/entries")!!.newBuilder()
+            else -> HttpUrl.parse("$BLOGS_ENDPOINT/${prof.id}/entries")!!.newBuilder()
         }
 
         builder.addQueryParameter("page[number]", pageNum.toString())
@@ -568,7 +546,7 @@ object Network {
         val req = Request.Builder().url(builder.build()).build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
-            throw extractErrors(resp, "Can't load entries for blog ${blog.slug}")
+            throw extractErrors(resp, "Can't load entries for blog ${prof.blogSlug}")
         }
 
         // response is returned after execute call, body is not null
@@ -698,7 +676,6 @@ object Network {
         val builder = HttpUrl.parse("$PROFILES_ENDPOINT/${Auth.profile?.id}/relationships/notifications")!!.newBuilder()
         builder.addQueryParameter("page[number]", pageNum.toString())
                 .addQueryParameter("page[size]", "20")
-                //.addQueryParameter("filters[state]", "new")
                 .addQueryParameter("include", "comments,profiles")
                 .addQueryParameter("sort", "state,-comment_id")
 
@@ -725,6 +702,31 @@ object Network {
 
         // response is returned after execute call, body is not null
         return fromWrappedJson(resp.body()!!.source(), Notification::class.java)!!
+    }
+
+
+    fun markNotificationsReadFor(entry: Entry): Boolean {
+        val builder = HttpUrl.parse("$PROFILES_ENDPOINT/${Auth.profile?.id}/relationships/notifications")!!.newBuilder()
+        builder.addQueryParameter("filters[entry_id]", entry.id)
+                .addQueryParameter("filters[state]", "new")
+                .addQueryParameter("include", "comments,profiles")
+
+        val req = Request.Builder().url(builder.build()).build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful) {
+            throw extractErrors(resp, "Can't load notifications for profile ${Auth.profile?.nickname}")
+        }
+
+        val unreadNotifications = fromWrappedListJson(resp.body()!!.source(), Notification::class.java)
+        for (notif in unreadNotifications) {
+            val update = NotificationRequest().apply {
+                id = notif.id
+                state = "read"
+            }
+            updateNotification(update)
+        }
+
+        return unreadNotifications.size > 0
     }
 
     /**

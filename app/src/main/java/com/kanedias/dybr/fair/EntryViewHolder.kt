@@ -23,8 +23,8 @@ import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.support.v4.app.FragmentTransaction
 import com.ftinc.scoop.Scoop
-import com.kanedias.dybr.fair.dto.Blog
 import com.kanedias.dybr.fair.dto.EntryMeta
+import com.kanedias.dybr.fair.dto.OwnProfile
 import com.kanedias.dybr.fair.themes.*
 import kotlinx.coroutines.*
 
@@ -75,7 +75,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     /**
      * Blog this entry belongs to
      */
-    private lateinit var blog: Blog
+    private lateinit var profile: OwnProfile
 
     /**
      * Listener to show comments of this entry
@@ -115,7 +115,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     fun editEntry() {
         val activity = itemView.context as AppCompatActivity
         val entryEdit = CreateNewEntryFragment().apply {
-            blog = this@EntryViewHolder.blog
+            profile = this@EntryViewHolder.profile
             editMode = true
             editEntry = this@EntryViewHolder.entry
         }
@@ -185,7 +185,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         try {
             val intent = Intent(Intent.ACTION_SEND)
             intent.type = "text/plain"
-            intent.putExtra(Intent.EXTRA_TEXT, "https://dybr.ru/blog/${blog.slug}/${entry.id}")
+            intent.putExtra(Intent.EXTRA_TEXT, "https://dybr.ru/blog/${profile.blogSlug}/${entry.id}")
             ctx.startActivity(Intent.createChooser(intent, ctx.getString(R.string.share_link_using)))
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(ctx, R.string.no_browser_found, Toast.LENGTH_SHORT).show()
@@ -222,7 +222,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     private fun showInWebView() {
         val uri = Uri.Builder()
                 .scheme("https").authority("dybr.ru")
-                .appendPath("blog").appendPath(blog.slug)
+                .appendPath("blog").appendPath(profile.blogSlug)
                 .appendPath(entry.id)
                 .build()
 
@@ -263,7 +263,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
      */
     fun setup(entry: Entry, editable: Boolean) {
         this.entry = entry
-        this.blog = entry.blog.get(entry.document)
+        this.profile = entry.profile.get(entry.document)
 
         // setup text views from entry data
         dateView.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(entry.createdAt)

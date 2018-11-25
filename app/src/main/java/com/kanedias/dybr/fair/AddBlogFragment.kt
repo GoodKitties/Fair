@@ -61,7 +61,7 @@ class AddBlogFragment: Fragment() {
 
             try {
                 val blog = async(Dispatchers.IO) { Network.createBlog(blogReq) }.await()
-                Auth.updateBlog(blog)
+                //Auth.updateBlog(blog)
 
                 //we created blog successfully, return to main activity
                 Toast.makeText(activity, R.string.blog_created, Toast.LENGTH_SHORT).show()

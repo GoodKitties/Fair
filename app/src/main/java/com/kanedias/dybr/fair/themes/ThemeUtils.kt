@@ -11,6 +11,7 @@ import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.Network
 import com.kanedias.dybr.fair.dto.Blog
 import com.kanedias.dybr.fair.dto.Design
+import com.kanedias.dybr.fair.dto.OwnProfile
 import com.kanedias.dybr.fair.dto.isMarkerBlog
 import kotlinx.coroutines.*
 import java.util.regex.Pattern
@@ -65,9 +66,9 @@ fun blendRGB(@ColorInt color1: Int, @ColorInt color2: Int, @FloatRange(from = 0.
  * @param blog blog to retrieve themes for
  * @param target target context where theme is applied
  */
-fun applyTheme(blog: Blog, target: Context) {
+fun applyTheme(profile: OwnProfile, target: Context) {
     // don't apply to service blogs e.g. to favorites or world
-    if (isMarkerBlog(blog))
+    if (isMarkerBlog(profile))
         return
 
     // don't apply if user explicitly shat it down
@@ -77,9 +78,7 @@ fun applyTheme(blog: Blog, target: Context) {
 
     GlobalScope.launch(Dispatchers.Main) {
         try {
-            val fullBlog = async(Dispatchers.IO) { Network.loadBlog(blog.id) }.await()
-            val relatedProf = fullBlog.profile.get(fullBlog.document) ?: return@launch
-            val design = async(Dispatchers.IO) { Network.loadProfileDesign(relatedProf) }.await() ?: return@launch
+            val design = async(Dispatchers.IO) { Network.loadProfileDesign(profile) }.await() ?: return@launch
 
             updateColorBindings(design)
         } catch (ex: Exception) {

@@ -22,6 +22,7 @@ import com.kanedias.dybr.fair.database.entities.OfflineDraft
 import com.kanedias.dybr.fair.dto.Blog
 import com.kanedias.dybr.fair.dto.Entry
 import com.kanedias.dybr.fair.dto.EntryCreateRequest
+import com.kanedias.dybr.fair.dto.OwnProfile
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.md.handleMarkdownRaw
 import com.kanedias.html2md.Html2Markdown
@@ -89,12 +90,12 @@ class CreateNewEntryFragment : Fragment() {
     /**
      * Blog this entry belongs to. Should be always set.
      */
-    lateinit var blog: Blog
+    lateinit var profile: OwnProfile
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         savedInstanceState?.getBoolean("editMode")?.let { editMode = it }
         savedInstanceState?.getSerializable("editEntry")?.let { editEntry = it as Entry }
-        savedInstanceState?.getSerializable("blog")?.let { blog = it as Blog }
+        savedInstanceState?.getSerializable("profile")?.let { profile = it as OwnProfile }
 
         val root = inflater.inflate(R.layout.fragment_create_entry, container, false)
         ButterKnife.bind(this, root)
@@ -139,7 +140,7 @@ class CreateNewEntryFragment : Fragment() {
 
         outState.putBoolean("editMode", editMode)
         when (editMode) {
-            false -> outState.putSerializable("blog", blog)
+            false -> outState.putSerializable("profile", profile)
             true -> outState.putSerializable("editEntry", editEntry)
         }
     }
@@ -198,7 +199,7 @@ class CreateNewEntryFragment : Fragment() {
         }
 
         // persist draft
-        DbProvider.helper.draftDao.create(OfflineDraft(key = "entry,blog=${blog.id}", title = titleInput, base = contentInput))
+        DbProvider.helper.draftDao.create(OfflineDraft(key = "entry,blog=${profile.id}", title = titleInput, base = contentInput))
         Toast.makeText(activity, R.string.offline_draft_saved, Toast.LENGTH_SHORT).show()
         fragmentManager!!.popBackStack()
     }
@@ -235,7 +236,7 @@ class CreateNewEntryFragment : Fragment() {
                     Toast.makeText(activity, R.string.entry_updated, Toast.LENGTH_SHORT).show()
                 } else {
                     // create new
-                    entry.blog = HasOne(blog)
+                    entry.blog = HasOne(profile) // TODO: fix after migration is complete
                     async(Dispatchers.IO) { Network.createEntry(entry) }.await()
                     Toast.makeText(activity, R.string.entry_created, Toast.LENGTH_SHORT).show()
                 }
@@ -276,7 +277,7 @@ class CreateNewEntryFragment : Fragment() {
         val drafts = DbProvider.helper.draftDao.queryBuilder()
                 .apply {
                     where()
-                            .eq("key", "entry,blog=${blog.id}")
+                            .eq("key", "entry,blog=${profile.id}")
                             .or()
                             .isNull("key")
                 }

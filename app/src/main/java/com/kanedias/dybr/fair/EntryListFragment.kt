@@ -33,7 +33,7 @@ open class EntryListFragment: Fragment() {
     @BindView(R.id.entry_list_area)
     lateinit var refresher: SwipeRefreshLayout
 
-    var blog: Blog? = null
+    var profile: OwnProfile? = null
 
     private val entryAdapter = EntryListAdapter()
     private var nextPage = 1
@@ -42,9 +42,9 @@ open class EntryListFragment: Fragment() {
     lateinit var activity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        if (blog == null) {
+        if (profile == null) {
             // restore only if we are recreating old fragment
-            savedInstanceState?.get("blog")?.let { blog = it as Blog }
+            savedInstanceState?.get("profile")?.let { profile = it as OwnProfile }
         }
 
         val view = inflater.inflate(layoutToUse(), container, false)
@@ -59,7 +59,7 @@ open class EntryListFragment: Fragment() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putSerializable("blog", blog)
+        outState.putSerializable("profile", profile)
     }
 
     open fun layoutToUse() = R.layout.fragment_entry_list
@@ -85,7 +85,7 @@ open class EntryListFragment: Fragment() {
             return
 
         // for now we can only write entries in blog if it's our own
-        when (isVisibleToUser && isBlogWritable(blog)) {
+        when (isVisibleToUser && isBlogWritable(profile)) {
             true -> activity.actionButton.show()
             false -> activity.actionButton.hide()
         }
@@ -96,12 +96,12 @@ open class EntryListFragment: Fragment() {
      * @param reset reset page counter to first
      */
     fun refreshEntries(reset: Boolean = false) {
-        if (blog == null) { // we don't have a blog, just show empty list
+        if (profile == null) { // we don't have a blog, just show empty list
             refresher.isRefreshing = false
             return
         }
 
-        if (blog === Auth.emptyBlogMarker) {
+        if (profile?.blogSlug == null) {
             // profile doesn't have a blog yet, ask to create
             entryRibbon.adapter = EmptyBlogAdapter()
             return
@@ -117,7 +117,7 @@ open class EntryListFragment: Fragment() {
             refresher.isRefreshing = true
 
             try {
-                val success = async(Dispatchers.IO) { Network.loadEntries(blog!!, nextPage) }
+                val success = async(Dispatchers.IO) { Network.loadEntries(profile!!, nextPage) }
                 updateRibbonPage(success.await(), reset)
             } catch (ex: Exception) {
                 Network.reportErrors(activity, ex)
@@ -125,7 +125,7 @@ open class EntryListFragment: Fragment() {
 
             refresher.isRefreshing = false
 
-            if (isBlogWritable(blog)) {
+            if (isBlogWritable(profile)) {
                 activity.actionButton.show()
             }
         }
@@ -160,7 +160,7 @@ open class EntryListFragment: Fragment() {
      */
     fun addCreateNewEntryForm() {
         val entryAdd = CreateNewEntryFragment().apply {
-            this.blog = this@EntryListFragment.blog!! // at this point we know we have the blog
+            this.profile = this@EntryListFragment.profile!! // at this point we know we have the blog
         }
 
         fragmentManager!!.beginTransaction()
@@ -214,7 +214,7 @@ open class EntryListFragment: Fragment() {
                 ITEM_REGULAR -> {
                     val entryHolder = holder as EntryViewHolder
                     val entry = entries[position]
-                    entryHolder.setup(entry, isBlogWritable(blog))
+                    entryHolder.setup(entry, isBlogWritable(profile))
                 }
                 ITEM_LOAD_MORE -> refreshEntries()
                 // Nothing needed for ITEM_LAST_PAGE

@@ -32,12 +32,12 @@ class EntryListFragmentFull: EntryListFragment() {
         super.setupUI(view)
 
         // setup toolbar
-        toolbar.title = blog?.title
+        toolbar.title = profile?.blogTitle
         toolbar.navigationIcon = DrawerArrowDrawable(activity).apply { progress = 1.0f }
         toolbar.setNavigationOnClickListener { fragmentManager?.popBackStack() }
 
         // setup FAB
-        if (isBlogWritable(blog)) {
+        if (isBlogWritable(profile)) {
             addEntryButton.show()
             addEntryButton.setOnClickListener { addCreateNewEntryForm() }
         }
@@ -56,7 +56,7 @@ class EntryListFragmentFull: EntryListFragment() {
         Scoop.getInstance().bind(BACKGROUND, entryRibbon)
         Scoop.getInstance().bindStatusBar(activity, STATUS_BAR)
 
-        blog?.let { applyTheme(it, activity) }
+        profile?.let { applyTheme(it, activity) }
     }
 
     override fun onDestroyView() {

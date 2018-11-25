@@ -15,9 +15,9 @@ import com.kanedias.dybr.fair.database.entities.Account
 object Auth {
     // service variables, changed only once
     lateinit var guest: Account
-    lateinit var emptyBlogMarker: Blog
-    lateinit var favoritesMarker: Blog
-    lateinit var worldMarker: Blog
+    lateinit var emptyBlogMarker: OwnProfile
+    lateinit var favoritesMarker: OwnProfile
+    lateinit var worldMarker: OwnProfile
 
     lateinit var user: Account
 
@@ -27,16 +27,11 @@ object Auth {
      */
     var profile: OwnProfile? = null
 
-    /**
-     * Blog of currently loaded [profile]
-     */
-    var blog: Blog? = null
-
     fun init(ctx: Context) {
         // setup special values
-        this.emptyBlogMarker = Blog().apply { id = "dummy" }
-        this.worldMarker = Blog().apply { id = "world"; title = ctx.getString(R.string.world) }
-        this.favoritesMarker = Blog().apply { id = "favorites"; title = ctx.getString(R.string.favorite) }
+        this.emptyBlogMarker = OwnProfile().apply { id = "dummy" }
+        this.worldMarker = OwnProfile().apply { id = "world"; blogSlug = ctx.getString(R.string.world) }
+        this.favoritesMarker = OwnProfile().apply { id = "favorites"; blogSlug = ctx.getString(R.string.favorite) }
         this.guest = Account().apply { email = ctx.getString(R.string.guest) }
 
         this.user = guest
@@ -45,18 +40,12 @@ object Auth {
     fun updateCurrentUser(acc: Account) {
         this.user = acc
         this.profile = null
-        this.blog = null
     }
 
     fun updateCurrentProfile(prof: OwnProfile) {
         this.user.lastProfileId = prof.id
         this.profile = prof
-        this.blog = null
 
         DbProvider.helper.accDao.update(Auth.user)
-    }
-
-    fun updateBlog(blog: Blog) {
-        this.blog = blog
     }
 }

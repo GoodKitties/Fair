@@ -245,8 +245,8 @@ class MainActivity : AppCompatActivity() {
                                 fragment.show(supportFragmentManager, "Showing search-requested profile fragment")
                             }
                             EntityType.BLOG -> {
-                                val blog = async(Dispatchers.IO) { Network.loadBlogBySlug(name) }.await()
-                                val fragment = EntryListFragmentFull().apply { this.blog = blog }
+                                val prof = async(Dispatchers.IO) { Network.loadProfileBySlug(name) }.await()
+                                val fragment = EntryListFragmentFull().apply { this.profile = prof }
                                 supportFragmentManager.beginTransaction()
                                         .addToBackStack("Showing search-requested address")
                                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
@@ -396,6 +396,11 @@ class MainActivity : AppCompatActivity() {
                     supportFragmentManager.popBackStack()
                 }
                 pager.setCurrentItem(NOTIFICATIONS_TAB, true)
+
+                // if the fragment is already loaded, try to refresh it
+                val notifPredicate = { it: Fragment -> it is NotificationListFragment }
+                val notifFragment = supportFragmentManager.fragments.find(notifPredicate) as NotificationListFragment?
+                notifFragment?.refreshNotifications(true)
             }
 
             Intent.ACTION_VIEW -> GlobalScope.launch(Dispatchers.Main) {
@@ -420,8 +425,8 @@ class MainActivity : AppCompatActivity() {
                 "blog" -> {
                     val fragment = when (address.size) {
                         2 -> {  // the case for /blog/<slug>
-                            val blog = GlobalScope.async(Dispatchers.IO) { Network.loadBlogBySlug(address[1]) }.await()
-                            EntryListFragmentFull().apply { this.blog = blog }
+                            val prof = GlobalScope.async(Dispatchers.IO) { Network.loadProfileBySlug(address[1]) }.await()
+                            EntryListFragmentFull().apply { this.profile = prof }
                         }
                         3 -> { // the case for /blog/<slug>/<entry>
                             val entry = GlobalScope.async(Dispatchers.IO) { Network.loadEntry(address[2]) }.await()
@@ -581,16 +586,6 @@ class MainActivity : AppCompatActivity() {
 
         // load current blog and favorites
         GlobalScope.launch(Dispatchers.Main) {
-
-            if (Auth.profile != null && Auth.blog == null) {
-                // we have loaded profile, try to load our blog
-                try {
-                    async(Dispatchers.IO) { Network.populateBlog() }.await()
-                } catch (ex: Exception) {
-                    Network.reportErrors(this@MainActivity, ex)
-                }
-            }
-
             sidebar.updateSidebar()
             refreshTabs()
 
@@ -603,7 +598,7 @@ class MainActivity : AppCompatActivity() {
     private fun refreshTabs() {
         tabAdapter.apply {
             account = Auth.user
-            blog = Auth.blog ?: Auth.emptyBlogMarker
+            profile = Auth.profile ?: Auth.emptyBlogMarker
         }
         tabAdapter.notifyDataSetChanged()
     }
@@ -630,7 +625,7 @@ class MainActivity : AppCompatActivity() {
     inner class TabAdapter: FragmentStatePagerAdapter(supportFragmentManager) {
 
         var account: Account? = null
-        var blog: Blog? = null
+        var profile: OwnProfile? = null
 
         override fun getCount(): Int {
             if (account == null) {
@@ -648,7 +643,7 @@ class MainActivity : AppCompatActivity() {
 
         override fun getItemPosition(fragment: Any): Int {
             val entryList = fragment as EntryListFragment
-            if (entryList.blog != blog) {
+            if (entryList.profile != profile) {
                 // needed to kill old fragment that is shown when auth is switched
                 entryList.userVisibleHint = false
                 return POSITION_NONE
@@ -658,11 +653,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun getItem(position: Int) = when(position) {
-            MY_DIARY_TAB -> EntryListFragment().apply { blog = this@TabAdapter.blog }
-            FAV_TAB  -> EntryListFragment().apply { blog = Auth.favoritesMarker }
-            WORLD_TAB -> EntryListFragment().apply { blog = Auth.worldMarker }
+            MY_DIARY_TAB -> EntryListFragment().apply { profile = this@TabAdapter.profile }
+            FAV_TAB  -> EntryListFragment().apply { profile = Auth.favoritesMarker }
+            WORLD_TAB -> EntryListFragment().apply { profile = Auth.worldMarker }
             NOTIFICATIONS_TAB -> NotificationListFragment()
-            else -> EntryListFragment().apply { blog = null }
+            else -> EntryListFragment().apply { profile = null }
         }
 
         override fun getPageTitle(position: Int): CharSequence? = when (position) {

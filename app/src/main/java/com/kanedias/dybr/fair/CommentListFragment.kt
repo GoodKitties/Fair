@@ -88,7 +88,7 @@ class CommentListFragment : Fragment() {
         Scoop.getInstance().bind(BACKGROUND, commentRibbon)
         Scoop.getInstance().bindStatusBar(activity, STATUS_BAR)
 
-        entry?.blog?.get(entry?.document)?.let { applyTheme(it, activity) }
+        entry?.profile?.get(entry?.document)?.let { applyTheme(it, activity) }
     }
 
     override fun onDestroyView() {
@@ -111,6 +111,15 @@ class CommentListFragment : Fragment() {
                 commentAdapter.comments = commentsDemand.await() // refresh comments of this entry
                 commentAdapter.entry = entry!!.apply { meta = entryDemand.await().meta } // refresh comment num and participants
                 commentRibbon.adapter = commentAdapter
+
+                // mark related notifications read
+                val markedRead = async(Dispatchers.IO) { Network.markNotificationsReadFor(entry!!) }.await()
+                if (markedRead) {
+                    // we changed notifications, update fragment with them if present
+                    val notifPredicate = { it: Fragment -> it is NotificationListFragment }
+                    val notifFragment = fragmentManager?.fragments?.find(notifPredicate) as NotificationListFragment?
+                    notifFragment?.refreshNotifications(true)
+                }
             } catch (ex: Exception) {
                 Network.reportErrors(activity, ex)
             }

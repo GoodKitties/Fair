@@ -141,12 +141,6 @@ class EntryResponse: Resource() {
     var state = "published"
 
     /**
-     * Blog this entry belongs to
-     */
-    @field:Json(name = "blog")
-    var blog = HasOne<Blog>()
-
-    /**
      * Profile this entry was written by
      */
     @field:Json(name = "profile")

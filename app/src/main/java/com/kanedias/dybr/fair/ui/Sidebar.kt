@@ -253,7 +253,6 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
 
     /**
      * Updates blog row according to retrieved info in
-     * @see [Auth.blog]
      * @see [Auth.profile]
      */
     private fun updateBlogRow() {
@@ -268,7 +267,7 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
             return
         }
 
-        if (Auth.blog == null) {
+        if (Auth.profile?.blogSlug == null) {
             // no blog yet, disable click, show "Add blog" button
             blogName.isEnabled = false
             blogName.setText(R.string.my_blog)
@@ -283,7 +282,7 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
         // we have a blog, show it
         blogName.isEnabled = true
         blogName.hint = activity.getString(R.string.my_blog)
-        blogName.text = Auth.blog?.title
+        blogName.text = Auth.profile?.blogTitle
         blogAdd.visibility = View.GONE
         blogName.setOnClickListener {
             for (i in 0..fragManager.backStackEntryCount) {

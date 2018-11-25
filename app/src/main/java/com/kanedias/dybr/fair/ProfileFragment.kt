@@ -85,10 +85,9 @@ class ProfileFragment: DialogFragment() {
         authorName.text = profile.nickname
         registrationDate.text = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(profile.createdAt)
 
-        val blog = profile.blogs.get(profile.document)?.first()
-        if (blog != null) {
-            authorBlog.text = Html.fromHtml("<a href='https://dybr.ru/blog/${blog.slug}'>${blog.title}</a>")
-            authorBlog.setOnClickListener { dismiss(); showBlog(blog) }
+        if (profile.blogSlug != null) {
+            authorBlog.text = Html.fromHtml("<a href='https://dybr.ru/blog/${profile.blogSlug}'>${profile.blogTitle}</a>")
+            authorBlog.setOnClickListener { dismiss(); showBlog(profile) }
         } else {
             authorBlog.text = ""
         }
@@ -148,8 +147,8 @@ class ProfileFragment: DialogFragment() {
         }
     }
 
-    private fun showBlog(blog: Blog) {
-        val browseFragment = EntryListFragmentFull().apply { this.blog = blog }
+    private fun showBlog(profile: OwnProfile) {
+        val browseFragment = EntryListFragmentFull().apply { this.profile = profile }
 
         activity.supportFragmentManager.beginTransaction()
                 .addToBackStack("Showing blog from profile")
