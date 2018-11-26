@@ -85,7 +85,7 @@ class CommentViewHolder(private val entry: Entry, iv: View, private val parent: 
         val delete = {
             GlobalScope.launch(Dispatchers.Main) {
                 try {
-                    async(Dispatchers.IO) { Network.deleteComment(comment) }.await()
+                    withContext(Dispatchers.IO) { Network.deleteComment(comment) }
                     Toast.makeText(activity, R.string.comment_deleted, Toast.LENGTH_SHORT).show()
 
                     // if we have current tab, refresh it
@@ -149,7 +149,7 @@ class CommentViewHolder(private val entry: Entry, iv: View, private val parent: 
             dialog.show()
 
             try {
-                val prof = async(Dispatchers.IO) { Network.loadProfile(comment.profile.get().id) }.await()
+                val prof = withContext(Dispatchers.IO) { Network.loadProfile(comment.profile.get().id) }
                 val profShow = ProfileFragment().apply { profile = prof }
                 profShow.show(activity.supportFragmentManager, "Showing user profile fragment")
             } catch (ex: Exception) {

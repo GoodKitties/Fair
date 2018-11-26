@@ -103,10 +103,10 @@ class ProfileFragment: DialogFragment() {
             GlobalScope.launch(Dispatchers.Main) {
                 try {
                     val req = Request.Builder().url(resolved).build()
-                    val bitmap = async(Dispatchers.IO) {
+                    val bitmap = withContext(Dispatchers.IO) {
                         val resp = Network.httpClient.newCall(req).execute()
                         BitmapFactory.decodeStream(resp.body()?.byteStream())
-                    }.await()
+                    }
                     authorAvatar.setImageBitmap(bitmap)
                 } catch (ioex: IOException) {
                     Network.reportErrors(activity, ioex)
@@ -130,13 +130,13 @@ class ProfileFragment: DialogFragment() {
             try {
                 if (Auth.profile?.favorites?.any { it.idMatches(profile) } == true) {
                     // remove from favorites
-                    async(Dispatchers.IO) { Network.removeFavorite(profile) }.await()
+                    withContext(Dispatchers.IO) { Network.removeFavorite(profile) }
                     Auth.profile?.favorites?.remove(profile)
                     favoritesToggle.setImageDrawable(emptyStar)
                     Toast.makeText(activity, R.string.removed_from_favorites, Toast.LENGTH_SHORT).show()
                 } else {
                     // add to favorites
-                    async(Dispatchers.IO) { Network.addFavorite(profile) }.await()
+                    withContext(Dispatchers.IO) { Network.addFavorite(profile) }
                     Auth.profile?.favorites?.add(profile)
                     favoritesToggle.setImageDrawable(filledStar)
                     Toast.makeText(activity, R.string.added_to_favorites, Toast.LENGTH_SHORT).show()

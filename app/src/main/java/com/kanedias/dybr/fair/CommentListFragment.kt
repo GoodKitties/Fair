@@ -106,14 +106,14 @@ class CommentListFragment : Fragment() {
             refresher.isRefreshing = true
 
             try {
-                val entryDemand = async(Dispatchers.IO) { Network.loadEntry(entry!!.id) }
-                val commentsDemand = async(Dispatchers.IO) { Network.loadComments(entry!!) }
-                commentAdapter.comments = commentsDemand.await() // refresh comments of this entry
-                commentAdapter.entry = entry!!.apply { meta = entryDemand.await().meta } // refresh comment num and participants
+                val entryDemand = withContext(Dispatchers.IO) { Network.loadEntry(entry!!.id) }
+                val commentsDemand = withContext(Dispatchers.IO) { Network.loadComments(entry!!) }
+                commentAdapter.comments = commentsDemand // refresh comments of this entry
+                commentAdapter.entry = entry!!.apply { meta = entryDemand.meta } // refresh comment num and participants
                 commentRibbon.adapter = commentAdapter
 
                 // mark related notifications read
-                val markedRead = async(Dispatchers.IO) { Network.markNotificationsReadFor(entry!!) }.await()
+                val markedRead = withContext(Dispatchers.IO) { Network.markNotificationsReadFor(entry!!) }
                 if (markedRead) {
                     // we changed notifications, update fragment with them if present
                     val notifPredicate = { it: Fragment -> it is NotificationListFragment }

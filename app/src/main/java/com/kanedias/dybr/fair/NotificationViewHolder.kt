@@ -63,7 +63,7 @@ class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
         GlobalScope.launch(Dispatchers.Main) {
             try {
-                val linkedEntry = async(Dispatchers.IO) { Network.loadEntry(notification.entryId) }.await()
+                val linkedEntry = withContext(Dispatchers.IO) { Network.loadEntry(notification.entryId) }
                 val commentsPage = CommentListFragment().apply { entry = linkedEntry }
                 activity.supportFragmentManager.beginTransaction()
                         .addToBackStack("Showing comment list fragment from notification")
@@ -93,7 +93,7 @@ class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
         GlobalScope.launch(Dispatchers.Main) {
             try {
-                async(Dispatchers.IO) { Network.updateNotification(marked) }.await()
+                withContext(Dispatchers.IO) { Network.updateNotification(marked) }
                 readButton.setImageResource(R.drawable.done_all)
                 toggleEnableRecursive(notificationArea, enabled = false)
             } catch (ex: Exception) {

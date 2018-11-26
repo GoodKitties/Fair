@@ -40,7 +40,7 @@ infix fun TextView.handleMarkdown(html: String) {
 
     GlobalScope.launch(Dispatchers.Main) {
         // this is computation-intensive task, better do it smoothly
-        val span = async(Dispatchers.IO) {
+        val span = withContext(Dispatchers.IO) {
             val mdConfig = SpannableConfiguration.builder(label.context).asyncDrawableLoader(DrawableLoader(label)).build()
             val spanned = Markwon.markdown(mdConfig, Html2Markdown().parse(html)) as SpannableStringBuilder
             postProcessSpans(label, spanned)
@@ -48,7 +48,7 @@ infix fun TextView.handleMarkdown(html: String) {
             spanned
         }
 
-        label.text = span.await()
+        label.text = span
         Markwon.scheduleDrawables(label)
     }
 

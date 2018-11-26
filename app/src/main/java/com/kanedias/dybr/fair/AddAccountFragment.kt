@@ -117,7 +117,7 @@ class AddAccountFragment : Fragment() {
         if (!validator.validateFields()) {
             // don't allow network request if there are errors in form
             // and hide errors after 3 seconds
-            GlobalScope.async(Dispatchers.Main) { delay(TimeUnit.SECONDS.toMillis(3)); validator.clearValidations() }
+            GlobalScope.launch(Dispatchers.Main) { delay(TimeUnit.SECONDS.toMillis(3)); validator.clearValidations() }
             return
         }
 
@@ -145,7 +145,7 @@ class AddAccountFragment : Fragment() {
             progressDialog.show()
 
             try {
-                async(Dispatchers.IO) { Network.login(acc) }.await()
+                withContext(Dispatchers.IO) { Network.login(acc) }
 
                 Toast.makeText(activity, R.string.login_successful, Toast.LENGTH_SHORT).show()
                 activity.startProfileSelector() // shows profile selection dialog
@@ -178,7 +178,7 @@ class AddAccountFragment : Fragment() {
             progressDialog.show()
 
             try {
-                val response = async(Dispatchers.IO) { Network.createAccount(req) }.await()
+                val response = withContext(Dispatchers.IO) { Network.createAccount(req) }
                 val acc = Account().apply {
                     serverId = response.id
                     email = response.email

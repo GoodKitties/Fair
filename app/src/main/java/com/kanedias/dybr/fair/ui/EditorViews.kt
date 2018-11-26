@@ -203,7 +203,7 @@ class EditorViews : Fragment() {
                     .show()
 
             try {
-                val link = async(Dispatchers.IO) { Network.uploadImage(stream.readBytes()) }.await()
+                val link = withContext(Dispatchers.IO) { Network.uploadImage(stream.readBytes()) }
                 MaterialDialog.Builder(activity!!)
                         .title(R.string.insert_image)
                         .content(R.string.select_image_height)

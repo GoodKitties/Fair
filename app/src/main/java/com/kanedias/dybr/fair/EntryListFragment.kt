@@ -117,8 +117,8 @@ open class EntryListFragment: Fragment() {
             refresher.isRefreshing = true
 
             try {
-                val success = async(Dispatchers.IO) { Network.loadEntries(profile!!, nextPage) }
-                updateRibbonPage(success.await(), reset)
+                val success = withContext(Dispatchers.IO) { Network.loadEntries(profile!!, nextPage) }
+                updateRibbonPage(success, reset)
             } catch (ex: Exception) {
                 Network.reportErrors(activity, ex)
             }

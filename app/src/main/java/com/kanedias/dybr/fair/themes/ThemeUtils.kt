@@ -78,7 +78,7 @@ fun applyTheme(profile: OwnProfile, target: Context) {
 
     GlobalScope.launch(Dispatchers.Main) {
         try {
-            val design = async(Dispatchers.IO) { Network.loadProfileDesign(profile) }.await() ?: return@launch
+            val design = withContext(Dispatchers.IO) { Network.loadProfileDesign(profile) } ?: return@launch
 
             updateColorBindings(design)
         } catch (ex: Exception) {

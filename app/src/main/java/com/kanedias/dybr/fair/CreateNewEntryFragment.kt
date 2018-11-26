@@ -232,12 +232,12 @@ class CreateNewEntryFragment : Fragment() {
                 if (editMode) {
                     // alter existing entry
                     entry.id = editEntry.id
-                    async(Dispatchers.IO) { Network.updateEntry(entry) }.await()
+                    withContext(Dispatchers.IO) { Network.updateEntry(entry) }
                     Toast.makeText(activity, R.string.entry_updated, Toast.LENGTH_SHORT).show()
                 } else {
                     // create new
                     entry.blog = HasOne(profile) // TODO: fix after migration is complete
-                    async(Dispatchers.IO) { Network.createEntry(entry) }.await()
+                    withContext(Dispatchers.IO) { Network.createEntry(entry) }
                     Toast.makeText(activity, R.string.entry_created, Toast.LENGTH_SHORT).show()
                 }
                 fragmentManager!!.popBackStack()

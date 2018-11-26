@@ -196,13 +196,13 @@ class CreateNewCommentFragment : Fragment() {
                 if (editMode) {
                     // alter existing comment
                     comment.id = editComment.id
-                    async(Dispatchers.IO) { Network.updateComment(comment) }.await()
+                    withContext(Dispatchers.IO) { Network.updateComment(comment) }
                     Toast.makeText(activity, R.string.comment_updated, Toast.LENGTH_SHORT).show()
                 } else {
                     // create new
                     comment.entry = HasOne(entry)
                     comment.profile = HasOne(Auth.profile)
-                    async(Dispatchers.IO) { Network.createComment(comment) }.await()
+                    withContext(Dispatchers.IO) { Network.createComment(comment) }
                     Toast.makeText(activity, R.string.comment_created, Toast.LENGTH_SHORT).show()
                 }
                 fragmentManager!!.popBackStack()

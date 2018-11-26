@@ -60,7 +60,7 @@ class AddBlogFragment: Fragment() {
             progressDialog.show()
 
             try {
-                val blog = async(Dispatchers.IO) { Network.createBlog(blogReq) }.await()
+                val blog = withContext(Dispatchers.IO) { Network.createBlog(blogReq) }
                 //Auth.updateBlog(blog)
 
                 //we created blog successfully, return to main activity

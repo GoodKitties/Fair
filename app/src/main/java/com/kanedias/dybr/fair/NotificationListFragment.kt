@@ -66,7 +66,7 @@ open class NotificationListFragment: Fragment() {
         val markRoutine = {
             GlobalScope.launch(Dispatchers.Main) {
                 try {
-                    GlobalScope.async(Dispatchers.IO) { Network.markAllNotificationsRead() }
+                    withContext(Dispatchers.IO) { Network.markAllNotificationsRead() }
                     refreshNotifications(true)
                 } catch (ex: Exception) {
                     Network.reportErrors(activity, ex)
@@ -112,8 +112,8 @@ open class NotificationListFragment: Fragment() {
             refresher.isRefreshing = true
 
             try {
-                val success = async(Dispatchers.IO) { Network.loadNotifications(pageNum = nextPage) }
-                updateRibbonPage(success.await(), reset)
+                val success = withContext(Dispatchers.IO) { Network.loadNotifications(pageNum = nextPage) }
+                updateRibbonPage(success, reset)
             } catch (ex: Exception) {
                 Network.reportErrors(activity, ex)
             }

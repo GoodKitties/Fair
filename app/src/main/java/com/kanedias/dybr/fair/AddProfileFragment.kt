@@ -63,7 +63,7 @@ class AddProfileFragment: Fragment() {
             progressDialog.show()
 
             try {
-                val profile = async(Dispatchers.IO) { Network.createProfile(profReq) }.await()
+                val profile = withContext(Dispatchers.IO) { Network.createProfile(profReq) }
                 Auth.updateCurrentProfile(profile)
 
                 //we created profile successfully, return to main activity

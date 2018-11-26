@@ -240,12 +240,12 @@ class MainActivity : AppCompatActivity() {
                     try {
                         when (type) {
                             EntityType.PROFILE -> {
-                                val prof = async(Dispatchers.IO) { Network.loadProfileByNickname(name) }.await()
+                                val prof = withContext(Dispatchers.IO) { Network.loadProfileByNickname(name) }
                                 val fragment = ProfileFragment().apply { profile = prof }
                                 fragment.show(supportFragmentManager, "Showing search-requested profile fragment")
                             }
                             EntityType.BLOG -> {
-                                val prof = async(Dispatchers.IO) { Network.loadProfileBySlug(name) }.await()
+                                val prof = withContext(Dispatchers.IO) { Network.loadProfileBySlug(name) }
                                 val fragment = EntryListFragmentFull().apply { this.profile = prof }
                                 supportFragmentManager.beginTransaction()
                                         .addToBackStack("Showing search-requested address")
@@ -355,7 +355,7 @@ class MainActivity : AppCompatActivity() {
 
             try {
                 // login with this account and reset profile/blog links
-                async(Dispatchers.IO) { Network.login(acc) }.await()
+                withContext(Dispatchers.IO) { Network.login(acc) }
 
                 if (Auth.user.lastProfileId == null) {
                     // first time we're loading this account, select profile
@@ -425,11 +425,11 @@ class MainActivity : AppCompatActivity() {
                 "blog" -> {
                     val fragment = when (address.size) {
                         2 -> {  // the case for /blog/<slug>
-                            val prof = GlobalScope.async(Dispatchers.IO) { Network.loadProfileBySlug(address[1]) }.await()
+                            val prof = withContext(Dispatchers.IO) { Network.loadProfileBySlug(address[1]) }
                             EntryListFragmentFull().apply { this.profile = prof }
                         }
                         3 -> { // the case for /blog/<slug>/<entry>
-                            val entry = GlobalScope.async(Dispatchers.IO) { Network.loadEntry(address[2]) }.await()
+                            val entry = withContext(Dispatchers.IO) { Network.loadEntry(address[2]) }
                             CommentListFragment().apply { this.entry = entry }
                         }
                         else -> return
@@ -444,7 +444,7 @@ class MainActivity : AppCompatActivity() {
                 "profile" -> {
                     val fragment = when (address.size) {
                         2 -> { // the case for /profile/<id>
-                            val profile = GlobalScope.async(Dispatchers.IO) { Network.loadProfile(address[1]) }.await()
+                            val profile = withContext(Dispatchers.IO) { Network.loadProfile(address[1]) }
                             ProfileFragment().apply { this.profile = profile }
                         }
                         else -> return
@@ -470,7 +470,7 @@ class MainActivity : AppCompatActivity() {
      */
     suspend fun startProfileSelector(showIfOne: Boolean = false) {
         // retrieve profiles from server
-        val profiles = GlobalScope.async(Dispatchers.IO) { Network.loadUserProfiles() }.await()
+        val profiles = withContext(Dispatchers.IO) { Network.loadUserProfiles() }
 
         // predefine what to do if new profile is needed
 
@@ -515,8 +515,8 @@ class MainActivity : AppCompatActivity() {
         // need to retrieve selected profile fully, i.e. with favorites and stuff
         GlobalScope.launch(Dispatchers.Main) {
             try {
-                async(Dispatchers.IO) { Network.makeProfileActive(prof) }.await()
-                val fullProf = async(Dispatchers.IO) { Network.loadProfile(prof.id) }.await()
+                withContext(Dispatchers.IO) { Network.makeProfileActive(prof) }
+                val fullProf = withContext(Dispatchers.IO) { Network.loadProfile(prof.id) }
                 Auth.updateCurrentProfile(fullProf)
                 refresh()
             } catch (ex: Exception) {
@@ -556,7 +556,7 @@ class MainActivity : AppCompatActivity() {
     private fun deleteProfile(prof: OwnProfile) {
         GlobalScope.launch(Dispatchers.Main) {
             try {
-                async(Dispatchers.IO) { Network.removeProfile(prof) }.await()
+                withContext(Dispatchers.IO) { Network.removeProfile(prof) }
                 Toast.makeText(this@MainActivity, R.string.profile_deleted, Toast.LENGTH_SHORT).show()
             } catch (ex: Exception) {
                 Network.reportErrors(this@MainActivity, ex)

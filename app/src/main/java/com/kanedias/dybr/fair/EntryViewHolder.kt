@@ -135,7 +135,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         val delete = {
             GlobalScope.launch(Dispatchers.Main) {
                 try {
-                    async(Dispatchers.IO) { Network.deleteEntry(entry) }.await()
+                    withContext(Dispatchers.IO) { Network.deleteEntry(entry) }
                     Toast.makeText(activity, R.string.entry_deleted, Toast.LENGTH_SHORT).show()
                     activity.supportFragmentManager.popBackStack()
 
@@ -208,7 +208,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
             dialog.show()
 
             try {
-                val prof = async(Dispatchers.IO) { Network.loadProfile(entry.profile.get().id) }.await()
+                val prof = withContext(Dispatchers.IO) { Network.loadProfile(entry.profile.get().id) }
                 val profShow = ProfileFragment().apply { profile = prof }
                 profShow.show(activity.supportFragmentManager, "Showing user profile fragment")
             } catch (ex: Exception) {

@@ -29,7 +29,7 @@ class InternalReceiver: BroadcastReceiver() {
                 // mark notification as read and get rid of status bar item
                 GlobalScope.launch(Dispatchers.Main) {
                     try {
-                        async(Dispatchers.IO) { Network.updateNotification(marked) }.await()
+                        withContext(Dispatchers.IO) { Network.updateNotification(marked) }
                         SyncNotificationsJob.markRead(context, notifId)
                     } catch (ex: Exception) {
                         Network.reportErrors(context, ex)
