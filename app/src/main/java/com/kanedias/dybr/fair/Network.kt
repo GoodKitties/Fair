@@ -477,19 +477,16 @@ object Network {
      * @return current design of the profile or null if nothing found
      */
     fun loadProfileDesign(prof: OwnProfile): Design? {
-        val req = Request.Builder().url("$PROFILES_ENDPOINT/${prof.id}/relationships/designs").build()
+        val designId = prof.settings?.currentDesign ?: return null
+
+        val req = Request.Builder().url("$PROFILES_ENDPOINT/${prof.id}/relationships/designs/$designId").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw extractErrors(resp, "Can't load profile design for ${prof.nickname}")
         }
 
         // response is returned after execute call, body is not null
-        val profileDesigns = fromWrappedListJson(resp.body()!!.source(), Design::class.java)
-        val filtered = profileDesigns.filter { it.id == prof.settings?.currentDesign }
-        if (filtered.isEmpty())
-            return null
-
-        return filtered[0]
+        return fromWrappedJson(resp.body()!!.source(), Design::class.java)
     }
 
     /**

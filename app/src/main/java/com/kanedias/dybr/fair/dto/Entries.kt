@@ -57,6 +57,15 @@ class EntryCreateRequest : Resource() {
     lateinit var state: String
 
     /**
+     * Settings for publishing this entry. Include feed settings, privacy controls
+     * and so on.
+     *
+     * If null, defaults are applied (visible for all and in feed)
+     */
+    @field:Json(name = "settings")
+    var settings: RecordSettings? = null
+
+    /**
      * Blog that this entry belongs to.
      * Must be set if it's new entry.
      */
@@ -145,12 +154,6 @@ class EntryResponse: Resource() {
      */
     @field:Json(name = "profile")
     var profile = HasOne<OwnProfile>()
-
-    /**
-     * Comments of this entry. This is link relationship, thus One-to-One
-     */
-    @field:Json(name = "comments")
-    var comments = HasOne<Comment>()
 }
 
 /**
