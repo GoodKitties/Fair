@@ -1,6 +1,9 @@
 package com.kanedias.dybr.fair.dto
 
+import android.content.Context
+import com.kanedias.dybr.fair.R
 import com.squareup.moshi.Json
+import java.io.Serializable
 
 /**
  * Generic settings structure for a record ([Entry] or [Comment])
@@ -10,7 +13,7 @@ import com.squareup.moshi.Json
 data class RecordSettings (
     @field:Json(name = "permissions")
     val permissions: RecordPermissions
-)
+) : Serializable
 
 /**
  * Entity representing record (entry or comment) permissions.
@@ -28,7 +31,7 @@ data class RecordPermissions (
          */
         @field:Json(name = "access")
         val access: List<RecordAccessItem?>
-)
+) : Serializable
 
 /**
  * Record access item, representing part of the whole permission scheme for entry or comment.
@@ -54,4 +57,14 @@ data class RecordAccessItem (
          */
         @field:Json(name = "allow")
         val allow: Boolean
-)
+) : Serializable
+
+infix fun RecordAccessItem?.toDescription(ctx: Context) : String {
+    val descArray = ctx.resources.getStringArray(R.array.permission_types)
+    return when (this) {
+        RecordAccessItem("private", false) -> descArray[0]
+        RecordAccessItem("registered", true) -> descArray[1]
+        RecordAccessItem("favorites", true) -> descArray[2]
+        else -> descArray[3] // visible for all
+    }
+}

@@ -38,6 +38,18 @@
             android:text="@string/placeholder_short"
             android:textStyle="bold"/>
 
+        <ImageView
+            android:id="@+id/entry_permissions"
+            android:layout_height="12dp"
+            android:layout_width="12dp"
+            android:layout_alignTop="@id/entry_date"
+            android:layout_alignBottom="@id/entry_date"
+            android:layout_toLeftOf="@id/entry_date"
+            android:layout_toStartOf="@id/entry_date"
+            android:layout_margin="8dp"
+            android:src="@drawable/lock"
+            android:contentDescription="@string/entry_access_permissions"/>
+
         <TextView
             android:id="@+id/entry_date"
             android:layout_width="wrap_content"

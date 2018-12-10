@@ -150,6 +150,14 @@ class EntryResponse: Resource() {
     var state = "published"
 
     /**
+     * Settings for this entry. Include feed settings, privacy controls
+     * and so on.
+     *
+     */
+    @field:Json(name = "settings")
+    var settings: RecordSettings? = null
+
+    /**
      * Profile this entry was written by
      */
     @field:Json(name = "profile")

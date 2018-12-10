@@ -641,17 +641,6 @@ class MainActivity : AppCompatActivity() {
             return 4 // favorites, world and own blog
         }
 
-        override fun getItemPosition(fragment: Any): Int {
-            val entryList = fragment as EntryListFragment
-            if (entryList.profile != profile) {
-                // needed to kill old fragment that is shown when auth is switched
-                entryList.userVisibleHint = false
-                return POSITION_NONE
-            }
-
-            return super.getItemPosition(fragment)
-        }
-
         override fun getItem(position: Int) = when(position) {
             MY_DIARY_TAB -> EntryListFragment().apply { profile = this@TabAdapter.profile }
             FAV_TAB  -> EntryListFragment().apply { profile = Auth.favoritesMarker }

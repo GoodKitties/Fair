@@ -15,7 +15,6 @@ import butterknife.BindViews
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
-import com.kanedias.dybr.fair.dto.Entry
 import com.kanedias.dybr.fair.ui.md.handleMarkdown
 import java.text.SimpleDateFormat
 import java.util.*
@@ -23,8 +22,7 @@ import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.support.v4.app.FragmentTransaction
 import com.ftinc.scoop.Scoop
-import com.kanedias.dybr.fair.dto.EntryMeta
-import com.kanedias.dybr.fair.dto.OwnProfile
+import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
 import kotlinx.coroutines.*
 
@@ -67,6 +65,9 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     @BindView(R.id.entry_participants_text)
     lateinit var participants: TextView
 
+    @BindView(R.id.entry_permissions)
+    lateinit var permissionIcon: ImageView
+
     /**
      * Entry that this holder represents
      */
@@ -107,6 +108,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         Scoop.getInstance().bind(TEXT, dateView, parent)
         Scoop.getInstance().bind(TEXT, bodyView, parent)
         Scoop.getInstance().bind(TEXT_LINKS, bodyView, parent, TextViewLinksAdapter())
+        Scoop.getInstance().bind(TEXT_LINKS, permissionIcon, parent)
         Scoop.getInstance().bind(DIVIDER, divider, parent)
         (buttons + indicators + participants + comments).forEach { Scoop.getInstance().bind(TEXT_LINKS, it, parent) }
     }
@@ -270,6 +272,15 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         titleView.text = entry.title
         entry.profile.get(entry.document)?.let { authorView.text = it.nickname }
         draftStateView.visibility = if (entry.state == "published") { View.GONE } else { View.VISIBLE }
+
+        // setup permission icon
+        val accessItem = entry.settings?.permissions?.access?.firstOrNull()
+        if (accessItem == null) {
+            permissionIcon.visibility = View.GONE
+        } else {
+            permissionIcon.visibility = View.VISIBLE
+            permissionIcon.setOnClickListener { Toast.makeText(it.context, accessItem.toDescription(it.context), Toast.LENGTH_SHORT).show() }
+        }
 
         // setup bottom row of edit buttons
         toggleEditButtons(editable)

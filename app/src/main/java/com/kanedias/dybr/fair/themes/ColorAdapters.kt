@@ -11,6 +11,7 @@ import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v4.view.TintableBackgroundView
 import android.support.v4.widget.CompoundButtonCompat
 import android.support.v7.graphics.drawable.DrawerArrowDrawable
+import android.support.v7.widget.AppCompatSpinner
 import android.support.v7.widget.CardView
 import android.support.v7.widget.Toolbar
 import android.view.View
@@ -115,6 +116,24 @@ class TextViewLinksAdapter: ColorAdapter<TextView> {
 
     override fun getColor(view: TextView): Int {
         return view.linkTextColors.defaultColor
+    }
+}
+
+class TextViewDrawableAdapter: ColorAdapter<TextView> {
+
+    private var color = Color.TRANSPARENT
+
+    override fun applyColor(view: TextView, color: Int) {
+        this.color = color
+
+        val colorStateList = Utils.colorToStateList(color)
+        for (drawable in view.compoundDrawables.filterNotNull()) {
+            DrawableCompat.setTintList(drawable, colorStateList)
+        }
+    }
+
+    override fun getColor(view: TextView): Int {
+        return color
     }
 }
 
@@ -223,4 +242,21 @@ class TabLayoutLineAdapter: ColorAdapter<TabLayout> {
         // can't retrieve it without resorting to reflection, ugh
         return color
     }
+}
+
+class SpinnerDropdownColorAdapter: ColorAdapter<AppCompatSpinner> {
+
+    private var color = Color.TRANSPARENT
+
+    override fun applyColor(view: AppCompatSpinner, color: Int) {
+        this.color = color
+
+        val colorStateList = Utils.colorToStateList(color)
+        DrawableCompat.setTintList(view.background, colorStateList)
+    }
+
+    override fun getColor(view: AppCompatSpinner): Int {
+        return color
+    }
+
 }

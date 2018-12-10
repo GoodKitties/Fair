@@ -24,12 +24,19 @@
 
     <!-- arrays -->
     <string-array name="image_sizes">
-        <item>100px</item>
-        <item>200px</item>
-        <item>300px</item>
-        <item>500px</item>
-        <item>800px</item>
-        <item>Full size</item>
+        <item>100px</item>      <!-- 0 -->
+        <item>200px</item>      <!-- 1 -->
+        <item>300px</item>      <!-- 2 -->
+        <item>500px</item>      <!-- 3 -->
+        <item>800px</item>      <!-- 4 -->
+        <item>Full size</item>  <!-- 5 -->
+    </string-array>
+
+    <string-array name="permission_types">
+        <item>Visible for no one but you</item>  <!-- 0 -->
+        <item>Visible for registered</item>      <!-- 1 -->
+        <item>Visible for favorites</item>       <!-- 2 -->
+        <item>Visible for all</item>             <!-- 3 -->
     </string-array>
 
     <string name="my_profile">My Profile</string>
@@ -201,4 +208,6 @@
     <string name="youve_received_new_comments">You\'ve received new comments</string>
     <string name="delete_offline_draft">Delete offline draft</string>
     <string name="offline_draft_deleted">Offline draft deleted</string>
+    <string name="select_permission_type">Select permission type</string>
+    <string name="entry_access_permissions">Entry access permissions</string>
 </resources>
