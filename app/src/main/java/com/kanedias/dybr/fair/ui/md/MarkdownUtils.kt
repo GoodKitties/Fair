@@ -193,6 +193,9 @@ class DrawableLoader(private val view: TextView): AsyncDrawable.Loader {
                                 .placeholder(android.R.drawable.progress_indeterminate_horizontal))
                         .into(AsyncDrawableTarget(drawable))
 
+                // image spans are expanded, text views don't invalidate themselves
+                view.postInvalidate()
+
             } catch (ioex: IOException) {
                 // ignore, just don't load image
                 Log.e("ImageLoader", "Couldn't load image", ioex)
