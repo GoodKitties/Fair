@@ -137,7 +137,10 @@ class ProfileFragment: DialogFragment() {
                 } else {
                     // add to favorites
                     withContext(Dispatchers.IO) { Network.addFavorite(profile) }
-                    Auth.profile?.favorites?.add(profile)
+                    Auth.profile?.apply {
+                        favorites.add(profile)
+                        document.addInclude(profile)
+                    }
                     favoritesToggle.setImageDrawable(filledStar)
                     Toast.makeText(activity, R.string.added_to_favorites, Toast.LENGTH_SHORT).show()
                 }

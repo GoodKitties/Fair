@@ -46,6 +46,8 @@ class CommentListFragment : Fragment() {
     var entry: Entry? = null
 
     private val commentAdapter = CommentListAdapter()
+    private var nextPage = 1
+    private var lastPage = false
 
     private lateinit var activity: MainActivity
 
@@ -71,8 +73,9 @@ class CommentListFragment : Fragment() {
         toolbar.navigationIcon = DrawerArrowDrawable(activity).apply { progress = 1.0f }
         toolbar.setNavigationOnClickListener { fragmentManager?.popBackStack() }
 
-        refresher.setOnRefreshListener { refreshComments() }
+        refresher.setOnRefreshListener { refreshComments(reset = true) }
         commentRibbon.layoutManager = LinearLayoutManager(activity)
+        commentRibbon.adapter = commentAdapter
 
         setBlogTheme(view)
     }
@@ -96,10 +99,22 @@ class CommentListFragment : Fragment() {
         Scoop.getInstance().popStyleLevel(false)
     }
 
-    fun refreshComments() {
+    /**
+     * Refresh comments displayed in fragment. Entry is not touched but as recycler view is refreshed
+     * its views are reloaded too.
+     *
+     * @param reset if true, reset page counting and start from page one
+     */
+    fun refreshComments(reset: Boolean = false) {
         if (entry == null) { // we don't have an entry, just show empty list
             refresher.isRefreshing = false
             return
+        }
+
+        if (reset) {
+            commentRibbon.smoothScrollToPosition(0)
+            nextPage = 1
+            lastPage = false
         }
 
         GlobalScope.launch(Dispatchers.Main) {
@@ -107,10 +122,9 @@ class CommentListFragment : Fragment() {
 
             try {
                 val entryDemand = withContext(Dispatchers.IO) { Network.loadEntry(entry!!.id) }
-                val commentsDemand = withContext(Dispatchers.IO) { Network.loadComments(entry!!) }
-                commentAdapter.comments = commentsDemand // refresh comments of this entry
+                val commentsDemand = withContext(Dispatchers.IO) { Network.loadComments(entry!!, pageNum = nextPage) }
                 commentAdapter.entry = entry!!.apply { meta = entryDemand.meta } // refresh comment num and participants
-                commentRibbon.adapter = commentAdapter
+                updateRibbonPage(commentsDemand, reset)
 
                 // mark related notifications read
                 val markedRead = withContext(Dispatchers.IO) { Network.markNotificationsReadFor(entry!!) }
@@ -125,6 +139,32 @@ class CommentListFragment : Fragment() {
             }
 
             refresher.isRefreshing = false
+        }
+    }
+
+    /**
+     * Update recycler view with loaded comments.
+     * If reset is called, strip comments and start anew.
+     *
+     * @param reset if true, reset page counting and start from page one
+     */
+    private fun updateRibbonPage(loaded: ArrayDocument<Comment>, reset: Boolean) {
+        if (reset) {
+            commentAdapter.comments.clear()
+        }
+
+        if (loaded.isEmpty()) {
+            lastPage = true
+            commentAdapter.notifyDataSetChanged()
+            return
+        }
+
+        nextPage += 1
+        commentAdapter.apply {
+            comments.addAll(loaded)
+            comments.included.addAll(loaded.included)
+
+            notifyDataSetChanged()
         }
     }
 
@@ -144,48 +184,63 @@ class CommentListFragment : Fragment() {
     /**
      * Adapter for comments list. Top item is an entry being viewed.
      * All views below represent comments to this entry.
+     *
+     * Scrolling to the bottom calls polling of next page or stops in case it's the last one
      */
     inner class CommentListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-        private val TYPE_ENTRY = 0
-        private val TYPE_COMMENT = 1
-
-        lateinit var comments: ArrayDocument<Comment>
         lateinit var entry: Entry
+        val comments = ArrayDocument<Comment>()
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            when (holder) {
-                is EntryViewHolder -> {
-                    holder.setup(entry, false)
-                    holder.itemView.isClickable = false
+            when (getItemViewType(position)) {
+                ITEM_HEADER -> {
+                    (holder as EntryViewHolder).apply {
+                        setup(entry, false)
+                        itemView.isClickable = false
+                    }
                 }
-                is CommentViewHolder -> {
+                ITEM_REGULAR -> {
                     val comment = comments[position - 1]
                     val profile = comment.profile.get(comments) // it's included
-                    holder.setup(comment, profile)
+                    (holder as CommentViewHolder).setup(comment, profile)
                 }
+                ITEM_LOAD_MORE -> refreshComments()
+                // Nothing needed for ITEM_LAST_PAGE
             }
         }
 
-        override fun getItemViewType(position: Int): Int {
-            if (position == 0) {
-                return TYPE_ENTRY
-            }
-            return TYPE_COMMENT
+        override fun getItemViewType(position: Int) = when {
+            position == 0 -> ITEM_HEADER
+            position < comments.size + 1 -> ITEM_REGULAR
+            lastPage -> ITEM_LAST_PAGE
+            else -> ITEM_LOAD_MORE
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
             val inflater = LayoutInflater.from(activity)
-            return if (viewType == TYPE_ENTRY) {
-                val view = inflater.inflate(R.layout.fragment_entry_list_item, parent, false)
-                EntryViewHolder(view, parent as View, allowSelection = true)
-            } else {
-                val view = inflater.inflate(R.layout.fragment_comment_list_item, parent, false)
-                CommentViewHolder(entry, view, parent as View)
+            return when (viewType) {
+                ITEM_HEADER -> {
+                    val view = inflater.inflate(R.layout.fragment_entry_list_item, parent, false)
+                    EntryViewHolder(view, parent as View, allowSelection = true)
+                }
+                ITEM_REGULAR -> {
+                    val view = inflater.inflate(R.layout.fragment_comment_list_item, parent, false)
+                    CommentViewHolder(entry, view, parent as View)
+                }
+                else -> object: RecyclerView.ViewHolder(View(inflater.context)) {}
             }
         }
 
-        override fun getItemCount() = comments.size + 1
+        override fun getItemCount(): Int {
+            if (comments.isEmpty()) {
+                // seems like we didn't yet load anything in our view, it's probably loading
+                // for the first time. Don't show "load more" and entry, let's wait while anything shows up.
+                return 1 // only show entry
+            }
+
+            return 1 +comments.size + 1 // entry, comments and "load more" item
+        }
     }
 
 }

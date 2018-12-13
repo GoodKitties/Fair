@@ -65,7 +65,7 @@ open class EntryListFragment: Fragment() {
     open fun layoutToUse() = R.layout.fragment_entry_list
 
     open fun setupUI(view: View) {
-        refresher.setOnRefreshListener { refreshEntries(true) }
+        refresher.setOnRefreshListener { refreshEntries(reset = true) }
         entryRibbon.layoutManager = LinearLayoutManager(activity)
         entryRibbon.adapter = entryAdapter
     }
@@ -93,7 +93,7 @@ open class EntryListFragment: Fragment() {
 
     /**
      * Loads the next page in entry listing. If no pages were loaded before, loads first
-     * @param reset reset page counter to first
+     * @param reset if true, reset page counting and start from page one
      */
     fun refreshEntries(reset: Boolean = false) {
         if (profile == null) { // we don't have a blog, just show empty list
@@ -134,7 +134,7 @@ open class EntryListFragment: Fragment() {
     /**
      * Update entry ribbon with newly loaded values.
      * @param loaded document with entries and links to pages that was loaded
-     * @param reset if true, clear current entries before populating from [loaded]
+     * @param reset if true, reset page counting and start from page one
      */
     private fun updateRibbonPage(loaded: ArrayDocument<Entry>, reset: Boolean) {
         if (reset) {
@@ -197,16 +197,10 @@ open class EntryListFragment: Fragment() {
 
         var entries: MutableList<Entry> = ArrayList()
 
-        override fun getItemViewType(position: Int): Int {
-            if (position < entries.size) {
-                return ITEM_REGULAR
-            }
-
-            if (lastPage) {
-                return  ITEM_LAST_PAGE
-            }
-
-            return ITEM_LOAD_MORE
+        override fun getItemViewType(position: Int) = when {
+            position < entries.size -> ITEM_REGULAR
+            lastPage -> ITEM_LAST_PAGE
+            else -> ITEM_LOAD_MORE
         }
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {

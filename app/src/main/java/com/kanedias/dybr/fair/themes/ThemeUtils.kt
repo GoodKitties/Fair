@@ -94,8 +94,8 @@ fun updateColorBindings(design: Design) {
         val tbBackground = it.background?.colorFromCss() ?: return@let
         var tbText = it.color?.colorFromCss() ?: return@let
 
-        // workaround: if alpha is lower than 0.5 do nothing
-        if (Color.alpha(tbBackground) < 127) {
+        // workaround: if background is translucent
+        if (Color.alpha(tbBackground) < 255) {
             return@let
         }
 
