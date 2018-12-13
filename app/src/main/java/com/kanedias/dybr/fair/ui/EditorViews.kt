@@ -249,13 +249,6 @@ class EditorViews : Fragment() {
         val result = beforeCursorWithPrefix + what + suffixWithAfterCursor
         contentInput.setText(result)
 
-        when {
-        // empty string between tags, set cursor between tags
-            what.isEmpty() -> contentInput.setSelection(contentInput.text.indexOf(suffixWithAfterCursor, cursorPos))
-        // append to text, set cursor to the end of text
-            afterCursor.isEmpty() -> contentInput.setSelection(contentInput.text.length)
-        // insert inside text, set cursor at the end of paste
-            else -> contentInput.setSelection(contentInput.text.indexOf(afterCursor, cursorPos))
-        }
+        contentInput.setSelection(cursorPos + prefix.length, cursorPos + prefix.length + what.length)
     }
 }
