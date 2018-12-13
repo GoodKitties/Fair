@@ -22,7 +22,6 @@ import java.net.HttpURLConnection.*
 import okhttp3.RequestBody
 import org.json.JSONObject
 import java.lang.IllegalStateException
-import java.net.HttpURLConnection
 
 
 /**
@@ -236,14 +235,15 @@ object Network {
             // get user info
             val reqUser = Request.Builder().url(USERS_ENDPOINT).build()
             val respUser = httpClient.newCall(reqUser).execute() // returns array with only one element
-            val user = fromWrappedListJson(respUser.body()!!.source(), User::class.java)
+            val user = fromWrappedJson(respUser.body()!!.source(), User::class.java) ?: return
 
             // memorize account info
             acc.apply {
-                serverId = user[0].id
-                createdAt = user[0].createdAt
-                updatedAt = user[0].updatedAt
-                isAdult = user[0].isAdult
+                serverId = user.id
+                createdAt = user.createdAt
+                updatedAt = user.updatedAt
+                isAdult = user.isAdult
+                lastProfileId = user.activeProfile
             }
         }
 
@@ -457,21 +457,6 @@ object Network {
     }
 
     /**
-     * Load one particular blog by id, with profile
-     * @param id id of requested blog
-     */
-    fun loadBlog(id: String): Blog {
-        val req = Request.Builder().url("$BLOGS_ENDPOINT/$id/?include=profile").build()
-        val resp = httpClient.newCall(req).execute()
-        if (!resp.isSuccessful) {
-            throw extractErrors(resp, "Can't load blog $id")
-        }
-
-        // response is returned after execute call, body is not null
-        return fromWrappedJson(resp.body()!!.source(), Blog::class.java)!!
-    }
-
-    /**
      * Loads current design of the profile. Retrieves all profile designs and filters by `settings.currentDesign`
      * @param prof profile to load design from
      * @return current design of the profile or null if nothing found
@@ -672,7 +657,7 @@ object Network {
 
         val builder = HttpUrl.parse("$PROFILES_ENDPOINT/${Auth.profile?.id}/relationships/notifications")!!.newBuilder()
         builder.addQueryParameter("page[number]", pageNum.toString())
-                .addQueryParameter("page[size]", "20")
+                .addQueryParameter("page[size]", pageSize.toString())
                 .addQueryParameter("include", "comments,profiles")
                 .addQueryParameter("sort", "state,-comment_id")
 

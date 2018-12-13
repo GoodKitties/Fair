@@ -132,6 +132,13 @@ class RegisterResponse : Resource() {
     var isAdult: Boolean = false
 
     /**
+     * Currently active profile for this user.
+     * Can be null if user was just created and doesn't have any profile.
+     */
+    @field:Json(name = "active-profile")
+    var activeProfile: String? = null
+
+    /**
      * Available when requested with `include=profiles`
      */
     @field:Json(name = "profiles")
