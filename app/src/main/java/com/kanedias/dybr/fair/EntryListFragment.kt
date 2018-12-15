@@ -138,7 +138,10 @@ open class EntryListFragment: Fragment() {
      */
     private fun updateRibbonPage(loaded: ArrayDocument<Entry>, reset: Boolean) {
         if (reset) {
-            entryAdapter.entries.clear()
+            entryAdapter.apply {
+                entries.clear()
+                notifyDataSetChanged()
+            }
         }
 
         if (loaded.isEmpty()) {
@@ -149,8 +152,9 @@ open class EntryListFragment: Fragment() {
 
         nextPage += 1
         entryAdapter.apply {
+            val oldSize = entries.size
             entries.addAll(loaded)
-            notifyDataSetChanged()
+            notifyItemRangeInserted(oldSize, loaded.size)
         }
     }
 

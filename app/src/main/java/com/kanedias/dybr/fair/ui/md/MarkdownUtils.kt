@@ -11,9 +11,11 @@ import android.util.Log
 import android.view.View
 import android.widget.TextView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
 import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
 import com.kanedias.dybr.fair.Network
 import com.kanedias.dybr.fair.R
@@ -25,8 +27,6 @@ import ru.noties.markwon.SpannableConfiguration
 import ru.noties.markwon.spans.AsyncDrawable
 import ru.noties.markwon.spans.AsyncDrawableSpan
 import java.io.IOException
-import java.net.URI
-import java.net.URLEncoder
 
 /**
  * Perform all necessary steps to view Markdown in this text view.
@@ -190,11 +190,9 @@ class DrawableLoader(private val view: TextView): AsyncDrawable.Loader {
                 Glide.with(view)
                         .load(resolved.toString())
                         .apply(RequestOptions()
-                                .placeholder(android.R.drawable.progress_indeterminate_horizontal))
-                        .into(AsyncDrawableTarget(drawable))
-
-                // image spans are expanded, text views don't invalidate themselves
-                view.postInvalidate()
+                                .placeholder(android.R.drawable.progress_indeterminate_horizontal)
+                                .downsample(DownsampleStrategy.CENTER_INSIDE))
+                        .into(AsyncDrawableTarget(view.width, drawable))
 
             } catch (ioex: IOException) {
                 // ignore, just don't load image
@@ -203,7 +201,7 @@ class DrawableLoader(private val view: TextView): AsyncDrawable.Loader {
         }
     }
 
-    inner class AsyncDrawableTarget(private val drawable: AsyncDrawable): SimpleTarget<Drawable>() {
+    inner class AsyncDrawableTarget(width: Int, private val drawable: AsyncDrawable): SimpleTarget<Drawable>(width, Target.SIZE_ORIGINAL) {
 
         override fun onLoadStarted(placeholder: Drawable?) {
             placeholder?.let { drawable.result = placeholder }
@@ -215,7 +213,6 @@ class DrawableLoader(private val view: TextView): AsyncDrawable.Loader {
 
             if (resource is GifDrawable) {
                 resource.start()
-
             }
         }
 

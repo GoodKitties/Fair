@@ -123,7 +123,7 @@ class CommentListFragment : Fragment() {
             try {
                 val entryDemand = withContext(Dispatchers.IO) { Network.loadEntry(entry!!.id) }
                 val commentsDemand = withContext(Dispatchers.IO) { Network.loadComments(entry!!, pageNum = nextPage) }
-                commentAdapter.entry = entry!!.apply { meta = entryDemand.meta } // refresh comment num and participants
+                entry!!.apply { meta = entryDemand.meta } // refresh comment num and participants
                 updateRibbonPage(commentsDemand, reset)
 
                 // mark related notifications read
@@ -150,7 +150,10 @@ class CommentListFragment : Fragment() {
      */
     private fun updateRibbonPage(loaded: ArrayDocument<Comment>, reset: Boolean) {
         if (reset) {
-            commentAdapter.comments.clear()
+            commentAdapter.apply {
+                comments.clear()
+                notifyDataSetChanged()
+            }
         }
 
         if (loaded.isEmpty()) {
@@ -161,10 +164,10 @@ class CommentListFragment : Fragment() {
 
         nextPage += 1
         commentAdapter.apply {
+            val oldSize = comments.size
             comments.addAll(loaded)
             comments.included.addAll(loaded.included)
-
-            notifyDataSetChanged()
+            notifyItemRangeInserted(oldSize, loaded.size)
         }
     }
 
@@ -189,14 +192,13 @@ class CommentListFragment : Fragment() {
      */
     inner class CommentListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-        lateinit var entry: Entry
         val comments = ArrayDocument<Comment>()
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             when (getItemViewType(position)) {
                 ITEM_HEADER -> {
                     (holder as EntryViewHolder).apply {
-                        setup(entry, false)
+                        setup(entry!!, false)
                         itemView.isClickable = false
                     }
                 }
@@ -226,13 +228,18 @@ class CommentListFragment : Fragment() {
                 }
                 ITEM_REGULAR -> {
                     val view = inflater.inflate(R.layout.fragment_comment_list_item, parent, false)
-                    CommentViewHolder(entry, view, parent as View)
+                    CommentViewHolder(entry!!, view, parent as View)
                 }
                 else -> object: RecyclerView.ViewHolder(View(inflater.context)) {}
             }
         }
 
         override fun getItemCount(): Int {
+            if (entry == null) {
+                // nothing to show, at all
+                return 0
+            }
+
             if (comments.isEmpty()) {
                 // seems like we didn't yet load anything in our view, it's probably loading
                 // for the first time. Don't show "load more" and entry, let's wait while anything shows up.
