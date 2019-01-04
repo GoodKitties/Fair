@@ -32,6 +32,7 @@ import butterknife.BindView
 import butterknife.OnClick
 import butterknife.ButterKnife
 import com.afollestad.materialdialogs.MaterialDialog
+import com.auth0.android.jwt.JWT
 import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.database.entities.Account
@@ -41,6 +42,7 @@ import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.Sidebar
 import kotlinx.coroutines.*
+import java.util.*
 
 /**
  * Main activity with drawer and sliding tabs where most of user interaction happens.
@@ -337,11 +339,19 @@ class MainActivity : AppCompatActivity() {
      * @param acc account to be logged in with
      */
     fun reLogin(acc: Account) {
+        // skip re-login if we're logging in as guest
         if (acc === Auth.guest) {
-            // we're logging in as guest, skip auth
             Auth.updateCurrentUser(Auth.guest)
             refresh()
             return
+        }
+
+        // skip re-login if it's the same profile, our token is still valid and we have profile loaded
+        if (acc == Auth.user && Auth.user.accessToken != null && Auth.profile != null) {
+            if (JWT(Auth.user.accessToken!!).expiresAt!! > Date()) {
+                refresh()
+                return
+            }
         }
 
         GlobalScope.launch(Dispatchers.Main) {
@@ -392,15 +402,31 @@ class MainActivity : AppCompatActivity() {
 
         when (cause.action) {
             ACTION_NOTIF_OPEN -> {
-                for (i in 0..supportFragmentManager.backStackEntryCount) {
-                    supportFragmentManager.popBackStack()
-                }
-                pager.setCurrentItem(NOTIFICATIONS_TAB, true)
+                val backToNotifications = {
+                    for (i in 0..supportFragmentManager.backStackEntryCount) {
+                        supportFragmentManager.popBackStack()
+                    }
+                    pager.setCurrentItem(NOTIFICATIONS_TAB, true)
 
-                // if the fragment is already loaded, try to refresh it
-                val notifPredicate = { it: Fragment -> it is NotificationListFragment }
-                val notifFragment = supportFragmentManager.fragments.find(notifPredicate) as NotificationListFragment?
-                notifFragment?.refreshNotifications(true)
+                    // if the fragment is already loaded, try to refresh it
+                    val notifPredicate = { it: Fragment -> it is NotificationListFragment }
+                    val notifFragment = supportFragmentManager.fragments.find(notifPredicate) as NotificationListFragment?
+                    notifFragment?.refreshNotifications(reset = true)
+                }
+
+                if (supportFragmentManager.backStackEntryCount > 0) {
+                    // dismiss all
+                    MaterialDialog.Builder(this)
+                            .title(R.string.confirm_action)
+                            .content(R.string.return_to_notifications)
+                            .negativeText(android.R.string.cancel)
+                            .negativeColorRes(R.color.md_red_900)
+                            .positiveText(android.R.string.ok)
+                            .onPositive {_, _ -> backToNotifications() }
+                            .show()
+                } else {
+                    backToNotifications()
+                }
             }
 
             Intent.ACTION_VIEW -> GlobalScope.launch(Dispatchers.Main) {

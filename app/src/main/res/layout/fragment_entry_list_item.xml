@@ -24,18 +24,27 @@
             android:layout_alignParentLeft="true"
             android:padding="5dp"
             android:textColor="@color/md_amber_600"
-            android:visibility="gone"
+            android:visibility="visible"
             android:text="@string/draft"/>
+
+        <ImageView
+            android:id="@+id/entry_avatar"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_below="@+id/entry_draft_state"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:contentDescription="@string/user_avatar" />
 
         <TextView
             android:id="@+id/entry_author"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/entry_draft_state"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:padding="5dp"
-            android:text="@string/placeholder_short"
+            android:layout_alignTop="@id/entry_avatar"
+            android:layout_toRightOf="@id/entry_avatar"
+            android:layout_toEndOf="@id/entry_avatar"
+            android:padding="8dp"
+            android:text="@string/placeholder_long"
             android:textStyle="bold"/>
 
         <ImageView
@@ -57,14 +66,15 @@
             android:layout_below="@+id/entry_draft_state"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:padding="5dp"
+            android:layout_alignBaseline="@id/entry_author"
+            android:padding="8dp"
             android:text="@string/placeholder_long"/>
 
         <TextView
             android:id="@+id/entry_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/entry_date"
+            android:layout_below="@+id/entry_avatar"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:padding="5dp"

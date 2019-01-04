@@ -73,6 +73,7 @@ import java.lang.IllegalStateException
  */
 object Network {
 
+    private const val USER_AGENT = "Fair ${BuildConfig.VERSION_NAME}"
     private const val DEFAULT_DYBR_API_ENDPOINT = "https://dybr.ru/v2"
 
     var MAIN_DYBR_API_ENDPOINT = DEFAULT_DYBR_API_ENDPOINT
@@ -131,6 +132,14 @@ object Network {
         return@Interceptor chain.proceed(authorisedReq)
     }
 
+    private val userAgent = Interceptor { chain ->
+        chain.proceed(chain
+                .request()
+                .newBuilder()
+                .header("User-Agent", USER_AGENT)
+                .build())
+    }
+
     lateinit var httpClient: OkHttpClient
 
     fun init(ctx: Context) {
@@ -150,6 +159,7 @@ object Network {
                 .connectionPool(ConnectionPool())
                 .dispatcher(Dispatcher())
                 .addInterceptor(authorizer)
+                .addInterceptor(userAgent)
                 .build()
     }
 
@@ -205,9 +215,6 @@ object Network {
      * @throws IOException on connection fail
      */
     fun login(acc: Account) {
-        // clear present access token, we're re-logging
-        acc.accessToken = null
-
         val loginRequest = LoginRequest().apply {
             action = "login"
             email = acc.email

@@ -210,4 +210,5 @@
     <string name="offline_draft_deleted">Offline draft deleted</string>
     <string name="select_permission_type">Select permission type</string>
     <string name="entry_access_permissions">Entry access permissions</string>
+    <string name="return_to_notifications">Return to notifications?</string>
 </resources>

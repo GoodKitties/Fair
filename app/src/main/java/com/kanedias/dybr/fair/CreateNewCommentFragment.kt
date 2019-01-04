@@ -210,7 +210,7 @@ class CreateNewCommentFragment : Fragment() {
                 // if we have current comment list, refresh it
                 val clPredicate = { it: Fragment -> it is CommentListFragment }
                 val currentTab = fragmentManager!!.fragments.find(clPredicate) as CommentListFragment?
-                currentTab?.refreshComments()
+                currentTab?.refreshComments(reset = true)
             } catch (ex: Exception) {
                 // don't close the fragment, just report errors
                 Network.reportErrors(activity, ex)

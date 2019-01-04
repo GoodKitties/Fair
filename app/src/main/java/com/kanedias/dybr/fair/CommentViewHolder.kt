@@ -3,7 +3,6 @@ package com.kanedias.dybr.fair
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentTransaction
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -18,8 +17,8 @@ import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.md.handleMarkdown
 import kotlinx.coroutines.*
-import java.text.SimpleDateFormat
-import java.util.*
+
+
 
 
 /**
@@ -28,7 +27,10 @@ import java.util.*
  * @see CommentListFragment.commentRibbon
  * @author Kanedias
  */
-class CommentViewHolder(private val entry: Entry, iv: View, private val parent: View) : RecyclerView.ViewHolder(iv) {
+class CommentViewHolder(private val entry: Entry, iv: View, private val parent: View) : UserContentViewHolder(iv) {
+
+    @BindView(R.id.comment_avatar)
+    lateinit var avatarView: ImageView
 
     @BindView(R.id.comment_date)
     lateinit var dateView: TextView
@@ -43,6 +45,7 @@ class CommentViewHolder(private val entry: Entry, iv: View, private val parent: 
     lateinit var buttons: List<@JvmSuppressWildcards ImageView>
 
     private lateinit var comment: Comment
+    private lateinit var profile: OwnProfile
 
     init {
         ButterKnife.bind(this, iv)
@@ -51,6 +54,12 @@ class CommentViewHolder(private val entry: Entry, iv: View, private val parent: 
         // make text selectable
         bodyView.isLongClickable = true
     }
+
+    override fun getCreationDateView() = dateView
+    override fun getCreationDate() = comment.createdAt
+    override fun getProfileAvatarView() = avatarView
+    override fun getProfileAvatarUrl() = profile.settings?.avatar
+    override fun getProfileId() = profile.id!!
 
     private fun setupTheming() {
         Scoop.getInstance().bind(TEXT_BLOCK, itemView, parent, CardViewColorAdapter())
@@ -91,7 +100,7 @@ class CommentViewHolder(private val entry: Entry, iv: View, private val parent: 
                     // if we have current tab, refresh it
                     val plPredicate = { it: Fragment -> it is CommentListFragment && it.userVisibleHint }
                     val currentTab = activity.supportFragmentManager.fragments.find(plPredicate) as CommentListFragment?
-                    currentTab?.refreshComments()
+                    currentTab?.refreshComments(reset = true)
                 } catch (ex: Exception) {
                     Network.reportErrors(itemView.context, ex)
                 }
@@ -126,8 +135,10 @@ class CommentViewHolder(private val entry: Entry, iv: View, private val parent: 
      */
     fun setup(comment: Comment, profile: OwnProfile) {
         this.comment = comment
+        this.profile = profile
 
-        dateView.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(comment.createdAt)
+        super.setup()
+
         authorView.text = profile.nickname
         bodyView.handleMarkdown(comment.content)
 
@@ -135,28 +146,7 @@ class CommentViewHolder(private val entry: Entry, iv: View, private val parent: 
     }
 
     @OnClick(R.id.comment_author)
-    fun showAuthorProfile() {
+    fun replyToUser() {
         val activity = itemView.context as AppCompatActivity
-
-        val dialog = MaterialDialog.Builder(activity)
-                .progress(true, 0)
-                .cancelable(false)
-                .title(R.string.please_wait)
-                .content(R.string.loading_profile)
-                .build()
-
-        GlobalScope.launch(Dispatchers.Main) {
-            dialog.show()
-
-            try {
-                val prof = withContext(Dispatchers.IO) { Network.loadProfile(comment.profile.get().id) }
-                val profShow = ProfileFragment().apply { profile = prof }
-                profShow.show(activity.supportFragmentManager, "Showing user profile fragment")
-            } catch (ex: Exception) {
-                Network.reportErrors(itemView.context, ex)
-            }
-
-            dialog.dismiss()
-        }
     }
 }

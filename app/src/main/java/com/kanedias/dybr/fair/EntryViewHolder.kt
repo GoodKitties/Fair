@@ -5,7 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -16,8 +15,6 @@ import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.ui.md.handleMarkdown
-import java.text.SimpleDateFormat
-import java.util.*
 import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.support.v4.app.FragmentTransaction
@@ -33,7 +30,10 @@ import kotlinx.coroutines.*
  * @see EntryListFragment.entryRibbon
  * @author Kanedias
  */
-class EntryViewHolder(iv: View, private val parent: View, private val allowSelection: Boolean = false) : RecyclerView.ViewHolder(iv) {
+class EntryViewHolder(iv: View, private val parent: View, private val allowSelection: Boolean = false) : UserContentViewHolder(iv) {
+
+    @BindView(R.id.entry_avatar)
+    lateinit var avatarView: ImageView
 
     @BindView(R.id.entry_author)
     lateinit var authorView: TextView
@@ -77,6 +77,12 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
      * Blog this entry belongs to
      */
     private lateinit var profile: OwnProfile
+
+    override fun getCreationDateView() = dateView
+    override fun getCreationDate() = entry.createdAt
+    override fun getProfileAvatarView() = avatarView
+    override fun getProfileAvatarUrl() = profile.settings?.avatar
+    override fun getProfileId() = profile.id!!
 
     /**
      * Listener to show comments of this entry
@@ -195,32 +201,6 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
 
     }
 
-    @OnClick(R.id.entry_author)
-    fun showAuthorProfile() {
-        val activity = itemView.context as AppCompatActivity
-
-        val dialog = MaterialDialog.Builder(activity)
-                .progress(true, 0)
-                .cancelable(false)
-                .title(R.string.please_wait)
-                .content(R.string.loading_profile)
-                .build()
-
-        GlobalScope.launch(Dispatchers.Main) {
-            dialog.show()
-
-            try {
-                val prof = withContext(Dispatchers.IO) { Network.loadProfile(entry.profile.get().id) }
-                val profShow = ProfileFragment().apply { profile = prof }
-                profShow.show(activity.supportFragmentManager, "Showing user profile fragment")
-            } catch (ex: Exception) {
-                Network.reportErrors(itemView.context, ex)
-            }
-
-            dialog.dismiss()
-        }
-    }
-
     private fun showInWebView() {
         val uri = Uri.Builder()
                 .scheme("https").authority("dybr.ru")
@@ -267,8 +247,9 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         this.entry = entry
         this.profile = entry.profile.get(entry.document)
 
+        super.setup()
+
         // setup text views from entry data
-        dateView.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(entry.createdAt)
         titleView.text = entry.title
         entry.profile.get(entry.document)?.let { authorView.text = it.nickname }
         draftStateView.visibility = if (entry.state == "published") { View.GONE } else { View.VISIBLE }
@@ -292,4 +273,5 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
 
         bodyView.handleMarkdown(entry.content)
     }
+
 }

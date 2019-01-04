@@ -17,26 +17,34 @@
         android:layout_height="wrap_content"
         android:padding="8dp">
 
-        <TextView
-            android:id="@+id/comment_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:padding="5dp"
-            android:text="@string/placeholder_long"/>
+        <ImageView
+            android:id="@+id/comment_avatar"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:contentDescription="@string/user_avatar" />
 
         <TextView
             android:id="@+id/comment_author"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:padding="5dp"
+            android:layout_toRightOf="@id/comment_avatar"
+            android:layout_toEndOf="@id/comment_avatar"
+            android:padding="8dp"
             android:textStyle="bold"
             android:text="@string/placeholder_long"
             android:maxEms="20"/>
+
+        <TextView
+            android:id="@+id/comment_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/comment_author"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:padding="8dp"
+            android:text="@string/placeholder_date"/>
 
         <com.kanedias.dybr.fair.misc.ClickPreventingTextView
             android:id="@+id/comment_message"
@@ -44,10 +52,10 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_below="@id/comment_author"
+            android:layout_below="@id/comment_avatar"
             android:padding="5dp"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="@string/placeholder_short"/>
+            android:text="@string/placeholder_huge"/>
 
         <LinearLayout
             android:id="@+id/comment_icon_area"
