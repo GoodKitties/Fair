@@ -3,8 +3,7 @@ package com.kanedias.dybr.fair
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
-import android.support.v4.app.Fragment
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -17,7 +16,9 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.ui.md.handleMarkdown
 import android.content.ComponentName
 import android.content.pm.PackageManager
-import android.support.v4.app.FragmentTransaction
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
+import com.afollestad.materialdialogs.list.listItems
 import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
@@ -156,13 +157,11 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         }
 
         // show confirmation dialog
-        MaterialDialog.Builder(itemView.context)
+        MaterialDialog(itemView.context)
                 .title(R.string.confirm_action)
-                .content(R.string.are_you_sure)
-                .negativeText(android.R.string.no)
-                .positiveText(android.R.string.yes)
-                .positiveColorRes(R.color.md_red_800)
-                .onPositive { _, _ -> delete() }
+                .message(R.string.are_you_sure)
+                .negativeButton(android.R.string.no)
+                .positiveButton(android.R.string.yes, click = { delete() })
                 .show()
     }
 
@@ -174,15 +173,12 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
                 ctx.getString(R.string.share)
                 )
 
-        MaterialDialog.Builder(itemView.context)
+        MaterialDialog(itemView.context)
                 .title(R.string.entry_menu)
-                .items(items)
-                .itemsCallback { _, _, position, _ ->
-                    when (position) {
-                        0 -> showInWebView()
-                        1 -> sharePost()
-                    }
-                }.show()
+                .listItems(items = items, selection = {_, index, _ ->  when (index) {
+                    0 -> showInWebView()
+                    1 -> sharePost()
+                }}).show()
     }
 
     private fun sharePost() {

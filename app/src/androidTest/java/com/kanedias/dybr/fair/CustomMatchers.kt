@@ -5,7 +5,7 @@ import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
 
-import android.support.test.espresso.AmbiguousViewMatcherException
+import androidx.test.espresso.AmbiguousViewMatcherException
 
 /**
  * Matches a view with specific index to avoid [AmbiguousViewMatcherException]

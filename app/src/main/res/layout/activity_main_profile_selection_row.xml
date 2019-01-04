@@ -29,6 +29,7 @@
         android:padding="6dp"
         android:layout_centerVertical="true"
         android:src="@drawable/close"
-        android:tint="#fff" />
+        android:tint="#fff"
+        android:contentDescription="@string/remove_profile" />
 
 </RelativeLayout>

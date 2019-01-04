@@ -1,7 +1,7 @@
 package com.kanedias.dybr.fair
 
 import android.os.Bundle
-import android.preference.PreferenceFragment
+import androidx.preference.PreferenceFragmentCompat
 
 /**
  * Fragment for showing and managing global preferences
@@ -10,10 +10,9 @@ import android.preference.PreferenceFragment
  *
  * Created on 26.04.18
  */
-class SettingsFragment : PreferenceFragment() {
+class SettingsFragment : PreferenceFragmentCompat() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.global_prefs)
     }
 }

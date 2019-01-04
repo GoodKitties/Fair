@@ -4,34 +4,34 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.database.Cursor
 import android.database.MatrixCursor
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.support.design.widget.AppBarLayout
-import android.support.design.widget.FloatingActionButton
-import android.support.design.widget.TabLayout
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentStatePagerAdapter
-import android.support.v4.app.FragmentTransaction
-import android.support.v4.app.NotificationManagerCompat
-import android.support.v4.view.GravityCompat
-import android.support.v4.view.ViewPager
-import android.support.v4.widget.DrawerLayout
-import android.support.v4.widget.SimpleCursorAdapter
-import android.support.v7.app.ActionBarDrawerToggle
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.SearchView
-import android.support.v7.widget.Toolbar
+import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.tabs.TabLayout
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.fragment.app.FragmentTransaction
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.view.GravityCompat
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.widget.SearchView
+import androidx.appcompat.widget.Toolbar
 import android.view.*
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.cursoradapter.widget.SimpleCursorAdapter
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager.widget.ViewPager
 import butterknife.BindView
 import butterknife.OnClick
 import butterknife.ButterKnife
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.list.customListAdapter
 import com.auth0.android.jwt.JWT
 import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.database.DbProvider
@@ -355,14 +355,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         GlobalScope.launch(Dispatchers.Main) {
-            val progressDialog = MaterialDialog.Builder(this@MainActivity)
-                    .progress(true, 0)
+            val progressDialog = MaterialDialog(this@MainActivity)
                     .cancelable(false)
                     .title(R.string.please_wait)
-                    .content(R.string.logging_in)
-                    .build()
+                    .message(R.string.logging_in)
             progressDialog.show()
-
             try {
                 // login with this account and reset profile/blog links
                 withContext(Dispatchers.IO) { Network.login(acc) }
@@ -415,14 +412,12 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 if (supportFragmentManager.backStackEntryCount > 0) {
-                    // dismiss all
-                    MaterialDialog.Builder(this)
+                    // confirm dismiss of all top fragments
+                    MaterialDialog(this)
                             .title(R.string.confirm_action)
-                            .content(R.string.return_to_notifications)
-                            .negativeText(android.R.string.cancel)
-                            .negativeColorRes(R.color.md_red_900)
-                            .positiveText(android.R.string.ok)
-                            .onPositive {_, _ -> backToNotifications() }
+                            .message(R.string.return_to_notifications)
+                            .negativeButton(android.R.string.cancel)
+                            .positiveButton(android.R.string.ok, click = { backToNotifications() })
                             .show()
                 } else {
                     backToNotifications()
@@ -503,13 +498,11 @@ class MainActivity : AppCompatActivity() {
         if (profiles.isEmpty()) {
             // suggest user to create profile
             drawer.closeDrawers()
-            MaterialDialog.Builder(this)
+            MaterialDialog(this)
                     .title(R.string.switch_profile)
-                    .content(R.string.no_profiles_create_one)
-                    .negativeText(R.string.no_profile)
-                    .onNegative { _, _ -> Auth.user.lastProfileId = "0"; refresh() } // set to null so it won't ask next time
-                    .positiveText(R.string.create_new)
-                    .onPositive { _, _ -> addProfile() }
+                    .message(R.string.no_profiles_create_one)
+                    .negativeButton(R.string.no_profile, click = { Auth.user.lastProfileId = "0"; refresh() })
+                    .positiveButton(R.string.create_new, click = { addProfile() })
                     .show()
             return
         }
@@ -523,15 +516,13 @@ class MainActivity : AppCompatActivity() {
 
         // we have multiple accounts to select from
         val profAdapter = ProfileListAdapter(profiles.toMutableList())
-        val dialog = MaterialDialog.Builder(this)
+        MaterialDialog(this)
                 .title(R.string.switch_profile)
-                .adapter(profAdapter, LinearLayoutManager(this))
-                .negativeText(R.string.no_profile)
-                .onNegative { _, _ -> Auth.user.lastProfileId = "0"; refresh() }
-                .positiveText(R.string.create_new)
-                .onPositive { _, _ -> addProfile() }
-                .show()
-        profAdapter.toDismiss = dialog
+                .customListAdapter(profAdapter)
+                .negativeButton(R.string.no_profile, click = { Auth.user.lastProfileId = "0"; refresh() })
+                .positiveButton(R.string.create_new, click = { addProfile() })
+                .show { profAdapter.toDismiss = this }
+
     }
 
     /**
@@ -721,16 +712,15 @@ class MainActivity : AppCompatActivity() {
                 profileName.text = prof.nickname
 
                 profileRemove.setOnClickListener {
-                    MaterialDialog.Builder(this@MainActivity)
+                    MaterialDialog(this@MainActivity)
                             .title(R.string.confirm_action)
-                            .content(R.string.confirm_profile_deletion)
-                            .negativeText(android.R.string.no)
-                            .positiveText(R.string.confirm)
-                            .onPositive {_, _ ->
+                            .message(R.string.confirm_profile_deletion)
+                            .negativeButton(android.R.string.no)
+                            .positiveButton(R.string.confirm, click = {
                                 deleteProfile(prof)
                                 profiles.remove(prof)
                                 this@ProfileListAdapter.notifyItemRemoved(pos)
-                            }.show()
+                            }).show()
                 }
 
                 itemView.setOnClickListener {

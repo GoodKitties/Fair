@@ -1,10 +1,10 @@
 package com.kanedias.dybr.fair
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.fragment.app.Fragment
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.*
 import android.widget.TextView
 import butterknife.BindView
@@ -53,8 +53,8 @@ open class NotificationListFragment: Fragment() {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
             R.id.menu_notifications_mark_all_read -> markAllRead()
             else -> return super.onOptionsItemSelected(item)
         }
@@ -74,12 +74,11 @@ open class NotificationListFragment: Fragment() {
             }
         }
 
-        MaterialDialog.Builder(activity)
+        MaterialDialog(activity)
                 .title(R.string.confirm_action)
-                .content(R.string.mark_all_notifications_read)
-                .negativeText(android.R.string.cancel)
-                .positiveText(android.R.string.yes)
-                .onPositive {_, _ ->  markRoutine() }
+                .message(R.string.mark_all_notifications_read)
+                .negativeButton(android.R.string.cancel)
+                .positiveButton(android.R.string.yes, click = { markRoutine() })
                 .show()
     }
 

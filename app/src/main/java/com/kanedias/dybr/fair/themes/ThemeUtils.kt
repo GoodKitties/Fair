@@ -3,13 +3,12 @@ package com.kanedias.dybr.fair.themes
 import android.content.Context
 import android.graphics.Color
 import android.preference.PreferenceManager
-import android.support.annotation.ColorInt
-import android.support.annotation.FloatRange
-import android.support.v4.graphics.ColorUtils
+import androidx.annotation.ColorInt
+import androidx.annotation.FloatRange
+import androidx.core.graphics.ColorUtils
 import android.util.Log
 import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.Network
-import com.kanedias.dybr.fair.dto.Blog
 import com.kanedias.dybr.fair.dto.Design
 import com.kanedias.dybr.fair.dto.OwnProfile
 import com.kanedias.dybr.fair.dto.isMarkerBlog
@@ -63,7 +62,7 @@ fun blendRGB(@ColorInt color1: Int, @ColorInt color2: Int, @FloatRange(from = 0.
  *
  * Note: Requires network. Resolves blog -> profile -> current profile design.
  *
- * @param blog blog to retrieve themes for
+ * @param profile profile to retrieve themes for
  * @param target target context where theme is applied
  */
 fun applyTheme(profile: OwnProfile, target: Context) {

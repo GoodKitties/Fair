@@ -8,11 +8,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.fragment.app.Fragment
+import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AppCompatActivity
 import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
@@ -23,16 +21,13 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.list.listItems
 import com.ftinc.scoop.Scoop
 import com.ftinc.scoop.adapters.TextViewColorAdapter
 import com.kanedias.dybr.fair.Network
 import com.kanedias.dybr.fair.R
-import com.kanedias.dybr.fair.database.DbProvider
-import com.kanedias.dybr.fair.database.entities.OfflineDraft
 import com.kanedias.dybr.fair.themes.*
 import kotlinx.coroutines.*
-import java.text.SimpleDateFormat
-import java.util.*
 
 /**
  * Fragment to hold all editing-related functions in all edit views where possible.
@@ -194,21 +189,21 @@ class EditorViews : Fragment() {
             return
 
         val stream = activity?.contentResolver?.openInputStream(intent.data) ?: return
+
+        val dialog = MaterialDialog(activity!!)
+                .title(R.string.please_wait)
+                .message(R.string.uploading)
+
         GlobalScope.launch(Dispatchers.Main) {
-            val dialog = MaterialDialog.Builder(activity!!)
-                    .title(R.string.please_wait)
-                    .content(R.string.uploading)
-                    .progress(true, 0)
-                    .show()
+            dialog.show()
 
             try {
                 val link = withContext(Dispatchers.IO) { Network.uploadImage(stream.readBytes()) }
-                MaterialDialog.Builder(activity!!)
+                MaterialDialog(activity!!)
                         .title(R.string.insert_image)
-                        .content(R.string.select_image_height)
-                        .items(R.array.image_sizes)
-                        .itemsCallback { _, _, pos, _ ->
-                            val spec = when (pos) {
+                        .message(R.string.select_image_height)
+                        .listItems(res = R.array.image_sizes, selection = {_, index, _ ->
+                            val spec = when (index) {
                                 0 -> "100"
                                 1 -> "200"
                                 2 -> "300"
@@ -217,7 +212,7 @@ class EditorViews : Fragment() {
                                 else -> "auto"
                             }
                             insertInCursorPosition("<img height='$spec' width='auto' src='", link, "' />")
-                        }.show()
+                        }).show()
             } catch (ex: Exception) {
                 Network.reportErrors(activity!!, ex)
             }

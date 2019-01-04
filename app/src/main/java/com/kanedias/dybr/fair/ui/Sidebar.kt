@@ -4,9 +4,8 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Intent
-import android.support.v4.app.FragmentTransaction
-import android.support.v4.view.animation.FastOutSlowInInterpolator
-import android.support.v4.widget.DrawerLayout
+import androidx.fragment.app.FragmentTransaction
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import android.view.View
 import android.widget.*
 import butterknife.BindView
@@ -29,7 +28,7 @@ import kotlinx.coroutines.channels.*
  *
  * Created on 05.11.17
  */
-class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivity) {
+class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, private val activity: MainActivity) {
 
     private val fragManager = activity.supportFragmentManager
 
@@ -106,12 +105,10 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
         if (Auth.profile == null)
             return
 
-        val dialog = MaterialDialog.Builder(activity)
-                .progress(true, 0)
+        val dialog = MaterialDialog(activity)
                 .cancelable(false)
                 .title(R.string.please_wait)
-                .content(R.string.loading_profile)
-                .build()
+                .message(R.string.loading_profile)
 
         GlobalScope.launch(Dispatchers.Main) {
             dialog.show()
@@ -168,12 +165,11 @@ class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivi
             // setup account row - handle click on delete button
             accRemove.setOnClickListener {
                 // "delete account" confirmation dialog
-                MaterialDialog.Builder(view.context)
+                MaterialDialog(view.context)
                         .title(R.string.delete_account)
-                        .content(R.string.are_you_sure)
-                        .positiveText(android.R.string.yes)
-                        .negativeText(android.R.string.no)
-                        .onPositive { _, _ -> deleteAccount(acc) }
+                        .message(R.string.are_you_sure)
+                        .positiveButton(android.R.string.yes, click = { deleteAccount(acc) })
+                        .negativeButton(android.R.string.no)
                         .show()
             }
 

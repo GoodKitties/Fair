@@ -16,9 +16,9 @@ android {
         applicationId "com.kanedias.dybr.fair"
         targetSdkVersion 28 // device you test on
         minSdkVersion 16    // device you allow your users to be on :)
-        versionCode 36
-        versionName "1.7.1"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        versionCode 37
+        versionName "1.8.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
@@ -68,15 +68,15 @@ android {
 
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
-            def versionCodes = ["universal": 0, "armeabi-v7a": 1, "arm64-v8a": 2, "x86": 3, "x86_64": 4]
-            int abiVersionCode = versionCodes.get(output.getFilter(com.android.build.OutputFile.ABI) ?: "universal")
+            def versionCodes = ['universal': 0, 'armeabi-v7a': 1, 'arm64-v8a': 2, 'x86': 3, 'x86_64': 4]
+            int abiVersionCode = versionCodes.get(output.getFilter(com.android.build.OutputFile.ABI) ?: 'universal')
             output.versionCodeOverride = abiVersionCode + android.defaultConfig.versionCode * 10
         }
     }
 }
 
 play {
-    jsonFile = file("misc/android-publisher-account.json")
+    jsonFile = file('misc/android-publisher-account.json')
     track = project.hasProperty('releaseType') ? project.property('releaseType') : 'alpha'
 }
 
@@ -84,17 +84,17 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"     // Kotlin language support
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.0.0"        // Kotlin coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.0.0"     // Kotlin UI context
-    implementation "com.android.support:design:$supportLibVersion"              // Material design support lib
-    implementation "com.android.support:appcompat-v7:$supportLibVersion"        // basic toolbars etc.
-    implementation "com.android.support:cardview-v7:$supportLibVersion"         // snappy cardview for lists
+    implementation 'com.google.android.material:material:1.1.0-alpha02'         // Material design support lib
+    implementation 'androidx.appcompat:appcompat:1.1.0-alpha01'                 // basic toolbars etc.
+    implementation 'androidx.cardview:cardview:1.0.0'                           // snappy cardview for lists
+    implementation 'androidx.preference:preference:1.0.0'                       // preference fragment compatibility
     implementation "ch.acra:acra-mail:$acraVersion"                             // crash handler
-    implementation 'com.evernote:android-job:1.2.6'                             // job scheduler
     implementation "ch.acra:acra-dialog:$acraVersion"
-    implementation 'com.jakewharton:butterknife:8.8.1'                          // Annotation processor
+    implementation 'com.evernote:android-job:1.2.6'                             // job scheduler
+    implementation 'com.jakewharton:butterknife:10.0.0'                         // Annotation processor
     implementation 'com.j256.ormlite:ormlite-android:5.0'                       // ORM for local storage
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'                         // android http client
-    implementation 'com.afollestad.material-dialogs:core:0.9.6.0'               // material design for dialogs
-    implementation 'com.github.Adonai.convalida-extended:convalida:1.1.0'       // validation of text inputs
+    implementation 'com.afollestad.material-dialogs:core:2.0.0-rc7'             // material design for dialogs
     implementation 'com.github.Adonai.Scoops:scoops:1.3.3'                      // theming engine
     implementation 'com.github.Adonai.Scoops:scoops-core:1.3.3'                 // theming engine api
     implementation 'moe.banana:moshi-jsonapi:3.5.0'                             // JSON-API parser
@@ -102,22 +102,21 @@ dependencies {
     implementation 'com.squareup.moshi:moshi-adapters:1.6.0'                    // Moshi serializers collection
     implementation 'ru.noties:markwon:2.0.0'                                    // markdown rendering
     //implementation 'com.github.clans:fab:1.6.4'                               // Floating action button with menu
-    implementation "com.github.bumptech.glide:okhttp3-integration:4.8.0"
-    implementation "com.github.bumptech.glide:glide:4.8.0"                      // image processing/caching lib
+    implementation 'com.github.bumptech.glide:okhttp3-integration:4.8.0'
+    implementation 'com.github.bumptech.glide:glide:4.8.0'                      // image processing/caching lib
     implementation 'com.auth0.android:jwtdecode:1.2.0'                          // handling JWT from server
 
 
     googleplayImplementation 'com.android.billingclient:billing:1.0'            // billing library from Google
 
-    kapt 'com.jakewharton:butterknife-compiler:8.8.1'                           // Kotlin annotation processors
-    kapt 'com.github.Adonai.convalida-extended:convalida-compiler:1.1.0'
+    kapt 'com.jakewharton:butterknife-compiler:10.0.0'                           // Kotlin annotation processors
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-core:2.23.4'
 
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test:rules:1.0.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    androidTestImplementation 'androidx.test:runner:1.1.1'
+    androidTestImplementation 'androidx.test:rules:1.1.1'
     androidTestImplementation 'org.awaitility:awaitility:3.0.0'                        // useful wait-for-condition
     androidTestImplementation 'org.apache.commons:commons-text:1.2'                    // random string generator
 }

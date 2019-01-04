@@ -1,7 +1,7 @@
 package com.kanedias.dybr.fair
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -39,11 +39,9 @@ class AddBlogFragment: Fragment() {
         ButterKnife.bind(this, root)
         activity = context as MainActivity
 
-        progressDialog = MaterialDialog.Builder(activity)
+        progressDialog = MaterialDialog(activity)
                 .title(R.string.please_wait)
-                .content(R.string.checking_in_progress)
-                .progress(true, 0)
-                .build()
+                .message(R.string.checking_in_progress)
 
         return root
     }

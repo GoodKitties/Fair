@@ -1,8 +1,8 @@
 package com.kanedias.dybr.fair
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import butterknife.BindView
 import butterknife.ButterKnife
 
@@ -24,7 +24,7 @@ class SettingsActivity: AppCompatActivity() {
         ButterKnife.bind(this)
 
         setSupportActionBar(prefToolbar)
-        fragmentManager.beginTransaction().replace(R.id.pref_content_frame, SettingsFragment()).commit()
+        supportFragmentManager.beginTransaction().replace(R.id.pref_content_frame, SettingsFragment()).commit()
     }
 
 }

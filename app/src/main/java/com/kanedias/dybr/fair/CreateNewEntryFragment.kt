@@ -2,11 +2,10 @@ package com.kanedias.dybr.fair
 
 import android.content.Context
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.graphics.drawable.DrawableCompat
-import android.support.v7.widget.AppCompatSpinner
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.fragment.app.Fragment
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.appcompat.widget.AppCompatSpinner
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +16,7 @@ import butterknife.ButterKnife
 import butterknife.OnCheckedChanged
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.list.customListAdapter
 import com.ftinc.scoop.Scoop
 import com.ftinc.scoop.adapters.TextViewColorAdapter
 import com.ftinc.scoop.util.Utils
@@ -109,7 +109,7 @@ class CreateNewEntryFragment : Fragment() {
 
         activity = context as MainActivity
 
-        setupUI(root)
+        setupUI()
         setupTheming(root)
 
         if (editMode) {
@@ -133,7 +133,7 @@ class CreateNewEntryFragment : Fragment() {
         Scoop.getInstance().popStyleLevel(false)
     }
 
-    private fun setupUI(root: View) {
+    private fun setupUI() {
         permissionSpinner.adapter = PermissionSpinnerAdapter(listOf(
                 RecordAccessItem("private", false),
                 RecordAccessItem("registered", true),
@@ -330,10 +330,9 @@ class CreateNewEntryFragment : Fragment() {
         }
 
         val adapter = DraftEntryViewAdapter(drafts)
-        val dialog = MaterialDialog.Builder(activity)
+        val dialog = MaterialDialog(activity)
                 .title(R.string.select_offline_draft)
-                .adapter(adapter, LinearLayoutManager(context))
-                .build()
+                .customListAdapter(adapter)
         adapter.toDismiss = dialog
         dialog.show()
     }

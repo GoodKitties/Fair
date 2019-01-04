@@ -1,8 +1,8 @@
 package com.kanedias.dybr.fair
 
-import android.support.v4.app.FragmentTransaction
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.RecyclerView
+import androidx.fragment.app.FragmentTransaction
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout

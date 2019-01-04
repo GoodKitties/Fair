@@ -1,8 +1,8 @@
 package com.kanedias.dybr.fair
 
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentTransaction
-import android.support.v7.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
+import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -103,13 +103,11 @@ class CommentViewHolder(private val entry: Entry, iv: View, private val parent: 
         }
 
         // show confirmation dialog
-        MaterialDialog.Builder(itemView.context)
+        MaterialDialog(itemView.context)
                 .title(R.string.confirm_action)
-                .content(R.string.are_you_sure)
-                .negativeText(android.R.string.no)
-                .positiveText(android.R.string.yes)
-                .positiveColorRes(R.color.md_red_800)
-                .onPositive { _, _ -> delete() }
+                .message(R.string.are_you_sure)
+                .negativeButton(android.R.string.no)
+                .positiveButton(android.R.string.yes, click = { delete() })
                 .show()
     }
 

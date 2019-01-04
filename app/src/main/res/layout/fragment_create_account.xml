@@ -18,7 +18,7 @@
         android:padding="16dp"
         tools:context="AddAccountFragment">
 
-        <android.support.design.widget.TextInputLayout
+        <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/acc_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -31,9 +31,9 @@
                 android:nextFocusForward="@id/acc_password_input"
                 android:hint="@string/email"/>
 
-        </android.support.design.widget.TextInputLayout>
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <android.support.design.widget.TextInputLayout
+        <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/acc_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -47,9 +47,9 @@
                 android:nextFocusForward="@id/acc_password_confirm_input"
                 android:hint="@string/password"/>
 
-        </android.support.design.widget.TextInputLayout>
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <android.support.design.widget.TextInputLayout
+        <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/acc_password_confirm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -63,7 +63,7 @@
                 android:nextFocusForward="@id/acc_termsofservice_checkbox"
                 android:hint="@string/confirm_password"/>
 
-        </android.support.design.widget.TextInputLayout>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <CheckBox
             android:id="@+id/acc_termsofservice_checkbox"

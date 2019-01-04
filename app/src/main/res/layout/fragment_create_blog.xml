@@ -20,7 +20,7 @@
         android:text="@string/create_blog"
         android:textAppearance="@android:style/TextAppearance.Large"/>
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/prof_nickname"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -33,9 +33,9 @@
             android:nextFocusForward="@id/blog_title_input"
             android:hint="@string/blog_address"/>
 
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/prof_birthday"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -48,7 +48,7 @@
             android:nextFocusForward="@id/blog_create_button"
             android:hint="@string/blog_title"/>
 
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/blog_create_button"

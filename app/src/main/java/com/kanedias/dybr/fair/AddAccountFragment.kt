@@ -1,7 +1,7 @@
 package com.kanedias.dybr.fair
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,14 +11,10 @@ import android.widget.EditText
 import android.widget.Toast
 import butterknife.*
 import com.afollestad.materialdialogs.MaterialDialog
-import convalida.library.Convalida
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.database.entities.Account
 import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.dto.RegisterRequest
-import com.kanedias.dybr.fair.ui.LoginInputs
-import com.kanedias.dybr.fair.ui.RegisterInputs
-import java.util.concurrent.TimeUnit
 import com.kanedias.dybr.fair.ui.Sidebar
 import kotlinx.coroutines.*
 
@@ -73,11 +69,9 @@ class AddAccountFragment : Fragment() {
         ButterKnife.bind(this, root)
         activity = context as MainActivity
 
-        progressDialog = MaterialDialog.Builder(activity)
+        progressDialog = MaterialDialog(activity)
                 .title(R.string.please_wait)
-                .content(R.string.checking_in_progress)
-                .progress(true, 0)
-                .build()
+                .message(R.string.checking_in_progress)
 
         return root
     }
@@ -109,18 +103,6 @@ class AddAccountFragment : Fragment() {
      */
     @OnClick(R.id.confirm_button)
     fun confirm() {
-        val validator = when (registerSwitch.isChecked) {
-            true -> Convalida.init(RegisterInputs(this))
-            false -> Convalida.init(LoginInputs(this))
-        }
-
-        if (!validator.validateFields()) {
-            // don't allow network request if there are errors in form
-            // and hide errors after 3 seconds
-            GlobalScope.launch(Dispatchers.Main) { delay(TimeUnit.SECONDS.toMillis(3)); validator.clearValidations() }
-            return
-        }
-
         if (registerSwitch.isChecked) {
             // send register query
             doRegistration()
@@ -193,10 +175,10 @@ class AddAccountFragment : Fragment() {
                 Toast.makeText(activity, R.string.congrats_diary_registered, Toast.LENGTH_SHORT).show()
 
                 // let's make sure user understood what's needed of him
-                MaterialDialog.Builder(activity)
+                MaterialDialog(activity)
                         .title(R.string.next_steps)
-                        .content(R.string.registered_please_confirm_mail)
-                        .positiveText(android.R.string.ok)
+                        .message(R.string.registered_please_confirm_mail)
+                        .positiveButton(android.R.string.ok)
                         .show()
 
                 // return to main activity

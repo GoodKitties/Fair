@@ -5,8 +5,8 @@ import android.graphics.BitmapFactory
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
-import android.support.v4.app.FragmentTransaction
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentTransaction
 import android.text.Html
 import android.widget.ImageView
 import android.widget.TextView
@@ -15,8 +15,8 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.customview.customView
 import com.kanedias.dybr.fair.dto.Auth
-import com.kanedias.dybr.fair.dto.Blog
 import com.kanedias.dybr.fair.dto.OwnProfile
 import com.kanedias.dybr.fair.misc.idMatches
 import kotlinx.coroutines.*
@@ -64,11 +64,10 @@ class ProfileFragment: DialogFragment() {
         ButterKnife.bind(this, view)
         setupUI()
 
-        return MaterialDialog.Builder(activity)
+        return MaterialDialog(activity)
                 .title(R.string.view_profile)
-                .customView(view, true)
-                .neutralText(android.R.string.ok)
-                .build()
+                .customView(view = view, scrollable = true)
+                .positiveButton(android.R.string.ok)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

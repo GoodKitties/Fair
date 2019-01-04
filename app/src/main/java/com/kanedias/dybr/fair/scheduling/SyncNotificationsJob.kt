@@ -2,8 +2,8 @@ package com.kanedias.dybr.fair.scheduling
 
 import android.app.PendingIntent
 import android.content.Context
-import android.support.v4.app.NotificationCompat
-import android.support.v4.app.NotificationManagerCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.evernote.android.job.Job
 import com.evernote.android.job.JobRequest
 import com.kanedias.dybr.fair.*
@@ -11,8 +11,8 @@ import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.html2md.Html2Markdown
 import java.util.concurrent.TimeUnit
 import android.content.Intent
-import android.support.v4.app.Person
-import android.support.v4.graphics.drawable.IconCompat
+import androidx.core.app.Person
+import androidx.core.graphics.drawable.IconCompat
 import android.util.Log
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CircleCrop

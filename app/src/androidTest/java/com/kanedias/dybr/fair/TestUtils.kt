@@ -1,11 +1,11 @@
 package com.kanedias.dybr.fair
 
-import android.support.test.espresso.Espresso
-import android.support.test.espresso.Espresso.*
-import android.support.test.espresso.action.ViewActions.*
-import android.support.test.espresso.assertion.ViewAssertions.*
-import android.support.test.espresso.matcher.RootMatchers.*
-import android.support.test.espresso.matcher.ViewMatchers.*
+import androidx.test.espresso.Espresso
+import androidx.test.espresso.Espresso.*
+import androidx.test.espresso.action.ViewActions.*
+import androidx.test.espresso.assertion.ViewAssertions.*
+import androidx.test.espresso.matcher.RootMatchers.*
+import androidx.test.espresso.matcher.ViewMatchers.*
 import android.view.Gravity
 import org.hamcrest.Matchers
 

@@ -1,10 +1,10 @@
 package com.kanedias.dybr.fair
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentTransaction
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.RecyclerView
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.RecyclerView
 import android.text.format.DateUtils
 import android.view.Gravity
 import android.view.View
@@ -82,12 +82,10 @@ abstract class UserContentViewHolder(iv: View): RecyclerView.ViewHolder(iv) {
         val activity = itemView.context as AppCompatActivity
         val partialProf = entity.profile.get(entity.document)
 
-        val dialog = MaterialDialog.Builder(activity)
-                .progress(true, 0)
+        val dialog = MaterialDialog(activity)
                 .cancelable(false)
                 .title(R.string.please_wait)
-                .content(R.string.loading_profile)
-                .build()
+                .message(R.string.loading_profile)
 
         GlobalScope.launch(Dispatchers.Main) {
             dialog.show()

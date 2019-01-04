@@ -2,9 +2,9 @@ package com.kanedias.dybr.fair
 
 import android.content.Context
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +14,7 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.list.customListAdapter
 import com.ftinc.scoop.Scoop
 import com.ftinc.scoop.adapters.TextViewColorAdapter
 import com.kanedias.dybr.fair.database.DbProvider
@@ -213,7 +214,7 @@ class CreateNewCommentFragment : Fragment() {
                 fragmentManager!!.popBackStack()
 
                 // if we have current comment list, refresh it
-                val clPredicate = { it: Fragment -> it is CommentListFragment }
+                val clPredicate = { it: androidx.fragment.app.Fragment -> it is CommentListFragment }
                 val currentTab = fragmentManager!!.fragments.find(clPredicate) as CommentListFragment?
                 currentTab?.refreshComments(reset = true)
             } catch (ex: Exception) {
@@ -264,10 +265,9 @@ class CreateNewCommentFragment : Fragment() {
         }
 
         val adapter = DraftCommentViewAdapter(drafts)
-        val dialog = MaterialDialog.Builder(activity)
+        val dialog = MaterialDialog(activity)
                 .title(R.string.select_offline_draft)
-                .adapter(adapter, LinearLayoutManager(context))
-                .build()
+                .customListAdapter(adapter)
         adapter.toDismiss = dialog
         dialog.show()
     }
