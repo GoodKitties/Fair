@@ -1,12 +1,12 @@
 package com.kanedias.dybr.fair
 
-import android.support.v7.app.AppCompatActivity
 import com.afollestad.materialdialogs.MaterialDialog
 import com.android.billingclient.api.*
 import com.android.billingclient.api.BillingClient.BillingResponse
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import com.android.billingclient.api.BillingClient.SkuType
 import com.android.billingclient.api.BillingFlowParams
 
@@ -70,12 +70,11 @@ class DonateHelper(private val activity: AppCompatActivity) : PurchasesUpdatedLi
     override fun onConsumeResponse(responseCode: Int, purchaseToken: String?) {
         if (responseCode == BillingResponse.OK) {
             Log.i("[Billing]", "Purchase consumed, token: $purchaseToken")
-            MaterialDialog.Builder(activity)
+            MaterialDialog(activity)
                     .title(R.string.donate)
-                    .content(R.string.thanks_for_your_pledge)
-                    .positiveText(android.R.string.ok)
-                    .negativeText(R.string.request_a_feature)
-                    .onNegative({ _, _ -> redirectToIssues() })
+                    .message(R.string.thanks_for_your_pledge)
+                    .positiveButton(android.R.string.ok)
+                    .negativeButton(R.string.request_a_feature, click = { redirectToIssues() })
                     .show()
             return
         }
@@ -88,16 +87,16 @@ class DonateHelper(private val activity: AppCompatActivity) : PurchasesUpdatedLi
      * Redirect those who want to request a feature to the issue tracker
      */
     private fun redirectToIssues() {
-        MaterialDialog.Builder(activity)
+        MaterialDialog(activity)
                 .title(R.string.donate)
-                .content(R.string.create_issue)
-                .positiveText(R.string.understood)
-                .negativeText(android.R.string.cancel)
-                .onPositive({_, _ ->
+                .message(R.string.create_issue)
+                .positiveButton(R.string.understood, click = {
                     val starter = Intent(Intent.ACTION_VIEW)
                     starter.data = Uri.parse("https://gitlab.com/Kanedias/Fair/issues")
                     activity.startActivity(starter)
-                }).show()
+                })
+                .negativeButton(android.R.string.cancel)
+                .show()
     }
 
 }
