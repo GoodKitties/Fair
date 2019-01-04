@@ -19,8 +19,6 @@ import com.kanedias.dybr.fair.ui.md.handleMarkdown
 import kotlinx.coroutines.*
 
 
-
-
 /**
  * View holder for showing comments in entry view.
  *
@@ -45,7 +43,6 @@ class CommentViewHolder(private val entry: Entry, iv: View, private val parent: 
     lateinit var buttons: List<@JvmSuppressWildcards ImageView>
 
     private lateinit var comment: Comment
-    private lateinit var profile: OwnProfile
 
     init {
         ButterKnife.bind(this, iv)
@@ -56,10 +53,8 @@ class CommentViewHolder(private val entry: Entry, iv: View, private val parent: 
     }
 
     override fun getCreationDateView() = dateView
-    override fun getCreationDate() = comment.createdAt
     override fun getProfileAvatarView() = avatarView
-    override fun getProfileAvatarUrl() = profile.settings?.avatar
-    override fun getProfileId() = profile.id!!
+    override fun getAuthorNameView() = authorView
 
     private fun setupTheming() {
         Scoop.getInstance().bind(TEXT_BLOCK, itemView, parent, CardViewColorAdapter())
@@ -98,8 +93,8 @@ class CommentViewHolder(private val entry: Entry, iv: View, private val parent: 
                     Toast.makeText(activity, R.string.comment_deleted, Toast.LENGTH_SHORT).show()
 
                     // if we have current tab, refresh it
-                    val plPredicate = { it: Fragment -> it is CommentListFragment && it.userVisibleHint }
-                    val currentTab = activity.supportFragmentManager.fragments.find(plPredicate) as CommentListFragment?
+                    val clPredicate = { it: Fragment -> it is CommentListFragment && it.userVisibleHint }
+                    val currentTab = activity.supportFragmentManager.fragments.find(clPredicate) as CommentListFragment?
                     currentTab?.refreshComments(reset = true)
                 } catch (ex: Exception) {
                     Network.reportErrors(itemView.context, ex)
@@ -133,20 +128,13 @@ class CommentViewHolder(private val entry: Entry, iv: View, private val parent: 
     /**
      * Called when this holder should be refreshed based on what it must show now
      */
-    fun setup(comment: Comment, profile: OwnProfile) {
+    fun setup(comment: Comment) {
+        super.setup(comment)
+
         this.comment = comment
-        this.profile = profile
-
-        super.setup()
-
-        authorView.text = profile.nickname
         bodyView.handleMarkdown(comment.content)
 
+        val profile = comment.profile.get(comment.document)
         toggleEditButtons(profile == Auth.profile)
-    }
-
-    @OnClick(R.id.comment_author)
-    fun replyToUser() {
-        val activity = itemView.context as AppCompatActivity
     }
 }

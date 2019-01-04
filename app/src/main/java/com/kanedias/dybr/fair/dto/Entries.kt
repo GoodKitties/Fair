@@ -115,19 +115,7 @@ class EntryCreateRequest : Resource() {
  * Created on 14.01.18
  */
 @JsonApi(type = "entries", policy = Policy.DESERIALIZATION_ONLY)
-class EntryResponse: Resource() {
-
-    /**
-     * Date this entry was created, as returned by entries API request
-     */
-    @field:Json(name = "created-at")
-    lateinit var createdAt: Date
-
-    /**
-     * Date this entry was updated, as returned by entries API request
-     */
-    @field:Json(name = "updated-at")
-    lateinit var updatedAt: Date
+class EntryResponse: Authored() {
 
     /**
      * Title of this entry, plaintext.
@@ -156,12 +144,6 @@ class EntryResponse: Resource() {
      */
     @field:Json(name = "settings")
     var settings: RecordSettings? = null
-
-    /**
-     * Profile this entry was written by
-     */
-    @field:Json(name = "profile")
-    var profile = HasOne<OwnProfile>()
 }
 
 /**

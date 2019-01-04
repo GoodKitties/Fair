@@ -204,8 +204,7 @@ class CommentListFragment : Fragment() {
                 }
                 ITEM_REGULAR -> {
                     val comment = comments[position - 1]
-                    val profile = comment.profile.get(comments) // it's included
-                    (holder as CommentViewHolder).setup(comment, profile)
+                    (holder as CommentViewHolder).setup(comment)
                 }
                 ITEM_LOAD_MORE -> refreshComments()
                 // Nothing needed for ITEM_LAST_PAGE

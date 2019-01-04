@@ -45,7 +45,6 @@ class EditorViews : Fragment() {
 
     companion object {
         const val ACTIVITY_REQUEST_IMAGE_UPLOAD = 0
-
         const val PERMISSION_REQUEST_STORAGE_FOR_IMAGE_UPLOAD = 0
     }
 
@@ -106,8 +105,8 @@ class EditorViews : Fragment() {
     )
     fun editSelection(clicked: View) {
         val clipboard = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val paste = if (clipboardSwitch.isChecked && clipboard.hasPrimaryClip() && clipboard.primaryClip.itemCount > 0) {
-            clipboard.primaryClip.getItemAt(0).text.toString()
+        val paste = if (clipboardSwitch.isChecked && clipboard.hasPrimaryClip() && clipboard.primaryClip!!.itemCount > 0) {
+            clipboard.primaryClip!!.getItemAt(0).text.toString()
         } else {
             ""
         }

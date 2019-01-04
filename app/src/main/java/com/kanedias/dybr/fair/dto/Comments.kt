@@ -108,7 +108,7 @@ class CreateCommentRequest: Resource() {
  * Created on 14.01.18
  */
 @JsonApi(type = "comments", policy = Policy.DESERIALIZATION_ONLY)
-class CommentResponse: Resource() {
+class CommentResponse: Authored() {
 
     /**
      * Text of this comment in HTML format
@@ -117,29 +117,10 @@ class CommentResponse: Resource() {
     lateinit var content: String
 
     /**
-     * Date this comment was created at.
-     * Immutable
-     */
-    @field:Json(name = "created-at")
-    lateinit var createdAt: Date
-
-    /**
-     * Date this comment was last modified at
-     */
-    @field:Json(name = "updated-at")
-    lateinit var updatedAt: Date
-
-    /**
      * Entry this comment was posted for
      */
     @field:Json(name = "entry")
     val entry = HasOne<Entry>()
-
-    /**
-     * Profile this comment was posted by
-     */
-    @field:Json(name = "profile")
-    val profile = HasOne<OwnProfile>()
 }
 
 typealias Comment = CommentResponse

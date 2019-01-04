@@ -79,10 +79,8 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     private lateinit var profile: OwnProfile
 
     override fun getCreationDateView() = dateView
-    override fun getCreationDate() = entry.createdAt
     override fun getProfileAvatarView() = avatarView
-    override fun getProfileAvatarUrl() = profile.settings?.avatar
-    override fun getProfileId() = profile.id!!
+    override fun getAuthorNameView() = authorView
 
     /**
      * Listener to show comments of this entry
@@ -244,14 +242,14 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
      * Called when this holder should be refreshed based on what it must show now
      */
     fun setup(entry: Entry, editable: Boolean) {
+        super.setup(entry)
+
         this.entry = entry
         this.profile = entry.profile.get(entry.document)
 
-        super.setup()
 
         // setup text views from entry data
         titleView.text = entry.title
-        entry.profile.get(entry.document)?.let { authorView.text = it.nickname }
         draftStateView.visibility = if (entry.state == "published") { View.GONE } else { View.VISIBLE }
 
         // setup permission icon

@@ -41,6 +41,10 @@ import java.util.*
  */
 class CreateNewCommentFragment : Fragment() {
 
+    companion object {
+        const val AUTHOR_LINK = "author-link"
+    }
+
     /**
      * Content of comment
      */
@@ -94,6 +98,7 @@ class CreateNewCommentFragment : Fragment() {
             populateUI()
         } else {
             loadDraft()
+            handleMisc()
         }
 
         setupTheming(root)
@@ -276,6 +281,27 @@ class CreateNewCommentFragment : Fragment() {
         Toast.makeText(context, R.string.offline_draft_loaded, Toast.LENGTH_SHORT).show()
 
         DbProvider.helper.draftDao.deleteById(draft.id)
+    }
+
+    /**
+     * Handles miscellaneous conditions, such as:
+     * * This fragment was shown due to click on author's nickname
+     * * This fragment was shown due to quoting
+     *
+     */
+    private fun handleMisc() {
+        // handle click on author nickname in comments field
+        arguments?.get(AUTHOR_LINK)?.let {
+            val entity = it as Authored
+            val profile = entity.profile.get(entity.document)
+
+            val withAuthorLink = when(entity) {
+                is Comment -> "${contentInput.text}[${profile.nickname}](#${entity.id}), "
+                else -> "${contentInput.text}[${profile.nickname}](#), "
+            }
+            contentInput.setText(withAuthorLink)
+            contentInput.setSelection(withAuthorLink.length)
+        }
     }
 
     /**
