@@ -10,9 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.android.billingclient.api.BillingClient.SkuType
 import com.android.billingclient.api.BillingFlowParams
 
-
-
-
 /**
  * Flavor-specific donation helper class. This manages menu option "Donate" in the main activity.
  *

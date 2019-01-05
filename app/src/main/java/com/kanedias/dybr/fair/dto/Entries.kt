@@ -5,7 +5,6 @@ import moe.banana.jsonapi2.HasOne
 import moe.banana.jsonapi2.JsonApi
 import moe.banana.jsonapi2.Policy
 import moe.banana.jsonapi2.Resource
-import java.util.*
 
 /**
  * Entry creation request
@@ -49,6 +48,12 @@ class EntryCreateRequest : Resource() {
      */
     @field:Json(name = "content")
     var content: String = ""
+
+    /**
+     * Tags of this entry
+     */
+    @field:Json(name = "tags")
+    var tags = listOf<String>()
 
     /**
      * State of this entry. Variants: "draft", "published"
@@ -129,6 +134,12 @@ class EntryResponse: Authored() {
      */
     @field:Json(name = "content")
     var content = ""
+
+    /**
+     * Tags of this entry
+     */
+    @field:Json(name = "tags")
+    var tags = mutableListOf<String>()
 
     /**
      * State of this entry. May be "published" or "draft"

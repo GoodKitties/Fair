@@ -68,7 +68,7 @@
             android:layout_alignParentRight="true"
             android:layout_alignBaseline="@id/entry_author"
             android:padding="8dp"
-            android:text="@string/placeholder_long"/>
+            android:text="@string/placeholder_date"/>
 
         <TextView
             android:id="@+id/entry_title"
@@ -95,11 +95,30 @@
             android:text="@string/placeholder_huge"/>
 
         <View
-            android:id="@+id/entry_divider"
+            android:id="@+id/entry_tag_divider"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_below="@id/entry_message"
             android:layout_marginTop="8dp"
+            android:alpha="0.3"
+            android:background="@android:color/white"/>
+
+        <TextView
+            android:id="@+id/entry_tags"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/entry_tag_divider"
+            android:padding="5dp"
+            android:text="@string/placeholder_tags_huge"
+            android:textStyle="bold">
+
+        </TextView>
+
+        <View
+            android:id="@+id/entry_meta_divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/entry_tags"
             android:alpha="0.3"
             android:background="@android:color/white"/>
 
@@ -108,7 +127,7 @@
             android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/entry_divider"
+            android:layout_below="@id/entry_meta_divider"
             android:layout_marginTop="8dp"
             android:layout_alignParentStart="true"
             android:layout_alignParentLeft="true">
@@ -159,7 +178,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_below="@id/entry_divider"
+            android:layout_below="@id/entry_meta_divider"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"> <!-- invisible for entries you don't own -->
 

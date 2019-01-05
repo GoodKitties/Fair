@@ -57,9 +57,16 @@
                             android:layout_height="wrap_content"
                             android:name="com.kanedias.dybr.fair.ui.EditorViews" />
 
+                        <androidx.appcompat.widget.AppCompatMultiAutoCompleteTextView
+                            android:id="@+id/tags_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:hint="@string/add_tags"/>
+
                         <androidx.appcompat.widget.AppCompatSpinner
                             android:id="@+id/entry_permission_selector"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
                             android:entries="@array/permission_types"

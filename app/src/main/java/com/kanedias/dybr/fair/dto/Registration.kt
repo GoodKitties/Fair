@@ -5,7 +5,6 @@ import moe.banana.jsonapi2.HasMany
 import moe.banana.jsonapi2.JsonApi
 import moe.banana.jsonapi2.Policy
 import moe.banana.jsonapi2.Resource
-import java.util.*
 
 /**
  * Register call request body. Used in network API registration procedure.
@@ -104,26 +103,13 @@ class RegisterRequest : Resource() {
  * Created on 10.12.2017
  */
 @JsonApi(type = "users", policy = Policy.DESERIALIZATION_ONLY)
-class RegisterResponse : Resource() {
+class RegisterResponse : Dated() {
 
     /**
      * Email used when registering, see [RegisterRequest.email]
      */
     @field:Json(name = "email")
     lateinit var email: String
-
-    /**
-     * Date this profile was created at.
-     * Immutable
-     */
-    @field:Json(name = "created-at")
-    lateinit var createdAt: Date
-
-    /**
-     * Date this profile was last modified at
-     */
-    @field:Json(name = "updated-at")
-    lateinit var updatedAt: Date
 
     /**
      * if checked - show non-SFW content

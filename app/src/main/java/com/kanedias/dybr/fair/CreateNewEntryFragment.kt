@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.appcompat.widget.AppCompatMultiAutoCompleteTextView
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnCheckedChanged
@@ -54,6 +55,12 @@ class CreateNewEntryFragment : Fragment() {
      */
     @BindView(R.id.source_text)
     lateinit var contentInput: EditText
+
+    /**
+     * Entry tag editor
+     */
+    @BindView(R.id.tags_text)
+    lateinit var tagsInput: AppCompatMultiAutoCompleteTextView
 
     /**
      * Permission type of an entry: visible for all, for registered
@@ -140,6 +147,13 @@ class CreateNewEntryFragment : Fragment() {
                 RecordAccessItem("favorites", true),
                 null /* visible for all */))
         permissionSpinner.setSelection(3) // select "Visible for all" by default
+
+        // tags autocompletion
+        val tags = profile.tags.map { "#${it.name}" }
+        val adapter = ArrayAdapter<String>(activity, android.R.layout.simple_dropdown_item_1line, tags)
+        tagsInput.setTokenizer(MultiAutoCompleteTextView.CommaTokenizer())
+        tagsInput.threshold = 1
+        tagsInput.setAdapter(adapter)
     }
 
     private fun setupTheming(root: View) {
@@ -147,6 +161,8 @@ class CreateNewEntryFragment : Fragment() {
         Scoop.getInstance().bind(TEXT, titleInput, EditTextAdapter())
         Scoop.getInstance().bind(TEXT_LINKS, titleInput, EditTextLineAdapter())
         Scoop.getInstance().bind(TEXT_OFFTOP, titleInput, EditTextHintAdapter())
+        Scoop.getInstance().bind(TEXT, tagsInput, EditTextAdapter())
+        Scoop.getInstance().bind(TEXT_OFFTOP, tagsInput, EditTextHintAdapter())
         Scoop.getInstance().bind(TEXT, preview)
         Scoop.getInstance().bind(TEXT_LINKS, preview, TextViewLinksAdapter())
         Scoop.getInstance().bind(TEXT_LINKS, previewButton, TextViewColorAdapter())
@@ -176,6 +192,7 @@ class CreateNewEntryFragment : Fragment() {
         // need to convert entry content (html) to Markdown somehow...
         val markdown = Html2Markdown().parse(editEntry.content)
         contentInput.setText(markdown)
+        tagsInput.setText(editEntry.tags.joinToString(transform = { "#$it" }, separator = ", "))
 
         // permission settings, if exist
         when (editEntry.settings?.permissions?.access?.firstOrNull()) {
@@ -221,14 +238,15 @@ class CreateNewEntryFragment : Fragment() {
     @Suppress("DEPRECATION") // getColor doesn't work up to API level 23
     @OnClick(R.id.entry_cancel)
     fun cancel() {
-        if (editMode || titleInput.text.isNullOrEmpty() && contentInput.text.isNullOrEmpty()) {
+        if (editMode || titleInput.text.isNullOrEmpty() && contentInput.text.isNullOrEmpty() && tagsInput.text.isNullOrEmpty()) {
             // entry has empty title and content, canceling right away
             fragmentManager!!.popBackStack()
             return
         }
 
         // persist draft
-        DbProvider.helper.draftDao.create(OfflineDraft(key = "entry,blog=${profile.id}", title = titleInput, base = contentInput))
+        DbProvider.helper.draftDao.create(OfflineDraft(key = "entry,blog=${profile.id}",
+                title = titleInput, base = contentInput, tags = tagsInput))
         Toast.makeText(activity, R.string.offline_draft_saved, Toast.LENGTH_SHORT).show()
         fragmentManager!!.popBackStack()
     }
@@ -255,10 +273,12 @@ class CreateNewEntryFragment : Fragment() {
             else -> null // visible for all
         }
 
+        val tagList = tagsInput.text.split(Regex(", *")).filter { it.startsWith("#") }.map { it.removePrefix("#") }
         val entry = EntryCreateRequest().apply {
             title = titleInput.text.toString()
             state = if (draftSwitch.isChecked) { "published" } else { "draft" }
             content = htmlContent
+            tags = tagList
             settings = RecordSettings(permissions = RecordPermissions(listOfNotNull(access)))
         }
 
@@ -295,7 +315,7 @@ class CreateNewEntryFragment : Fragment() {
             return
 
         // persist new draft
-        DbProvider.helper.draftDao.create(OfflineDraft(title = titleInput, base = contentInput))
+        DbProvider.helper.draftDao.create(OfflineDraft(title = titleInput, base = contentInput, tags = tagsInput))
 
         // clear the context and show notification
         titleInput.setText("")
@@ -344,6 +364,7 @@ class CreateNewEntryFragment : Fragment() {
     private fun popDraftUI(draft: OfflineDraft) {
         titleInput.setText(draft.title)
         contentInput.setText(draft.content)
+        tagsInput.setText(draft.tags)
         Toast.makeText(context, R.string.offline_draft_loaded, Toast.LENGTH_SHORT).show()
 
         DbProvider.helper.draftDao.deleteById(draft.id)

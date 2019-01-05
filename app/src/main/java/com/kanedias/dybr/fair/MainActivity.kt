@@ -615,7 +615,7 @@ class MainActivity : AppCompatActivity() {
     private fun refreshTabs() {
         tabAdapter.apply {
             account = Auth.user
-            profile = Auth.profile ?: Auth.emptyBlogMarker
+            selfProfile = Auth.profile ?: Auth.emptyBlogMarker
         }
         tabAdapter.notifyDataSetChanged()
     }
@@ -642,7 +642,7 @@ class MainActivity : AppCompatActivity() {
     inner class TabAdapter: FragmentStatePagerAdapter(supportFragmentManager) {
 
         var account: Account? = null
-        var profile: OwnProfile? = null
+        var selfProfile: OwnProfile? = null
 
         override fun getCount(): Int {
             if (account == null) {
@@ -659,7 +659,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun getItem(position: Int) = when(position) {
-            MY_DIARY_TAB -> EntryListFragment().apply { profile = this@TabAdapter.profile }
+            MY_DIARY_TAB -> EntryListFragment().apply { profile = this@TabAdapter.selfProfile }
             FAV_TAB  -> EntryListFragment().apply { profile = Auth.favoritesMarker }
             WORLD_TAB -> EntryListFragment().apply { profile = Auth.worldMarker }
             NOTIFICATIONS_TAB -> NotificationListFragment()

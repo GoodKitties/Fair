@@ -6,6 +6,13 @@
     <!-- placeholders -->
     <string name="placeholder_long" translatable="false">Sample placeholder text</string>
     <string name="placeholder_short" translatable="false">Placeholder</string>
+    <string name="placeholder_tags_huge" translatable="false">
+        <![CDATA[
+            #Seven #for #the #days #and #seven #for #the
+            #nights #seven #for #the #heaven #and #the #tunnel
+            #and #the #lights
+        ]]>
+    </string>
     <string name="placeholder_huge" translatable="false">
         <![CDATA[
             All eyes see the figure of the wizard\n
@@ -211,4 +218,6 @@
     <string name="select_permission_type">Select permission type</string>
     <string name="entry_access_permissions">Entry access permissions</string>
     <string name="return_to_notifications">Return to notifications?</string>
+    <string name="select_tags">Select #tags</string>
+    <string name="add_tags">Add #tags</string>
 </resources>

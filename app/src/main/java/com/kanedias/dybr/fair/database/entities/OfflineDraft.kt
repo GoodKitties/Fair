@@ -19,10 +19,11 @@ class OfflineDraft {
 
     constructor()
 
-    constructor(key: String? = null, title: TextView? = null, base: TextView) {
+    constructor(key: String? = null, title: TextView? = null, base: TextView, tags: TextView? = null) {
         this.key = key
         this.title = title?.text?.toString()
         this.content = base.text.toString()
+        this.tags = tags?.text?.toString()
     }
 
     /**
@@ -54,4 +55,10 @@ class OfflineDraft {
      */
     @DatabaseField(canBeNull = false)
     lateinit var content: String
+
+    /**
+     * Tags of this item
+     */
+    @DatabaseField(canBeNull = true)
+    var tags: String? = null
 }

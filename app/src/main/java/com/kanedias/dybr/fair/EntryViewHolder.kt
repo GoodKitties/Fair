@@ -16,6 +16,11 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.ui.md.handleMarkdown
 import android.content.ComponentName
 import android.content.pm.PackageManager
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.TextPaint
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.afollestad.materialdialogs.list.listItems
@@ -48,8 +53,14 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     @BindView(R.id.entry_message)
     lateinit var bodyView: TextView
 
-    @BindView(R.id.entry_divider)
-    lateinit var divider: View
+    @BindView(R.id.entry_tag_divider)
+    lateinit var tagDivider: View
+
+    @BindView(R.id.entry_tags)
+    lateinit var tagsView: TextView
+
+    @BindView(R.id.entry_meta_divider)
+    lateinit var metaDivider: View
 
     @BindView(R.id.entry_draft_state)
     lateinit var draftStateView: TextView
@@ -100,6 +111,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         ButterKnife.bind(this, iv)
         setupTheming()
 
+        tagsView.movementMethod = LinkMovementMethod()
         iv.setOnClickListener(commentShow)
         if (allowSelection) {
             bodyView.isLongClickable = true
@@ -113,8 +125,10 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         Scoop.getInstance().bind(TEXT, dateView, parent)
         Scoop.getInstance().bind(TEXT, bodyView, parent)
         Scoop.getInstance().bind(TEXT_LINKS, bodyView, parent, TextViewLinksAdapter())
+        Scoop.getInstance().bind(TEXT_LINKS, tagsView, parent, TextViewLinksAdapter())
         Scoop.getInstance().bind(TEXT_LINKS, permissionIcon, parent)
-        Scoop.getInstance().bind(DIVIDER, divider, parent)
+        Scoop.getInstance().bind(DIVIDER, metaDivider, parent)
+        Scoop.getInstance().bind(DIVIDER, tagDivider, parent)
         (buttons + indicators + participants + comments).forEach { Scoop.getInstance().bind(TEXT_LINKS, it, parent) }
     }
 
@@ -225,7 +239,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     /**
      * Show or hide entry editing buttons depending on circumstances
      */
-    private fun toggleEditButtons(show: Boolean) {
+    private fun setupEditButtons(show: Boolean) {
         val visibility = when (show) {
             true -> View.VISIBLE
             false -> View.GONE
@@ -257,8 +271,11 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
             permissionIcon.setOnClickListener { Toast.makeText(it.context, accessItem.toDescription(it.context), Toast.LENGTH_SHORT).show() }
         }
 
+        // show tags if they are present
+        setupTags(entry)
+
         // setup bottom row of edit buttons
-        toggleEditButtons(editable)
+        setupEditButtons(editable)
 
         // setup bottom row of metadata buttons
         val metadata = Network.bufferToObject<EntryMeta>(entry.meta)
@@ -266,6 +283,43 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         metadata?.let { participants.text = it.commenters.toString() }
 
         bodyView.handleMarkdown(entry.content)
+    }
+
+    /**
+     * Show tags below the message, with divider.
+     * Make tags below the entry message clickable.
+     */
+    private fun setupTags(entry: Entry) {
+        if (entry.tags.isEmpty()) {
+            tagDivider.visibility = View.GONE
+            tagsView.visibility = View.GONE
+        } else {
+            tagDivider.visibility = View.VISIBLE
+            tagsView.visibility = View.VISIBLE
+
+            val clickTags = SpannableStringBuilder()
+            for (tag in entry.tags) {
+                clickTags.append("#").append(tag)
+                clickTags.setSpan(ClickableTag(tag), clickTags.length - 1 - tag.length, clickTags.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                clickTags.append(" ")
+            }
+            tagsView.text = clickTags
+        }
+    }
+
+    /**
+     * Clickable tag span. Don't make it look like a URL link but make it clickable nevertheless.
+     */
+    inner class ClickableTag(private val tag: String): ClickableSpan() {
+
+        override fun onClick(widget: View) {
+            Toast.makeText(itemView.context, "Tag search not yet implemented: $tag", Toast.LENGTH_SHORT).show()
+        }
+
+        override fun updateDrawState(ds: TextPaint) {
+            super.updateDrawState(ds)
+            ds.isUnderlineText = false
+        }
     }
 
 }

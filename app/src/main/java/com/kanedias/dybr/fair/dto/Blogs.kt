@@ -5,7 +5,6 @@ import moe.banana.jsonapi2.HasOne
 import moe.banana.jsonapi2.JsonApi
 import moe.banana.jsonapi2.Policy
 import moe.banana.jsonapi2.Resource
-import java.util.*
 
 /**
  * Blog creation request. Requires profile relation, title and slug
@@ -95,7 +94,7 @@ class BlogCreateRequest : Resource() {
  * Created on 14.01.18
  */
 @JsonApi(type = "blogs", policy = Policy.DESERIALIZATION_ONLY)
-class BlogResponse : Resource() {
+class BlogResponse : Dated() {
 
     /**
      * See [BlogCreateRequest.slug]
@@ -108,19 +107,6 @@ class BlogResponse : Resource() {
      */
     @field:Json(name = "title")
     lateinit var title: String
-
-    /**
-     * Date this blog was created at.
-     * Immutable
-     */
-    @field:Json(name = "created-at")
-    lateinit var createdAt: Date
-
-    /**
-     * Date this blog was last modified at
-     */
-    @field:Json(name = "updated-at")
-    lateinit var updatedAt: Date
 
     /**
      * Profile this blog belongs to

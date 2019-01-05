@@ -2,7 +2,7 @@ package com.kanedias.dybr.fair.dto
 
 import com.squareup.moshi.Json
 import moe.banana.jsonapi2.*
-import java.util.*
+import java.io.Serializable
 
 /**
  * Profile creation request.
@@ -80,25 +80,13 @@ class ProfileCreateRequest: Resource() {
  * Created on 17.11.17
  */
 @JsonApi(type = "profiles", policy = Policy.DESERIALIZATION_ONLY)
-class ProfileResponse : Resource() {
+class ProfileResponse : Dated() {
 
     /**
      * Chosen nickname
      */
     @field:Json(name = "nickname")
     lateinit var nickname: String
-
-    /**
-     * Date this profile was created, as returned by users API request
-     */
-    @field:Json(name = "created-at")
-    lateinit var createdAt: Date
-
-    /**
-     * Date this profile was updated, as returned by users API request
-     */
-    @field:Json(name = "updated-at")
-    lateinit var updatedAt: Date
 
     /**
      * Birthday in DD-MM format
@@ -125,16 +113,16 @@ class ProfileResponse : Resource() {
     var settings: ProfileSettings? = null
 
     /**
+     * Tags that this profile is using
+     */
+    @field:Json(name = "tags")
+    var tags = mutableSetOf<Tag>()
+
+    /**
      * Link to the user this profile belongs to
      */
     @field:Json(name = "user")
     var user = HasOne<User>()
-
-    /**
-     * Link to the blog of this profile
-     */
-    @field:Json(name = "blogs")// TODO: fix on backend
-    var blogs = HasMany<Blog>()
 
     /**
      * Link to the readers of this profile
@@ -148,5 +136,10 @@ class ProfileResponse : Resource() {
     @field:Json(name = "favorites")
     var favorites = HasMany<OwnProfile>()
 }
+
+data class Tag(
+        val name: String,
+        var entries: Int
+) : Serializable
 
 typealias OwnProfile = ProfileResponse
