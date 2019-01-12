@@ -18,7 +18,7 @@ import com.kanedias.dybr.fair.themes.*
  *
  * Created on 23.06.18
  */
-class EntryListFragmentFull: EntryListFragment() {
+open class EntryListFragmentFull: EntryListFragment() {
 
     @BindView(R.id.add_entry_button)
     lateinit var addEntryButton: FloatingActionButton

@@ -16,6 +16,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.ui.handleMarkdown
 import android.content.ComponentName
 import android.content.pm.PackageManager
+import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.TextPaint
@@ -310,10 +311,21 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     /**
      * Clickable tag span. Don't make it look like a URL link but make it clickable nevertheless.
      */
-    inner class ClickableTag(private val tag: String): ClickableSpan() {
+    inner class ClickableTag(private val tagValue: String): ClickableSpan() {
 
         override fun onClick(widget: View) {
-            Toast.makeText(itemView.context, "Tag search not yet implemented: $tag", Toast.LENGTH_SHORT).show()
+            val activity = itemView.context as AppCompatActivity
+
+            val searchFragment = EntryListSearchTagFragmentFull().apply {
+                arguments = Bundle().apply {
+                    putSerializable("filters", hashMapOf("tag" to tagValue))
+                }
+            }
+            activity.supportFragmentManager.beginTransaction()
+                    .addToBackStack("Showing search tag fragment after click to tag")
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .add(R.id.main_drawer_layout, searchFragment)
+                    .commit()
         }
 
         override fun updateDrawState(ds: TextPaint) {

@@ -44,10 +44,22 @@ abstract class UserContentListFragment : Fragment() {
     }
 
     /**
+     * Detect conditions in which loading of entries should be skipped
+     * and handle them.
+     *
+     * @return true if loading should be skipped, false otherwise
+     */
+    open fun handleLoadSkip() : Boolean = false
+
+    /**
      * Loads more data into the recycler view
      * @param reset if true, clear current items and current/last page load status
      */
     open fun loadMore(reset: Boolean = false) {
+        if (handleLoadSkip()) {
+            return
+        }
+
         if (reset) {
             getRibbonView().scrollTo(0, 0)
             getRibbonAdapter().clearItems()
@@ -76,8 +88,11 @@ abstract class UserContentListFragment : Fragment() {
      * @param loaded document with notifications for active profile and links to pages that was loaded
      */
     fun onMoreDataLoaded(loaded: ArrayDocument<out Resource>) {
-        if (loaded.isEmpty()) {
+        if (loaded.size < PAGE_SIZE) {
             allLoaded = true
+        }
+
+        if (loaded.isEmpty()) {
             return
         }
 

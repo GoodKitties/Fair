@@ -32,7 +32,7 @@ open class EntryListFragment: UserContentListFragment() {
     override fun getRibbonView() = entryRibbon
     override fun getRefresher() = ribbonRefresher
     override fun getRibbonAdapter() = entryAdapter
-    override fun retrieveData(pageNum: Int) = { Network.loadEntries(prof = this.profile!!, pageNum = pageNum) }
+    override fun retrieveData(pageNum: Int) = { Network.loadEntries(prof = this.profile, pageNum = pageNum) }
 
     var profile: OwnProfile? = null
 
@@ -90,26 +90,34 @@ open class EntryListFragment: UserContentListFragment() {
     }
 
     /**
-     * Loads the next page in entry listing. If no pages were loaded before, loads first
-     * @param reset if true, reset page counting and start from page one
+     * Entry fragment is mostly bound to profile, so in case we don't have it we should skip loading
      */
-    override fun loadMore(reset: Boolean) {
+    override fun handleLoadSkip(): Boolean {
         if (profile == null) { // we don't have a blog, just show empty list
             ribbonRefresher.isRefreshing = false
-            return
+            return true
         }
 
         if (profile?.blogSlug == null) {
             // profile doesn't have a blog yet, ask to create
             entryRibbon.adapter = EmptyBlogAdapter()
-            return
+            ribbonRefresher.isRefreshing = false
+            return true
         }
+
+        return false
+    }
+
+    /**
+     * Loads the next page in entry listing. If no pages were loaded before, loads first
+     * @param reset if true, reset page counting and start from page one
+     */
+    override fun loadMore(reset: Boolean) {
+        super.loadMore(reset)
 
         if (isBlogWritable(profile)) {
             activity.actionButton.show()
         }
-
-        super.loadMore(reset)
     }
 
     /**

@@ -501,41 +501,61 @@ object Network {
     }
 
     /**
-     * Pull diary entries from blog denoted by [blog]. Includes profiles and blog for returned entry list.
+     * Pull diary entries from blog denoted by [prof]. Includes profiles and blog for returned entry list.
      * The resulting URL will be like this: http://dybr.ru/api/v1/blogs/<blog-slug>
      *
      * @param prof profile with blog to retrieve entries from
      * @param pageNum page number to retrieve
      */
-    fun loadEntries(prof: OwnProfile, pageNum: Int = 1): ArrayDocument<Entry> {
+    fun loadEntries(prof: OwnProfile?, pageNum: Int = 1): ArrayDocument<Entry> {
         // handle special case when we selected tab with favorites
         val builder = when (prof) {
             Auth.favoritesMarker -> { // workaround, filter entries by profile ids
                 val favProfiles = Auth.profile?.favorites?.joinToString(separator = ",", transform = { res -> res.id })
                 if (favProfiles.isNullOrBlank()) {
-                    HttpUrl.parse(ENTRIES_ENDPOINT)!!.newBuilder()
-                            .addQueryParameter("filters[profile_id]", "0")
+                    HttpUrl.parse(ENTRIES_ENDPOINT)!!.newBuilder().addQueryParameter("filters[profile_id]", "0")
                 } else {
-                    HttpUrl.parse(ENTRIES_ENDPOINT)!!.newBuilder()
-                            .addQueryParameter("filters[profile_id]", favProfiles)
+                    HttpUrl.parse(ENTRIES_ENDPOINT)!!.newBuilder().addQueryParameter("filters[profile_id]", favProfiles)
                 }
             }
 
             Auth.worldMarker -> HttpUrl.parse(ENTRIES_ENDPOINT)!!.newBuilder()
                     .addQueryParameter("filters[feed]", "1")
 
+            null -> HttpUrl.parse(ENTRIES_ENDPOINT)!!.newBuilder()
             else -> HttpUrl.parse("$BLOGS_ENDPOINT/${prof.id}/entries")!!.newBuilder()
         }
 
         builder.addQueryParameter("page[number]", pageNum.toString())
-                .addQueryParameter("page[size]", "20")
+                .addQueryParameter("page[size]", PAGE_SIZE.toString())
                 .addQueryParameter("include", "profile,blog")
                 .addQueryParameter("sort", "-created-at")
 
         val req = Request.Builder().url(builder.build()).build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
-            throw extractErrors(resp, "Can't load entries for blog ${prof.blogSlug}")
+            throw extractErrors(resp, "Can't load entries for blog ${prof?.blogSlug}, page $pageNum")
+        }
+
+        // response is returned after execute call, body is not null
+        return fromWrappedListJson(resp.body()!!.source(), Entry::class.java)
+    }
+
+    fun loadFilteredEntries(filters: Map<String, String>, pageNum: Int = 1): ArrayDocument<Entry> {
+        val builder = HttpUrl.parse(ENTRIES_ENDPOINT)!!.newBuilder()
+                .addQueryParameter("page[number]", pageNum.toString())
+                .addQueryParameter("page[size]", PAGE_SIZE.toString())
+                .addQueryParameter("include", "profile,blog")
+                .addQueryParameter("sort", "-created-at")
+
+        for ((type, value) in filters) {
+            builder.addQueryParameter("filters[$type]", value)
+        }
+
+        val req = Request.Builder().url(builder.build()).build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful) {
+            throw extractErrors(resp, "Can't load filtered entries for filters $filters")
         }
 
         // response is returned after execute call, body is not null
@@ -563,7 +583,13 @@ object Network {
      * @param entry entry to retrieve comments from
      */
     fun loadComments(entry: Entry, pageNum: Int = 1): ArrayDocument<Comment> {
-        val req = Request.Builder().url("$ENTRIES_ENDPOINT/${entry.id}/comments?sort=created-at&page[number]=$pageNum&page[size]=20&include=profile").build()
+        val builder = HttpUrl.parse("$ENTRIES_ENDPOINT/${entry.id}/comments")!!.newBuilder()
+                .addQueryParameter("page[number]", pageNum.toString())
+                .addQueryParameter("page[size]", PAGE_SIZE.toString())
+                .addQueryParameter("include", "profile")
+                .addQueryParameter("sort", "created-at")
+
+        val req = Request.Builder().url(builder.build()).build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw extractErrors(resp, "Can't load comments for entry ${entry.id}")
@@ -658,7 +684,7 @@ object Network {
     /**
      * Loads notifications for current profile
      */
-    fun loadNotifications(pageSize: Int = 20, pageNum: Int = 1) : ArrayDocument<Notification> {
+    fun loadNotifications(pageSize: Int = PAGE_SIZE, pageNum: Int = 1) : ArrayDocument<Notification> {
         if (Auth.profile == null)
             return ArrayDocument()
 
