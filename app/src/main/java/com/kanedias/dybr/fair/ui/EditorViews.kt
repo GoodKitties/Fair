@@ -211,7 +211,7 @@ class EditorViews : Fragment() {
                                 4 -> "800"
                                 else -> "auto"
                             }
-                            insertInCursorPosition("<img height='$spec' width='auto' src='", link, "' />")
+                            insertInCursorPosition("<img width='$spec' height='auto' src='", link, "' />")
                         }).show()
             } catch (ex: Exception) {
                 Network.reportErrors(activity!!, ex)
