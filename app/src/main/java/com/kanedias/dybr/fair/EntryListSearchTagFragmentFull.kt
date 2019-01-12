@@ -25,6 +25,12 @@ class EntryListSearchTagFragmentFull: EntryListFragmentFull() {
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        toolbar.title = "#${filters.entries.first().value}"
+    }
+
     override fun retrieveData(pageNum: Int) = { Network.loadFilteredEntries(filters = this.filters, pageNum = this.currentPage) }
 
     /**
