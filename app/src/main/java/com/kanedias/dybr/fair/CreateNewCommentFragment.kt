@@ -33,7 +33,7 @@ import java.util.*
 
 
 /**
- * Frag,emt responsible for creating/updating comments.
+ * Fragment responsible for creating/updating comments.
  *
  * @author Kanedias
  *

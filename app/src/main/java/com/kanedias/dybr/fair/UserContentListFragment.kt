@@ -14,6 +14,15 @@ import moe.banana.jsonapi2.ArrayDocument
 import moe.banana.jsonapi2.Resource
 
 /**
+ * Base fragment for any page with refreshable [RecyclerView] which
+ * can load more items when scrolled to the bottom.
+ *
+ * Subclasses should provide data retrieval steps, view references
+ * and [LoadMoreAdapter] extensions for data representation.
+ *
+ * Loading more items, refreshing and last page detection is then
+ * handled by this fragment.
+ *
  * @author Kanedias
  *
  * Created on 12.01.19
@@ -66,19 +75,14 @@ abstract class UserContentListFragment : Fragment() {
      * Update notification ribbon with newly loaded values.
      * @param loaded document with notifications for active profile and links to pages that was loaded
      */
-    open fun onMoreDataLoaded(loaded: ArrayDocument<out Resource>) {
-        val currentCnt = getRibbonAdapter().itemCount
-
+    fun onMoreDataLoaded(loaded: ArrayDocument<out Resource>) {
         if (loaded.isEmpty()) {
             allLoaded = true
             return
         }
 
         currentPage += 1
-        getRibbonAdapter().apply {
-            items.addAll(loaded)
-            notifyItemRangeInserted(currentCnt, loaded.size)
-        }
+        getRibbonAdapter().addItems(loaded)
     }
 
     /**
@@ -148,8 +152,15 @@ abstract class UserContentListFragment : Fragment() {
         }
 
         fun addItem(item: Resource) {
+            val insertionPoint = itemCount
             items.add(item)
-            notifyItemInserted(headers.size + items.size)
+            notifyItemInserted(insertionPoint)
+        }
+
+        fun addItems(list: List<Resource>) {
+            val insertionPoint = itemCount
+            items.addAll(list)
+            notifyItemRangeInserted(insertionPoint, list.size)
         }
 
         fun clearItems() {

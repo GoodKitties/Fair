@@ -25,7 +25,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * Holder that shows info and interactive elements for any authored entity
+ * Holder that shows info and interactive elements for any authored entity.
+ * Has convenient handlers for date showing, author dialog popup, author name click.
  *
  * @author Kanedias
  *
