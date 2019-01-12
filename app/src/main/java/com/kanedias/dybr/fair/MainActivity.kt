@@ -318,9 +318,9 @@ class MainActivity : AppCompatActivity() {
      * Find current tab and try to refresh its contents
      */
     private fun refreshCurrentTab() {
-        val plPredicate = { it: Fragment -> it is EntryListFragment && it.userVisibleHint }
-        val currentTab = supportFragmentManager.fragments.find(plPredicate) as EntryListFragment?
-        currentTab?.refreshEntries()
+        val plPredicate = { it: Fragment -> it is UserContentListFragment && it.userVisibleHint }
+        val currentTab = supportFragmentManager.fragments.find(plPredicate) as UserContentListFragment?
+        currentTab?.loadMore(reset = true)
     }
 
     override fun onBackPressed() {
@@ -408,7 +408,7 @@ class MainActivity : AppCompatActivity() {
                     // if the fragment is already loaded, try to refresh it
                     val notifPredicate = { it: Fragment -> it is NotificationListFragment }
                     val notifFragment = supportFragmentManager.fragments.find(notifPredicate) as NotificationListFragment?
-                    notifFragment?.refreshNotifications(reset = true)
+                    notifFragment?.loadMore(reset = true)
                 }
 
                 if (supportFragmentManager.backStackEntryCount > 0) {
@@ -630,7 +630,7 @@ class MainActivity : AppCompatActivity() {
         // we know that fragment is already present so it will return cached one
         val currFragment = tabAdapter.instantiateItem(pager, pager.currentItem) as? EntryListFragment ?: return
 
-        if (currFragment.refresher.isRefreshing) {
+        if (currFragment.ribbonRefresher.isRefreshing) {
             // diary is not loaded yet
             Toast.makeText(this, R.string.still_loading, Toast.LENGTH_SHORT).show()
             return

@@ -1,7 +1,6 @@
 package com.kanedias.dybr.fair
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.fragment.app.FragmentTransaction
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -10,12 +9,9 @@ import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
 import com.kanedias.dybr.fair.dto.*
-import kotlinx.coroutines.*
-import moe.banana.jsonapi2.ArrayDocument
 
 
 /**
@@ -25,21 +21,23 @@ import moe.banana.jsonapi2.ArrayDocument
  *
  * Created on 18.11.17
  */
-open class EntryListFragment: Fragment() {
+open class EntryListFragment: UserContentListFragment() {
 
     @BindView(R.id.entry_ribbon)
     lateinit var entryRibbon: RecyclerView
 
     @BindView(R.id.entry_list_area)
-    lateinit var refresher: SwipeRefreshLayout
+    lateinit var ribbonRefresher: SwipeRefreshLayout
+
+    override fun getRibbonView() = entryRibbon
+    override fun getRefresher() = ribbonRefresher
+    override fun getRibbonAdapter() = entryAdapter
+    override fun retrieveData(pageNum: Int) = { Network.loadEntries(prof = this.profile!!, pageNum = pageNum) }
 
     var profile: OwnProfile? = null
 
-    private val entryAdapter = EntryListAdapter()
-    private var nextPage = 1
-    private var lastPage = false
-
-    lateinit var activity: MainActivity
+    private lateinit var entryAdapter: UserContentListFragment.LoadMoreAdapter
+    protected lateinit var activity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         if (profile == null) {
@@ -49,11 +47,11 @@ open class EntryListFragment: Fragment() {
 
         val view = inflater.inflate(layoutToUse(), container, false)
         activity = context as MainActivity
+        entryAdapter = EntryListAdapter()
 
         ButterKnife.bind(this, view)
         setupUI(view)
         setupTheming()
-        refreshEntries()
         return view
     }
 
@@ -65,7 +63,7 @@ open class EntryListFragment: Fragment() {
     open fun layoutToUse() = R.layout.fragment_entry_list
 
     open fun setupUI(view: View) {
-        refresher.setOnRefreshListener { refreshEntries(reset = true) }
+        ribbonRefresher.setOnRefreshListener { loadMore(reset = true) }
         entryRibbon.layoutManager = LinearLayoutManager(activity)
         entryRibbon.adapter = entryAdapter
     }
@@ -95,9 +93,9 @@ open class EntryListFragment: Fragment() {
      * Loads the next page in entry listing. If no pages were loaded before, loads first
      * @param reset if true, reset page counting and start from page one
      */
-    fun refreshEntries(reset: Boolean = false) {
+    override fun loadMore(reset: Boolean) {
         if (profile == null) { // we don't have a blog, just show empty list
-            refresher.isRefreshing = false
+            ribbonRefresher.isRefreshing = false
             return
         }
 
@@ -107,55 +105,11 @@ open class EntryListFragment: Fragment() {
             return
         }
 
-        if (reset) {
-            entryRibbon.smoothScrollToPosition(0)
-            nextPage = 1
-            lastPage = false
+        if (isBlogWritable(profile)) {
+            activity.actionButton.show()
         }
 
-        GlobalScope.launch(Dispatchers.Main) {
-            refresher.isRefreshing = true
-
-            try {
-                val success = withContext(Dispatchers.IO) { Network.loadEntries(profile!!, nextPage) }
-                updateRibbonPage(success, reset)
-            } catch (ex: Exception) {
-                Network.reportErrors(activity, ex)
-            }
-
-            refresher.isRefreshing = false
-
-            if (isBlogWritable(profile)) {
-                activity.actionButton.show()
-            }
-        }
-    }
-
-    /**
-     * Update entry ribbon with newly loaded values.
-     * @param loaded document with entries and links to pages that was loaded
-     * @param reset if true, reset page counting and start from page one
-     */
-    private fun updateRibbonPage(loaded: ArrayDocument<Entry>, reset: Boolean) {
-        if (reset) {
-            entryAdapter.apply {
-                entries.clear()
-                notifyDataSetChanged()
-            }
-        }
-
-        if (loaded.isEmpty()) {
-            lastPage = true
-            entryAdapter.notifyDataSetChanged()
-            return
-        }
-
-        nextPage += 1
-        entryAdapter.apply {
-            val oldSize = entries.size
-            entries.addAll(loaded)
-            notifyItemRangeInserted(oldSize, loaded.size)
-        }
+        super.loadMore(reset)
     }
 
     /**
@@ -197,27 +151,17 @@ open class EntryListFragment: Fragment() {
      * Main adapter of this fragment's recycler view. Shows posts in the blog and handles
      * refreshing and page loading.
      */
-    inner class EntryListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-        var entries: MutableList<Entry> = ArrayList()
-
-        override fun getItemViewType(position: Int) = when {
-            position < entries.size -> ITEM_REGULAR
-            lastPage -> ITEM_LAST_PAGE
-            else -> ITEM_LOAD_MORE
-        }
+    inner class EntryListAdapter : UserContentListFragment.LoadMoreAdapter() {
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             when (getItemViewType(position)) {
                 ITEM_REGULAR -> {
                     val entryHolder = holder as EntryViewHolder
-                    val entry = entries[position]
+                    val entry = items[position] as Entry
                     entryHolder.setup(entry, isBlogWritable(profile))
                 }
-                ITEM_LOAD_MORE -> refreshEntries()
-                // Nothing needed for ITEM_LAST_PAGE
+                else -> super.onBindViewHolder(holder, position)
             }
-
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -227,27 +171,8 @@ open class EntryListFragment: Fragment() {
                     val view = inflater.inflate(R.layout.fragment_entry_list_item, parent, false)
                     EntryViewHolder(view, parent as View)
                 }
-                ITEM_LOAD_MORE -> {
-                    val pbar = inflater.inflate(R.layout.view_load_more, parent, false)
-                    object: RecyclerView.ViewHolder(pbar) {}
-                }
-                else -> { // ITEM_LAST_PAGE
-                    val lastPage = inflater.inflate(R.layout.view_last_page, parent, false)
-                    lastPage.findViewById<TextView>(R.id.last_page_reload).setOnClickListener { refreshEntries(true) }
-                    object: RecyclerView.ViewHolder(lastPage) {}
-                }
+                else -> super.onCreateViewHolder(parent, viewType)
             }
-        }
-
-        override fun getItemCount() : Int {
-            if (entries.isEmpty()) {
-                // seems like we didn't yet load anything in our view, it's probably loading
-                // for the first time. Don't show "load more", let's wait while anything shows up.
-                return 0
-            }
-
-            // we have something in the view already
-            return entries.size + 1
         }
     }
 

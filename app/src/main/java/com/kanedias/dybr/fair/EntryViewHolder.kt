@@ -13,7 +13,7 @@ import butterknife.BindViews
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
-import com.kanedias.dybr.fair.ui.md.handleMarkdown
+import com.kanedias.dybr.fair.ui.handleMarkdown
 import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.text.Spannable
@@ -163,7 +163,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
                     // if we have current tab, refresh it
                     val plPredicate = { it: Fragment -> it is EntryListFragment && it.userVisibleHint }
                     val currentTab = activity.supportFragmentManager.fragments.find(plPredicate) as EntryListFragment?
-                    currentTab?.refreshEntries(true)
+                    currentTab?.loadMore(reset = true)
                 } catch (ex: Exception) {
                     Network.reportErrors(itemView.context, ex)
                 }

@@ -1,18 +1,15 @@
 package com.kanedias.dybr.fair
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import android.view.*
-import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.dto.*
 import kotlinx.coroutines.*
-import moe.banana.jsonapi2.ArrayDocument
 
 /**
  * Fragment which displays list of notifications for current profile.
@@ -21,17 +18,20 @@ import moe.banana.jsonapi2.ArrayDocument
  *
  * Created on 14.10.2018
  */
-open class NotificationListFragment: Fragment() {
+open class NotificationListFragment: UserContentListFragment() {
 
     @BindView(R.id.notif_ribbon)
     lateinit var notifRibbon: RecyclerView
 
     @BindView(R.id.notif_list_area)
-    lateinit var refresher: SwipeRefreshLayout
+    lateinit var ribbonRefresher: SwipeRefreshLayout
+
+    override fun getRibbonView() = notifRibbon
+    override fun getRefresher() = ribbonRefresher
+    override fun getRibbonAdapter() = notifAdapter
+    override fun retrieveData(pageNum: Int) = { Network.loadNotifications(pageNum = pageNum) }
 
     private val notifAdapter = NotificationListAdapter()
-    private var nextPage = 1
-    private var lastPage = false
 
     lateinit var activity: MainActivity
 
@@ -44,7 +44,6 @@ open class NotificationListFragment: Fragment() {
         ButterKnife.bind(this, view)
         setupUI(view)
         setupTheming()
-        refreshNotifications()
         return view
     }
 
@@ -67,7 +66,7 @@ open class NotificationListFragment: Fragment() {
             GlobalScope.launch(Dispatchers.Main) {
                 try {
                     withContext(Dispatchers.IO) { Network.markAllNotificationsRead() }
-                    refreshNotifications(true)
+                    loadMore(true)
                 } catch (ex: Exception) {
                     Network.reportErrors(activity, ex)
                 }
@@ -83,7 +82,7 @@ open class NotificationListFragment: Fragment() {
     }
 
     open fun setupUI(view: View) {
-        refresher.setOnRefreshListener { refreshNotifications(true) }
+        ribbonRefresher.setOnRefreshListener { loadMore(true) }
         notifRibbon.layoutManager = LinearLayoutManager(activity)
         notifRibbon.adapter = notifAdapter
     }
@@ -95,86 +94,29 @@ open class NotificationListFragment: Fragment() {
      * Loads the next page in notifications listing. If no pages were loaded before, loads first
      * @param reset reset page counter to first
      */
-    fun refreshNotifications(reset: Boolean = false) {
+    override fun loadMore(reset: Boolean) {
         if (Auth.profile == null) { // we don't have a profile, just show empty list
-            refresher.isRefreshing = false
+            ribbonRefresher.isRefreshing = false
             return
         }
 
-        if (reset) {
-            notifRibbon.smoothScrollToPosition(0)
-            nextPage = 1
-            lastPage = false
-        }
-
-        GlobalScope.launch(Dispatchers.Main) {
-            refresher.isRefreshing = true
-
-            try {
-                val success = withContext(Dispatchers.IO) { Network.loadNotifications(pageNum = nextPage) }
-                updateRibbonPage(success, reset)
-            } catch (ex: Exception) {
-                Network.reportErrors(activity, ex)
-            }
-
-            refresher.isRefreshing = false
-        }
-    }
-
-    /**
-     * Update notification ribbon with newly loaded values.
-     * @param loaded document with notifications for active profile and links to pages that was loaded
-     * @param reset if true, clear current entries before populating from [loaded]
-     */
-    private fun updateRibbonPage(loaded: ArrayDocument<Notification>, reset: Boolean) {
-        if (reset) {
-            notifAdapter.notifications.clear()
-        }
-
-        if (loaded.isEmpty()) {
-            lastPage = true
-            notifAdapter.notifyDataSetChanged()
-            return
-        }
-
-        nextPage += 1
-        notifAdapter.apply {
-            notifications.addAll(loaded)
-            notifyDataSetChanged()
-        }
+        super.loadMore(reset)
     }
 
     /**
      * Main adapter of this fragment's recycler view. Shows notifications and handles
      * refreshing and page loading.
      */
-    inner class NotificationListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-        var notifications: MutableList<Notification> = ArrayList()
-
-        override fun getItemViewType(position: Int): Int {
-            if (position < notifications.size) {
-                return ITEM_REGULAR
-            }
-
-            if (lastPage) {
-                return  ITEM_LAST_PAGE
-            }
-
-            return ITEM_LOAD_MORE
-        }
+    inner class NotificationListAdapter : UserContentListFragment.LoadMoreAdapter() {
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             when (getItemViewType(position)) {
                 ITEM_REGULAR -> {
                     val entryHolder = holder as NotificationViewHolder
-                    val notification = notifications[position]
-                    entryHolder.setup(notification)
+                    entryHolder.setup(items[position] as Notification)
                 }
-                ITEM_LOAD_MORE -> refreshNotifications()
-                // Nothing needed for LAST_PAGE
+                else -> super.onBindViewHolder(holder, position)
             }
-
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -184,40 +126,9 @@ open class NotificationListFragment: Fragment() {
                     val view = inflater.inflate(R.layout.fragment_notification_list_item, parent, false)
                     NotificationViewHolder(view)
                 }
-                ITEM_LOAD_MORE -> {
-                    val pbar = inflater.inflate(R.layout.view_load_more, parent, false)
-                    object: RecyclerView.ViewHolder(pbar) {}
-                }
-                else -> { // ITEM_LAST_PAGE
-                    val lastPage = inflater.inflate(R.layout.view_last_page, parent, false)
-                    lastPage.findViewById<TextView>(R.id.last_page_reload).setOnClickListener { refreshNotifications(true) }
-                    object: RecyclerView.ViewHolder(lastPage) {}
-                }
+                else -> super.onCreateViewHolder(parent, viewType)
             }
         }
-
-        override fun getItemCount() : Int {
-            if (notifications.isEmpty()) {
-                // seems like we didn't yet load anything in our view, it's probably loading
-                // for the first time. Don't show "load more", let's wait while anything shows up.
-                return 0
-            }
-
-            // we have something in the view already
-            return notifications.size + 1
-        }
-
-        /*
-        fun removeItem(position: Int) {
-            notifications.removeAt(position)
-            notifyItemRemoved(position)
-        }
-
-        fun addItem(notification: Notification) {
-            notifications.add(notification)
-            notifyItemInserted(notifications.size)
-        }
-        */
     }
 
 }

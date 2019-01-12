@@ -25,7 +25,7 @@ import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.database.entities.OfflineDraft
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
-import com.kanedias.dybr.fair.ui.md.handleMarkdownRaw
+import com.kanedias.dybr.fair.ui.handleMarkdownRaw
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.*
 import moe.banana.jsonapi2.HasOne
@@ -292,7 +292,7 @@ class CreateNewEntryFragment : Fragment() {
                     Toast.makeText(activity, R.string.entry_updated, Toast.LENGTH_SHORT).show()
                 } else {
                     // create new
-                    entry.blog = HasOne(profile) // TODO: fix after migration is complete
+                    entry.blog = HasOne(profile)
                     withContext(Dispatchers.IO) { Network.createEntry(entry) }
                     Toast.makeText(activity, R.string.entry_created, Toast.LENGTH_SHORT).show()
                 }
@@ -301,7 +301,7 @@ class CreateNewEntryFragment : Fragment() {
                 // if we have current tab set, refresh it
                 val plPredicate = { it: Fragment -> it is EntryListFragment && it.userVisibleHint }
                 val currentTab = fragmentManager!!.fragments.find(plPredicate) as EntryListFragment?
-                currentTab?.refreshEntries(reset = true)
+                currentTab?.loadMore(reset = true)
             } catch (ex: Exception) {
                 // don't close the fragment, just report errors
                 Network.reportErrors(activity, ex)

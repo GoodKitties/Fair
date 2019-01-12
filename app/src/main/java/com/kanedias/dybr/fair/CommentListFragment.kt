@@ -20,7 +20,6 @@ import com.kanedias.dybr.fair.dto.Comment
 import com.kanedias.dybr.fair.dto.Entry
 import com.kanedias.dybr.fair.themes.*
 import kotlinx.coroutines.*
-import moe.banana.jsonapi2.ArrayDocument
 
 /**
  * Fragment which displays selected entry and its comments below.
@@ -29,13 +28,13 @@ import moe.banana.jsonapi2.ArrayDocument
  *
  * Created on 01.04.18
  */
-class CommentListFragment : Fragment() {
+class CommentListFragment : UserContentListFragment() {
 
     @BindView(R.id.comments_toolbar)
     lateinit var toolbar: Toolbar
 
     @BindView(R.id.comments_list_area)
-    lateinit var refresher: SwipeRefreshLayout
+    lateinit var ribbonRefresher: SwipeRefreshLayout
 
     @BindView(R.id.comments_ribbon)
     lateinit var commentRibbon: RecyclerView
@@ -43,11 +42,14 @@ class CommentListFragment : Fragment() {
     @BindView(R.id.add_comment_button)
     lateinit var addCommentButton: FloatingActionButton
 
+    override fun getRibbonView() = commentRibbon
+    override fun getRefresher() = ribbonRefresher
+    override fun getRibbonAdapter() = commentAdapter
+    override fun retrieveData(pageNum: Int) = { Network.loadComments(entry = this.entry!!, pageNum = pageNum) }
+
     var entry: Entry? = null
 
-    private val commentAdapter = CommentListAdapter()
-    private var nextPage = 1
-    private var lastPage = false
+    private lateinit var commentAdapter: UserContentListFragment.LoadMoreAdapter
 
     private lateinit var activity: MainActivity
 
@@ -56,10 +58,10 @@ class CommentListFragment : Fragment() {
 
         val view = inflater.inflate(R.layout.fragment_comment_list, container, false)
         activity = context as MainActivity
+        commentAdapter = CommentListAdapter()
 
         ButterKnife.bind(this, view)
         setupUI(view)
-        refreshComments()
         return view
     }
 
@@ -73,7 +75,7 @@ class CommentListFragment : Fragment() {
         toolbar.navigationIcon = DrawerArrowDrawable(activity).apply { progress = 1.0f }
         toolbar.setNavigationOnClickListener { fragmentManager?.popBackStack() }
 
-        refresher.setOnRefreshListener { refreshComments(reset = true) }
+        ribbonRefresher.setOnRefreshListener { loadMore(reset = true) }
         commentRibbon.layoutManager = LinearLayoutManager(activity)
         commentRibbon.adapter = commentAdapter
 
@@ -105,26 +107,27 @@ class CommentListFragment : Fragment() {
      *
      * @param reset if true, reset page counting and start from page one
      */
-    fun refreshComments(reset: Boolean = false) {
+    override fun loadMore(reset: Boolean) {
         if (entry == null) { // we don't have an entry, just show empty list
-            refresher.isRefreshing = false
+            ribbonRefresher.isRefreshing = false
             return
         }
 
         if (reset) {
-            commentRibbon.smoothScrollToPosition(0)
-            nextPage = 1
-            lastPage = false
+            getRibbonView().scrollTo(0, 0)
+            commentAdapter.clearItems()
+            allLoaded = false
+            currentPage = 1
         }
 
         GlobalScope.launch(Dispatchers.Main) {
-            refresher.isRefreshing = true
+            ribbonRefresher.isRefreshing = true
 
             try {
                 val entryDemand = withContext(Dispatchers.IO) { Network.loadEntry(entry!!.id) }
-                val commentsDemand = withContext(Dispatchers.IO) { Network.loadComments(entry!!, pageNum = nextPage) }
+                val commentsDemand = withContext(Dispatchers.IO) { Network.loadComments(entry!!, pageNum = currentPage) }
                 entry!!.apply { meta = entryDemand.meta } // refresh comment num and participants
-                updateRibbonPage(commentsDemand, reset)
+                onMoreDataLoaded(commentsDemand)
 
                 // mark related notifications read
                 val markedRead = withContext(Dispatchers.IO) { Network.markNotificationsReadFor(entry!!) }
@@ -132,42 +135,13 @@ class CommentListFragment : Fragment() {
                     // we changed notifications, update fragment with them if present
                     val notifPredicate = { it: Fragment -> it is NotificationListFragment }
                     val notifFragment = fragmentManager?.fragments?.find(notifPredicate) as NotificationListFragment?
-                    notifFragment?.refreshNotifications(true)
+                    notifFragment?.loadMore(true)
                 }
             } catch (ex: Exception) {
                 Network.reportErrors(activity, ex)
             }
 
-            refresher.isRefreshing = false
-        }
-    }
-
-    /**
-     * Update recycler view with loaded comments.
-     * If reset is called, strip comments and start anew.
-     *
-     * @param reset if true, reset page counting and start from page one
-     */
-    private fun updateRibbonPage(loaded: ArrayDocument<Comment>, reset: Boolean) {
-        if (reset) {
-            commentAdapter.apply {
-                comments.clear()
-                notifyDataSetChanged()
-            }
-        }
-
-        if (loaded.isEmpty()) {
-            lastPage = true
-            commentAdapter.notifyDataSetChanged()
-            return
-        }
-
-        nextPage += 1
-        commentAdapter.apply {
-            val oldSize = comments.size
-            comments.addAll(loaded)
-            comments.included.addAll(loaded.included)
-            notifyItemRangeInserted(oldSize, loaded.size)
+            ribbonRefresher.isRefreshing = false
         }
     }
 
@@ -190,32 +164,27 @@ class CommentListFragment : Fragment() {
      *
      * Scrolling to the bottom calls polling of next page or stops in case it's the last one
      */
-    inner class CommentListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    inner class CommentListAdapter : UserContentListFragment.LoadMoreAdapter() {
 
-        val comments = ArrayDocument<Comment>()
+        init {
+            headers.add(entry!!)
+        }
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             when (getItemViewType(position)) {
                 ITEM_HEADER -> {
+                    val entry = headers[position] as Entry
                     (holder as EntryViewHolder).apply {
-                        setup(entry!!, false)
+                        setup(entry, false)
                         itemView.isClickable = false
                     }
                 }
                 ITEM_REGULAR -> {
-                    val comment = comments[position - 1]
+                    val comment = items[position - headers.size] as Comment
                     (holder as CommentViewHolder).setup(comment)
                 }
-                ITEM_LOAD_MORE -> refreshComments()
-                // Nothing needed for ITEM_LAST_PAGE
+                else -> super.onBindViewHolder(holder, position)
             }
-        }
-
-        override fun getItemViewType(position: Int) = when {
-            position == 0 -> ITEM_HEADER
-            position < comments.size + 1 -> ITEM_REGULAR
-            lastPage -> ITEM_LAST_PAGE
-            else -> ITEM_LOAD_MORE
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -229,23 +198,8 @@ class CommentListFragment : Fragment() {
                     val view = inflater.inflate(R.layout.fragment_comment_list_item, parent, false)
                     CommentViewHolder(entry!!, view, parent as View)
                 }
-                else -> object: RecyclerView.ViewHolder(View(inflater.context)) {}
+                else -> return super.onCreateViewHolder(parent, viewType)
             }
-        }
-
-        override fun getItemCount(): Int {
-            if (entry == null) {
-                // nothing to show, at all
-                return 0
-            }
-
-            if (comments.isEmpty()) {
-                // seems like we didn't yet load anything in our view, it's probably loading
-                // for the first time. Don't show "load more" and entry, let's wait while anything shows up.
-                return 1 // only show entry
-            }
-
-            return 1 +comments.size + 1 // entry, comments and "load more" item
         }
     }
 

@@ -71,11 +71,11 @@ class EntryCreateRequest : Resource() {
     var settings: RecordSettings? = null
 
     /**
-     * Blog that this entry belongs to.
+     * Profile with blog this entry belongs to.
      * Must be set if it's new entry.
      */
     @field:Json(name = "blog")
-    var blog: HasOne<Blog>? = null
+    var blog: HasOne<OwnProfile>? = null
 }
 
 /**

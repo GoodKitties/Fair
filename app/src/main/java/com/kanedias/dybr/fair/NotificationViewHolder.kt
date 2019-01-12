@@ -10,7 +10,7 @@ import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
-import com.kanedias.dybr.fair.ui.md.handleMarkdown
+import com.kanedias.dybr.fair.ui.handleMarkdown
 import java.text.SimpleDateFormat
 import java.util.*
 import com.kanedias.dybr.fair.dto.Notification

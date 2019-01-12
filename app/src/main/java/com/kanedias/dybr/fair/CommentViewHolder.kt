@@ -15,7 +15,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
-import com.kanedias.dybr.fair.ui.md.handleMarkdown
+import com.kanedias.dybr.fair.ui.handleMarkdown
 import kotlinx.coroutines.*
 
 
@@ -95,7 +95,7 @@ class CommentViewHolder(private val entry: Entry, iv: View, private val parent: 
                     // if we have current tab, refresh it
                     val clPredicate = { it: Fragment -> it is CommentListFragment && it.userVisibleHint }
                     val currentTab = activity.supportFragmentManager.fragments.find(clPredicate) as CommentListFragment?
-                    currentTab?.refreshComments(reset = true)
+                    currentTab?.loadMore(reset = true)
                 } catch (ex: Exception) {
                     Network.reportErrors(itemView.context, ex)
                 }

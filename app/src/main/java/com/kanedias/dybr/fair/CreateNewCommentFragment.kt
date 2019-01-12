@@ -3,7 +3,6 @@ package com.kanedias.dybr.fair
 import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -21,7 +20,7 @@ import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.database.entities.OfflineDraft
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
-import com.kanedias.dybr.fair.ui.md.handleMarkdownRaw
+import com.kanedias.dybr.fair.ui.handleMarkdownRaw
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.*
 import moe.banana.jsonapi2.HasOne
@@ -216,7 +215,7 @@ class CreateNewCommentFragment : Fragment() {
                 // if we have current comment list, refresh it
                 val clPredicate = { it: androidx.fragment.app.Fragment -> it is CommentListFragment }
                 val currentTab = fragmentManager!!.fragments.find(clPredicate) as CommentListFragment?
-                currentTab?.refreshComments(reset = true)
+                currentTab?.loadMore()
             } catch (ex: Exception) {
                 // don't close the fragment, just report errors
                 Network.reportErrors(activity, ex)

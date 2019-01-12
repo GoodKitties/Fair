@@ -5,8 +5,7 @@ package com.kanedias.dybr.fair
 // LOAD_MORE recycler view mechanics
 const val ITEM_HEADER = 0
 const val ITEM_REGULAR = 1
-const val ITEM_LOAD_MORE = 2
-const val ITEM_LAST_PAGE = 3
+const val ITEM_UNKNOWN = 2
 
 // Job tags for scheduling
 const val JOB_TAG_NOTIFICATIONS_INITIAL = "Notifications-oneshot"

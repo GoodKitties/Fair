@@ -1,4 +1,4 @@
-package com.kanedias.dybr.fair.ui.md
+package com.kanedias.dybr.fair.ui
 
 import android.graphics.drawable.Drawable
 import android.preference.PreferenceManager
