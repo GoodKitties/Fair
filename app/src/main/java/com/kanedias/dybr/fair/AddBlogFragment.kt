@@ -24,26 +24,31 @@ import kotlinx.coroutines.*
  */
 class AddBlogFragment: Fragment() {
 
-    private lateinit var activity: MainActivity
-
     @BindView(R.id.blog_slug_input)
     lateinit var slugInput: EditText
 
     @BindView(R.id.blog_title_input)
     lateinit var titleInput: EditText
 
+    private val submitJob = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + submitJob)
+
     private lateinit var progressDialog: MaterialDialog
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val root = inflater.inflate(R.layout.fragment_create_blog, container, false)
-        ButterKnife.bind(this, root)
-        activity = context as MainActivity
+        val view = inflater.inflate(R.layout.fragment_create_blog, container, false)
+        ButterKnife.bind(this, view)
 
-        progressDialog = MaterialDialog(activity)
+        progressDialog = MaterialDialog(requireContext())
                 .title(R.string.please_wait)
                 .message(R.string.checking_in_progress)
 
-        return root
+        return view
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        submitJob.cancel()
     }
 
     @OnClick(R.id.blog_create_button)
@@ -54,7 +59,7 @@ class AddBlogFragment: Fragment() {
             profile.set(Auth.profile)
         }
 
-        GlobalScope.launch(Dispatchers.Main) {
+        uiScope.launch(Dispatchers.Main) {
             progressDialog.show()
 
             try {
@@ -62,10 +67,10 @@ class AddBlogFragment: Fragment() {
                 //Auth.updateBlog(blog)
 
                 //we created blog successfully, return to main activity
-                Toast.makeText(activity, R.string.blog_created, Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), R.string.blog_created, Toast.LENGTH_SHORT).show()
                 handleSuccess()
             } catch (ex: Exception) {
-                Network.reportErrors(activity, ex)
+                Network.reportErrors(requireContext(), ex)
             }
 
             progressDialog.hide()
@@ -76,7 +81,7 @@ class AddBlogFragment: Fragment() {
      * Handle successful blog addition. Navigate back to [MainActivity] and update sidebar account list.
      */
     private fun handleSuccess() {
-        fragmentManager!!.popBackStack()
-        activity.refresh()
+        requireFragmentManager().popBackStack()
+        (activity as MainActivity).refresh()
     }
 }

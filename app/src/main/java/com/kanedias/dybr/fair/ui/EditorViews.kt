@@ -62,8 +62,8 @@ class EditorViews : Fragment() {
     lateinit var topDivider: View
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val root = inflater.inflate(R.layout.fragment_edit_form, container, false)
-        ButterKnife.bind(this, root)
+        val view = inflater.inflate(R.layout.fragment_edit_form, container, false)
+        ButterKnife.bind(this, view)
 
         @Suppress("DEPRECATION") // we need to support API < 24
         mdLabel.text = Html.fromHtml(getString(R.string.markdown_basics))
@@ -73,7 +73,7 @@ class EditorViews : Fragment() {
         contentInput.requestFocus()
         setupTheming()
 
-        return root
+        return view
     }
 
     private fun setupTheming() {
@@ -99,7 +99,7 @@ class EditorViews : Fragment() {
             R.id.edit_quick_link
     )
     fun editSelection(clicked: View) {
-        val clipboard = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val paste = if (clipboardSwitch.isChecked && clipboard.hasPrimaryClip() && clipboard.primaryClip!!.itemCount > 0) {
             clipboard.primaryClip!!.getItemAt(0).text.toString()
         } else {
@@ -190,7 +190,7 @@ class EditorViews : Fragment() {
 
         val stream = activity?.contentResolver?.openInputStream(intent.data) ?: return
 
-        val dialog = MaterialDialog(activity!!)
+        val dialog = MaterialDialog(requireContext())
                 .title(R.string.please_wait)
                 .message(R.string.uploading)
 
@@ -199,7 +199,7 @@ class EditorViews : Fragment() {
 
             try {
                 val link = withContext(Dispatchers.IO) { Network.uploadImage(stream.readBytes()) }
-                MaterialDialog(activity!!)
+                MaterialDialog(requireContext())
                         .title(R.string.insert_image)
                         .message(R.string.select_image_height)
                         .listItems(res = R.array.image_sizes, selection = {_, index, _ ->
@@ -214,7 +214,7 @@ class EditorViews : Fragment() {
                             insertInCursorPosition("<img width='$spec' height='auto' src='", link, "' />")
                         }).show()
             } catch (ex: Exception) {
-                Network.reportErrors(activity!!, ex)
+                Network.reportErrors(requireContext(), ex)
             }
 
             dialog.dismiss()

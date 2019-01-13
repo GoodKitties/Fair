@@ -28,8 +28,8 @@ open class EntryListFragmentFull: EntryListFragment() {
 
     override fun layoutToUse() = R.layout.fragment_entry_list_fullscreen
 
-    override fun setupUI(view: View) {
-        super.setupUI(view)
+    override fun setupUI() {
+        super.setupUI()
 
         // setup toolbar
         toolbar.title = profile?.blogTitle
@@ -42,10 +42,10 @@ open class EntryListFragmentFull: EntryListFragment() {
             addEntryButton.setOnClickListener { addCreateNewEntryForm() }
         }
 
-        setBlogTheme(view)
+        setBlogTheme()
     }
 
-    private fun setBlogTheme(view: View) {
+    private fun setBlogTheme() {
         // this is a fullscreen fragment, add new style
         Scoop.getInstance().addStyleLevel(view)
         Scoop.getInstance().bind(TOOLBAR, toolbar)

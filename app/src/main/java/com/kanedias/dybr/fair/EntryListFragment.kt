@@ -50,8 +50,10 @@ open class EntryListFragment: UserContentListFragment() {
         entryAdapter = EntryListAdapter()
 
         ButterKnife.bind(this, view)
-        setupUI(view)
+        setupUI()
         setupTheming()
+        loadMore()
+
         return view
     }
 
@@ -62,7 +64,7 @@ open class EntryListFragment: UserContentListFragment() {
 
     open fun layoutToUse() = R.layout.fragment_entry_list
 
-    open fun setupUI(view: View) {
+    open fun setupUI() {
         ribbonRefresher.setOnRefreshListener { loadMore(reset = true) }
         entryRibbon.layoutManager = LinearLayoutManager(activity)
         entryRibbon.adapter = entryAdapter
@@ -129,7 +131,7 @@ open class EntryListFragment: UserContentListFragment() {
             this.profile = this@EntryListFragment.profile!! // at this point we know we have the blog
         }
 
-        fragmentManager!!.beginTransaction()
+        requireFragmentManager().beginTransaction()
                 .addToBackStack("Showing entry add fragment")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .add(R.id.main_drawer_layout, entryAdd)

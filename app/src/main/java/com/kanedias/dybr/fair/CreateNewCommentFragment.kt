@@ -69,9 +69,8 @@ class CreateNewCommentFragment : Fragment() {
     @BindView(R.id.comment_submit)
     lateinit var submitButton: Button
 
-    private var previewShown = false
-
-    private lateinit var activity: MainActivity
+    private val submitJob = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + submitJob)
 
     /**
      * Entry this comment belongs to. Should be always set.
@@ -85,15 +84,19 @@ class CreateNewCommentFragment : Fragment() {
      */
     lateinit var editComment : Comment
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Scoop.getInstance().addStyleLevel()
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         savedInstanceState?.getBoolean("editMode")?.let { editMode = it }
         savedInstanceState?.getSerializable("editComment")?.let { editComment = it as Comment }
         savedInstanceState?.getSerializable("entry")?.let { entry = it as Entry }
 
-        val root = inflater.inflate(R.layout.fragment_create_comment, container, false)
-        ButterKnife.bind(this, root)
+        val view = inflater.inflate(R.layout.fragment_create_comment, container, false)
+        ButterKnife.bind(this, view)
 
-        activity = context as MainActivity
         if (editMode) {
             populateUI()
         } else {
@@ -101,23 +104,19 @@ class CreateNewCommentFragment : Fragment() {
             handleMisc()
         }
 
-        setupTheming(root)
+        setupTheming()
 
-        return root
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Scoop.getInstance().addStyleLevel()
+        return view
     }
 
     override fun onDestroy() {
         super.onDestroy()
         Scoop.getInstance().popStyleLevel(false)
+        submitJob.cancel()
     }
 
-    private fun setupTheming(root: View) {
-        Scoop.getInstance().bind(TEXT_BLOCK, root, BackgroundNoAlphaAdapter())
+    private fun setupTheming() {
+        Scoop.getInstance().bind(TEXT_BLOCK, view, BackgroundNoAlphaAdapter())
         Scoop.getInstance().bind(TEXT, preview)
         Scoop.getInstance().bind(TEXT_LINKS, preview, TextViewLinksAdapter())
         Scoop.getInstance().bind(TEXT_LINKS, previewButton, TextViewColorAdapter())
@@ -148,16 +147,12 @@ class CreateNewCommentFragment : Fragment() {
      */
     @OnClick(R.id.comment_preview)
     fun togglePreview() {
-        previewShown = !previewShown
-
-        if (previewShown) {
-            //preview.setBackgroundResource(R.drawable.white_border_line) // set border when previewing
+        if (previewSwitcher.displayedChild == 0) {
             preview.handleMarkdownRaw(contentInput.text.toString())
-            previewSwitcher.showNext()
+            previewSwitcher.displayedChild = 1
         } else {
-            previewSwitcher.showPrevious()
+            previewSwitcher.displayedChild = 0
         }
-
     }
 
     /**
@@ -168,14 +163,14 @@ class CreateNewCommentFragment : Fragment() {
     fun cancel() {
         if (editMode || contentInput.text.isNullOrEmpty()) {
             // entry has empty title and content, canceling right away
-            fragmentManager!!.popBackStack()
+            requireFragmentManager().popBackStack()
             return
         }
 
         // persist draft
         DbProvider.helper.draftDao.create(OfflineDraft(key = "comment,entry=${entry.id}", base = contentInput))
-        Toast.makeText(activity, R.string.offline_draft_saved, Toast.LENGTH_SHORT).show()
-        fragmentManager!!.popBackStack()
+        Toast.makeText(requireContext(), R.string.offline_draft_saved, Toast.LENGTH_SHORT).show()
+        requireFragmentManager().popBackStack()
     }
 
     /**
@@ -184,7 +179,7 @@ class CreateNewCommentFragment : Fragment() {
     @OnClick(R.id.comment_submit)
     fun submit() {
         // hide keyboard
-        val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view!!.windowToken, 0)
 
         // hide edit form, show loading spinner
@@ -196,7 +191,7 @@ class CreateNewCommentFragment : Fragment() {
         val comment = CreateCommentRequest().apply { content = htmlContent }
 
         // make http request
-        GlobalScope.launch(Dispatchers.Main) {
+        uiScope.launch(Dispatchers.Main) {
             try {
                 if (editMode) {
                     // alter existing comment
@@ -210,15 +205,15 @@ class CreateNewCommentFragment : Fragment() {
                     withContext(Dispatchers.IO) { Network.createComment(comment) }
                     Toast.makeText(activity, R.string.comment_created, Toast.LENGTH_SHORT).show()
                 }
-                fragmentManager!!.popBackStack()
+                requireFragmentManager().popBackStack()
 
                 // if we have current comment list, refresh it
                 val clPredicate = { it: androidx.fragment.app.Fragment -> it is CommentListFragment }
-                val currentTab = fragmentManager!!.fragments.find(clPredicate) as CommentListFragment?
+                val currentTab = requireFragmentManager().fragments.find(clPredicate) as CommentListFragment?
                 currentTab?.loadMore()
             } catch (ex: Exception) {
                 // don't close the fragment, just report errors
-                Network.reportErrors(activity, ex)
+                Network.reportErrors(requireContext(), ex)
             }
         }
     }
@@ -264,7 +259,7 @@ class CreateNewCommentFragment : Fragment() {
         }
 
         val adapter = DraftCommentViewAdapter(drafts)
-        val dialog = MaterialDialog(activity)
+        val dialog = MaterialDialog(requireContext())
                 .title(R.string.select_offline_draft)
                 .customListAdapter(adapter)
         adapter.toDismiss = dialog

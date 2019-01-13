@@ -38,15 +38,15 @@ class AddProfileFragment: Fragment() {
     private lateinit var progressDialog: MaterialDialog
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val root = inflater.inflate(R.layout.fragment_create_profile, container, false)
-        ButterKnife.bind(this, root)
+        val view = inflater.inflate(R.layout.fragment_create_profile, container, false)
+        ButterKnife.bind(this, view)
         activity = context as MainActivity
 
         progressDialog = MaterialDialog(activity)
                 .title(R.string.please_wait)
                 .message(R.string.checking_in_progress)
 
-        return root
+        return view
     }
 
     @OnClick(R.id.prof_create_button)
@@ -79,7 +79,7 @@ class AddProfileFragment: Fragment() {
      * Handle successful account addition. Navigate back to [MainActivity] and update sidebar account list.
      */
     private fun handleSuccess() {
-        fragmentManager!!.popBackStack()
+        requireFragmentManager().popBackStack()
         activity.refresh()
     }
 }

@@ -81,18 +81,26 @@ class CreateNewEntryFragment : Fragment() {
     @BindView(R.id.entry_preview_switcher)
     lateinit var previewSwitcher: ViewSwitcher
 
+    /**
+     * Switch between publucation and draft
+     */
     @BindView(R.id.entry_draft_switch)
     lateinit var draftSwitch: CheckBox
 
+    /**
+     * Switch between input and preview
+     */
     @BindView(R.id.entry_preview)
     lateinit var previewButton: Button
 
+    /**
+     * Submit new/edited entry
+     */
     @BindView(R.id.entry_submit)
     lateinit var submitButton: Button
 
-    private var previewShown = false
-
-    private lateinit var activity: MainActivity
+    private val submitJob = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + submitJob)
 
     var editMode = false // create new by default
 
@@ -111,13 +119,11 @@ class CreateNewEntryFragment : Fragment() {
         savedInstanceState?.getSerializable("editEntry")?.let { editEntry = it as Entry }
         savedInstanceState?.getSerializable("profile")?.let { profile = it as OwnProfile }
 
-        val root = inflater.inflate(R.layout.fragment_create_entry, container, false)
-        ButterKnife.bind(this, root)
-
-        activity = context as MainActivity
+        val view = inflater.inflate(R.layout.fragment_create_entry, container, false)
+        ButterKnife.bind(this, view)
 
         setupUI()
-        setupTheming(root)
+        setupTheming()
 
         if (editMode) {
             // we're editing existing entry, populate UI with its contents and settings
@@ -127,7 +133,7 @@ class CreateNewEntryFragment : Fragment() {
             loadDraft()
         }
 
-        return root
+        return view
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -138,6 +144,7 @@ class CreateNewEntryFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         Scoop.getInstance().popStyleLevel(false)
+        submitJob.cancel()
     }
 
     private fun setupUI() {
@@ -150,14 +157,14 @@ class CreateNewEntryFragment : Fragment() {
 
         // tags autocompletion
         val tags = profile.tags.map { "#${it.name}" }
-        val adapter = ArrayAdapter<String>(activity, android.R.layout.simple_dropdown_item_1line, tags)
+        val adapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_dropdown_item_1line, tags)
         tagsInput.setTokenizer(MultiAutoCompleteTextView.CommaTokenizer())
         tagsInput.threshold = 1
         tagsInput.setAdapter(adapter)
     }
 
-    private fun setupTheming(root: View) {
-        Scoop.getInstance().bind(TEXT_BLOCK, root, BackgroundNoAlphaAdapter())
+    private fun setupTheming() {
+        Scoop.getInstance().bind(TEXT_BLOCK, view, BackgroundNoAlphaAdapter())
         Scoop.getInstance().bind(TEXT, titleInput, EditTextAdapter())
         Scoop.getInstance().bind(TEXT_LINKS, titleInput, EditTextLineAdapter())
         Scoop.getInstance().bind(TEXT_OFFTOP, titleInput, EditTextHintAdapter())
@@ -208,16 +215,12 @@ class CreateNewEntryFragment : Fragment() {
      */
     @OnClick(R.id.entry_preview)
     fun togglePreview() {
-        previewShown = !previewShown
-
-        if (previewShown) {
-            //preview.setBackgroundResource(R.drawable.white_border_line) // set border when previewing
+        if (previewSwitcher.displayedChild == 0) {
             preview.handleMarkdownRaw(contentInput.text.toString())
-            previewSwitcher.showNext()
+            previewSwitcher.displayedChild = 1
         } else {
-            previewSwitcher.showPrevious()
+            previewSwitcher.displayedChild = 0
         }
-
     }
 
     /**
@@ -240,7 +243,7 @@ class CreateNewEntryFragment : Fragment() {
     fun cancel() {
         if (editMode || titleInput.text.isNullOrEmpty() && contentInput.text.isNullOrEmpty() && tagsInput.text.isNullOrEmpty()) {
             // entry has empty title and content, canceling right away
-            fragmentManager!!.popBackStack()
+            requireFragmentManager().popBackStack()
             return
         }
 
@@ -248,7 +251,7 @@ class CreateNewEntryFragment : Fragment() {
         DbProvider.helper.draftDao.create(OfflineDraft(key = "entry,blog=${profile.id}",
                 title = titleInput, base = contentInput, tags = tagsInput))
         Toast.makeText(activity, R.string.offline_draft_saved, Toast.LENGTH_SHORT).show()
-        fragmentManager!!.popBackStack()
+        requireFragmentManager().popBackStack()
     }
 
     /**
@@ -257,7 +260,7 @@ class CreateNewEntryFragment : Fragment() {
     @OnClick(R.id.entry_submit)
     fun submit() {
         // hide keyboard
-        val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view!!.windowToken, 0)
 
         // hide edit form, show loading spinner
@@ -283,7 +286,7 @@ class CreateNewEntryFragment : Fragment() {
         }
 
         // make http request
-        GlobalScope.launch(Dispatchers.Main) {
+        uiScope.launch(Dispatchers.Main) {
             try {
                 if (editMode) {
                     // alter existing entry
@@ -296,15 +299,15 @@ class CreateNewEntryFragment : Fragment() {
                     withContext(Dispatchers.IO) { Network.createEntry(entry) }
                     Toast.makeText(activity, R.string.entry_created, Toast.LENGTH_SHORT).show()
                 }
-                fragmentManager!!.popBackStack()
+                requireFragmentManager().popBackStack()
 
                 // if we have current tab set, refresh it
                 val plPredicate = { it: Fragment -> it is EntryListFragment && it.userVisibleHint }
-                val currentTab = fragmentManager!!.fragments.find(plPredicate) as EntryListFragment?
+                val currentTab = requireFragmentManager().fragments.find(plPredicate) as EntryListFragment?
                 currentTab?.loadMore(reset = true)
             } catch (ex: Exception) {
                 // don't close the fragment, just report errors
-                Network.reportErrors(activity, ex)
+                Network.reportErrors(requireContext(), ex)
             }
         }
     }
@@ -350,7 +353,7 @@ class CreateNewEntryFragment : Fragment() {
         }
 
         val adapter = DraftEntryViewAdapter(drafts)
-        val dialog = MaterialDialog(activity)
+        val dialog = MaterialDialog(requireContext())
                 .title(R.string.select_offline_draft)
                 .customListAdapter(adapter)
         adapter.toDismiss = dialog

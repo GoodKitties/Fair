@@ -61,7 +61,9 @@ class CommentListFragment : UserContentListFragment() {
         commentAdapter = CommentListAdapter()
 
         ButterKnife.bind(this, view)
-        setupUI(view)
+        setupUI()
+        loadMore()
+
         return view
     }
 
@@ -70,7 +72,7 @@ class CommentListFragment : UserContentListFragment() {
         outState.putSerializable("entry", entry)
     }
 
-    private fun setupUI(view: View) {
+    private fun setupUI() {
         toolbar.title = entry?.title
         toolbar.navigationIcon = DrawerArrowDrawable(activity).apply { progress = 1.0f }
         toolbar.setNavigationOnClickListener { fragmentManager?.popBackStack() }
@@ -79,10 +81,10 @@ class CommentListFragment : UserContentListFragment() {
         commentRibbon.layoutManager = LinearLayoutManager(activity)
         commentRibbon.adapter = commentAdapter
 
-        setBlogTheme(view)
+        setBlogTheme()
     }
 
-    private fun setBlogTheme(view: View) {
+    private fun setBlogTheme() {
         // this is a fullscreen fragment, add new style
         Scoop.getInstance().addStyleLevel(view)
         Scoop.getInstance().bind(TOOLBAR, toolbar)
@@ -151,7 +153,7 @@ class CommentListFragment : UserContentListFragment() {
             this.entry = this@CommentListFragment.entry!! // at this point we know we have the entry
         }
 
-        fragmentManager!!.beginTransaction()
+        requireFragmentManager().beginTransaction()
                 .addToBackStack("Showing comment add fragment")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .add(R.id.main_drawer_layout, commentAdd)

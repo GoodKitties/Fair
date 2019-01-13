@@ -82,8 +82,8 @@ play {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"     // Kotlin language support
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.0.0"        // Kotlin coroutines
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.0.0"     // Kotlin UI context
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.0"        // Kotlin coroutines
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.0"     // Kotlin UI context
     implementation 'com.google.android.material:material:1.1.0-alpha02'         // Material design support lib
     implementation 'androidx.appcompat:appcompat:1.1.0-alpha01'                 // basic toolbars etc.
     implementation 'androidx.cardview:cardview:1.0.0'                           // snappy cardview for lists

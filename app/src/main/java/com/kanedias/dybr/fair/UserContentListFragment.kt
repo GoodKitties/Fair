@@ -6,10 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import moe.banana.jsonapi2.ArrayDocument
 import moe.banana.jsonapi2.Resource
 
@@ -37,10 +34,12 @@ abstract class UserContentListFragment : Fragment() {
     protected var allLoaded = false
     protected var currentPage = 1
 
-    override fun onStart() {
-        super.onStart()
+    private val loadJob = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + loadJob)
 
-        loadMore()
+    override fun onDestroy() {
+        super.onDestroy()
+        loadJob.cancel()
     }
 
     /**
@@ -70,13 +69,13 @@ abstract class UserContentListFragment : Fragment() {
 
         getRefresher().isRefreshing = true
 
-        GlobalScope.launch(Dispatchers.Main) {
+        uiScope.launch(Dispatchers.Main) {
 
             try {
                 val success = withContext(Dispatchers.IO) { retrieveData(pageNum = currentPage).invoke() }
                 onMoreDataLoaded(success)
             } catch (ex: Exception) {
-                Network.reportErrors(context!!, ex)
+                Network.reportErrors(requireContext(), ex)
             }
 
             getRefresher().isRefreshing = false

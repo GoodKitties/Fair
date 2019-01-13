@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.preference.PreferenceManager
 import android.widget.Toast
+import androidx.annotation.WorkerThread
 import com.kanedias.dybr.fair.database.entities.Account
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
@@ -71,6 +72,7 @@ import java.lang.IllegalStateException
  *
  * Created on 12.11.17
  */
+@WorkerThread
 object Network {
 
     private const val USER_AGENT = "Fair ${BuildConfig.VERSION_NAME}"

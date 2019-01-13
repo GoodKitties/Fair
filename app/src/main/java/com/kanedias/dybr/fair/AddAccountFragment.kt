@@ -60,25 +60,30 @@ class AddAccountFragment : Fragment() {
     @BindViews(R.id.acc_email, R.id.acc_password)
     lateinit var loginInputs: List<@JvmSuppressWildcards View>
 
-    private lateinit var activity: MainActivity
+    private val submitJob = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + submitJob)
 
     private lateinit var progressDialog: MaterialDialog
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val root = inflater.inflate(R.layout.fragment_create_account, container, false)
-        ButterKnife.bind(this, root)
-        activity = context as MainActivity
+        val view = inflater.inflate(R.layout.fragment_create_account, container, false)
+        ButterKnife.bind(this, view)
 
-        progressDialog = MaterialDialog(activity)
+        progressDialog = MaterialDialog(requireContext())
                 .title(R.string.please_wait)
                 .message(R.string.checking_in_progress)
 
-        return root
+        return view
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         progressDialog.dismiss()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        submitJob.cancel()
     }
 
     /**
@@ -123,20 +128,20 @@ class AddAccountFragment : Fragment() {
             current = true
         }
 
-        GlobalScope.launch(Dispatchers.Main) {
+        uiScope.launch(Dispatchers.Main) {
             progressDialog.show()
 
             try {
                 withContext(Dispatchers.IO) { Network.login(acc) }
 
-                Toast.makeText(activity, R.string.login_successful, Toast.LENGTH_SHORT).show()
-                activity.startProfileSelector() // shows profile selection dialog
+                Toast.makeText(requireContext(), R.string.login_successful, Toast.LENGTH_SHORT).show()
+                (activity as MainActivity).startProfileSelector() // shows profile selection dialog
 
                 //we logged in successfully, return to main activity
                 DbProvider.helper.accDao.create(acc)
                 handleSuccess()
             } catch (ex: Exception) {
-                Network.reportErrors(activity, ex, mapOf(422 to R.string.invalid_credentials))
+                Network.reportErrors(requireContext(), ex, mapOf(422 to R.string.invalid_credentials))
             }
 
             progressDialog.hide()
@@ -156,7 +161,7 @@ class AddAccountFragment : Fragment() {
             isAdult = isAdultSwitch.isChecked
         }
 
-        GlobalScope.launch(Dispatchers.Main) {
+        uiScope.launch(Dispatchers.Main) {
             progressDialog.show()
 
             try {
@@ -172,10 +177,10 @@ class AddAccountFragment : Fragment() {
                 }
 
                 DbProvider.helper.accDao.create(acc)
-                Toast.makeText(activity, R.string.congrats_diary_registered, Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), R.string.congrats_diary_registered, Toast.LENGTH_SHORT).show()
 
                 // let's make sure user understood what's needed of him
-                MaterialDialog(activity)
+                MaterialDialog(requireContext())
                         .title(R.string.next_steps)
                         .message(R.string.registered_please_confirm_mail)
                         .positiveButton(android.R.string.ok)
@@ -185,7 +190,7 @@ class AddAccountFragment : Fragment() {
                 Auth.updateCurrentUser(acc)
                 handleSuccess()
             } catch (ex: Exception) {
-                Network.reportErrors(activity, ex, mapOf(422 to R.string.invalid_credentials))
+                Network.reportErrors(requireContext(), ex, mapOf(422 to R.string.invalid_credentials))
             }
 
             progressDialog.hide()
@@ -196,7 +201,7 @@ class AddAccountFragment : Fragment() {
      * Handle successful account addition. Navigate back to [MainActivity] and update sidebar account list.
      */
     private fun handleSuccess() {
-        fragmentManager!!.popBackStack()
-        activity.refresh()
+        requireFragmentManager().popBackStack()
+        (activity as MainActivity).refresh()
     }
 }

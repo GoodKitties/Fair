@@ -42,8 +42,10 @@ open class NotificationListFragment: UserContentListFragment() {
         activity = context as MainActivity
 
         ButterKnife.bind(this, view)
-        setupUI(view)
+        setupUI()
         setupTheming()
+        loadMore()
+
         return view
     }
 
@@ -81,7 +83,7 @@ open class NotificationListFragment: UserContentListFragment() {
                 .show()
     }
 
-    open fun setupUI(view: View) {
+    open fun setupUI() {
         ribbonRefresher.setOnRefreshListener { loadMore(true) }
         notifRibbon.layoutManager = LinearLayoutManager(activity)
         notifRibbon.adapter = notifAdapter
