@@ -32,10 +32,9 @@ abstract class UserContentListFragment : Fragment() {
     abstract fun retrieveData(pageNum: Int) : () -> ArrayDocument<out Resource>
 
     protected var allLoaded = false
-    protected var currentPage = 1
 
     private val loadJob = Job()
-    private val uiScope = CoroutineScope(Dispatchers.Main + loadJob)
+    protected val uiScope = CoroutineScope(Dispatchers.Main + loadJob)
 
     override fun onDestroy() {
         super.onDestroy()
@@ -64,15 +63,15 @@ abstract class UserContentListFragment : Fragment() {
             getRibbonAdapter().clearItems()
 
             allLoaded = false
-            currentPage = 1
         }
 
         getRefresher().isRefreshing = true
+        val nextPage = getRibbonAdapter().items.size / PAGE_SIZE + 1
 
         uiScope.launch(Dispatchers.Main) {
 
             try {
-                val success = withContext(Dispatchers.IO) { retrieveData(pageNum = currentPage).invoke() }
+                val success = withContext(Dispatchers.IO) { retrieveData(pageNum = nextPage).invoke() }
                 onMoreDataLoaded(success)
             } catch (ex: Exception) {
                 Network.reportErrors(requireContext(), ex)
@@ -95,7 +94,6 @@ abstract class UserContentListFragment : Fragment() {
             return
         }
 
-        currentPage += 1
         getRibbonAdapter().addItems(loaded)
     }
 

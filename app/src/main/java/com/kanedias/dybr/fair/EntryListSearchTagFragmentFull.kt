@@ -31,7 +31,7 @@ class EntryListSearchTagFragmentFull: EntryListFragmentFull() {
         toolbar.title = "#${filters.entries.first().value}"
     }
 
-    override fun retrieveData(pageNum: Int) = { Network.loadFilteredEntries(filters = this.filters, pageNum = this.currentPage) }
+    override fun retrieveData(pageNum: Int) = { Network.loadFilteredEntries(filters = this.filters, pageNum = pageNum) }
 
     /**
      * We don't rely on profile, never skip loading entries

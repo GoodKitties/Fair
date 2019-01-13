@@ -103,6 +103,15 @@ class CommentListFragment : UserContentListFragment() {
         Scoop.getInstance().popStyleLevel(false)
     }
 
+    override fun handleLoadSkip(): Boolean {
+        if (entry == null) { // we don't have an entry, just show empty list
+            ribbonRefresher.isRefreshing = false
+            return true
+        }
+
+        return false
+    }
+
     /**
      * Refresh comments displayed in fragment. Entry is not touched but as recycler view is refreshed
      * its views are reloaded too.
@@ -110,26 +119,13 @@ class CommentListFragment : UserContentListFragment() {
      * @param reset if true, reset page counting and start from page one
      */
     override fun loadMore(reset: Boolean) {
-        if (entry == null) { // we don't have an entry, just show empty list
-            ribbonRefresher.isRefreshing = false
-            return
-        }
+        super.loadMore(reset)
 
-        if (reset) {
-            getRibbonView().scrollTo(0, 0)
-            commentAdapter.clearItems()
-            allLoaded = false
-            currentPage = 1
-        }
-
-        GlobalScope.launch(Dispatchers.Main) {
-            ribbonRefresher.isRefreshing = true
-
+        // update entry comment meta counters and mark notifications as read for current entry
+        uiScope.launch(Dispatchers.Main) {
             try {
                 val entryDemand = withContext(Dispatchers.IO) { Network.loadEntry(entry!!.id) }
-                val commentsDemand = withContext(Dispatchers.IO) { Network.loadComments(entry!!, pageNum = currentPage) }
                 entry!!.apply { meta = entryDemand.meta } // refresh comment num and participants
-                onMoreDataLoaded(commentsDemand)
 
                 // mark related notifications read
                 val markedRead = withContext(Dispatchers.IO) { Network.markNotificationsReadFor(entry!!) }
@@ -137,13 +133,11 @@ class CommentListFragment : UserContentListFragment() {
                     // we changed notifications, update fragment with them if present
                     val notifPredicate = { it: Fragment -> it is NotificationListFragment }
                     val notifFragment = fragmentManager?.fragments?.find(notifPredicate) as NotificationListFragment?
-                    notifFragment?.loadMore(true)
+                    notifFragment?.loadMore(reset = true)
                 }
             } catch (ex: Exception) {
                 Network.reportErrors(activity, ex)
             }
-
-            ribbonRefresher.isRefreshing = false
         }
     }
 
