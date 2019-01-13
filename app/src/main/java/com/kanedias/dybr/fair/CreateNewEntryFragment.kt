@@ -123,7 +123,7 @@ class CreateNewEntryFragment : Fragment() {
         ButterKnife.bind(this, view)
 
         setupUI()
-        setupTheming()
+        setupTheming(view)
 
         if (editMode) {
             // we're editing existing entry, populate UI with its contents and settings
@@ -163,7 +163,7 @@ class CreateNewEntryFragment : Fragment() {
         tagsInput.setAdapter(adapter)
     }
 
-    private fun setupTheming() {
+    private fun setupTheming(view: View) {
         Scoop.getInstance().bind(TEXT_BLOCK, view, BackgroundNoAlphaAdapter())
         Scoop.getInstance().bind(TEXT, titleInput, EditTextAdapter())
         Scoop.getInstance().bind(TEXT_LINKS, titleInput, EditTextLineAdapter())

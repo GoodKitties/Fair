@@ -55,8 +55,9 @@ class SyncNotificationsJob: Job() {
         // filter them so we only process non-read and non-skipped ones
         val nonRead = notifications.filter { it.state == "new" }
         val nonSkipped = nonRead.filter { !skippedNotificationIds.contains(it.id) }
+        val nonSkippedAndNew = nonSkipped.filter { !currentlyShownIds.contains(it.id) }
 
-        if (nonSkipped.isEmpty()) {
+        if (nonSkippedAndNew.isEmpty()) {
             // cancel all android notifications if there's nothing to display
             NotificationManagerCompat.from(context).cancel(NEW_COMMENTS_NOTIFICATION)
             return Result.SUCCESS
@@ -75,15 +76,15 @@ class SyncNotificationsJob: Job() {
         val userPerson = Person.Builder().setName(userProfile.nickname).setIcon(loadAvatar(userProfile)).build()
 
         // convert each website notification to android notification
-        for (msgNotif in nonSkipped) {
+        for (msgNotif in nonSkippedAndNew) {
             val comment = msgNotif.comment.get(msgNotif.document) ?: continue // comment itself
-            val author = msgNotif.profile.get(msgNotif.document) ?: continue // profile of person who wrote the comment
-            val source = msgNotif.source.get(msgNotif.document)
+            val author = msgNotif.profile.get(msgNotif.document) ?: continue // comment author profile
+            val source = msgNotif.source.get(msgNotif.document) // blog owner profile where comment was written
 
             val authorPerson = Person.Builder().setName(author.nickname).setIcon(loadAvatar(author)).build()
 
             // get data from website notification
-            val text = Html2Markdown().parse(comment.content).lines().first() + "..."
+            val text = Html2Markdown().parse(comment.content).lines().firstOrNull { it.isNotEmpty() }.orEmpty() + "..."
             val converted = Markwon.markdown(context, text).toString()
             val msgStyle = NotificationCompat.MessagingStyle(userPerson)
                     .setConversationTitle(source.blogTitle)
@@ -127,7 +128,7 @@ class SyncNotificationsJob: Job() {
 
         // create grouping android notification
         val groupStyle = NotificationCompat.InboxStyle()
-        nonSkipped.forEach { msgNotif ->
+        nonSkippedAndNew.forEach { msgNotif ->
             val author = msgNotif.profile.get(msgNotif.document) ?: return@forEach
             val source = msgNotif.source.get(msgNotif.document)
             groupStyle.addLine("${author.nickname} · ${source.blogTitle}")
@@ -149,7 +150,7 @@ class SyncNotificationsJob: Job() {
 
         // track what's shown currently in status bar
         // Keep in mind that this is a set so duplicates will be skipped
-        currentlyShownIds.addAll(nonSkipped.map { it -> it.id })
+        currentlyShownIds.addAll(nonSkippedAndNew.map { it -> it.id })
 
         return Result.SUCCESS
     }

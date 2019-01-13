@@ -51,7 +51,7 @@ open class EntryListFragment: UserContentListFragment() {
 
         ButterKnife.bind(this, view)
         setupUI()
-        setupTheming()
+        setupTheming(view)
         loadMore()
 
         return view
@@ -70,7 +70,7 @@ open class EntryListFragment: UserContentListFragment() {
         entryRibbon.adapter = entryAdapter
     }
 
-    open fun setupTheming() {
+    open fun setupTheming(view: View) {
     }
 
     /**

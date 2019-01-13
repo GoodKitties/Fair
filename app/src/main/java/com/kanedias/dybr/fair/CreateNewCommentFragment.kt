@@ -104,7 +104,7 @@ class CreateNewCommentFragment : Fragment() {
             handleMisc()
         }
 
-        setupTheming()
+        setupTheming(view)
 
         return view
     }
@@ -115,7 +115,7 @@ class CreateNewCommentFragment : Fragment() {
         submitJob.cancel()
     }
 
-    private fun setupTheming() {
+    private fun setupTheming(view: View) {
         Scoop.getInstance().bind(TEXT_BLOCK, view, BackgroundNoAlphaAdapter())
         Scoop.getInstance().bind(TEXT, preview)
         Scoop.getInstance().bind(TEXT_LINKS, preview, TextViewLinksAdapter())

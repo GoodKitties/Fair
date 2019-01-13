@@ -43,7 +43,7 @@ open class NotificationListFragment: UserContentListFragment() {
 
         ButterKnife.bind(this, view)
         setupUI()
-        setupTheming()
+        setupTheming(view)
         loadMore()
 
         return view
@@ -89,7 +89,7 @@ open class NotificationListFragment: UserContentListFragment() {
         notifRibbon.adapter = notifAdapter
     }
 
-    open fun setupTheming() {
+    open fun setupTheming(view: View) {
     }
 
     /**
