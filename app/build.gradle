@@ -16,8 +16,8 @@ android {
         applicationId "com.kanedias.dybr.fair"
         targetSdkVersion 28 // device you test on
         minSdkVersion 16    // device you allow your users to be on :)
-        versionCode 41
-        versionName "1.9.1"
+        versionCode 42
+        versionName "1.9.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

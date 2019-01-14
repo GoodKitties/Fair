@@ -94,20 +94,12 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/placeholder_huge"/>
 
-        <View
-            android:id="@+id/entry_tag_divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_below="@id/entry_message"
-            android:layout_marginTop="8dp"
-            android:alpha="0.3"
-            android:background="@android:color/white"/>
-
         <TextView
             android:id="@+id/entry_tags"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/entry_tag_divider"
+            android:layout_below="@id/entry_message"
+            android:layout_marginTop="8dp"
             android:padding="5dp"
             android:text="@string/placeholder_tags_huge"
             android:textStyle="bold">

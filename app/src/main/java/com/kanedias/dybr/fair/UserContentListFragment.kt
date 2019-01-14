@@ -1,5 +1,6 @@
 package com.kanedias.dybr.fair
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
@@ -7,7 +8,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.coroutines.*
-import moe.banana.jsonapi2.ArrayDocument
 import moe.banana.jsonapi2.Resource
 
 /**
@@ -29,15 +29,21 @@ abstract class UserContentListFragment : Fragment() {
     abstract fun getRibbonView(): RecyclerView
     abstract fun getRefresher(): SwipeRefreshLayout
     abstract fun getRibbonAdapter(): UserContentListFragment.LoadMoreAdapter
-    abstract fun retrieveData(pageNum: Int) : () -> ArrayDocument<out Resource>
+    abstract fun retrieveData(pageNum: Int) : () -> List<Resource>
 
     protected var allLoaded = false
 
-    private val loadJob = Job()
-    protected val uiScope = CoroutineScope(Dispatchers.Main + loadJob)
+    private lateinit var loadJob: Job
+    protected lateinit var uiScope: CoroutineScope
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        loadJob = Job()
+        uiScope = CoroutineScope(Dispatchers.Main + loadJob)
+    }
+
+    override fun onDetach() {
+        super.onDetach()
         loadJob.cancel()
     }
 
@@ -85,7 +91,7 @@ abstract class UserContentListFragment : Fragment() {
      * Update notification ribbon with newly loaded values.
      * @param loaded document with notifications for active profile and links to pages that was loaded
      */
-    fun onMoreDataLoaded(loaded: ArrayDocument<out Resource>) {
+    private fun onMoreDataLoaded(loaded: List<Resource>) {
         if (loaded.size < PAGE_SIZE) {
             allLoaded = true
         }
@@ -94,7 +100,11 @@ abstract class UserContentListFragment : Fragment() {
             return
         }
 
-        getRibbonAdapter().addItems(loaded)
+        // exclude items already on this page
+        val alreadyLoaded = getRibbonAdapter().items.size % PAGE_SIZE
+        val freshItems = loaded.drop(alreadyLoaded)
+
+        getRibbonAdapter().addItems(freshItems)
     }
 
     /**

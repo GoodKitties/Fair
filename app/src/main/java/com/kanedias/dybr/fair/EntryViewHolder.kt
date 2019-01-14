@@ -54,9 +54,6 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     @BindView(R.id.entry_message)
     lateinit var bodyView: TextView
 
-    @BindView(R.id.entry_tag_divider)
-    lateinit var tagDivider: View
-
     @BindView(R.id.entry_tags)
     lateinit var tagsView: TextView
 
@@ -129,7 +126,6 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         Scoop.getInstance().bind(TEXT_LINKS, tagsView, parent, TextViewLinksAdapter())
         Scoop.getInstance().bind(TEXT_LINKS, permissionIcon, parent)
         Scoop.getInstance().bind(DIVIDER, metaDivider, parent)
-        Scoop.getInstance().bind(DIVIDER, tagDivider, parent)
         (buttons + indicators + participants + comments).forEach { Scoop.getInstance().bind(TEXT_LINKS, it, parent) }
     }
 
@@ -292,10 +288,8 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
      */
     private fun setupTags(entry: Entry) {
         if (entry.tags.isEmpty()) {
-            tagDivider.visibility = View.GONE
             tagsView.visibility = View.GONE
         } else {
-            tagDivider.visibility = View.VISIBLE
             tagsView.visibility = View.VISIBLE
 
             val clickTags = SpannableStringBuilder()
