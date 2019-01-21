@@ -100,7 +100,7 @@ dependencies {
     implementation 'moe.banana:moshi-jsonapi:3.5.0'                             // JSON-API parser
     implementation 'com.squareup.moshi:moshi-kotlin:1.6.0'                      // Moshi Kotlin support
     implementation 'com.squareup.moshi:moshi-adapters:1.6.0'                    // Moshi serializers collection
-    implementation 'ru.noties:markwon:2.0.0'                                    // markdown rendering
+    implementation 'ru.noties:markwon:2.0.1'                                    // markdown rendering
     //implementation 'com.github.clans:fab:1.6.4'                               // Floating action button with menu
     implementation 'com.github.bumptech.glide:okhttp3-integration:4.8.0'
     implementation 'com.github.bumptech.glide:glide:4.8.0'                      // image processing/caching lib

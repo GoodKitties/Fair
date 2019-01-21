@@ -25,7 +25,7 @@ import kotlinx.coroutines.*
  * @see CommentListFragment.commentRibbon
  * @author Kanedias
  */
-class CommentViewHolder(private val entry: Entry, iv: View, private val parent: View) : UserContentViewHolder(iv) {
+class CommentViewHolder(private val entry: Entry, iv: View, private val parent: View) : UserContentViewHolder<Comment>(iv) {
 
     @BindView(R.id.comment_avatar)
     lateinit var avatarView: ImageView
@@ -126,13 +126,14 @@ class CommentViewHolder(private val entry: Entry, iv: View, private val parent: 
     /**
      * Called when this holder should be refreshed based on what it must show now
      */
-    fun setup(comment: Comment) {
-        super.setup(comment)
+    override fun setup(entity: Comment) {
+        super.setup(entity)
 
-        this.comment = comment
+        this.comment = entity
+
         bodyView.handleMarkdown(comment.content)
 
         val profile = comment.profile.get(comment.document)
-        toggleEditButtons(profile == Auth.profile)
+        toggleEditButtons(isBlogWritable(profile))
     }
 }

@@ -302,9 +302,9 @@ class CreateNewEntryFragment : Fragment() {
                 requireFragmentManager().popBackStack()
 
                 // if we have current tab set, refresh it
-                val plPredicate = { it: Fragment -> it is EntryListFragment && it.userVisibleHint }
-                val currentTab = requireFragmentManager().fragments.find(plPredicate) as EntryListFragment?
-                currentTab?.loadMore(reset = true)
+                val frgPredicate = { it: Fragment -> it is UserContentListFragment && it.userVisibleHint }
+                val currentFrg = requireFragmentManager().fragments.reversed().find(frgPredicate) as UserContentListFragment?
+                currentFrg?.loadMore(reset = true)
             } catch (ex: Exception) {
                 // don't close the fragment, just report errors
                 Network.reportErrors(requireContext(), ex)

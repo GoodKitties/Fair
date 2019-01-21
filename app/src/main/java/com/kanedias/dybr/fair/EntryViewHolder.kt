@@ -37,7 +37,7 @@ import kotlinx.coroutines.*
  * @see EntryListFragment.entryRibbon
  * @author Kanedias
  */
-class EntryViewHolder(iv: View, private val parent: View, private val allowSelection: Boolean = false) : UserContentViewHolder(iv) {
+class EntryViewHolder(iv: View, private val parent: View, private val allowSelection: Boolean = false) : UserContentViewHolder<Entry>(iv) {
 
     @BindView(R.id.entry_avatar)
     lateinit var avatarView: ImageView
@@ -248,12 +248,12 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     /**
      * Called when this holder should be refreshed based on what it must show now
      */
-    fun setup(entry: Entry, editable: Boolean) {
-        super.setup(entry)
+    override fun setup(entity: Entry) {
+        super.setup(entity)
 
-        this.entry = entry
-        this.profile = entry.profile.get(entry.document)
-
+        // bind variables
+        this.entry = entity
+        this.profile = entity.profile.get(entity.document)
 
         // setup text views from entry data
         titleView.text = entry.title
@@ -272,7 +272,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         setupTags(entry)
 
         // setup bottom row of edit buttons
-        setupEditButtons(editable)
+        setupEditButtons(isBlogWritable(profile))
 
         // setup bottom row of metadata buttons
         val metadata = Network.bufferToObject<EntryMeta>(entry.meta)

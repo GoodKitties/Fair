@@ -193,24 +193,25 @@ class CreateNewCommentFragment : Fragment() {
         // make http request
         uiScope.launch(Dispatchers.Main) {
             try {
+                // if we have current comment list, refresh it
+                val frgPredicate = { it: Fragment -> it is UserContentListFragment }
+                val curFrg = requireFragmentManager().fragments.reversed().find(frgPredicate) as UserContentListFragment?
+
                 if (editMode) {
                     // alter existing comment
                     comment.id = editComment.id
                     withContext(Dispatchers.IO) { Network.updateComment(comment) }
                     Toast.makeText(activity, R.string.comment_updated, Toast.LENGTH_SHORT).show()
+                    curFrg?.loadMore(reset = true)
                 } else {
                     // create new
                     comment.entry = HasOne(entry)
                     comment.profile = HasOne(Auth.profile)
                     withContext(Dispatchers.IO) { Network.createComment(comment) }
                     Toast.makeText(activity, R.string.comment_created, Toast.LENGTH_SHORT).show()
+                    curFrg?.loadMore()
                 }
                 requireFragmentManager().popBackStack()
-
-                // if we have current comment list, refresh it
-                val clPredicate = { it: androidx.fragment.app.Fragment -> it is CommentListFragment }
-                val currentTab = requireFragmentManager().fragments.find(clPredicate) as CommentListFragment?
-                currentTab?.loadMore()
             } catch (ex: Exception) {
                 // don't close the fragment, just report errors
                 Network.reportErrors(requireContext(), ex)

@@ -37,7 +37,6 @@ infix fun TextView.handleMarkdown(html: String) {
     val label = this
 
     label.text = null
-
     GlobalScope.launch(Dispatchers.Main) {
         // this is computation-intensive task, better do it smoothly
         val span = withContext(Dispatchers.IO) {
@@ -51,8 +50,6 @@ infix fun TextView.handleMarkdown(html: String) {
         label.text = span
         Markwon.scheduleDrawables(label)
     }
-
-
 }
 
 /**
@@ -76,7 +73,7 @@ fun postProcessSpans(view: TextView, spanned: SpannableStringBuilder) {
 fun postProcessMore(spanned: SpannableStringBuilder, view: TextView) {
     while (true) {
         // we need to process all MOREs in the text, start from inner ones, get back to outer in next loops
-        val moreDetector = Regex(".*(\\[MORE=(.+?)](.*?)\\[\\/MORE])", RegexOption.DOT_MATCHES_ALL)
+        val moreDetector = Regex(".*(\\[MORE=(.+?)](.*?)\\[/MORE])", RegexOption.DOT_MATCHES_ALL)
         val match = moreDetector.find(spanned) ?: break
         // we have a match, make a replacement
 

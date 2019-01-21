@@ -168,7 +168,7 @@ open class EntryListFragment: UserContentListFragment() {
                 ITEM_REGULAR -> {
                     val entryHolder = holder as EntryViewHolder
                     val entry = items[position] as Entry
-                    entryHolder.setup(entry, isBlogWritable(profile))
+                    entryHolder.setup(entry)
                 }
                 else -> super.onBindViewHolder(holder, position)
             }

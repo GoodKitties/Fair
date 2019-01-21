@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.kanedias.dybr.fair.dto.Authored
 import kotlinx.coroutines.*
 import moe.banana.jsonapi2.Resource
 
@@ -80,7 +81,9 @@ abstract class UserContentListFragment : Fragment() {
                 val success = withContext(Dispatchers.IO) { retrieveData(pageNum = nextPage).invoke() }
                 onMoreDataLoaded(success)
             } catch (ex: Exception) {
-                Network.reportErrors(requireContext(), ex)
+                if (isActive) {
+                    Network.reportErrors(requireContext(), ex)
+                }
             }
 
             getRefresher().isRefreshing = false
@@ -189,6 +192,11 @@ abstract class UserContentListFragment : Fragment() {
             val itemsCleared = items.size
             items.clear()
             notifyItemRangeRemoved(headers.size, itemsCleared)
+        }
+
+        fun replaceHeader(pos: Int, entity: Authored) {
+            headers[pos] = entity
+            notifyItemChanged(pos)
         }
 
     }

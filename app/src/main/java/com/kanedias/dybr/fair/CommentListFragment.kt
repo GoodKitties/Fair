@@ -124,8 +124,8 @@ class CommentListFragment : UserContentListFragment() {
         // update entry comment meta counters and mark notifications as read for current entry
         uiScope.launch(Dispatchers.Main) {
             try {
-                val entryDemand = withContext(Dispatchers.IO) { Network.loadEntry(entry!!.id) }
-                entry!!.apply { meta = entryDemand.meta } // refresh comment num and participants
+                entry = withContext(Dispatchers.IO) { Network.loadEntry(entry!!.id) }
+                getRibbonAdapter().replaceHeader(0, entry!!)
 
                 // mark related notifications read
                 val markedRead = withContext(Dispatchers.IO) { Network.markNotificationsReadFor(entry!!) }
@@ -171,7 +171,7 @@ class CommentListFragment : UserContentListFragment() {
                 ITEM_HEADER -> {
                     val entry = headers[position] as Entry
                     (holder as EntryViewHolder).apply {
-                        setup(entry, false)
+                        setup(entry)
                         itemView.isClickable = false
                     }
                 }

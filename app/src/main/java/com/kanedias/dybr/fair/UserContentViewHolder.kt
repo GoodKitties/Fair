@@ -32,13 +32,13 @@ import java.util.*
  *
  * Created on 04.01.19
  */
-abstract class UserContentViewHolder(iv: View): RecyclerView.ViewHolder(iv) {
+abstract class UserContentViewHolder<T: Authored>(iv: View): RecyclerView.ViewHolder(iv) {
 
     abstract fun getCreationDateView(): TextView
     abstract fun getAuthorNameView(): TextView
     abstract fun getProfileAvatarView(): ImageView
 
-    open fun setup(entity: Authored) {
+    open fun setup(entity: T) {
         val profile = entity.profile.get(entity.document)
 
         getCreationDateView().text = DateUtils.getRelativeTimeSpanString(entity.createdAt.time)
@@ -49,6 +49,8 @@ abstract class UserContentViewHolder(iv: View): RecyclerView.ViewHolder(iv) {
             Glide.with(getProfileAvatarView()).load(avatar)
                     .apply(RequestOptions().downsample(DownsampleStrategy.CENTER_INSIDE))
                     .into(getProfileAvatarView())
+        } else {
+            getProfileAvatarView().setImageDrawable(null)
         }
         getProfileAvatarView().setOnClickListener { showProfile(entity) }
 
@@ -62,7 +64,7 @@ abstract class UserContentViewHolder(iv: View): RecyclerView.ViewHolder(iv) {
      *
      * @param entity entity to use created date from
      */
-    private fun showFullDate(entity: Authored) {
+    private fun showFullDate(entity: T) {
         val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(entity.createdAt.time)
         val toast = Toast.makeText(itemView.context, date, Toast.LENGTH_SHORT)
 
@@ -79,7 +81,7 @@ abstract class UserContentViewHolder(iv: View): RecyclerView.ViewHolder(iv) {
      *
      * @param entity entity to show author from
      */
-    private fun showProfile(entity: Authored) {
+    private fun showProfile(entity: T) {
         val activity = itemView.context as AppCompatActivity
         val partialProf = entity.profile.get(entity.document)
 
@@ -109,7 +111,7 @@ abstract class UserContentViewHolder(iv: View): RecyclerView.ViewHolder(iv) {
      *
      * @param entity entity to reply to
      */
-    private fun replyWithName(entity: Authored) {
+    private fun replyWithName(entity: T) {
         val activity = itemView.context as AppCompatActivity
 
         val fragments = activity.supportFragmentManager.fragments.reversed()
