@@ -1,0 +1,11 @@
+<resources>
+    <!-- hide placeholders, users don't need to see them -->
+    <string name="placeholder_long" translatable="false" />
+    <string name="placeholder_short" translatable="false" />
+    <string name="placeholder_tags_huge" translatable="false" />
+    <string name="placeholder_huge" translatable="false" />
+    <string name="placeholder_date" translatable="false" />
+    <string name="placeholder_number_short" translatable="false" />
+    <string name="placeholder_number_long" translatable="false" />
+    <string name="placeholder_link" translatable="false" />
+</resources>

@@ -36,13 +36,12 @@ import java.io.IOException
 infix fun TextView.handleMarkdown(html: String) {
     val label = this
 
-    label.text = null
     GlobalScope.launch(Dispatchers.Main) {
         // this is computation-intensive task, better do it smoothly
         val span = withContext(Dispatchers.IO) {
             val mdConfig = SpannableConfiguration.builder(label.context).asyncDrawableLoader(DrawableLoader(label)).build()
             val spanned = Markwon.markdown(mdConfig, Html2Markdown().parse(html)) as SpannableStringBuilder
-            postProcessSpans(label, spanned)
+            postProcessSpans(spanned, label)
 
             spanned
         }
@@ -55,7 +54,7 @@ infix fun TextView.handleMarkdown(html: String) {
 /**
  * Post-process spans like MORE or image loading
  */
-fun postProcessSpans(view: TextView, spanned: SpannableStringBuilder) {
+fun postProcessSpans(spanned: SpannableStringBuilder, view: TextView) {
     val prefs = PreferenceManager.getDefaultSharedPreferences(view.context)
 
     if (!prefs.getBoolean("auto-load-images", true)) {
@@ -156,7 +155,7 @@ private fun postProcessDrawables(spanned: SpannableStringBuilder, view: TextView
 infix fun TextView.handleMarkdownRaw(markdown: String) {
     val mdConfig = SpannableConfiguration.builder(this.context).asyncDrawableLoader(DrawableLoader(this)).build()
     val spanned = Markwon.markdown(mdConfig, markdown) as SpannableStringBuilder
-    postProcessSpans(this, spanned)
+    postProcessSpans(spanned, this)
 
     this.text = spanned
 }
