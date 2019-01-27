@@ -15,9 +15,9 @@ android {
     defaultConfig {
         applicationId "com.kanedias.dybr.fair"
         targetSdkVersion 28 // device you test on
-        minSdkVersion 16    // device you allow your users to be on :)
-        versionCode 42
-        versionName "1.9.2"
+        minSdkVersion 19    // device you allow your users to be on :)
+        versionCode 43
+        versionName "1.9.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -105,6 +105,7 @@ dependencies {
     implementation 'com.github.bumptech.glide:okhttp3-integration:4.8.0'
     implementation 'com.github.bumptech.glide:glide:4.8.0'                      // image processing/caching lib
     implementation 'com.auth0.android:jwtdecode:1.2.0'                          // handling JWT from server
+    implementation 'com.github.stfalcon:stfalcon-imageviewer:0.1.0'             // embedded image viewer
 
 
     googleplayImplementation 'com.android.billingclient:billing:1.0'            // billing library from Google
