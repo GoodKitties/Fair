@@ -2,13 +2,9 @@ package com.kanedias.dybr.fair.ui
 
 import android.Manifest
 import android.app.Activity
-import android.app.DownloadManager
-import android.app.Service
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.net.Uri
@@ -42,7 +38,6 @@ import com.bumptech.glide.request.transition.Transition
 import com.kanedias.dybr.fair.BuildConfig
 import com.kanedias.dybr.fair.Network
 import com.kanedias.dybr.fair.R
-import com.kanedias.dybr.fair.ui.EditorViews.Companion.PERMISSION_REQUEST_STORAGE_FOR_IMAGE_UPLOAD
 import com.kanedias.html2md.Html2Markdown
 import com.stfalcon.imageviewer.StfalconImageViewer
 import kotlinx.coroutines.*
@@ -79,6 +74,8 @@ infix fun TextView.handleMarkdown(html: String) {
 
 /**
  * Post-process spans like MORE or image loading
+ * @param spanned editable spannable to change
+ * @param view resulting text view to accept the modified spanned string
  */
 fun postProcessSpans(spanned: SpannableStringBuilder, view: TextView) {
     val prefs = PreferenceManager.getDefaultSharedPreferences(view.context)
@@ -92,11 +89,18 @@ fun postProcessSpans(spanned: SpannableStringBuilder, view: TextView) {
 
 }
 
+/**
+ * Post-process drawables, so you can click on them to see them in full-screen
+ * @param spanned editable spannable to change
+ * @param view resulting text view to accept the modified spanned string
+ */
 fun postProcessDrawables(spanned: SpannableStringBuilder, view: TextView) {
-    val spans = spanned.getSpans(0, spanned.length, AsyncDrawableSpan::class.java)
-    for (span in spans) {
-        val start = spanned.getSpanStart(span)
-        val end = spanned.getSpanEnd(span)
+    val imgSpans = spanned.getSpans(0, spanned.length, AsyncDrawableSpan::class.java)
+    imgSpans.sortBy { spanned.getSpanStart(it) }
+
+    for (img in imgSpans) {
+        val start = spanned.getSpanStart(img)
+        val end = spanned.getSpanEnd(img)
         val spansToWrap = spanned.getSpans(start, end, CharacterStyle::class.java)
         if (spansToWrap.any { it is ClickableSpan }) {
             // the image is clickable, we can't replace it
@@ -105,16 +109,23 @@ fun postProcessDrawables(spanned: SpannableStringBuilder, view: TextView) {
 
         val wrapperClick = object : ClickableSpan() {
             override fun onClick(widget: View?) {
-                val overlay = ImageShowOverlay(view.context)
-                overlay.update(spans[0])
+                val index = imgSpans.indexOf(img)
+                if (index == -1) {
+                    // something modified spannable in a way image is no longer here
+                    return
+                }
 
-                StfalconImageViewer.Builder<AsyncDrawableSpan>(view.context, spans) { view, span ->
+                val overlay = ImageShowOverlay(view.context)
+                overlay.update(imgSpans[index])
+
+                StfalconImageViewer.Builder<AsyncDrawableSpan>(view.context, imgSpans) { view, span ->
                     val base = HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT) ?: return@Builder
                     val resolved = base.resolve(span.drawable.destination) ?: return@Builder
                     Glide.with(view).load(resolved.toString()).into(view)
                 }
                         .withOverlayView(overlay)
-                        .withImageChangeListener { position -> overlay.update(spans[position])}
+                        .withStartPosition(index)
+                        .withImageChangeListener { position -> overlay.update(imgSpans[position])}
                         .allowSwipeToDismiss(true)
                         .show()
             }
@@ -221,7 +232,8 @@ infix fun TextView.handleMarkdownRaw(markdown: String) {
 }
 
 /**
- * Class responsible for loading images inside markdown-enabled text-views
+ * Class responsible for loading pictures inside markdown-enabled text-views.
+ * Uses [Glide] to cache and down-sample images.
  */
 class DrawableLoader(private val view: TextView): AsyncDrawable.Loader {
 
@@ -252,7 +264,7 @@ class DrawableLoader(private val view: TextView): AsyncDrawable.Loader {
 
             } catch (ioex: IOException) {
                 // ignore, just don't load image
-                Log.e("ImageLoader", "Couldn't load image", ioex)
+                Log.e("Fair/Markdown", "Couldn't load image", ioex)
             }
         }
     }
@@ -278,6 +290,9 @@ class DrawableLoader(private val view: TextView): AsyncDrawable.Loader {
     }
 }
 
+/**
+ * Class responsible for showing "Share" and "Download" buttons when viewing images in full-screen.
+ */
 class ImageShowOverlay(ctx: Context,
                        attrs: AttributeSet? = null,
                        defStyleAttr: Int = 0) : FrameLayout(ctx, attrs, defStyleAttr) {
@@ -297,6 +312,7 @@ class ImageShowOverlay(ctx: Context,
         val base = HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT) ?: return
         val resolved = base.resolve(span.drawable.destination) ?: return
 
+        // share button: share the image using file provider
         share.setOnClickListener {
             Glide.with(it).asFile().load(resolved.toString()).into(object: SimpleTarget<File>() {
 
@@ -314,9 +330,11 @@ class ImageShowOverlay(ctx: Context,
             })
         }
 
+        // download button: download the image to Download folder on internal SD
         download.setOnClickListener {
             val activity = context as? Activity ?: return@setOnClickListener
 
+            // request SD write permissions if we don't have it already
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 0)
                 return@setOnClickListener
@@ -327,7 +345,7 @@ class ImageShowOverlay(ctx: Context,
 
                 override fun onResourceReady(resource: File, transition: Transition<in File>?) {
                     val downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                    val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(getMimeTypeOfFile(context, resource))
+                    val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(getMimeTypeOfFile(resource))
                     val name = "${resolved.pathSegments().last()}.$ext"
                     val downloadedFile = File(downloads, name)
                     downloadedFile.writeBytes(resource.readBytes())
@@ -340,7 +358,12 @@ class ImageShowOverlay(ctx: Context,
         }
     }
 
-    private fun getMimeTypeOfFile(ctx: Context, file: File): String? {
+    /**
+     * Decode the file as bitmap and retrieve its mime type, if it's an image
+     * @param file input file to parse
+     * @return string-represented mime type of this file
+     */
+    private fun getMimeTypeOfFile(file: File): String? {
         val opt = BitmapFactory.Options()
         opt.inJustDecodeBounds = true
 
@@ -349,8 +372,16 @@ class ImageShowOverlay(ctx: Context,
         }
 
         return opt.outMimeType
-}
+    }
 
+    /**
+     * Save image file to location that is shared from xml/shared_paths.
+     * After that it's possible to share this file to other applications
+     * using [FileProvider].
+     *
+     * @param image image file to save
+     * @return Uri that file-provider returns, or null if unable to
+     */
     private fun saveToShared(image: File) : Uri? {
         try {
             val sharedImgs = File(context.cacheDir, "shared_images");
