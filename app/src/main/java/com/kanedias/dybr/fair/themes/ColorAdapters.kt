@@ -21,10 +21,9 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.MenuItemCompat
 import com.ftinc.scoop.adapters.ColorAdapter
 import com.ftinc.scoop.adapters.TextViewColorAdapter
-import com.ftinc.scoop.util.Utils
-import com.kanedias.dybr.fair.R
 
 /**
  * @author Kanedias
@@ -122,6 +121,24 @@ class ToolbarIconsAdapter : ColorAdapter<Toolbar> {
     }
 }
 
+class ToolbarMenuIconsAdapter : ColorAdapter<Toolbar> {
+
+    private var color = Color.TRANSPARENT
+
+    override fun applyColor(view: Toolbar, @ColorInt color: Int) {
+        this.color = color
+
+        for (idx in 0 until view.menu.size()) {
+            val mi = view.menu.getItem(idx)
+            MenuItemCompat.setIconTintList(mi, ColorStateList.valueOf(color))
+        }
+    }
+
+    override fun getColor(view: Toolbar): Int {
+        return color
+    }
+}
+
 class SearchIconsAdapter : ColorAdapter<SearchView> {
 
     private  fun getDrawable(content: View, name: String) : Drawable? {
@@ -190,16 +207,27 @@ class TextViewLinksAdapter: ColorAdapter<TextView> {
 /**
  * Same as [TextViewColorAdapter] but with disabled color support
  */
-class TextViewDisabledAdapter: ColorAdapter<TextView> {
+class TextViewDisableAwareColorAdapter : ColorAdapter<TextView> {
 
-    override fun applyColor(view: TextView, color: Int) {
-        view.setTextColor(Utils.colorToStateList(view.textColors.defaultColor, color))
+    override fun applyColor(view: TextView, @ColorInt color: Int) {
+        val stateList = ColorStateList(
+                arrayOf(
+                        intArrayOf(-android.R.attr.state_enabled),
+                        intArrayOf()
+                ),
+                intArrayOf(
+                        ColorUtils.setAlphaComponent(color, 127),
+                        color
+                )
+        )
+        view.setTextColor(stateList)
     }
 
     override fun getColor(view: TextView): Int {
         return view.currentTextColor
     }
 }
+
 
 class TextViewDrawableAdapter: ColorAdapter<TextView> {
 

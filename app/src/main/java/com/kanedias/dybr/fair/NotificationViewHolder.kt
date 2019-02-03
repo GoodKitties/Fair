@@ -107,23 +107,12 @@ class NotificationViewHolder(iv: View, private val parent: View) : RecyclerView.
 
     private fun setupTheming() {
         Scoop.getInstance().bind(TEXT_BLOCK, itemView, parent, CardViewColorAdapter())
-        Scoop.getInstance().bind(TEXT, causeView, parent)
-        Scoop.getInstance().bind(TEXT_OFFTOP, causeView, parent, TextViewDisabledAdapter())
-
-        Scoop.getInstance().bind(TEXT, blogView, parent)
-        Scoop.getInstance().bind(TEXT_OFFTOP, blogView, parent, TextViewDisabledAdapter())
-
-        Scoop.getInstance().bind(TEXT, authorView, parent)
-        Scoop.getInstance().bind(TEXT_OFFTOP, authorView, parent, TextViewDisabledAdapter())
-
-        Scoop.getInstance().bind(TEXT, dateView, parent)
-        Scoop.getInstance().bind(TEXT_OFFTOP, dateView, parent, TextViewDisabledAdapter())
-
-        Scoop.getInstance().bind(TEXT, bodyView, parent)
-        Scoop.getInstance().bind(TEXT_OFFTOP, bodyView, parent, TextViewDisabledAdapter())
-
+        Scoop.getInstance().bind(TEXT, causeView, parent, TextViewDisableAwareColorAdapter())
+        Scoop.getInstance().bind(TEXT, blogView, parent, TextViewDisableAwareColorAdapter())
+        Scoop.getInstance().bind(TEXT, authorView, parent, TextViewDisableAwareColorAdapter())
+        Scoop.getInstance().bind(TEXT, dateView, parent, TextViewDisableAwareColorAdapter())
+        Scoop.getInstance().bind(TEXT, bodyView, parent, TextViewDisableAwareColorAdapter())
         Scoop.getInstance().bind(TEXT_LINKS, bodyView, parent, TextViewLinksAdapter())
-
         Scoop.getInstance().bind(TEXT_LINKS, readButton, parent)
     }
 

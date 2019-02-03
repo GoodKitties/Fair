@@ -52,8 +52,13 @@ open class NotificationListFragment: UserContentListFragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.notifications_fragment_menu, menu)
         super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.notifications_fragment_menu, menu)
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        Scoop.getInstance().bind(TOOLBAR_TEXT, activity.toolbar, ToolbarMenuIconsAdapter())
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
