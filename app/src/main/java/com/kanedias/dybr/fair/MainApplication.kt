@@ -81,6 +81,7 @@ class MainApplication : Application() {
                 TEXT_BLOCK to resources.getColor(R.color.cardview_dark_background),
                 TEXT_OFFTOP to resources.getColor(android.R.color.secondary_text_dark),
                 ACCENT to resources.getColor(R.color.colorAccent),
+                ACCENT_TEXT to resources.getColor(R.color.primary_text_default_material_dark),
                 DIVIDER to resources.getColor(R.color.colorAccent))
         )
     }

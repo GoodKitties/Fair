@@ -41,19 +41,19 @@ open class EntryListFragmentFull: EntryListFragment() {
             addEntryButton.show()
             addEntryButton.setOnClickListener { addCreateNewEntryForm() }
         }
-
-        setBlogTheme()
     }
 
-    private fun setBlogTheme() {
+    override fun setupTheming(view: View) {
         // this is a fullscreen fragment, add new style
         Scoop.getInstance().addStyleLevel(view)
+
+        super.setupTheming(view)
+
         Scoop.getInstance().bind(TOOLBAR, toolbar)
         Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
-        Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarIconAdapter())
+        Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarIconsAdapter())
         Scoop.getInstance().bind(ACCENT, addEntryButton, FabColorAdapter())
-        Scoop.getInstance().bind(TEXT, addEntryButton, FabIconAdapter())
-        Scoop.getInstance().bind(BACKGROUND, entryRibbon)
+        Scoop.getInstance().bind(ACCENT_TEXT, addEntryButton, FabIconAdapter())
         Scoop.getInstance().bindStatusBar(activity, STATUS_BAR)
 
         profile?.let { applyTheme(it, activity) }

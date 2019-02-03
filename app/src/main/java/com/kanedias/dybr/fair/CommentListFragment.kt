@@ -89,9 +89,9 @@ class CommentListFragment : UserContentListFragment() {
         Scoop.getInstance().addStyleLevel(view)
         Scoop.getInstance().bind(TOOLBAR, toolbar)
         Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
-        Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarIconAdapter())
+        Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarIconsAdapter())
         Scoop.getInstance().bind(ACCENT, addCommentButton, FabColorAdapter())
-        Scoop.getInstance().bind(TEXT, addCommentButton, FabIconAdapter())
+        Scoop.getInstance().bind(ACCENT_TEXT, addCommentButton, FabIconAdapter())
         Scoop.getInstance().bind(BACKGROUND, commentRibbon)
         Scoop.getInstance().bindStatusBar(activity, STATUS_BAR)
 

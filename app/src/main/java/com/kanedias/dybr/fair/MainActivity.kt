@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.database.Cursor
 import android.database.MatrixCursor
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -61,6 +62,11 @@ class MainActivity : AppCompatActivity() {
         var onScreen = false
     }
 
+    /**
+     * Main drawer, i.e. two panes - content and sidebar
+     */
+    @BindView(R.id.main_drawer_layout)
+    lateinit var drawer: DrawerLayout
 
     /**
      * AppBar layout with toolbar and tabs
@@ -73,12 +79,6 @@ class MainActivity : AppCompatActivity() {
      */
     @BindView(R.id.toolbar)
     lateinit var toolbar: Toolbar
-
-    /**
-     * Main drawer, i.e. two panes - content and sidebar
-     */
-    @BindView(R.id.main_drawer_layout)
-    lateinit var drawer: DrawerLayout
 
     @BindView(R.id.content_view)
     lateinit var pager: ViewPager
@@ -131,6 +131,8 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         // setup click listeners, adapters etc.
         setupUI()
+        // Setup profile themes
+        setupTheming()
         // load user profile and initialize tabs
         reLogin(Auth.user)
     }
@@ -173,16 +175,29 @@ class MainActivity : AppCompatActivity() {
             drawer.openDrawer(GravityCompat.START)
             preferences.edit().putBoolean("first-app-launch", false).apply()
         }
-
-        setupTheming()
     }
 
     private fun setupTheming() {
+        Scoop.getInstance().addStyleLevel()
+
+        Scoop.getInstance().bindStatusBar(this, STATUS_BAR)
+
+
         Scoop.getInstance().bind(TOOLBAR, toolbar)
         Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
+        Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarIconsAdapter())
+
         Scoop.getInstance().bind(TOOLBAR, tabs)
         Scoop.getInstance().bind(TOOLBAR_TEXT, tabs, TabLayoutTextAdapter())
-        Scoop.getInstance().bind(ACCENT, tabs, TabLayoutLineAdapter())
+        Scoop.getInstance().bind(TOOLBAR_TEXT, tabs, TabLayoutLineAdapter())
+
+        Scoop.getInstance().bind(ACCENT, actionButton, FabColorAdapter())
+        Scoop.getInstance().bind(ACCENT_TEXT, actionButton, FabIconAdapter())
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Scoop.getInstance().popStyleLevel()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -198,6 +213,11 @@ class MainActivity : AppCompatActivity() {
     private fun setupTopSearch(menu: Menu) {
         val searchItem = menu.findItem(R.id.menu_search)
         val searchView = searchItem.actionView as SearchView
+
+        // apply theme to search view
+        Scoop.getInstance().bind(TOOLBAR_TEXT, searchView, SearchIconsAdapter())
+        Scoop.getInstance().bind(TOOLBAR_TEXT, searchView, SearchTextAdapter())
+
         val initialSuggestions = constructSuggestions("")
         val searchAdapter = SimpleCursorAdapter(this, R.layout.activity_main_search_row, initialSuggestions,
                 arrayOf("name", "type", "source"),
@@ -600,6 +620,9 @@ class MainActivity : AppCompatActivity() {
      * Refresh sliding tabs, sidebar (usually after auth/settings change)
      */
     fun refresh() {
+
+        // apply theme if present
+        Auth.profile?.let { applyTheme(it, this) }
 
         // load current blog and favorites
         GlobalScope.launch(Dispatchers.Main) {

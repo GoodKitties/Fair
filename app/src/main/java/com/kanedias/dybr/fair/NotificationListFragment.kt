@@ -8,7 +8,9 @@ import android.view.*
 import butterknife.BindView
 import butterknife.ButterKnife
 import com.afollestad.materialdialogs.MaterialDialog
+import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.dto.*
+import com.kanedias.dybr.fair.themes.*
 import kotlinx.coroutines.*
 
 /**
@@ -90,6 +92,7 @@ open class NotificationListFragment: UserContentListFragment() {
     }
 
     open fun setupTheming(view: View) {
+        Scoop.getInstance().bind(BACKGROUND, notifRibbon)
     }
 
     /**
@@ -126,7 +129,7 @@ open class NotificationListFragment: UserContentListFragment() {
             return when (viewType) {
                 ITEM_REGULAR -> {
                     val view = inflater.inflate(R.layout.fragment_notification_list_item, parent, false)
-                    NotificationViewHolder(view)
+                    NotificationViewHolder(view, parent as View)
                 }
                 else -> super.onCreateViewHolder(parent, viewType)
             }

@@ -10,11 +10,13 @@ import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
+import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.ui.handleMarkdown
 import java.text.SimpleDateFormat
 import java.util.*
 import com.kanedias.dybr.fair.dto.Notification
 import com.kanedias.dybr.fair.dto.NotificationRequest
+import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.toggleEnableRecursive
 import kotlinx.coroutines.*
 
@@ -24,7 +26,7 @@ import kotlinx.coroutines.*
  * @see NotificationListFragment.notifRibbon
  * @author Kanedias
  */
-class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
+class NotificationViewHolder(iv: View, private val parent: View) : RecyclerView.ViewHolder(iv) {
 
     @BindView(R.id.notification_area)
     lateinit var notificationArea: RelativeLayout
@@ -80,6 +82,7 @@ class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
     init {
         ButterKnife.bind(this, iv)
+        setupTheming()
 
         iv.setOnClickListener(commentShow)
     }
@@ -100,6 +103,28 @@ class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
                 Network.reportErrors(itemView.context, ex)
             }
         }
+    }
+
+    private fun setupTheming() {
+        Scoop.getInstance().bind(TEXT_BLOCK, itemView, parent, CardViewColorAdapter())
+        Scoop.getInstance().bind(TEXT, causeView, parent)
+        Scoop.getInstance().bind(TEXT_OFFTOP, causeView, parent, TextViewDisabledAdapter())
+
+        Scoop.getInstance().bind(TEXT, blogView, parent)
+        Scoop.getInstance().bind(TEXT_OFFTOP, blogView, parent, TextViewDisabledAdapter())
+
+        Scoop.getInstance().bind(TEXT, authorView, parent)
+        Scoop.getInstance().bind(TEXT_OFFTOP, authorView, parent, TextViewDisabledAdapter())
+
+        Scoop.getInstance().bind(TEXT, dateView, parent)
+        Scoop.getInstance().bind(TEXT_OFFTOP, dateView, parent, TextViewDisabledAdapter())
+
+        Scoop.getInstance().bind(TEXT, bodyView, parent)
+        Scoop.getInstance().bind(TEXT_OFFTOP, bodyView, parent, TextViewDisabledAdapter())
+
+        Scoop.getInstance().bind(TEXT_LINKS, bodyView, parent, TextViewLinksAdapter())
+
+        Scoop.getInstance().bind(TEXT_LINKS, readButton, parent)
     }
 
     /**

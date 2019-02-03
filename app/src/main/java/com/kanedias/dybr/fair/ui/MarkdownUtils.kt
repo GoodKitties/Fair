@@ -278,10 +278,6 @@ class DrawableLoader(private val view: TextView): AsyncDrawable.Loader {
         override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
             resource.setBounds(0, 0, resource.intrinsicWidth, resource.intrinsicHeight)
             drawable.result = resource
-
-            if (resource is GifDrawable) {
-                resource.start()
-            }
         }
 
         override fun onLoadCleared(placeholder: Drawable?) {
@@ -346,7 +342,10 @@ class ImageShowOverlay(ctx: Context,
                 override fun onResourceReady(resource: File, transition: Transition<in File>?) {
                     val downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                     val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(getMimeTypeOfFile(resource))
-                    val name = "${resolved.pathSegments().last()}.$ext"
+                    var name = resolved.pathSegments().last()
+                    if (ext!= null && !name.endsWith(ext)) {
+                        name += ".$ext"
+                    }
                     val downloadedFile = File(downloads, name)
                     downloadedFile.writeBytes(resource.readBytes())
 

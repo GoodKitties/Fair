@@ -19,13 +19,14 @@ const val TOOLBAR = 0       // top toolbar color
 const val STATUS_BAR = 1    // status bar color (a thin bar above toolbar)
 const val TOOLBAR_TEXT = 2  // toolbar title text
 const val ACCENT = 3        // floating button color
-const val BACKGROUND = 4    // background for main view
-const val DIVIDER = 5       // color of divider lines (between text and edit/delete buttons)
-const val TEXT_BLOCK = 6    // background for text cards
-const val TEXT = 7          // color of main text
-const val TEXT_HEADERS = 8  // color of entry titles
-const val TEXT_LINKS = 9    // color of links in text
-const val TEXT_OFFTOP = 10  // color of offtop and hints in text
+const val ACCENT_TEXT = 4   // floating button color
+const val BACKGROUND = 5    // background for main view
+const val DIVIDER = 6       // color of divider lines (between text and edit/delete buttons)
+const val TEXT_BLOCK = 7    // background for text cards
+const val TEXT = 8          // color of main text
+const val TEXT_HEADERS = 9  // color of entry titles
+const val TEXT_LINKS = 10   // color of links in text
+const val TEXT_OFFTOP = 11  // color of offtop and hints in text
 
 /**
  * Converts rgba string to standard color integer notation
@@ -114,11 +115,13 @@ fun updateColorBindings(design: Design) {
     }
 
     // common background color
+    Log.e("ThemeEngine", "BG COLOR ${design.data.colors?.background}")
     design.data.colors?.background?.colorFromCss()?.let {
         // workaround: if alpha is lower than 1 blend with white
         // because default website color is white
         val alpha = Color.alpha(it).toFloat() / 255
         if (alpha < 0.5) {
+            Log.e("ThemeEngine", "BLENDING")
             Scoop.getInstance().update(BACKGROUND, ColorUtils.compositeColors(it, Color.WHITE))
             return@let
         }
@@ -144,6 +147,9 @@ fun updateColorBindings(design: Design) {
     // color of links like "edit" or "delete"
     design.data.colors?.links?.colorFromCss()?.let { Scoop.getInstance().update(TEXT_LINKS, it) }
 
-    // accent color
-    design.data.colors?.accent?.colorFromCss()?.let { Scoop.getInstance().update(ACCENT, it) }
+    // accent color, color of header with page numbers and filters
+    design.data.colors?.elementsBack?.colorFromCss()?.let { Scoop.getInstance().update(ACCENT, it) }
+
+    // text on accent-colored views
+    design.data.colors?.elements?.colorFromCss()?.let { Scoop.getInstance().update(ACCENT_TEXT, it) }
 }

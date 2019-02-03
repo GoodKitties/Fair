@@ -3,6 +3,7 @@ package com.kanedias.dybr.fair.themes
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import androidx.annotation.ColorInt
@@ -17,9 +18,13 @@ import androidx.appcompat.widget.Toolbar
 import android.view.View
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.widget.SearchView
 import com.ftinc.scoop.adapters.ColorAdapter
+import com.ftinc.scoop.adapters.TextViewColorAdapter
 import com.ftinc.scoop.util.Utils
+import com.kanedias.dybr.fair.R
 
 /**
  * @author Kanedias
@@ -44,7 +49,7 @@ class TabUnderlineAdapter: ColorAdapter<TabLayout> {
 class FabColorAdapter : ColorAdapter<FloatingActionButton> {
 
     override fun applyColor(view: FloatingActionButton, @ColorInt color: Int) {
-        val colorStateList = Utils.colorToStateList(color)
+        val colorStateList = ColorStateList.valueOf(color)
         view.backgroundTintList = colorStateList
     }
 
@@ -60,8 +65,7 @@ class FabIconAdapter : ColorAdapter<FloatingActionButton> {
     override fun applyColor(view: FloatingActionButton, @ColorInt color: Int) {
         this.color = color
 
-        val colorStateList = Utils.colorToStateList(color)
-        DrawableCompat.setTintList(view.drawable, colorStateList)
+        DrawableCompat.setTint(view.drawable, color)
     }
 
     override fun getColor(view: FloatingActionButton): Int {
@@ -95,16 +99,80 @@ class ToolbarTextAdapter : ColorAdapter<Toolbar> {
     }
 }
 
-class ToolbarIconAdapter : ColorAdapter<Toolbar> {
+class ToolbarIconsAdapter : ColorAdapter<Toolbar> {
+
+    private var color = Color.TRANSPARENT
 
     override fun applyColor(view: Toolbar, @ColorInt color: Int) {
-        val icon = view.navigationIcon as DrawerArrowDrawable?
-        icon?.color = color
+        this.color = color
+
+        for (drawable in listOfNotNull(view.navigationIcon, view.overflowIcon, view.collapseIcon)) {
+            // drawer arrow drawable can't be tinted
+            if (drawable is DrawerArrowDrawable) {
+                drawable.color = color
+                continue
+            }
+
+            DrawableCompat.setTint(drawable, color)
+        }
     }
 
     override fun getColor(view: Toolbar): Int {
-        val icon = view.navigationIcon as DrawerArrowDrawable?
-        return icon?.color ?: Color.TRANSPARENT
+        return color
+    }
+}
+
+class SearchIconsAdapter : ColorAdapter<SearchView> {
+
+    private  fun getDrawable(content: View, name: String) : Drawable? {
+        val field = content::class.java.getDeclaredField(name)
+        field.isAccessible = true
+        return field.get(content) as? Drawable?
+    }
+
+    private var color = Color.TRANSPARENT
+
+    override fun applyColor(view: SearchView, @ColorInt color: Int) {
+        this.color = color
+
+        val searchImg = view.findViewById<ImageView>(androidx.appcompat.R.id.search_button)
+        val collImg = view.findViewById<ImageView>(androidx.appcompat.R.id.search_mag_icon)
+        val goImg = view.findViewById<ImageView>(androidx.appcompat.R.id.search_go_btn)
+        val closeImg = view.findViewById<ImageView>(androidx.appcompat.R.id.search_close_btn)
+        val voiceImg = view.findViewById<ImageView>(androidx.appcompat.R.id.search_voice_btn)
+
+        for (image in listOfNotNull(searchImg, collImg, goImg, closeImg, voiceImg)) {
+            DrawableCompat.setTint(image.drawable, color)
+        }
+
+        getDrawable(view, "mSearchHintIcon")?.let {
+            val hintColor = ColorUtils.setAlphaComponent(color, 127)
+            DrawableCompat.setTint(it, hintColor)
+        }
+
+    }
+
+    override fun getColor(view: SearchView): Int {
+        return color
+    }
+}
+
+class SearchTextAdapter : ColorAdapter<SearchView> {
+
+    private var color = Color.TRANSPARENT
+
+    override fun applyColor(view: SearchView, @ColorInt color: Int) {
+        this.color = color
+
+        val textView = view.findViewById<TextView>(androidx.appcompat.R.id.search_src_text)
+        textView.setTextColor(color)
+
+        val hintColor = ColorUtils.setAlphaComponent(color, 127)
+        textView.setHintTextColor(hintColor)
+    }
+
+    override fun getColor(view: SearchView): Int {
+        return color
     }
 }
 
@@ -119,6 +187,20 @@ class TextViewLinksAdapter: ColorAdapter<TextView> {
     }
 }
 
+/**
+ * Same as [TextViewColorAdapter] but with disabled color support
+ */
+class TextViewDisabledAdapter: ColorAdapter<TextView> {
+
+    override fun applyColor(view: TextView, color: Int) {
+        view.setTextColor(Utils.colorToStateList(view.textColors.defaultColor, color))
+    }
+
+    override fun getColor(view: TextView): Int {
+        return view.currentTextColor
+    }
+}
+
 class TextViewDrawableAdapter: ColorAdapter<TextView> {
 
     private var color = Color.TRANSPARENT
@@ -126,9 +208,8 @@ class TextViewDrawableAdapter: ColorAdapter<TextView> {
     override fun applyColor(view: TextView, color: Int) {
         this.color = color
 
-        val colorStateList = Utils.colorToStateList(color)
         for (drawable in view.compoundDrawables.filterNotNull()) {
-            DrawableCompat.setTintList(drawable, colorStateList)
+            DrawableCompat.setTint(drawable, color)
         }
     }
 
@@ -140,7 +221,7 @@ class TextViewDrawableAdapter: ColorAdapter<TextView> {
 class CheckBoxAdapter: ColorAdapter<CheckBox> {
 
     override fun applyColor(view: CheckBox, color: Int) {
-        CompoundButtonCompat.setButtonTintList(view, Utils.colorToStateList(color))
+        CompoundButtonCompat.setButtonTintList(view, ColorStateList.valueOf(color))
     }
 
     override fun getColor(view: CheckBox): Int {
@@ -164,7 +245,7 @@ class EditTextLineAdapter: ColorAdapter<EditText> {
 
     override fun applyColor(view: EditText, color: Int) {
         if (view is TintableBackgroundView) {
-            view.supportBackgroundTintList = Utils.colorToStateList(color)
+            view.supportBackgroundTintList = ColorStateList.valueOf(color)
         }
     }
 
@@ -251,8 +332,7 @@ class SpinnerDropdownColorAdapter: ColorAdapter<AppCompatSpinner> {
     override fun applyColor(view: AppCompatSpinner, color: Int) {
         this.color = color
 
-        val colorStateList = Utils.colorToStateList(color)
-        DrawableCompat.setTintList(view.background, colorStateList)
+        DrawableCompat.setTint(view.background, color)
     }
 
     override fun getColor(view: AppCompatSpinner): Int {

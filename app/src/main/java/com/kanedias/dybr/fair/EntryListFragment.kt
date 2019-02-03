@@ -1,5 +1,6 @@
 package com.kanedias.dybr.fair
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.fragment.app.FragmentTransaction
@@ -11,7 +12,9 @@ import android.view.View
 import android.view.ViewGroup
 import butterknife.BindView
 import butterknife.ButterKnife
+import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.dto.*
+import com.kanedias.dybr.fair.themes.BACKGROUND
 
 
 /**
@@ -71,6 +74,7 @@ open class EntryListFragment: UserContentListFragment() {
     }
 
     open fun setupTheming(view: View) {
+        Scoop.getInstance().bind(BACKGROUND, entryRibbon)
     }
 
     /**
