@@ -164,6 +164,7 @@ class EntryResponse: Authored() {
 class EntryMeta {
     var commenters = 0
     var comments = 0
+    var subscribed = false
 }
 
 typealias Entry = EntryResponse

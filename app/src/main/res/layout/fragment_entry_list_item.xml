@@ -176,6 +176,15 @@
 
             <ImageView
                 android:theme="@style/Ripple.Item"
+                android:id="@+id/entry_subscribe"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="8dp"
+                android:src="@drawable/star_border"
+                android:contentDescription="@string/subscribe_to_entry"/>
+
+            <ImageView
+                android:theme="@style/Ripple.Item"
                 android:id="@+id/entry_edit"
                 android:layout_width="36dp"
                 android:layout_height="36dp"

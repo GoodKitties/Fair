@@ -777,6 +777,37 @@ object Network {
         return fromWrappedJson(resp.body()!!.source(), LoginResponse::class.java)!!
     }
 
+
+    /**
+     * Update current profile's subscription to [entry]
+     *
+     * @param entry entry to modify status for
+     * @param subscribe if true, subscribe, else unsubscribe from denoted entry
+     */
+    fun updateSubscription(entry: Entry, subscribe: Boolean) {
+        val subscription = object: Resource() {}.apply {
+            type = "subscription"
+            id = entry.id
+        }
+        val req = Request.Builder()
+                .apply {
+                    if (subscribe) {
+                        this.post(RequestBody.create(MIME_JSON_API, toWrappedListJson(subscription)))
+                    } else {
+                        this.patch(RequestBody.create(MIME_JSON_API, """{ "data": [] }"""))
+                    }
+                }
+                .url("$ENTRIES_ENDPOINT/${entry.id}/relationships/subscriptions")
+                .build()
+
+        val resp = httpClient.newCall(req).execute()
+
+        // unprocessable entity error can be returned when something is wrong with your input
+        if (!resp.isSuccessful) {
+            throw extractErrors(resp, "Can't (un)subscribe to entry ${entry.id}")
+        }
+    }
+
     /**
      * Uploads image to dybr-dedicated storage and returns link to it
      *

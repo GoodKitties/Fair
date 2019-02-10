@@ -28,6 +28,7 @@ import com.afollestad.materialdialogs.list.listItems
 import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
+import com.kanedias.dybr.fair.ui.showToastAtView
 import kotlinx.coroutines.*
 
 /**
@@ -63,7 +64,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     @BindView(R.id.entry_draft_state)
     lateinit var draftStateView: TextView
 
-    @BindViews(R.id.entry_edit, R.id.entry_delete, R.id.entry_more_options)
+    @BindViews(R.id.entry_subscribe, R.id.entry_edit, R.id.entry_delete, R.id.entry_more_options)
     lateinit var buttons: List<@JvmSuppressWildcards ImageView>
 
     @BindViews(R.id.entry_participants_indicator, R.id.entry_comments_indicator)
@@ -82,6 +83,11 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
      * Entry that this holder represents
      */
     private lateinit var entry: Entry
+
+    /**
+     * Optional metadata associated with current entry
+     */
+    private var metadata: EntryMeta? = null
 
     /**
      * Blog this entry belongs to
@@ -143,6 +149,28 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .add(R.id.main_drawer_layout, entryEdit)
                 .commit()
+    }
+
+    @OnClick(R.id.entry_subscribe)
+    fun subscribeToEntry(button: ImageView) {
+        val subscribe = !(metadata?.subscribed ?: false)
+
+        val toastText = when (subscribe) {
+            true -> R.string.subscribed_to_entry
+            false -> R.string.unsubscribed_from_entry
+        }
+
+        GlobalScope.launch(Dispatchers.Main) {
+            try {
+                withContext(Dispatchers.IO) { Network.updateSubscription(entry, !subscribe) }
+                showToastAtView(button, itemView.context.getString(toastText))
+
+                metadata?.subscribed = subscribe
+                setupButtons()
+            } catch (ex: Exception) {
+                Network.reportErrors(itemView.context, ex)
+            }
+        }
     }
 
     @OnClick(R.id.entry_delete)
@@ -236,13 +264,21 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     /**
      * Show or hide entry editing buttons depending on circumstances
      */
-    private fun setupEditButtons(show: Boolean) {
-        val visibility = when (show) {
+    private fun setupButtons() {
+        // setup edit buttons
+        val visibility = when (isBlogWritable(profile)) {
             true -> View.VISIBLE
             false -> View.GONE
         }
         val editTag = itemView.context.getString(R.string.edit_tag)
         buttons.filter { it.tag == editTag }.forEach { it.visibility = visibility }
+
+        // setup subscription button
+        val drawable = when (metadata?.subscribed) {
+            true -> R.drawable.star_filled
+            else -> R.drawable.star_border
+        }
+        buttons.first { it.id == R.id.entry_subscribe }.setImageResource(drawable)
     }
 
     /**
@@ -253,6 +289,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
 
         // bind variables
         this.entry = entity
+        this.metadata = Network.bufferToObject<EntryMeta>(entry.meta)
         this.profile = entity.profile.get(entity.document)
 
         // setup text views from entry data
@@ -265,19 +302,18 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
             permissionIcon.visibility = View.GONE
         } else {
             permissionIcon.visibility = View.VISIBLE
-            permissionIcon.setOnClickListener { Toast.makeText(it.context, accessItem.toDescription(it.context), Toast.LENGTH_SHORT).show() }
+            permissionIcon.setOnClickListener { showToastAtView(permissionIcon, accessItem.toDescription(it.context)) }
         }
 
         // show tags if they are present
         setupTags(entry)
 
-        // setup bottom row of edit buttons
-        setupEditButtons(isBlogWritable(profile))
-
         // setup bottom row of metadata buttons
-        val metadata = Network.bufferToObject<EntryMeta>(entry.meta)
         metadata?.let { comments.text = it.comments.toString() }
         metadata?.let { participants.text = it.commenters.toString() }
+
+        // setup bottom row of buttons
+        setupButtons()
 
         bodyView.handleMarkdown(entry.content)
     }

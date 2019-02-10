@@ -223,4 +223,7 @@
     <string name="add_tags">Add #tags</string>
     <string name="downloading_image">Downloading image…</string>
     <string name="image_saved_as">Image saved as</string>
+    <string name="subscribe_to_entry">(Un)subscribe to entry</string>
+    <string name="subscribed_to_entry">Subscribed to entry</string>
+    <string name="unsubscribed_from_entry">Unsubscribed from entry</string>
 </resources>

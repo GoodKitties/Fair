@@ -16,6 +16,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.kanedias.dybr.fair.dto.Authored
+import com.kanedias.dybr.fair.ui.showToastAtView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -66,13 +67,7 @@ abstract class UserContentViewHolder<T: Authored>(iv: View): RecyclerView.ViewHo
      */
     private fun showFullDate(entity: T) {
         val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(entity.createdAt.time)
-        val toast = Toast.makeText(itemView.context, date, Toast.LENGTH_SHORT)
-
-        val location = IntArray(2)
-        getCreationDateView().getLocationOnScreen(location)
-
-        toast.setGravity(Gravity.TOP or Gravity.START, getCreationDateView().right - 25, location[1] - 10)
-        toast.show()
+        showToastAtView(getCreationDateView(), date)
     }
 
     /**

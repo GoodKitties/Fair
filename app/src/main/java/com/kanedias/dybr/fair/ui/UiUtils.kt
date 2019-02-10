@@ -7,8 +7,8 @@ import android.widget.ImageView
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.Drawable
-
-
+import android.view.Gravity
+import android.widget.Toast
 
 
 /**
@@ -34,4 +34,20 @@ fun toggleEnableRecursive(view: View, enabled: Boolean) {
 
     // disable for good
     view.isEnabled = enabled
+}
+
+/**
+ * Show toast exactly under specified view
+ *
+ * @param view view at which toast should be located
+ * @param text text of toast
+ */
+fun showToastAtView(view: View, text: String) {
+    val toast = Toast.makeText(view.context, text, Toast.LENGTH_SHORT)
+
+    val location = IntArray(2)
+    view.getLocationOnScreen(location)
+
+    toast.setGravity(Gravity.TOP or Gravity.START, view.right - 25, location[1] - 10)
+    toast.show()
 }
