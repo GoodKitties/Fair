@@ -191,8 +191,8 @@ class MainActivity : AppCompatActivity() {
         Scoop.getInstance().bind(TOOLBAR_TEXT, tabs, TabLayoutTextAdapter())
         Scoop.getInstance().bind(TOOLBAR_TEXT, tabs, TabLayoutLineAdapter())
 
-        Scoop.getInstance().bind(ACCENT, actionButton, FabColorAdapter())
-        Scoop.getInstance().bind(ACCENT_TEXT, actionButton, FabIconAdapter())
+        Scoop.getInstance().bind(ACCENT_TEXT, actionButton, FabColorAdapter())
+        Scoop.getInstance().bind(ACCENT, actionButton, FabIconAdapter())
     }
 
     override fun onDestroy() {

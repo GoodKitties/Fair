@@ -52,8 +52,10 @@ open class EntryListFragmentFull: EntryListFragment() {
         Scoop.getInstance().bind(TOOLBAR, toolbar)
         Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
         Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarIconsAdapter())
-        Scoop.getInstance().bind(ACCENT, addEntryButton, FabColorAdapter())
-        Scoop.getInstance().bind(ACCENT_TEXT, addEntryButton, FabIconAdapter())
+
+        Scoop.getInstance().bind(ACCENT_TEXT, addEntryButton, FabColorAdapter())
+        Scoop.getInstance().bind(ACCENT, addEntryButton, FabIconAdapter())
+
         Scoop.getInstance().bindStatusBar(activity, STATUS_BAR)
 
         profile?.let { applyTheme(it, activity) }

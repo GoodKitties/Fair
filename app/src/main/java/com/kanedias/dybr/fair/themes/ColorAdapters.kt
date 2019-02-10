@@ -262,6 +262,7 @@ class EditTextAdapter: ColorAdapter<EditText> {
 
     override fun applyColor(view: EditText, color: Int) {
         view.setTextColor(color)
+        view.setHintTextColor(ColorUtils.setAlphaComponent(color, 127))
     }
 
     override fun getColor(view: EditText): Int {

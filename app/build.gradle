@@ -76,7 +76,7 @@ android {
 }
 
 play {
-    jsonFile = file('misc/android-publisher-account.json')
+    serviceAccountCredentials = file('misc/android-publisher-account.json')
     track = project.hasProperty('releaseType') ? project.property('releaseType') : 'alpha'
 }
 
@@ -84,8 +84,8 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"     // Kotlin language support
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.0"        // Kotlin coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.0"     // Kotlin UI context
-    implementation 'com.google.android.material:material:1.1.0-alpha02'         // Material design support lib
-    implementation 'androidx.appcompat:appcompat:1.1.0-alpha01'                 // basic toolbars etc.
+    implementation 'com.google.android.material:material:1.1.0-alpha03'         // Material design support lib
+    implementation 'androidx.appcompat:appcompat:1.1.0-alpha02'                 // basic toolbars etc.
     implementation 'androidx.cardview:cardview:1.0.0'                           // snappy cardview for lists
     implementation 'androidx.preference:preference:1.0.0'                       // preference fragment compatibility
     implementation "ch.acra:acra-mail:$acraVersion"                             // crash handler
@@ -119,5 +119,5 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test:rules:1.1.1'
     androidTestImplementation 'org.awaitility:awaitility:3.0.0'                        // useful wait-for-condition
-    androidTestImplementation 'org.apache.commons:commons-text:1.2'                    // random string generator
+    androidTestImplementation 'org.apache.commons:commons-text:1.4'                    // random string generator
 }

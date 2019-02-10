@@ -85,7 +85,6 @@ class EditorViews : Fragment() {
         Scoop.getInstance().bind(DIVIDER, topDivider)
         Scoop.getInstance().bind(TEXT, contentInput, EditTextAdapter())
         Scoop.getInstance().bind(TEXT_LINKS, contentInput, EditTextLineAdapter())
-        Scoop.getInstance().bind(TEXT_OFFTOP, contentInput, EditTextHintAdapter())
         Scoop.getInstance().bind(TEXT, mdLabel)
         Scoop.getInstance().bind(TEXT_LINKS, mdLabel, TextViewLinksAdapter())
     }
