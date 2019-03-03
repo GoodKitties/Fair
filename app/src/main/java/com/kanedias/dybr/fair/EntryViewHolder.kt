@@ -38,7 +38,7 @@ import kotlinx.coroutines.*
  * @see EntryListFragment.entryRibbon
  * @author Kanedias
  */
-class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : UserContentViewHolder<Entry>(iv) {
+class EntryViewHolder(iv: View, private val parent: View, private val allowSelection: Boolean = false) : UserContentViewHolder<Entry>(iv) {
 
     @BindView(R.id.entry_avatar)
     lateinit var avatarView: ImageView
@@ -123,7 +123,7 @@ class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : U
     }
 
     private fun setupTheming() {
-        val styleLevel = itemView.styleLevel ?: return
+        val styleLevel = parent.styleLevel ?: return
 
         styleLevel.bind(TEXT_BLOCK, itemView, CardViewColorAdapter())
         styleLevel.bind(TEXT_HEADERS, titleView)

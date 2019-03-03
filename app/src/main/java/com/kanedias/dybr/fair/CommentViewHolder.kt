@@ -7,7 +7,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.fragment.app.FragmentActivity
 import butterknife.BindView
 import butterknife.BindViews
 import butterknife.ButterKnife
@@ -26,7 +25,7 @@ import kotlinx.coroutines.*
  * @see CommentListFragment.commentRibbon
  * @author Kanedias
  */
-class CommentViewHolder(private val entry: Entry, iv: View) : UserContentViewHolder<Comment>(iv) {
+class CommentViewHolder(iv: View, private val parent: View, private val entry: Entry) : UserContentViewHolder<Comment>(iv) {
 
     @BindView(R.id.comment_avatar)
     lateinit var avatarView: ImageView
@@ -58,7 +57,7 @@ class CommentViewHolder(private val entry: Entry, iv: View) : UserContentViewHol
     override fun getAuthorNameView() = authorView
 
     private fun setupTheming() {
-        val styleLevel = itemView.styleLevel ?: return
+        val styleLevel = parent.styleLevel ?: return
 
         styleLevel.bind(TEXT_BLOCK, itemView, CardViewColorAdapter())
         styleLevel.bind(TEXT, authorView)

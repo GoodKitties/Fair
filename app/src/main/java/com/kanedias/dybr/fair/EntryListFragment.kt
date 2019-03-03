@@ -183,7 +183,7 @@ open class EntryListFragment: UserContentListFragment() {
             return when (viewType) {
                 ITEM_REGULAR -> {
                     val view = inflater.inflate(R.layout.fragment_entry_list_item, parent, false)
-                    EntryViewHolder(view)
+                    EntryViewHolder(view, parent)
                 }
                 else -> super.onCreateViewHolder(parent, viewType)
             }

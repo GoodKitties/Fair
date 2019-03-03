@@ -75,7 +75,20 @@ val View.styleLevel : StyleLevel?
         val activity = this.context as? MainActivity ?: return null
         val fm = activity.supportFragmentManager
 
-        //first, try to find fragment with style on top of backstack
+        // first, check if this view's parent fragment is itself styled
+        for (fragment in fm.fragments) {
+            val styled = fragment as? UserContentListFragment ?: continue
+
+            var parent = this
+            while (parent.parent != null && parent.parent is View) {
+                if (parent.parent === fragment.view)
+                    return styled.styleLevel
+
+                parent = parent.parent as View
+            }
+        }
+
+        // second, try to find fragment with style on top of backstack
         for (idx in fm.backStackEntryCount - 1 downTo 0) {
             val entry = fm.getBackStackEntryAt(idx)
             val opsField = entry::class.java.getDeclaredField("mOps").apply { isAccessible = true }

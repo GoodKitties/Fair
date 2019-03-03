@@ -190,11 +190,11 @@ class CommentListFragment : UserContentListFragment() {
             return when (viewType) {
                 ITEM_HEADER -> {
                     val view = inflater.inflate(R.layout.fragment_entry_list_item, parent, false)
-                    EntryViewHolder(view, allowSelection = true)
+                    EntryViewHolder(view, parent, allowSelection = true)
                 }
                 ITEM_REGULAR -> {
                     val view = inflater.inflate(R.layout.fragment_comment_list_item, parent, false)
-                    CommentViewHolder(entry!!, view)
+                    CommentViewHolder(view, parent, entry!!)
                 }
                 else -> return super.onCreateViewHolder(parent, viewType)
             }
