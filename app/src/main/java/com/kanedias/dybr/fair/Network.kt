@@ -785,8 +785,8 @@ object Network {
      * @param subscribe if true, subscribe, else unsubscribe from denoted entry
      */
     fun updateSubscription(entry: Entry, subscribe: Boolean) {
-        val subscription = object: Resource() {}.apply {
-            type = "subscription"
+        val subscription = ResourceIdentifier().apply {
+            type = "subscriptions"
             id = entry.id
         }
         val req = Request.Builder()

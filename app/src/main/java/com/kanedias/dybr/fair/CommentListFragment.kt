@@ -62,6 +62,7 @@ class CommentListFragment : UserContentListFragment() {
 
         ButterKnife.bind(this, view)
         setupUI()
+        setupTheming()
         loadMore()
 
         return view
@@ -80,24 +81,23 @@ class CommentListFragment : UserContentListFragment() {
         ribbonRefresher.setOnRefreshListener { loadMore(reset = true) }
         commentRibbon.layoutManager = LinearLayoutManager(activity)
         commentRibbon.adapter = commentAdapter
-
-        setBlogTheme()
     }
 
-    private fun setBlogTheme() {
+    private fun setupTheming() {
         // this is a fullscreen fragment, add new style
-        Scoop.getInstance().addStyleLevel(view)
-        Scoop.getInstance().bind(TOOLBAR, toolbar)
-        Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
-        Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarIconsAdapter())
+        styleLevel = Scoop.getInstance().addStyleLevel()
 
-        Scoop.getInstance().bind(ACCENT_TEXT, addCommentButton, FabColorAdapter())
-        Scoop.getInstance().bind(ACCENT, addCommentButton, FabIconAdapter())
+        styleLevel.bind(TOOLBAR, toolbar)
+        styleLevel.bind(TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
+        styleLevel.bind(TOOLBAR_TEXT, toolbar, ToolbarIconsAdapter())
 
-        Scoop.getInstance().bind(BACKGROUND, commentRibbon)
-        Scoop.getInstance().bindStatusBar(activity, STATUS_BAR)
+        styleLevel.bind(ACCENT, addCommentButton, FabColorAdapter())
+        styleLevel.bind(ACCENT_TEXT, addCommentButton, FabIconAdapter())
 
-        entry?.profile?.get(entry?.document)?.let { applyTheme(it, activity) }
+        styleLevel.bind(BACKGROUND, commentRibbon)
+        styleLevel.bindStatusBar(activity, STATUS_BAR)
+
+        entry?.profile?.get(entry?.document)?.let { applyTheme(activity, it, styleLevel) }
     }
 
     override fun onDestroyView() {
@@ -173,7 +173,7 @@ class CommentListFragment : UserContentListFragment() {
                 ITEM_HEADER -> {
                     val entry = headers[position] as Entry
                     (holder as EntryViewHolder).apply {
-                        setup(entry)
+                        setup(entry, true)
                         itemView.isClickable = false
                     }
                 }
@@ -190,11 +190,11 @@ class CommentListFragment : UserContentListFragment() {
             return when (viewType) {
                 ITEM_HEADER -> {
                     val view = inflater.inflate(R.layout.fragment_entry_list_item, parent, false)
-                    EntryViewHolder(view, parent as View, allowSelection = true)
+                    EntryViewHolder(view, allowSelection = true)
                 }
                 ITEM_REGULAR -> {
                     val view = inflater.inflate(R.layout.fragment_comment_list_item, parent, false)
-                    CommentViewHolder(entry!!, view, parent as View)
+                    CommentViewHolder(entry!!, view)
                 }
                 else -> return super.onCreateViewHolder(parent, viewType)
             }

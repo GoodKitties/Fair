@@ -10,14 +10,12 @@ import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
-import com.ftinc.scoop.Scoop
-import com.kanedias.dybr.fair.ui.handleMarkdown
 import java.text.SimpleDateFormat
 import java.util.*
 import com.kanedias.dybr.fair.dto.Notification
 import com.kanedias.dybr.fair.dto.NotificationRequest
 import com.kanedias.dybr.fair.themes.*
-import com.kanedias.dybr.fair.ui.toggleEnableRecursive
+import com.kanedias.dybr.fair.ui.*
 import kotlinx.coroutines.*
 
 /**
@@ -26,7 +24,7 @@ import kotlinx.coroutines.*
  * @see NotificationListFragment.notifRibbon
  * @author Kanedias
  */
-class NotificationViewHolder(iv: View, private val parent: View) : RecyclerView.ViewHolder(iv) {
+class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
     @BindView(R.id.notification_area)
     lateinit var notificationArea: RelativeLayout
@@ -106,14 +104,16 @@ class NotificationViewHolder(iv: View, private val parent: View) : RecyclerView.
     }
 
     private fun setupTheming() {
-        Scoop.getInstance().bind(TEXT_BLOCK, itemView, parent, CardViewColorAdapter())
-        Scoop.getInstance().bind(TEXT, causeView, parent, TextViewDisableAwareColorAdapter())
-        Scoop.getInstance().bind(TEXT, blogView, parent, TextViewDisableAwareColorAdapter())
-        Scoop.getInstance().bind(TEXT, authorView, parent, TextViewDisableAwareColorAdapter())
-        Scoop.getInstance().bind(TEXT, dateView, parent, TextViewDisableAwareColorAdapter())
-        Scoop.getInstance().bind(TEXT, bodyView, parent, TextViewDisableAwareColorAdapter())
-        Scoop.getInstance().bind(TEXT_LINKS, bodyView, parent, TextViewLinksAdapter())
-        Scoop.getInstance().bind(TEXT_LINKS, readButton, parent)
+        val styleLevel = itemView.styleLevel ?: return
+
+        styleLevel.bind(TEXT_BLOCK, itemView, CardViewColorAdapter())
+        styleLevel.bind(TEXT, causeView, TextViewDisableAwareColorAdapter())
+        styleLevel.bind(TEXT, blogView, TextViewDisableAwareColorAdapter())
+        styleLevel.bind(TEXT, authorView, TextViewDisableAwareColorAdapter())
+        styleLevel.bind(TEXT, dateView, TextViewDisableAwareColorAdapter())
+        styleLevel.bind(TEXT, bodyView, TextViewDisableAwareColorAdapter())
+        styleLevel.bind(TEXT_LINKS, bodyView, TextViewLinksAdapter())
+        styleLevel.bind(TEXT_LINKS, readButton)
     }
 
     /**

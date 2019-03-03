@@ -8,6 +8,7 @@ import androidx.annotation.FloatRange
 import androidx.core.graphics.ColorUtils
 import android.util.Log
 import com.ftinc.scoop.Scoop
+import com.ftinc.scoop.StyleLevel
 import com.kanedias.dybr.fair.Network
 import com.kanedias.dybr.fair.dto.Design
 import com.kanedias.dybr.fair.dto.OwnProfile
@@ -63,16 +64,17 @@ fun blendRGB(@ColorInt color1: Int, @ColorInt color2: Int, @FloatRange(from = 0.
  *
  * Note: Requires network. Resolves blog -> profile -> current profile design.
  *
+ * @param ctx context to work with
  * @param profile profile to retrieve themes for
- * @param target target context where theme is applied
+ * @param level style level to alter
  */
-fun applyTheme(profile: OwnProfile, target: Context) {
+fun applyTheme(ctx: Context, profile: OwnProfile, level: StyleLevel) {
     // don't apply to service blogs e.g. to favorites or world
     if (isMarkerBlog(profile))
         return
 
     // don't apply if user explicitly shat it down
-    val prefs = PreferenceManager.getDefaultSharedPreferences(target)
+    val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
     if (!prefs.getBoolean("apply-blog-theme", true))
         return
 
@@ -80,7 +82,7 @@ fun applyTheme(profile: OwnProfile, target: Context) {
         try {
             val design = withContext(Dispatchers.IO) { Network.loadProfileDesign(profile) } ?: return@launch
 
-            updateColorBindings(design)
+            updateColorBindings(design, level)
         } catch (ex: Exception) {
             // do nothing - themes are optional
             Log.e("ThemeEngine", "Couldn't apply theme", ex)
@@ -88,7 +90,7 @@ fun applyTheme(profile: OwnProfile, target: Context) {
     }
 }
 
-fun updateColorBindings(design: Design) {
+fun updateColorBindings(design: Design, level: StyleLevel) {
     // toolbar colors
     design.data.header?.let {
         val tbBackground = it.background?.colorFromCss() ?: return@let
@@ -109,9 +111,9 @@ fun updateColorBindings(design: Design) {
             }
         }
 
-        Scoop.getInstance().update(TOOLBAR, tbBackground)
-        Scoop.getInstance().update(STATUS_BAR, blendRGB(tbBackground, Color.BLACK, 0.2f))
-        Scoop.getInstance().update(TOOLBAR_TEXT, tbText)
+        level.update(TOOLBAR, tbBackground)
+        level.update(STATUS_BAR, blendRGB(tbBackground, Color.BLACK, 0.2f))
+        level.update(TOOLBAR_TEXT, tbText)
     }
 
     // common background color
@@ -122,34 +124,34 @@ fun updateColorBindings(design: Design) {
         val alpha = Color.alpha(it).toFloat() / 255
         if (alpha < 0.5) {
             Log.e("ThemeEngine", "BLENDING")
-            Scoop.getInstance().update(BACKGROUND, ColorUtils.compositeColors(it, Color.WHITE))
+            level.update(BACKGROUND, ColorUtils.compositeColors(it, Color.WHITE))
             return@let
         }
 
-        Scoop.getInstance().update(BACKGROUND, it)
+        level.update(BACKGROUND, it)
     }
 
     // color of text cards
-    design.data.colors?.blocks?.colorFromCss()?.let { Scoop.getInstance().update(TEXT_BLOCK, it) }
+    design.data.colors?.blocks?.colorFromCss()?.let { level.update(TEXT_BLOCK, it) }
 
     // color of text on the cards
-    design.data.colors?.text?.colorFromCss()?.let { Scoop.getInstance().update(TEXT, it) }
+    design.data.colors?.text?.colorFromCss()?.let { level.update(TEXT, it) }
 
     // color of offtop and hints in text
-    design.data.colors?.offtop?.colorFromCss()?.let { Scoop.getInstance().update(TEXT_OFFTOP, it) }
+    design.data.colors?.offtop?.colorFromCss()?.let { level.update(TEXT_OFFTOP, it) }
 
     // color of entry titles on the cards
-    design.data.colors?.headers?.colorFromCss()?.let { Scoop.getInstance().update(TEXT_HEADERS, it) }
+    design.data.colors?.headers?.colorFromCss()?.let { level.update(TEXT_HEADERS, it) }
 
     // dividers between entry text and buttons
-    design.data.colors?.dividers?.colorFromCss()?.let { Scoop.getInstance().update(DIVIDER, it) }
+    design.data.colors?.dividers?.colorFromCss()?.let { level.update(DIVIDER, it) }
 
     // color of links like "edit" or "delete"
-    design.data.colors?.links?.colorFromCss()?.let { Scoop.getInstance().update(TEXT_LINKS, it) }
+    design.data.colors?.links?.colorFromCss()?.let { level.update(TEXT_LINKS, it) }
 
     // accent color, color of header with page numbers and filters
-    design.data.colors?.elementsBack?.colorFromCss()?.let { Scoop.getInstance().update(ACCENT, it) }
+    design.data.colors?.elementsBack?.colorFromCss()?.let { level.update(ACCENT, it) }
 
     // text on accent-colored views
-    design.data.colors?.elements?.colorFromCss()?.let { Scoop.getInstance().update(ACCENT_TEXT, it) }
+    design.data.colors?.elements?.colorFromCss()?.let { level.update(ACCENT_TEXT, it) }
 }

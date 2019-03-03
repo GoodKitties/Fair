@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.ftinc.scoop.StyleLevel
 import com.kanedias.dybr.fair.dto.Authored
 import kotlinx.coroutines.*
 import moe.banana.jsonapi2.Resource
@@ -36,6 +37,8 @@ abstract class UserContentListFragment : Fragment() {
 
     private lateinit var loadJob: Job
     protected lateinit var uiScope: CoroutineScope
+
+    lateinit var styleLevel: StyleLevel
 
     override fun onAttach(context: Context) {
         super.onAttach(context)

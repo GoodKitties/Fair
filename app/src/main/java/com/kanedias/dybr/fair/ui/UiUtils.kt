@@ -6,9 +6,17 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
-import android.graphics.drawable.Drawable
 import android.view.Gravity
+import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
+import com.ftinc.scoop.StyleLevel
+import com.kanedias.dybr.fair.MainActivity
+import com.kanedias.dybr.fair.UserContentListFragment
+import kotlin.reflect.KClass
+import kotlin.reflect.full.isSubclassOf
 
 
 /**
@@ -48,6 +56,37 @@ fun showToastAtView(view: View, text: String) {
     val location = IntArray(2)
     view.getLocationOnScreen(location)
 
-    toast.setGravity(Gravity.TOP or Gravity.START, view.right - 25, location[1] - 10)
+    toast.setGravity(Gravity.TOP or Gravity.START, location[0] - 25, location[1] - 10)
     toast.show()
 }
+
+/**
+ * Note: Doesn't work if view hierarchy is just being recreated, like when you launch application again
+ * after its activities and fragments were already recycled.
+ */
+@Suppress("UNCHECKED_CAST")
+fun <T: Fragment> FragmentActivity.getTopFragment(type: KClass<T>): T? {
+    val clPredicate = { it: Fragment -> it::class.isSubclassOf(type) }
+    return supportFragmentManager.fragments.reversed().find(clPredicate) as T?
+}
+
+val View.styleLevel : StyleLevel?
+    get() {
+        val activity = this.context as? MainActivity ?: return null
+        val fm = activity.supportFragmentManager
+
+        //first, try to find fragment with style on top of backstack
+        for (idx in fm.backStackEntryCount - 1 downTo 0) {
+            val entry = fm.getBackStackEntryAt(idx)
+            val opsField = entry::class.java.getDeclaredField("mOps").apply { isAccessible = true }
+            val ops = opsField.get(entry) as? List<*>
+
+            val lastOp = ops?.lastOrNull() ?: continue
+            val fragField = lastOp::class.java.getDeclaredField("fragment").apply { isAccessible = true }
+            val fragment = fragField.get(lastOp) as? UserContentListFragment ?: continue
+
+            return fragment.styleLevel
+        }
+
+        return activity.styleLevel
+    }

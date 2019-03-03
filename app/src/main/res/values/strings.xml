@@ -154,7 +154,6 @@
     <string name="insert_bulleted_list">Insert bulleted list</string>
     <string name="insert_link">Insert link</string>
     <string name="insert_image">Insert image</string>
-    <string name="upload_public_image">Upload public image</string>
     <string name="insert_from_clipboard">Insert from clipboard</string>
     <string name="content">Content</string>
     <string name="select_image_to_upload">Select image to upload</string>
@@ -208,7 +207,7 @@
     <string name="share_image_using">Share image using…</string>
     <string name="no_blog_yet">You don\'t have a blog yet!</string>
     <string name="mark_read">Mark read</string>
-    <string name="text_divider">·</string>
+    <string name="text_divider" translatable="false">·</string>
     <string name="notifications">Notifications</string>
     <string name="mark_all_read">Mark all read</string>
     <string name="mark_all_notifications_read">Mark all notifications as read?</string>
@@ -219,7 +218,6 @@
     <string name="select_permission_type">Select permission type</string>
     <string name="entry_access_permissions">Entry access permissions</string>
     <string name="return_to_notifications">Return to notifications?</string>
-    <string name="select_tags">Select #tags</string>
     <string name="add_tags">Add #tags</string>
     <string name="downloading_image">Downloading image…</string>
     <string name="image_saved_as">Image saved as</string>

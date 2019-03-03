@@ -4,7 +4,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.database.Cursor
 import android.database.MatrixCursor
-import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -35,6 +34,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.customListAdapter
 import com.auth0.android.jwt.JWT
 import com.ftinc.scoop.Scoop
+import com.ftinc.scoop.StyleLevel
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.database.entities.Account
 import com.kanedias.dybr.fair.database.entities.SearchGotoInfo
@@ -114,6 +114,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var donateHelper: DonateHelper
 
     /**
+     * Style level for the activity. This is intentionally made public as various fragments that are not shown
+     * in fullscreen should use this level from the activity.
+     *
+     * Fullscreen fragments and various dialogs should instead create and use their own style level.
+     */
+    lateinit var styleLevel: StyleLevel
+
+    /**
      * Tab adapter for [pager] <-> [tabs] synchronisation
      */
     private val tabAdapter = TabAdapter()
@@ -178,21 +186,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupTheming() {
-        Scoop.getInstance().addStyleLevel()
+        styleLevel = Scoop.getInstance().addStyleLevel()
 
-        Scoop.getInstance().bindStatusBar(this, STATUS_BAR)
+        styleLevel.bindStatusBar(this, STATUS_BAR)
 
 
-        Scoop.getInstance().bind(TOOLBAR, toolbar)
-        Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
-        Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarIconsAdapter())
+        styleLevel.bind(TOOLBAR, toolbar)
+        styleLevel.bind(TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
+        styleLevel.bind(TOOLBAR_TEXT, toolbar, ToolbarIconsAdapter())
 
-        Scoop.getInstance().bind(TOOLBAR, tabs)
-        Scoop.getInstance().bind(TOOLBAR_TEXT, tabs, TabLayoutTextAdapter())
-        Scoop.getInstance().bind(TOOLBAR_TEXT, tabs, TabLayoutLineAdapter())
+        styleLevel.bind(TOOLBAR, tabs)
+        styleLevel.bind(TOOLBAR_TEXT, tabs, TabLayoutTextAdapter())
+        styleLevel.bind(TOOLBAR_TEXT, tabs, TabLayoutLineAdapter())
 
-        Scoop.getInstance().bind(ACCENT_TEXT, actionButton, FabColorAdapter())
-        Scoop.getInstance().bind(ACCENT, actionButton, FabIconAdapter())
+        styleLevel.bind(ACCENT, actionButton, FabColorAdapter())
+        styleLevel.bind(ACCENT_TEXT, actionButton, FabIconAdapter())
     }
 
     override fun onDestroy() {
@@ -215,8 +223,8 @@ class MainActivity : AppCompatActivity() {
         val searchView = searchItem.actionView as SearchView
 
         // apply theme to search view
-        Scoop.getInstance().bind(TOOLBAR_TEXT, searchView, SearchIconsAdapter())
-        Scoop.getInstance().bind(TOOLBAR_TEXT, searchView, SearchTextAdapter())
+        styleLevel.bind(TOOLBAR_TEXT, searchView, SearchIconsAdapter())
+        styleLevel.bind(TOOLBAR_TEXT, searchView, SearchTextAdapter())
 
         val initialSuggestions = constructSuggestions("")
         val searchAdapter = SimpleCursorAdapter(this, R.layout.activity_main_search_row, initialSuggestions,
@@ -622,7 +630,7 @@ class MainActivity : AppCompatActivity() {
     fun refresh() {
 
         // apply theme if present
-        Auth.profile?.let { applyTheme(it, this) }
+        Auth.profile?.let { applyTheme(this, it, styleLevel) }
 
         // load current blog and favorites
         GlobalScope.launch(Dispatchers.Main) {

@@ -26,6 +26,7 @@ import com.kanedias.dybr.fair.database.entities.OfflineDraft
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.handleMarkdownRaw
+import com.kanedias.dybr.fair.ui.styleLevel
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.*
 import moe.banana.jsonapi2.HasOne
@@ -164,18 +165,20 @@ class CreateNewEntryFragment : Fragment() {
     }
 
     private fun setupTheming(view: View) {
-        Scoop.getInstance().bind(TEXT_BLOCK, view, BackgroundNoAlphaAdapter())
-        Scoop.getInstance().bind(TEXT, titleInput, EditTextAdapter())
-        Scoop.getInstance().bind(TEXT_LINKS, titleInput, EditTextLineAdapter())
-        Scoop.getInstance().bind(TEXT, tagsInput, EditTextAdapter())
-        Scoop.getInstance().bind(TEXT_LINKS, tagsInput, EditTextLineAdapter())
-        Scoop.getInstance().bind(TEXT, preview)
-        Scoop.getInstance().bind(TEXT_LINKS, preview, TextViewLinksAdapter())
-        Scoop.getInstance().bind(TEXT_LINKS, previewButton, TextViewColorAdapter())
-        Scoop.getInstance().bind(TEXT_LINKS, submitButton, TextViewColorAdapter())
-        Scoop.getInstance().bind(TEXT_LINKS, permissionSpinner, SpinnerDropdownColorAdapter())
-        Scoop.getInstance().bind(TEXT, draftSwitch, TextViewColorAdapter())
-        Scoop.getInstance().bind(TEXT_LINKS, draftSwitch, CheckBoxAdapter())
+        val styleLevel = view.styleLevel ?: return
+
+        styleLevel.bind(TEXT_BLOCK, view, BackgroundNoAlphaAdapter())
+        styleLevel.bind(TEXT, titleInput, EditTextAdapter())
+        styleLevel.bind(TEXT_LINKS, titleInput, EditTextLineAdapter())
+        styleLevel.bind(TEXT, tagsInput, EditTextAdapter())
+        styleLevel.bind(TEXT_LINKS, tagsInput, EditTextLineAdapter())
+        styleLevel.bind(TEXT, preview)
+        styleLevel.bind(TEXT_LINKS, preview, TextViewLinksAdapter())
+        styleLevel.bind(TEXT_LINKS, previewButton, TextViewColorAdapter())
+        styleLevel.bind(TEXT_LINKS, submitButton, TextViewColorAdapter())
+        styleLevel.bind(TEXT_LINKS, permissionSpinner, SpinnerDropdownColorAdapter())
+        styleLevel.bind(TEXT, draftSwitch, TextViewColorAdapter())
+        styleLevel.bind(TEXT_LINKS, draftSwitch, CheckBoxAdapter())
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -470,8 +473,9 @@ class CreateNewEntryFragment : Fragment() {
                 it.compoundDrawablePadding = Utils.dpToPx(it.context, 4F).toInt()
                 it.text = item.toDescription(it.context)
 
-                Scoop.getInstance().bind(TEXT, it, TextViewColorAdapter())
-                Scoop.getInstance().bind(TEXT_LINKS, it, TextViewDrawableAdapter())
+                val styleLevel = view.styleLevel ?: return@let
+                styleLevel.bind(TEXT, it, TextViewColorAdapter())
+                styleLevel.bind(TEXT_LINKS, it, TextViewDrawableAdapter())
             }
 
             return view

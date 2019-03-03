@@ -26,6 +26,7 @@ import com.ftinc.scoop.Scoop
 import com.ftinc.scoop.adapters.TextViewColorAdapter
 import com.kanedias.dybr.fair.Network
 import com.kanedias.dybr.fair.R
+import com.kanedias.dybr.fair.UserContentListFragment
 import com.kanedias.dybr.fair.themes.*
 import kotlinx.coroutines.*
 
@@ -71,22 +72,24 @@ class EditorViews : Fragment() {
 
         // start editing content right away
         contentInput.requestFocus()
-        setupTheming()
+        setupTheming(view)
 
         return view
     }
 
-    private fun setupTheming() {
+    private fun setupTheming(view: View) {
+        val styleLevel = view.styleLevel ?: return
+
         for (idx in 0 until buttonArea.childCount) {
-            Scoop.getInstance().bind(TEXT_LINKS, buttonArea.getChildAt(idx))
+            styleLevel.bind(TEXT_LINKS, buttonArea.getChildAt(idx))
         }
-        Scoop.getInstance().bind(TEXT, clipboardSwitch, TextViewColorAdapter())
-        Scoop.getInstance().bind(TEXT_LINKS, clipboardSwitch, CheckBoxAdapter())
-        Scoop.getInstance().bind(DIVIDER, topDivider)
-        Scoop.getInstance().bind(TEXT, contentInput, EditTextAdapter())
-        Scoop.getInstance().bind(TEXT_LINKS, contentInput, EditTextLineAdapter())
-        Scoop.getInstance().bind(TEXT, mdLabel)
-        Scoop.getInstance().bind(TEXT_LINKS, mdLabel, TextViewLinksAdapter())
+        styleLevel.bind(TEXT, clipboardSwitch, TextViewColorAdapter())
+        styleLevel.bind(TEXT_LINKS, clipboardSwitch, CheckBoxAdapter())
+        styleLevel.bind(DIVIDER, topDivider)
+        styleLevel.bind(TEXT, contentInput, EditTextAdapter())
+        styleLevel.bind(TEXT_LINKS, contentInput, EditTextLineAdapter())
+        styleLevel.bind(TEXT, mdLabel)
+        styleLevel.bind(TEXT_LINKS, mdLabel, TextViewLinksAdapter())
     }
 
     /**

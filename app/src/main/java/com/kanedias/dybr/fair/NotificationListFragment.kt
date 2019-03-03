@@ -8,7 +8,6 @@ import android.view.*
 import butterknife.BindView
 import butterknife.ButterKnife
 import com.afollestad.materialdialogs.MaterialDialog
-import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
 import kotlinx.coroutines.*
@@ -45,7 +44,7 @@ open class NotificationListFragment: UserContentListFragment() {
 
         ButterKnife.bind(this, view)
         setupUI()
-        setupTheming(view)
+        setupTheming()
         loadMore()
 
         return view
@@ -58,7 +57,7 @@ open class NotificationListFragment: UserContentListFragment() {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
-        Scoop.getInstance().bind(TOOLBAR_TEXT, activity.toolbar, ToolbarMenuIconsAdapter())
+        styleLevel.bind(TOOLBAR_TEXT, activity.toolbar, ToolbarMenuIconsAdapter())
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -96,8 +95,10 @@ open class NotificationListFragment: UserContentListFragment() {
         notifRibbon.adapter = notifAdapter
     }
 
-    open fun setupTheming(view: View) {
-        Scoop.getInstance().bind(BACKGROUND, notifRibbon)
+    open fun setupTheming() {
+        styleLevel = activity.styleLevel
+
+        styleLevel.bind(BACKGROUND, notifRibbon)
     }
 
     /**
@@ -134,7 +135,7 @@ open class NotificationListFragment: UserContentListFragment() {
             return when (viewType) {
                 ITEM_REGULAR -> {
                     val view = inflater.inflate(R.layout.fragment_notification_list_item, parent, false)
-                    NotificationViewHolder(view, parent as View)
+                    NotificationViewHolder(view)
                 }
                 else -> super.onCreateViewHolder(parent, viewType)
             }

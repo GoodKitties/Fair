@@ -1,6 +1,5 @@
 package com.kanedias.dybr.fair
 
-import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.fragment.app.FragmentTransaction
@@ -12,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import butterknife.BindView
 import butterknife.ButterKnife
-import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.BACKGROUND
 
@@ -54,7 +52,7 @@ open class EntryListFragment: UserContentListFragment() {
 
         ButterKnife.bind(this, view)
         setupUI()
-        setupTheming(view)
+        setupTheming()
         loadMore()
 
         return view
@@ -73,8 +71,10 @@ open class EntryListFragment: UserContentListFragment() {
         entryRibbon.adapter = entryAdapter
     }
 
-    open fun setupTheming(view: View) {
-        Scoop.getInstance().bind(BACKGROUND, entryRibbon)
+    open fun setupTheming() {
+        styleLevel = activity.styleLevel
+
+        styleLevel.bind(BACKGROUND, entryRibbon)
     }
 
     /**
@@ -183,7 +183,7 @@ open class EntryListFragment: UserContentListFragment() {
             return when (viewType) {
                 ITEM_REGULAR -> {
                     val view = inflater.inflate(R.layout.fragment_entry_list_item, parent, false)
-                    EntryViewHolder(view, parent as View)
+                    EntryViewHolder(view)
                 }
                 else -> super.onCreateViewHolder(parent, viewType)
             }

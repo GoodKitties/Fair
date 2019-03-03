@@ -6,15 +6,14 @@ import androidx.fragment.app.FragmentTransaction
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import android.text.format.DateUtils
-import android.view.Gravity
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
 import com.bumptech.glide.request.RequestOptions
+import com.ftinc.scoop.StyleLevel
 import com.kanedias.dybr.fair.dto.Authored
 import com.kanedias.dybr.fair.ui.showToastAtView
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +38,7 @@ abstract class UserContentViewHolder<T: Authored>(iv: View): RecyclerView.ViewHo
     abstract fun getAuthorNameView(): TextView
     abstract fun getProfileAvatarView(): ImageView
 
-    open fun setup(entity: T) {
+    open fun setup(entity: T, standalone: Boolean = false) {
         val profile = entity.profile.get(entity.document)
 
         getCreationDateView().text = DateUtils.getRelativeTimeSpanString(entity.createdAt.time)

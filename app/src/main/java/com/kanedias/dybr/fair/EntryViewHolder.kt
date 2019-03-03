@@ -25,10 +25,10 @@ import android.text.style.ClickableSpan
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.afollestad.materialdialogs.list.listItems
-import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.showToastAtView
+import com.kanedias.dybr.fair.ui.styleLevel
 import kotlinx.coroutines.*
 
 /**
@@ -38,7 +38,7 @@ import kotlinx.coroutines.*
  * @see EntryListFragment.entryRibbon
  * @author Kanedias
  */
-class EntryViewHolder(iv: View, private val parent: View, private val allowSelection: Boolean = false) : UserContentViewHolder<Entry>(iv) {
+class EntryViewHolder(iv: View, private val allowSelection: Boolean = false) : UserContentViewHolder<Entry>(iv) {
 
     @BindView(R.id.entry_avatar)
     lateinit var avatarView: ImageView
@@ -101,7 +101,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     /**
      * Listener to show comments of this entry
      */
-    private val commentShow  = View.OnClickListener { it ->
+    private val commentShow  = View.OnClickListener {
         val activity = it.context as AppCompatActivity
         val commentsPage = CommentListFragment().apply { entry = this@EntryViewHolder.entry }
         activity.supportFragmentManager.beginTransaction()
@@ -123,16 +123,18 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     }
 
     private fun setupTheming() {
-        Scoop.getInstance().bind(TEXT_BLOCK, itemView, parent, CardViewColorAdapter())
-        Scoop.getInstance().bind(TEXT_HEADERS, titleView, parent)
-        Scoop.getInstance().bind(TEXT, authorView, parent)
-        Scoop.getInstance().bind(TEXT, dateView, parent)
-        Scoop.getInstance().bind(TEXT, bodyView, parent)
-        Scoop.getInstance().bind(TEXT_LINKS, bodyView, parent, TextViewLinksAdapter())
-        Scoop.getInstance().bind(TEXT_LINKS, tagsView, parent, TextViewLinksAdapter())
-        Scoop.getInstance().bind(TEXT_LINKS, permissionIcon, parent)
-        Scoop.getInstance().bind(DIVIDER, metaDivider, parent)
-        (buttons + indicators + participants + comments).forEach { Scoop.getInstance().bind(TEXT_LINKS, it, parent) }
+        val styleLevel = itemView.styleLevel ?: return
+
+        styleLevel.bind(TEXT_BLOCK, itemView, CardViewColorAdapter())
+        styleLevel.bind(TEXT_HEADERS, titleView)
+        styleLevel.bind(TEXT, authorView)
+        styleLevel.bind(TEXT, dateView)
+        styleLevel.bind(TEXT, bodyView)
+        styleLevel.bind(TEXT_LINKS, bodyView, TextViewLinksAdapter())
+        styleLevel.bind(TEXT_LINKS, tagsView, TextViewLinksAdapter())
+        styleLevel.bind(TEXT_LINKS, permissionIcon)
+        styleLevel.bind(DIVIDER, metaDivider)
+        (buttons + indicators + participants + comments).forEach { styleLevel.bind(TEXT_LINKS, it) }
     }
 
     @OnClick(R.id.entry_edit)
@@ -162,7 +164,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
 
         GlobalScope.launch(Dispatchers.Main) {
             try {
-                withContext(Dispatchers.IO) { Network.updateSubscription(entry, !subscribe) }
+                withContext(Dispatchers.IO) { Network.updateSubscription(entry, subscribe) }
                 showToastAtView(button, itemView.context.getString(toastText))
 
                 metadata?.subscribed = subscribe
@@ -266,26 +268,27 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
      */
     private fun setupButtons() {
         // setup edit buttons
-        val visibility = when (isBlogWritable(profile)) {
+        val editVisibility = when (isBlogWritable(profile)) {
             true -> View.VISIBLE
             false -> View.GONE
         }
         val editTag = itemView.context.getString(R.string.edit_tag)
-        buttons.filter { it.tag == editTag }.forEach { it.visibility = visibility }
+        buttons.filter { it.tag == editTag }.forEach { it.visibility = editVisibility }
 
         // setup subscription button
-        val drawable = when (metadata?.subscribed) {
-            true -> R.drawable.star_filled
-            else -> R.drawable.star_border
+        val subButton = buttons.first { it.id == R.id.entry_subscribe }
+        when (metadata?.subscribed) {
+            true -> subButton.apply { visibility = View.VISIBLE; setImageResource(R.drawable.star_filled) }
+            false -> subButton.apply { visibility = View.VISIBLE; setImageResource(R.drawable.star_border) }
+            null -> subButton.visibility = View.GONE
         }
-        buttons.first { it.id == R.id.entry_subscribe }.setImageResource(drawable)
     }
 
     /**
      * Called when this holder should be refreshed based on what it must show now
      */
-    override fun setup(entity: Entry) {
-        super.setup(entity)
+    override fun setup(entity: Entry, standalone: Boolean) {
+        super.setup(entity, standalone)
 
         // bind variables
         this.entry = entity
@@ -314,6 +317,11 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
 
         // setup bottom row of buttons
         setupButtons()
+
+        // hack
+        if (!standalone) {
+            buttons.first { it.id == R.id.entry_subscribe }.visibility = View.GONE
+        }
 
         bodyView.handleMarkdown(entry.content)
     }

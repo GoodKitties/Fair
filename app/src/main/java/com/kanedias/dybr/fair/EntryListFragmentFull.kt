@@ -3,9 +3,9 @@ package com.kanedias.dybr.fair
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.appcompat.widget.Toolbar
-import android.view.View
 import butterknife.BindView
 import com.ftinc.scoop.Scoop
+import com.ftinc.scoop.StyleLevel
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
 
@@ -43,22 +43,22 @@ open class EntryListFragmentFull: EntryListFragment() {
         }
     }
 
-    override fun setupTheming(view: View) {
+    override fun setupTheming() {
         // this is a fullscreen fragment, add new style
-        Scoop.getInstance().addStyleLevel(view)
+        styleLevel = Scoop.getInstance().addStyleLevel()
 
-        super.setupTheming(view)
+        styleLevel.bind(BACKGROUND, entryRibbon)
 
-        Scoop.getInstance().bind(TOOLBAR, toolbar)
-        Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
-        Scoop.getInstance().bind(TOOLBAR_TEXT, toolbar, ToolbarIconsAdapter())
+        styleLevel.bind(TOOLBAR, toolbar)
+        styleLevel.bind(TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
+        styleLevel.bind(TOOLBAR_TEXT, toolbar, ToolbarIconsAdapter())
 
-        Scoop.getInstance().bind(ACCENT_TEXT, addEntryButton, FabColorAdapter())
-        Scoop.getInstance().bind(ACCENT, addEntryButton, FabIconAdapter())
+        styleLevel.bind(ACCENT, addEntryButton, FabColorAdapter())
+        styleLevel.bind(ACCENT_TEXT, addEntryButton, FabIconAdapter())
 
-        Scoop.getInstance().bindStatusBar(activity, STATUS_BAR)
+        styleLevel.bindStatusBar(activity, STATUS_BAR)
 
-        profile?.let { applyTheme(it, activity) }
+        profile?.let { applyTheme(activity, it, styleLevel) }
     }
 
     override fun onDestroyView() {

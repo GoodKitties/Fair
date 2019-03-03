@@ -7,15 +7,16 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.fragment.app.FragmentActivity
 import butterknife.BindView
 import butterknife.BindViews
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
-import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.handleMarkdown
+import com.kanedias.dybr.fair.ui.styleLevel
 import kotlinx.coroutines.*
 
 
@@ -25,7 +26,7 @@ import kotlinx.coroutines.*
  * @see CommentListFragment.commentRibbon
  * @author Kanedias
  */
-class CommentViewHolder(private val entry: Entry, iv: View, private val parent: View) : UserContentViewHolder<Comment>(iv) {
+class CommentViewHolder(private val entry: Entry, iv: View) : UserContentViewHolder<Comment>(iv) {
 
     @BindView(R.id.comment_avatar)
     lateinit var avatarView: ImageView
@@ -57,12 +58,14 @@ class CommentViewHolder(private val entry: Entry, iv: View, private val parent: 
     override fun getAuthorNameView() = authorView
 
     private fun setupTheming() {
-        Scoop.getInstance().bind(TEXT_BLOCK, itemView, parent, CardViewColorAdapter())
-        Scoop.getInstance().bind(TEXT, authorView, parent)
-        Scoop.getInstance().bind(TEXT, dateView, parent)
-        Scoop.getInstance().bind(TEXT, bodyView, parent)
-        Scoop.getInstance().bind(TEXT_LINKS, bodyView, parent, TextViewLinksAdapter())
-        buttons.forEach { Scoop.getInstance().bind(TEXT_LINKS, it, parent) }
+        val styleLevel = itemView.styleLevel ?: return
+
+        styleLevel.bind(TEXT_BLOCK, itemView, CardViewColorAdapter())
+        styleLevel.bind(TEXT, authorView)
+        styleLevel.bind(TEXT, dateView)
+        styleLevel.bind(TEXT, bodyView)
+        styleLevel.bind(TEXT_LINKS, bodyView, TextViewLinksAdapter())
+        buttons.forEach { styleLevel.bind(TEXT_LINKS, it) }
     }
 
     @OnClick(R.id.comment_edit)
@@ -70,8 +73,8 @@ class CommentViewHolder(private val entry: Entry, iv: View, private val parent: 
         val activity = itemView.context as AppCompatActivity
         val commentEdit = CreateNewCommentFragment().apply {
             entry = this@CommentViewHolder.entry
-            editMode = true
             editComment = this@CommentViewHolder.comment
+            editMode = true
         }
 
         activity.supportFragmentManager.beginTransaction()
@@ -126,8 +129,8 @@ class CommentViewHolder(private val entry: Entry, iv: View, private val parent: 
     /**
      * Called when this holder should be refreshed based on what it must show now
      */
-    override fun setup(entity: Comment) {
-        super.setup(entity)
+    override fun setup(entity: Comment, standalone: Boolean) {
+        super.setup(entity, standalone)
 
         this.comment = entity
 

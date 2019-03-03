@@ -21,6 +21,7 @@ import com.kanedias.dybr.fair.database.entities.OfflineDraft
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.handleMarkdownRaw
+import com.kanedias.dybr.fair.ui.styleLevel
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.*
 import moe.banana.jsonapi2.HasOne
@@ -116,11 +117,13 @@ class CreateNewCommentFragment : Fragment() {
     }
 
     private fun setupTheming(view: View) {
-        Scoop.getInstance().bind(TEXT_BLOCK, view, BackgroundNoAlphaAdapter())
-        Scoop.getInstance().bind(TEXT, preview)
-        Scoop.getInstance().bind(TEXT_LINKS, preview, TextViewLinksAdapter())
-        Scoop.getInstance().bind(TEXT_LINKS, previewButton, TextViewColorAdapter())
-        Scoop.getInstance().bind(TEXT_LINKS, submitButton, TextViewColorAdapter())
+        val styleLevel = view.styleLevel ?: return
+
+        styleLevel.bind(TEXT_BLOCK, view, BackgroundNoAlphaAdapter())
+        styleLevel.bind(TEXT, preview)
+        styleLevel.bind(TEXT_LINKS, preview, TextViewLinksAdapter())
+        styleLevel.bind(TEXT_LINKS, previewButton, TextViewColorAdapter())
+        styleLevel.bind(TEXT_LINKS, submitButton, TextViewColorAdapter())
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
