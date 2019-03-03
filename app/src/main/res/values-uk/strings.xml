@@ -1,12 +1,12 @@
 <resources>
     <!-- arrays -->
     <string-array name="image_sizes">
-        <item>100px</item>
-        <item>200px</item>
-        <item>300px</item>
-        <item>500px</item>
-        <item>800px</item>
-        <item>Повний розмір</item>
+        <item>100px</item>      <!-- 0 -->
+        <item>200px</item>      <!-- 1 -->
+        <item>300px</item>      <!-- 2 -->
+        <item>500px</item>      <!-- 3 -->
+        <item>800px</item>      <!-- 4 -->
+        <item>Повний розмір</item>  <!-- 5 -->
     </string-array>
 
     <string name="my_profile">Мій профіль</string>
@@ -136,4 +136,4 @@
     <string name="view_profile">Подивитися профіль</string>
     <string name="removed_from_favorites">Видалено із вибраного</string>
     <string name="added_to_favorites">Додано у вибране</string>
-</resources>
+    </resources>
