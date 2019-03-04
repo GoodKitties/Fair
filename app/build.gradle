@@ -1,8 +1,13 @@
-apply plugin: 'com.android.application'
-apply plugin: 'com.github.triplet.play'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
+plugins {
+    id 'com.android.application'
+
+    id 'com.palantir.git-version' version '0.11.0'
+    id 'com.github.triplet.play' version '2.1.0'
+
+    id 'kotlin-android'
+    id 'kotlin-android-extensions'
+    id 'kotlin-kapt'
+}
 
 android {
     compileSdkVersion 28
@@ -68,9 +73,18 @@ android {
 
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
+            // user-supplied code
+            def versionCode = android.defaultConfig.versionCode
+
+            // code based on ABI
             def versionCodes = ['universal': 0, 'armeabi-v7a': 1, 'arm64-v8a': 2, 'x86': 3, 'x86_64': 4]
             int abiVersionCode = versionCodes.get(output.getFilter(com.android.build.OutputFile.ABI) ?: 'universal')
-            output.versionCodeOverride = abiVersionCode + android.defaultConfig.versionCode * 10
+
+            // code based on track
+            def gitVersionCode = versionDetails().commitDistance
+
+            output.versionCodeOverride = versionCode * 10000 + gitVersionCode * 10 + abiVersionCode
+            output.versionNameOverride = gitVersion()
         }
     }
 }
@@ -84,7 +98,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"     // Kotlin language support
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.0"        // Kotlin coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.0"     // Kotlin UI context
-    implementation 'com.google.android.material:material:1.1.0-alpha03'         // Material design support lib
+    implementation 'com.google.android.material:material:1.1.0-alpha04'         // Material design support lib
     implementation 'androidx.appcompat:appcompat:1.1.0-alpha02'                 // basic toolbars etc.
     implementation 'androidx.cardview:cardview:1.0.0'                           // snappy cardview for lists
     implementation 'androidx.preference:preference:1.0.0'                       // preference fragment compatibility
@@ -106,6 +120,7 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.8.0'                      // image processing/caching lib
     implementation 'com.auth0.android:jwtdecode:1.2.0'                          // handling JWT from server
     implementation 'com.github.stfalcon:stfalcon-imageviewer:0.1.0'             // embedded image viewer
+    implementation 'com.github.marcoscgdev:EasyAbout:1.0.6'                     // about dialog
 
 
     googleplayImplementation 'com.android.billingclient:billing:1.0'            // billing library from Google

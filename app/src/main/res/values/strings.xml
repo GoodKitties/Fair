@@ -1,6 +1,9 @@
 <resources>
     <!-- names, addresses -->
     <string name="app_name" translatable="false">Fair</string>
+    <string name="the_maker" translatable="false">Kanedias</string>
+    <string name="house_of_maker" translatable="false">House of Maker</string>
+    <string name="gplv3" translatable="false">GPLv3</string>
     <string name="namespace_example" translatable="false"><![CDATA[dybr.ru/<address>]]></string>
 
     <!-- placeholders -->
@@ -224,4 +227,13 @@
     <string name="subscribe_to_entry">(Un)subscribe to entry</string>
     <string name="subscribed_to_entry">Subscribed to entry</string>
     <string name="unsubscribed_from_entry">Unsubscribed from entry</string>
+    <string name="version">Version</string>
+    <string name="license">License</string>
+    <string name="author">Author</string>
+    <string name="send_email">Send e-mail</string>
+    <string name="about">About</string>
+    <string name="source_code">Source code</string>
+    <string name="fork_on_github">Fork on Github</string>
+    <string name="report_bug">Report bug</string>
+    <string name="github_issue_tracker">Github issue tracker</string>
 </resources>

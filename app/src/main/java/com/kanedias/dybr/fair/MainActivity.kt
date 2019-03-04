@@ -333,7 +333,11 @@ class MainActivity : AppCompatActivity() {
         when (item?.itemId) {
             R.id.menu_donate -> donateHelper.donate()
             R.id.menu_settings -> startActivity(Intent(this, SettingsActivity::class.java))
-            R.id.menu_refresh -> refreshCurrentTab()
+            R.id.menu_about -> supportFragmentManager.beginTransaction()
+                    .addToBackStack("Showing about fragment")
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .add(R.id.main_drawer_layout, AboutFragment())
+                    .commit()
             else -> return super.onOptionsItemSelected(item)
         }
 

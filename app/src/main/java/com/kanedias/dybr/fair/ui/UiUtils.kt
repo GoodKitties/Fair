@@ -1,15 +1,18 @@
 package com.kanedias.dybr.fair.ui
 
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.net.Uri
 import android.view.Gravity
-import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.ftinc.scoop.StyleLevel
@@ -58,6 +61,22 @@ fun showToastAtView(view: View, text: String) {
 
     toast.setGravity(Gravity.TOP or Gravity.START, location[0] - 25, location[1] - 10)
     toast.show()
+}
+
+/**
+ * Open the URL using the default browser on this device
+ */
+fun openUrlExternally(ctx: Context, uri: Uri) {
+    val pkgMgr = ctx.packageManager
+    val intent = Intent(Intent.ACTION_VIEW, uri)
+
+    // detect default browser
+    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://"))
+    val defaultBrowser = pkgMgr.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
+
+    // use default browser to open the url
+    intent.component = with(defaultBrowser.activityInfo) { ComponentName(applicationInfo.packageName, name) }
+    ctx.startActivity(intent)
 }
 
 /**

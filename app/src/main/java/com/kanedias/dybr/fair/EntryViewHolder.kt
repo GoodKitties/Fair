@@ -14,8 +14,6 @@ import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.ui.handleMarkdown
-import android.content.ComponentName
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableStringBuilder
@@ -27,6 +25,7 @@ import androidx.fragment.app.FragmentTransaction
 import com.afollestad.materialdialogs.list.listItems
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
+import com.kanedias.dybr.fair.ui.openUrlExternally
 import com.kanedias.dybr.fair.ui.showToastAtView
 import com.kanedias.dybr.fair.ui.styleLevel
 import kotlinx.coroutines.*
@@ -243,24 +242,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
                 .appendPath(entry.id)
                 .build()
 
-        openUrlExternally(uri)
-    }
-
-    /**
-     * Open the URL using the default browser on this device
-     */
-    private fun openUrlExternally(uri: Uri) {
-        val ctx = itemView.context
-        val pkgMgr = ctx.packageManager
-        val intent = Intent(Intent.ACTION_VIEW, uri)
-
-        // detect default browser
-        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://"))
-        val defaultBrowser = pkgMgr.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
-
-        // use default browser to open the url
-        intent.component = with(defaultBrowser.activityInfo) { ComponentName(applicationInfo.packageName, name) }
-        ctx.startActivity(intent)
+        openUrlExternally(itemView.context, uri)
     }
 
     /**

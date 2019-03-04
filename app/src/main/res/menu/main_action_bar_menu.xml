@@ -12,18 +12,18 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/menu_refresh"
-        android:title="@string/refresh"
-        android:icon="@android:drawable/ic_menu_rotate"/>
-
-    <item
         android:id="@+id/menu_donate"
         android:title="@string/donate"
-        android:icon="@drawable/money"/>
+        android:icon="@drawable/heart"/>
 
     <item
         android:id="@+id/menu_settings"
         android:title="@string/settings"
         android:icon="@drawable/settings"/>
+
+    <item
+        android:id="@+id/menu_about"
+        android:title="@string/about"
+        android:icon="@drawable/information"/>
 
 </menu>
