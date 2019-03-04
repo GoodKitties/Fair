@@ -24,6 +24,10 @@ before_script:
   - export GRADLE_USER_HOME=$PWD/.gradle
   - chmod +x ./gradlew
 
+.decrypt_release_account: &decrypt_publish_json |
+  apt-get --quiet install gnupg2 --yes
+  gpg --batch --decrypt --output ${GOOGLE_PUBLISH_JSON} --passphrase ${GOOGLE_ACCOUNT_DECRYPTION_KEY} ${GOOGLE_PUBLISH_JSON}.gpg
+
 stages:
   - build
   - test
@@ -54,11 +58,8 @@ functional-tests:
 
 release-alpha:
   stage: release
-  only:
-    - tags
   script:
-    - apt-get --quiet install gnupg2 --yes
-    - gpg --batch --decrypt --output ${GOOGLE_PUBLISH_JSON} --passphrase ${GOOGLE_ACCOUNT_DECRYPTION_KEY} ${GOOGLE_PUBLISH_JSON}.gpg
+    - *decrypt_publish_json
     - ./gradlew app:publishApkGoogleplayRelease
   after_script:
     - rm -f ${GOOGLE_PUBLISH_JSON}
@@ -69,10 +70,9 @@ release-alpha:
 release-gold:
   stage: release
   only:
-    - web
+    - tags
   script:
-    - apt-get --quiet install gnupg2 --yes
-    - gpg --batch --decrypt --output ${GOOGLE_PUBLISH_JSON} --passphrase ${GOOGLE_ACCOUNT_DECRYPTION_KEY} ${GOOGLE_PUBLISH_JSON}.gpg
+    - *decrypt_publish_json
     - ./gradlew publishGoogleplayRelease -PreleaseType=production
   after_script:
     - rm -f ${GOOGLE_PUBLISH_JSON}
