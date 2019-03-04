@@ -338,7 +338,10 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
 
             val searchFragment = EntryListSearchTagFragmentFull().apply {
                 arguments = Bundle().apply {
-                    putSerializable("filters", hashMapOf("tag" to tagValue))
+                    putSerializable("filters", hashMapOf(
+                            "tag" to tagValue,
+                            "profile_id" to this@EntryViewHolder.profile.id)
+                    )
                 }
             }
             activity.supportFragmentManager.beginTransaction()

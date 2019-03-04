@@ -28,7 +28,7 @@ class EntryListSearchTagFragmentFull: EntryListFragmentFull() {
     override fun onStart() {
         super.onStart()
 
-        toolbar.title = "#${filters.entries.first().value}"
+        toolbar.title = "#${filters["tag"]}"
     }
 
     override fun retrieveData(pageNum: Int) = { Network.loadFilteredEntries(filters = this.filters, pageNum = pageNum) }

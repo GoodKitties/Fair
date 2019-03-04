@@ -283,6 +283,18 @@ class MainActivity : AppCompatActivity() {
                                         .add(R.id.main_drawer_layout, fragment)
                                         .commit()
                             }
+                            EntityType.TAG -> {
+                                val searchFragment = EntryListSearchTagFragmentFull().apply {
+                                    arguments = Bundle().apply {
+                                        putSerializable("filters", hashMapOf("tag" to name))
+                                    }
+                                }
+                                supportFragmentManager.beginTransaction()
+                                        .addToBackStack("Showing search tag fragment after click on search")
+                                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                                        .add(R.id.main_drawer_layout, searchFragment)
+                                        .commit()
+                            }
                         }
                         persistSearchSuggestion(type, name)
                     } catch (ex: Exception) {
@@ -320,6 +332,7 @@ class MainActivity : AppCompatActivity() {
             // add two service rows with just prefix
             cursor.addRow(arrayOf(++counter, prefix, EntityType.BLOG.name, getString(R.string.direct_jump)))
             cursor.addRow(arrayOf(++counter, prefix, EntityType.PROFILE.name, getString(R.string.direct_jump)))
+            cursor.addRow(arrayOf(++counter, prefix, EntityType.TAG.name, getString(R.string.direct_jump)))
         }
 
         // add suitable addresses from favorites and database
