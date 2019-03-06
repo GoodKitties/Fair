@@ -97,7 +97,8 @@ class CommentListFragment : UserContentListFragment() {
         styleLevel.bind(BACKGROUND, commentRibbon)
         styleLevel.bindStatusBar(activity, STATUS_BAR)
 
-        entry?.profile?.get(entry?.document)?.let { applyTheme(activity, it, styleLevel) }
+        val backgrounds = mapOf<View, Int>(commentRibbon to BACKGROUND/*, toolbar to TOOLBAR*/)
+        entry?.profile?.get(entry?.document)?.let { applyTheme(activity, it, styleLevel, backgrounds) }
     }
 
     override fun onDestroyView() {

@@ -36,7 +36,7 @@ class DesignResponse: Resource() {
  */
 data class DesignStyle(
         val name: String?,
-        //val background: Boolean?,
+        val background: DesignImage?,
         val layout: DesignLayout?,
         val colors: DesignColors?,
         val header: DesignHeader?,
@@ -172,6 +172,7 @@ data class DesignImage(
         val url: String?,
         val size: String?,
         val repeat: String?,
+        val enable: Boolean?,
         val position: String?,
         val attachment: String?
 ) : Serializable

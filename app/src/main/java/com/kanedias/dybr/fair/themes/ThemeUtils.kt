@@ -1,12 +1,21 @@
 package com.kanedias.dybr.fair.themes
 
 import android.content.Context
+import android.view.View
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.preference.PreferenceManager
 import androidx.annotation.ColorInt
 import androidx.annotation.FloatRange
 import androidx.core.graphics.ColorUtils
 import android.util.Log
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.CustomViewTarget
+import com.bumptech.glide.request.transition.DrawableCrossFadeTransition
+import com.bumptech.glide.request.transition.Transition
 import com.ftinc.scoop.Scoop
 import com.ftinc.scoop.StyleLevel
 import com.kanedias.dybr.fair.Network
@@ -14,6 +23,8 @@ import com.kanedias.dybr.fair.dto.Design
 import com.kanedias.dybr.fair.dto.OwnProfile
 import com.kanedias.dybr.fair.dto.isMarkerBlog
 import kotlinx.coroutines.*
+import okhttp3.HttpUrl
+import ru.noties.markwon.spans.AsyncDrawable
 import java.util.regex.Pattern
 
 const val TOOLBAR = 0       // top toolbar color
@@ -50,7 +61,7 @@ fun String.colorFromCss() : Int? {
  * Same as [ColorUtils.blendARGB] but leave alpha as in [color1]
  */
 @ColorInt
-fun blendRGB(@ColorInt color1: Int, @ColorInt color2: Int, @FloatRange(from = 0.0, to = 1.0) ratio: Float): Int {
+fun blendRGB(@ColorInt color1: Int, @ColorInt color2: Int, ratio: Float): Int {
     val inverseRatio = 1 - ratio
     val a = Color.alpha(color1) // we don't touch alpha channel
     val r = Color.red(color1) * inverseRatio + Color.red(color2) * ratio
@@ -68,7 +79,7 @@ fun blendRGB(@ColorInt color1: Int, @ColorInt color2: Int, @FloatRange(from = 0.
  * @param profile profile to retrieve themes for
  * @param level style level to alter
  */
-fun applyTheme(ctx: Context, profile: OwnProfile, level: StyleLevel) {
+fun applyTheme(ctx: Context, profile: OwnProfile, level: StyleLevel, withDrawables: Map<View, Int> = emptyMap()) {
     // don't apply to service blogs e.g. to favorites or world
     if (isMarkerBlog(profile))
         return
@@ -81,8 +92,8 @@ fun applyTheme(ctx: Context, profile: OwnProfile, level: StyleLevel) {
     GlobalScope.launch(Dispatchers.Main) {
         try {
             val design = withContext(Dispatchers.IO) { Network.loadProfileDesign(profile) } ?: return@launch
-
             updateColorBindings(design, level)
+            updateBackgroundDrawables(design, withDrawables)
         } catch (ex: Exception) {
             // do nothing - themes are optional
             Log.e("ThemeEngine", "Couldn't apply theme", ex)
@@ -90,15 +101,81 @@ fun applyTheme(ctx: Context, profile: OwnProfile, level: StyleLevel) {
     }
 }
 
+fun updateBackgroundDrawables(design: Design, withDrawables: Map<View, Int>) {
+    for (entry in withDrawables.entries) {
+        val enabled = when (entry.value) {
+            BACKGROUND -> design.data.background?.enable ?: false
+            TOOLBAR -> design.data.header?.image?.enable ?: false
+            else -> false
+        }
+
+        if (!enabled)
+            continue
+
+        val url = when (entry.value) {
+            BACKGROUND -> design.data.background?.url
+            TOOLBAR -> design.data.header?.image?.url
+            else -> null
+        }
+
+        if (url.isNullOrBlank())
+            continue
+
+        val base = HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT) ?: continue
+        val resolved = base.resolve(url) ?: continue
+
+        Glide.with(entry.key)
+                .load(resolved.toString())
+                .apply(RequestOptions()
+                        .placeholder(android.R.drawable.progress_indeterminate_horizontal)
+                        .override(entry.key.width, entry.key.height)
+                        .centerCrop())
+                .into(BgDrawableTarget(entry.key))
+    }
+}
+
+private class BgDrawableTarget(view: View): CustomViewTarget<View, Drawable>(view) {
+
+    val cf = DrawableCrossFadeTransition(300, true)
+
+    override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
+        resource.setBounds(0, 0, resource.intrinsicWidth, resource.intrinsicHeight)
+        GlobalScope.launch(Dispatchers.Main) {
+            delay(600)
+            cf.transition(resource, BgAdapter(view))
+        }
+    }
+
+    override fun onLoadFailed(errorDrawable: Drawable?) {
+
+    }
+
+    override fun onResourceCleared(placeholder: Drawable?) {
+
+    }
+
+    inner class BgAdapter(private val view: View) : Transition.ViewAdapter {
+
+        override fun getView() = view
+
+        override fun getCurrentDrawable(): Drawable? = view.background
+
+        override fun setDrawable(drawable: Drawable) {
+            view.background = drawable
+        }
+
+    }
+}
+
 fun updateColorBindings(design: Design, level: StyleLevel) {
     // toolbar colors
     design.data.header?.let {
-        val tbBackground = it.background?.colorFromCss() ?: return@let
+        var tbBackground = it.background?.colorFromCss() ?: return@let
         var tbText = it.color?.colorFromCss() ?: return@let
 
         // workaround: if background is translucent
         if (Color.alpha(tbBackground) < 255) {
-            return@let
+            tbBackground = ColorUtils.setAlphaComponent(tbBackground, 255)
         }
 
         // workaround: if contrast between toolbar and text is lower than 7
@@ -117,13 +194,11 @@ fun updateColorBindings(design: Design, level: StyleLevel) {
     }
 
     // common background color
-    Log.e("ThemeEngine", "BG COLOR ${design.data.colors?.background}")
     design.data.colors?.background?.colorFromCss()?.let {
         // workaround: if alpha is lower than 1 blend with white
         // because default website color is white
         val alpha = Color.alpha(it).toFloat() / 255
         if (alpha < 0.5) {
-            Log.e("ThemeEngine", "BLENDING")
             level.update(BACKGROUND, ColorUtils.compositeColors(it, Color.WHITE))
             return@let
         }

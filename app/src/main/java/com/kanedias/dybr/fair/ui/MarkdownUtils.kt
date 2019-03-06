@@ -258,7 +258,7 @@ class DrawableLoader(private val view: TextView): AsyncDrawable.Loader {
                         .load(resolved.toString())
                         .apply(RequestOptions()
                                 .placeholder(android.R.drawable.progress_indeterminate_horizontal)
-                                .downsample(DownsampleStrategy.CENTER_INSIDE))
+                                .centerInside())
                         .into(AsyncDrawableTarget(view.width, drawable))
 
             } catch (ioex: IOException) {

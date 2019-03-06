@@ -1,5 +1,6 @@
 package com.kanedias.dybr.fair
 
+import android.view.View
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.appcompat.widget.Toolbar
@@ -58,7 +59,8 @@ open class EntryListFragmentFull: EntryListFragment() {
 
         styleLevel.bindStatusBar(activity, STATUS_BAR)
 
-        profile?.let { applyTheme(activity, it, styleLevel) }
+        val backgrounds = mapOf<View, Int>(entryRibbon to BACKGROUND/*, toolbar to TOOLBAR*/)
+        profile?.let { applyTheme(activity, it, styleLevel, backgrounds) }
     }
 
     override fun onDestroyView() {
