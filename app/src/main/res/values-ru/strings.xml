@@ -12,7 +12,7 @@
     <string-array name="permission_types">
         <item>Не видно никому, кроме вас</item>  <!-- 0 -->
         <item>Видно зарегистрированным пользователям</item>      <!-- 1 -->
-        <item>Видно вашим Избранным</item>       <!-- 2 -->
+        <item>Видно вашему Избранному</item>       <!-- 2 -->
         <item>Видно всем</item>             <!-- 3 -->
     </string-array>
 
@@ -123,7 +123,6 @@
     <string name="insert_bulleted_list">Вставить маркированный список</string>
     <string name="insert_link">Вставить ссылку</string>
     <string name="insert_image">Вставить изображение</string>
-    <string name="upload_public_image">Загрузить внешнее изображение</string>
     <string name="insert_from_clipboard">Вставить из буфера обмена</string>
     <string name="content">Содержимое</string>
     <string name="select_image_to_upload">Выберите изображение для загрузки</string>
@@ -155,15 +154,15 @@
     <string name="removed_from_favorites">Удалить из Избранного</string>
     <string name="added_to_favorites">Добавлено в Избранное</string>
     <string name="apply_blog_theme">Применить тему оформления дневника</string>
-    <string name="apply_blog_theme_on">Тема дневника будет применена, если это возможно</string>
+    <string name="apply_blog_theme_on">Приложение применит тему, если это возможно</string>
     <string name="apply_blog_theme_off">Приложение не будет изменять тему</string>
     <string name="save_offline_draft">Сохранить оффлайн-черновик</string>
     <string name="load_offline_draft">Загрузить оффлайн-черновик</string>
     <string name="offline_draft_saved">Оффлайн-черновик сохранён</string>
     <string name="offline_draft_loaded">Оффлайн-черновик загружен</string>
-    <string name="select_offline_draft">Выберите оффлайн-черновик</string>
+    <string name="select_offline_draft">Выбрать оффлайн-черновик</string>
     <string name="direct_jump">Прямой переход</string>
-    <string name="from_profile_favorites">Из избранного вашего профиля</string>
+    <string name="from_profile_favorites">Из вашего Избранного</string>
     <string name="from_saved_searches">Из сохранённых запросов</string>
     <string name="not_found">Не найдено</string>
     <string name="auto_load_images">Автозагрузка изображений</string>
@@ -176,7 +175,6 @@
     <string name="share_image_using">Поделиться изображением с помощью...</string>
     <string name="no_blog_yet">У вас ещё нет дневника</string>
     <string name="mark_read">Отметить прочитанным</string>
-    <string name="text_divider">.</string>
     <string name="notifications">Уведомления</string>
     <string name="mark_all_read">Отметить всё прочитанным</string>
     <string name="mark_all_notifications_read">Отметить все уведомления прочитанными?</string>
@@ -187,11 +185,20 @@
     <string name="select_permission_type">Выбрать тип доступа</string>
     <string name="entry_access_permissions">Указать права доступа</string>
     <string name="return_to_notifications">Вернуться к уведомлениям?</string>
-    <string name="select_tags">Выбрать теги</string>
     <string name="add_tags">Добавить теги</string>
     <string name="downloading_image">Загрузка изображения</string>
     <string name="image_saved_as">Изображение сохранено, как</string>
-    <string name="subscribe_to_entry">Подписаться на запись / Отписаться от записи</string>
+    <string name="subscribe_to_entry">Подписаться / Отписаться</string>
     <string name="subscribed_to_entry">Вы подписаны на запись</string>
     <string name="unsubscribed_from_entry">Вы отписаны от записи</string>
+    <string name="version">Версия</string>
+    <string name="license">Лицензия</string>
+    <string name="author">Автор</string>
+    <string name="send_email">Отправить e-mail</string>
+    <string name="about">О приложении</string>
+    <string name="source_code">Исходный код</string>
+    <string name="fork_on_github">Fork on GitHub</string>
+    <string name="report_bug">Отчёт об ошибке</string>
+    <string name="github_issue_tracker">Трекер задач GitHub</string>
+    <string name="reply">Ответить</string>
 </resources>

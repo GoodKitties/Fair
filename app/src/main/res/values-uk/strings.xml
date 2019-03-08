@@ -112,7 +112,6 @@
     <string name="insert_bulleted_list">Вставити маркований список</string>
     <string name="insert_link">Вставити посилання</string>
     <string name="insert_image">Вставити зображення</string>
-    <string name="upload_public_image">Завантажити загальнодоступне зображення</string>
     <string name="insert_from_clipboard">Вставити з буферу обміну</string>
     <string name="select_image_to_upload">Обрати зображення для завантаження</string>
     <string name="no_file_manager_found">Менеджер файлів не знайдено</string>

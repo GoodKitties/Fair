@@ -1,2 +1,17 @@
 <resources>
+    <!-- arrays -->
+    <string-array name="image_sizes">
+        <item>100px</item>      <!-- 0 -->
+        <item>200px</item>      <!-- 1 -->
+        <item>300px</item>      <!-- 2 -->
+        <item>500px</item>      <!-- 3 -->
+        <item>800px</item>      <!-- 4 -->
+        <item>Volle Größe</item>  <!-- 5 -->
+    </string-array>
+
+    <string name="my_diary">Mein Tagebuch</string>
+    <string name="hello_plus_comma">Hallo,</string>
+    <string name="guest">Gast</string>
+    <string name="birthday_dd_mm">Geburtsdatum: JJJJ-MM-TT</string>
+    <string name="author_name_label">Name:</string>
     </resources>
