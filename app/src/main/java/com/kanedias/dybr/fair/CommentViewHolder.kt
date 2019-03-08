@@ -13,6 +13,7 @@ import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.dto.*
+import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.handleMarkdown
 import com.kanedias.dybr.fair.ui.styleLevel
@@ -77,11 +78,7 @@ class CommentViewHolder(iv: View, private val parent: View, private val entry: E
             editMode = true
         }
 
-        activity.supportFragmentManager.beginTransaction()
-                .addToBackStack("Showing comment edit fragment")
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .add(R.id.main_drawer_layout, commentEdit)
-                .commit()
+        activity.showFullscreenFragment(commentEdit)
     }
 
     @OnClick(R.id.comment_delete)

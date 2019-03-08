@@ -19,6 +19,7 @@ import com.afollestad.materialdialogs.customview.customView
 import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.dto.OwnProfile
 import com.kanedias.dybr.fair.misc.idMatches
+import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import kotlinx.coroutines.*
 import okhttp3.HttpUrl
 import okhttp3.Request
@@ -151,11 +152,6 @@ class ProfileFragment: DialogFragment() {
 
     private fun showBlog(profile: OwnProfile) {
         val browseFragment = EntryListFragmentFull().apply { this.profile = profile }
-
-        activity.supportFragmentManager.beginTransaction()
-                .addToBackStack("Showing blog from profile")
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .add(R.id.main_drawer_layout, browseFragment)
-                .commit()
+        activity.showFullscreenFragment(browseFragment)
     }
 }

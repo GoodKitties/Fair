@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import butterknife.BindView
 import butterknife.ButterKnife
 import com.kanedias.dybr.fair.dto.*
+import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.BACKGROUND
 
 
@@ -135,11 +136,7 @@ open class EntryListFragment: UserContentListFragment() {
             this.profile = this@EntryListFragment.profile!! // at this point we know we have the blog
         }
 
-        requireFragmentManager().beginTransaction()
-                .addToBackStack("Showing entry add fragment")
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .add(R.id.main_drawer_layout, entryAdd)
-                .commit()
+        requireActivity().showFullscreenFragment(entryAdd)
     }
 
     /**

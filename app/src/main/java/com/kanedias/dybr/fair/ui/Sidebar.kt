@@ -16,6 +16,7 @@ import com.kanedias.dybr.fair.*
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.database.entities.Account
+import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.*
 
@@ -88,11 +89,7 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
     @OnClick(R.id.add_account_row)
     fun addAccount() {
         drawer.closeDrawers()
-        fragManager.beginTransaction()
-                .addToBackStack("Showing account fragment")
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .add(R.id.main_drawer_layout, AddAccountFragment())
-                .commit()
+        activity.showFullscreenFragment(AddAccountFragment())
     }
 
     @OnClick(R.id.settings_area)

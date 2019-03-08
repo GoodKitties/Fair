@@ -16,6 +16,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.kanedias.dybr.fair.dto.Authored
+import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.ui.getTopFragment
 import com.kanedias.dybr.fair.ui.showToastAtView
 import kotlinx.coroutines.Dispatchers
@@ -119,12 +120,7 @@ abstract class UserContentViewHolder<T: Authored>(iv: View): RecyclerView.ViewHo
             this.entry = commentList.entry!!
             arguments = Bundle().apply { putSerializable(CreateNewCommentFragment.AUTHOR_LINK, entity) }
         }
-
-        activity.supportFragmentManager.beginTransaction()
-                .addToBackStack("Showing comment add fragment")
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .add(R.id.main_drawer_layout, commentAdd)
-                .commit()
+        activity.showFullscreenFragment(commentAdd)
     }
 
     inner class SelectionEnhancer(private val entity: T): ActionMode.Callback {
@@ -147,12 +143,7 @@ abstract class UserContentViewHolder<T: Authored>(iv: View): RecyclerView.ViewHo
                         }
                     }
 
-                    activity.supportFragmentManager.beginTransaction()
-                            .addToBackStack("Showing comment add fragment")
-                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                            .add(R.id.main_drawer_layout, commentAdd)
-                            .commit()
-
+                    activity.showFullscreenFragment(commentAdd)
                     return true
                 }
                 else -> return false

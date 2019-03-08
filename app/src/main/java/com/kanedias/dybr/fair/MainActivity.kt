@@ -40,6 +40,7 @@ import com.kanedias.dybr.fair.database.entities.Account
 import com.kanedias.dybr.fair.database.entities.SearchGotoInfo
 import com.kanedias.dybr.fair.database.entities.SearchGotoInfo.*
 import com.kanedias.dybr.fair.dto.*
+import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.Sidebar
 import kotlinx.coroutines.*
@@ -277,11 +278,7 @@ class MainActivity : AppCompatActivity() {
                             EntityType.BLOG -> {
                                 val prof = withContext(Dispatchers.IO) { Network.loadProfileBySlug(name) }
                                 val fragment = EntryListFragmentFull().apply { this.profile = prof }
-                                supportFragmentManager.beginTransaction()
-                                        .addToBackStack("Showing search-requested address")
-                                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                                        .add(R.id.main_drawer_layout, fragment)
-                                        .commit()
+                                showFullscreenFragment(fragment)
                             }
                             EntityType.TAG -> {
                                 val searchFragment = EntryListSearchTagFragmentFull().apply {
@@ -289,11 +286,7 @@ class MainActivity : AppCompatActivity() {
                                         putSerializable("filters", hashMapOf("tag" to name))
                                     }
                                 }
-                                supportFragmentManager.beginTransaction()
-                                        .addToBackStack("Showing search tag fragment after click on search")
-                                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                                        .add(R.id.main_drawer_layout, searchFragment)
-                                        .commit()
+                                showFullscreenFragment(searchFragment)
                             }
                         }
                         persistSearchSuggestion(type, name)
@@ -346,11 +339,7 @@ class MainActivity : AppCompatActivity() {
         when (item?.itemId) {
             R.id.menu_donate -> donateHelper.donate()
             R.id.menu_settings -> startActivity(Intent(this, SettingsActivity::class.java))
-            R.id.menu_about -> supportFragmentManager.beginTransaction()
-                    .addToBackStack("Showing about fragment")
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .add(R.id.main_drawer_layout, AboutFragment())
-                    .commit()
+            R.id.menu_about -> showFullscreenFragment(AboutFragment())
             else -> return super.onOptionsItemSelected(item)
         }
 
@@ -501,11 +490,7 @@ class MainActivity : AppCompatActivity() {
                         else -> return
                     }
 
-                    supportFragmentManager.beginTransaction()
-                            .addToBackStack("Showing intent-requested address")
-                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                            .add(R.id.main_drawer_layout, fragment)
-                            .commit()
+                    showFullscreenFragment(fragment)
                 }
                 "profile" -> {
                     val fragment = when (address.size) {
@@ -592,22 +577,14 @@ class MainActivity : AppCompatActivity() {
      * Show "Add profile" fragment
      */
     fun addProfile() {
-        supportFragmentManager.beginTransaction()
-                .addToBackStack("Showing profile creation fragment")
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .add(R.id.main_drawer_layout, AddProfileFragment())
-                .commit()
+        showFullscreenFragment(AddProfileFragment())
     }
 
     /**
      * Show "Add blog" fragment. Only one blog can belong to specific profile
      */
     fun createBlog() {
-        supportFragmentManager.beginTransaction()
-                .addToBackStack("Showing blog creation fragment")
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .add(R.id.main_drawer_layout, AddBlogFragment())
-                .commit()
+        showFullscreenFragment(AddBlogFragment())
     }
 
 

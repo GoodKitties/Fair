@@ -18,6 +18,7 @@ import butterknife.OnClick
 import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.dto.Comment
 import com.kanedias.dybr.fair.dto.Entry
+import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.*
 import kotlinx.coroutines.*
 
@@ -150,11 +151,7 @@ class CommentListFragment : UserContentListFragment() {
             this.entry = this@CommentListFragment.entry!! // at this point we know we have the entry
         }
 
-        requireFragmentManager().beginTransaction()
-                .addToBackStack("Showing comment add fragment")
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .add(R.id.main_drawer_layout, commentAdd)
-                .commit()
+        requireActivity().showFullscreenFragment(commentAdd)
     }
 
     /**

@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import com.kanedias.dybr.fair.dto.Notification
 import com.kanedias.dybr.fair.dto.NotificationRequest
+import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.*
 import kotlinx.coroutines.*
@@ -65,11 +66,7 @@ class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
             try {
                 val linkedEntry = withContext(Dispatchers.IO) { Network.loadEntry(notification.entryId) }
                 val commentsPage = CommentListFragment().apply { entry = linkedEntry }
-                activity.supportFragmentManager.beginTransaction()
-                        .addToBackStack("Showing comment list fragment from notification")
-                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                        .add(R.id.main_drawer_layout, commentsPage)
-                        .commit()
+                activity.showFullscreenFragment(commentsPage)
                 markRead()
             } catch (ex: Exception) {
                 Network.reportErrors(itemView.context, ex)

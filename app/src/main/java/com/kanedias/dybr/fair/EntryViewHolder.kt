@@ -24,6 +24,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.afollestad.materialdialogs.list.listItems
 import com.kanedias.dybr.fair.dto.*
+import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.openUrlExternally
 import com.kanedias.dybr.fair.ui.showToastAtView
@@ -104,11 +105,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     private val commentShow  = View.OnClickListener {
         val activity = it.context as AppCompatActivity
         val commentsPage = CommentListFragment().apply { entry = this@EntryViewHolder.entry }
-        activity.supportFragmentManager.beginTransaction()
-                .addToBackStack("Showing comment list fragment")
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .add(R.id.main_drawer_layout, commentsPage)
-                .commit()
+        activity.showFullscreenFragment(commentsPage)
     }
 
     init {
@@ -146,11 +143,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
             editEntry = this@EntryViewHolder.entry
         }
 
-        activity.supportFragmentManager.beginTransaction()
-                .addToBackStack("Showing entry edit fragment")
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .add(R.id.main_drawer_layout, entryEdit)
-                .commit()
+        activity.showFullscreenFragment(entryEdit)
     }
 
     @OnClick(R.id.entry_subscribe)
@@ -345,11 +338,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
                     )
                 }
             }
-            activity.supportFragmentManager.beginTransaction()
-                    .addToBackStack("Showing search tag fragment after click to tag")
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .add(R.id.main_drawer_layout, searchFragment)
-                    .commit()
+            activity.showFullscreenFragment(searchFragment)
         }
 
         override fun updateDrawState(ds: TextPaint) {

@@ -12,6 +12,7 @@ import android.widget.*
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
+import butterknife.OnLongClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.customListAdapter
 import com.ftinc.scoop.Scoop
@@ -176,6 +177,17 @@ class CreateNewCommentFragment : Fragment() {
         DbProvider.helper.draftDao.create(OfflineDraft(key = "comment,entry=${entry.id}", base = contentInput))
         Toast.makeText(requireContext(), R.string.offline_draft_saved, Toast.LENGTH_SHORT).show()
         requireFragmentManager().popBackStack()
+    }
+
+    /**
+     * Nobody knows about this feature.
+     * Cancels dialog and doesn't create any offline draft.
+     * @return always true
+     */
+    @OnLongClick(R.id.comment_cancel)
+    fun forceCancel(): Boolean {
+        requireFragmentManager().popBackStack()
+        return true
     }
 
     /**
