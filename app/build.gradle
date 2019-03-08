@@ -21,8 +21,8 @@ android {
         applicationId "com.kanedias.dybr.fair"
         targetSdkVersion 28 // device you test on
         minSdkVersion 19    // device you allow your users to be on :)
-        versionCode 46
-        versionName "1.9.6"
+        versionCode 47
+        versionName "1.9.7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -83,8 +83,16 @@ android {
             // code based on track
             def gitVersionCode = versionDetails().commitDistance
 
-            output.versionCodeOverride = versionCode * 10000 + gitVersionCode * 10 + abiVersionCode
-            output.versionNameOverride = gitVersion()
+            def playVersionCode = 0
+            switch (play.track) {
+                case 'production': playVersionCode = 0; break
+                case 'beta': playVersionCode = 1; break
+                case 'alpha': playVersionCode = 2; break
+                case 'internal': playVersionCode = 3; break
+            }
+
+            output.versionCodeOverride = versionCode * 10000 + playVersionCode * 1000 + gitVersionCode * 10 + abiVersionCode
+            output.versionNameOverride = gitVersion().replace('.dirty', '')
         }
     }
 }
