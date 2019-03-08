@@ -1,11 +1,13 @@
 package com.kanedias.dybr.fair
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import android.text.format.DateUtils
+import android.view.ActionMode
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -13,8 +15,8 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
 import com.bumptech.glide.request.RequestOptions
-import com.ftinc.scoop.StyleLevel
 import com.kanedias.dybr.fair.dto.Authored
+import com.kanedias.dybr.fair.ui.getTopFragment
 import com.kanedias.dybr.fair.ui.showToastAtView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -37,6 +39,7 @@ abstract class UserContentViewHolder<T: Authored>(iv: View): RecyclerView.ViewHo
     abstract fun getCreationDateView(): TextView
     abstract fun getAuthorNameView(): TextView
     abstract fun getProfileAvatarView(): ImageView
+    abstract fun getContentView(): TextView
 
     open fun setup(entity: T, standalone: Boolean = false) {
         val profile = entity.profile.get(entity.document)
@@ -56,6 +59,8 @@ abstract class UserContentViewHolder<T: Authored>(iv: View): RecyclerView.ViewHo
 
         getAuthorNameView().text = profile.nickname
         getAuthorNameView().setOnClickListener { replyWithName(entity) }
+
+        getContentView().customSelectionActionModeCallback = SelectionEnhancer(entity)
     }
 
     /**
@@ -107,10 +112,7 @@ abstract class UserContentViewHolder<T: Authored>(iv: View): RecyclerView.ViewHo
      */
     private fun replyWithName(entity: T) {
         val activity = itemView.context as AppCompatActivity
-
-        val fragments = activity.supportFragmentManager.fragments.reversed()
-        val clPredicate = { it: Fragment -> it is CommentListFragment }
-        val commentList = fragments.find(clPredicate) as CommentListFragment? ?: return
+        val commentList = activity.getTopFragment(CommentListFragment::class) ?: return
 
         // open create new comment fragment and insert nickname
         val commentAdd = CreateNewCommentFragment().apply {
@@ -123,5 +125,47 @@ abstract class UserContentViewHolder<T: Authored>(iv: View): RecyclerView.ViewHo
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .add(R.id.main_drawer_layout, commentAdd)
                 .commit()
+    }
+
+    inner class SelectionEnhancer(private val entity: T): ActionMode.Callback {
+
+        private val textView = getContentView()
+
+        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+            val text = textView.text.subSequence(textView.selectionStart, textView.selectionEnd)
+
+            when(item.itemId) {
+                R.id.menu_reply -> {
+                    val activity = itemView.context as AppCompatActivity
+                    val commentList = activity.getTopFragment(CommentListFragment::class) ?: return true
+
+                    val commentAdd = CreateNewCommentFragment().apply {
+                        this.entry = commentList.entry!!
+                        arguments = Bundle().apply {
+                            putSerializable(CreateNewCommentFragment.AUTHOR_LINK, entity)
+                            putSerializable(CreateNewCommentFragment.REPLY_TEXT, text.toString())
+                        }
+                    }
+
+                    activity.supportFragmentManager.beginTransaction()
+                            .addToBackStack("Showing comment add fragment")
+                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                            .add(R.id.main_drawer_layout, commentAdd)
+                            .commit()
+
+                    return true
+                }
+                else -> return false
+            }
+        }
+
+        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+            mode.menuInflater.inflate(R.menu.content_selection_menu, menu)
+            return true
+        }
+
+        override fun onPrepareActionMode(mode: ActionMode, menu: Menu) = false
+
+        override fun onDestroyActionMode(mode: ActionMode) = Unit
     }
 }

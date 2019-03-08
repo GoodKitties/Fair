@@ -236,4 +236,5 @@
     <string name="fork_on_github">Fork on Github</string>
     <string name="report_bug">Report bug</string>
     <string name="github_issue_tracker">Github issue tracker</string>
+    <string name="reply">Reply</string>
 </resources>

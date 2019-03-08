@@ -20,6 +20,7 @@ import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.database.entities.OfflineDraft
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
+import com.kanedias.dybr.fair.ui.EditorViews
 import com.kanedias.dybr.fair.ui.handleMarkdownRaw
 import com.kanedias.dybr.fair.ui.styleLevel
 import com.kanedias.html2md.Html2Markdown
@@ -44,6 +45,7 @@ class CreateNewCommentFragment : Fragment() {
 
     companion object {
         const val AUTHOR_LINK = "author-link"
+        const val REPLY_TEXT = "reply-text"
     }
 
     /**
@@ -288,6 +290,16 @@ class CreateNewCommentFragment : Fragment() {
      *
      */
     private fun handleMisc() {
+        // handle click on reply in text selection menu
+        arguments?.get(REPLY_TEXT)?.let {
+            val selectedText = it as String
+            val replyQuoted = selectedText.replace(EditorViews.LINE_START, "> ")
+            val withQuote = "${contentInput.text}$replyQuoted\n\n"
+
+            contentInput.setText(withQuote)
+            contentInput.setSelection(withQuote.length)
+        }
+
         // handle click on author nickname in comments field
         arguments?.get(AUTHOR_LINK)?.let {
             val entity = it as Authored

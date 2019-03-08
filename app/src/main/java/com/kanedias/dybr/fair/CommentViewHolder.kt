@@ -55,6 +55,7 @@ class CommentViewHolder(iv: View, private val parent: View, private val entry: E
     override fun getCreationDateView() = dateView
     override fun getProfileAvatarView() = avatarView
     override fun getAuthorNameView() = authorView
+    override fun getContentView() = bodyView
 
     private fun setupTheming() {
         val styleLevel = parent.styleLevel ?: return

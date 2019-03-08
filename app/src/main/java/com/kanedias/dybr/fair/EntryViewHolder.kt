@@ -96,6 +96,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     override fun getCreationDateView() = dateView
     override fun getProfileAvatarView() = avatarView
     override fun getAuthorNameView() = authorView
+    override fun getContentView() = bodyView
 
     /**
      * Listener to show comments of this entry

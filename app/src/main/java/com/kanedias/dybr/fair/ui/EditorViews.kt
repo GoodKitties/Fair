@@ -42,6 +42,8 @@ class EditorViews : Fragment() {
     companion object {
         const val ACTIVITY_REQUEST_IMAGE_UPLOAD = 0
         const val PERMISSION_REQUEST_STORAGE_FOR_IMAGE_UPLOAD = 0
+
+        val LINE_START = Regex("^", RegexOption.MULTILINE)
     }
 
     @BindView(R.id.source_text)
@@ -114,7 +116,7 @@ class EditorViews : Fragment() {
             R.id.edit_quick_underlined -> insertInCursorPosition("<u>", paste, "</u>")
             R.id.edit_quick_strikethrough -> insertInCursorPosition("<s>", paste, "</s>")
             R.id.edit_quick_code -> insertInCursorPosition("```\n", paste, "\n```\n")
-            R.id.edit_quick_quote -> insertInCursorPosition("> ", paste)
+            R.id.edit_quick_quote -> insertInCursorPosition(paste.replace(LINE_START, "> ") + "\n\n", "")
             R.id.edit_quick_number_list -> insertInCursorPosition("\n1. ", paste, "\n2. \n3. ")
             R.id.edit_quick_bullet_list -> insertInCursorPosition("\n* ", paste, "\n* \n* ")
             R.id.edit_quick_link -> insertInCursorPosition("<a href=\"$paste\">", paste, "</a>")
