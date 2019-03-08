@@ -58,9 +58,11 @@ functional-tests:
 
 release-alpha:
   stage: release
+  except:
+    - tags
   script:
     - *decrypt_publish_json
-    - ./gradlew app:publishApkGoogleplayRelease
+    - ./gradlew app:publishGoogleplayRelease
   after_script:
     - rm -f ${GOOGLE_PUBLISH_JSON}
   artifacts:
