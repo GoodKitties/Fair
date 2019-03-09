@@ -135,7 +135,10 @@ class AddAccountFragment : Fragment() {
                 withContext(Dispatchers.IO) { Network.login(acc) }
 
                 Toast.makeText(requireContext(), R.string.login_successful, Toast.LENGTH_SHORT).show()
-                (activity as MainActivity).startProfileSelector() // shows profile selection dialog
+                if (Auth.user.lastProfileId.isNullOrBlank()) {
+                    // user doesn't have active profile, select one
+                    (activity as MainActivity).startProfileSelector() // shows profile selection dialog
+                }
 
                 //we logged in successfully, return to main activity
                 DbProvider.helper.accDao.create(acc)

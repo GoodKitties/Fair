@@ -322,7 +322,7 @@ object Network {
      * @return list of profiles that are bound to currently logged in user
      */
     fun loadUserProfiles(): List<OwnProfile> {
-        val req = Request.Builder().url("$USERS_ENDPOINT/${Auth.user.serverId}?include=profiles").build()
+        val req = Request.Builder().url("$USERS_ENDPOINT/${Auth.user.serverId}?include=profiles,favorites").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
             throw extractErrors(resp, "Can't load user profiles")
@@ -358,7 +358,7 @@ object Network {
      * @param id identifier of profile to load
      */
     fun loadProfile(id: String): OwnProfile {
-        val req = Request.Builder().url("$PROFILES_ENDPOINT/$id?include=blog,favorites").build()
+        val req = Request.Builder().url("$PROFILES_ENDPOINT/$id?include=favorites").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw extractErrors(resp, "Can't load profile $id")
