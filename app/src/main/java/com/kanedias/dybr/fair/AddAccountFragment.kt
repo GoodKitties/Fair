@@ -122,6 +122,12 @@ class AddAccountFragment : Fragment() {
      * Creates session for the user, saves auth and closes fragment on success.
      */
     private fun doLogin() {
+        if (!DbProvider.helper.accDao.queryForEq("email", emailInput.text.toString()).isEmpty()) {
+            // we already have this account as active, skip!
+            Toast.makeText(activity, R.string.email_already_added, Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val acc = Account().apply {
             email = emailInput.text.toString()
             password = passwordInput.text.toString()
@@ -135,7 +141,7 @@ class AddAccountFragment : Fragment() {
                 withContext(Dispatchers.IO) { Network.login(acc) }
 
                 Toast.makeText(requireContext(), R.string.login_successful, Toast.LENGTH_SHORT).show()
-                if (Auth.user.lastProfileId.isNullOrBlank()) {
+                if (Auth.user.lastProfileId.isNullOrBlank() || Auth.user.lastProfileId == "0") {
                     // user doesn't have active profile, select one
                     (activity as MainActivity).startProfileSelector() // shows profile selection dialog
                 }
@@ -144,7 +150,14 @@ class AddAccountFragment : Fragment() {
                 DbProvider.helper.accDao.create(acc)
                 handleSuccess()
             } catch (ex: Exception) {
-                Network.reportErrors(requireContext(), ex, mapOf(422 to R.string.invalid_credentials))
+                val errorMap = mapOf(
+                        "email_not_confirmed" to getString(R.string.email_not_activated_yet),
+                        "email_not_found" to getString(R.string.email_not_found),
+                        "email_invalid" to getString(R.string.email_is_invalid),
+                        "password_invalid" to getString(R.string.incorrect_password)
+                )
+
+                Network.reportErrors(ctx = requireContext(), ex = ex, detailMapping = errorMap)
             }
 
             progressDialog.hide()
@@ -193,7 +206,15 @@ class AddAccountFragment : Fragment() {
                 Auth.updateCurrentUser(acc)
                 handleSuccess()
             } catch (ex: Exception) {
-                Network.reportErrors(requireContext(), ex, mapOf(422 to R.string.invalid_credentials))
+                val errorMap = mapOf(
+                        "email_registered" to getString(R.string.email_already_registered),
+                        "email_not_confirmed" to getString(R.string.email_not_activated_yet),
+                        "email_not_found" to getString(R.string.email_not_found),
+                        "email_invalid" to getString(R.string.email_is_invalid),
+                        "password_invalid" to getString(R.string.incorrect_password)
+                )
+
+                Network.reportErrors(ctx = requireContext(), ex = ex, detailMapping = errorMap)
             }
 
             progressDialog.hide()

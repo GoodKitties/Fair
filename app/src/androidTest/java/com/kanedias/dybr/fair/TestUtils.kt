@@ -12,7 +12,8 @@ import org.hamcrest.Matchers
 const val KNOWN_ACCOUNT_EMAIL = "test.account@mail.ru"
 const val KNOWN_ACCOUNT_PASSWORD = "123"
 
-fun addKnownAccount(activity: MainActivity) {
+fun addKnownAccount(activity: MainActivity,
+                    email: String = KNOWN_ACCOUNT_EMAIL, password: String = KNOWN_ACCOUNT_PASSWORD) {
     if (!activity.drawer.isDrawerOpen(Gravity.START)) {
         // open drawer
         onView(withContentDescription(R.string.open)).perform(click())
@@ -22,11 +23,11 @@ fun addKnownAccount(activity: MainActivity) {
     onView(withText(R.string.add_an_account)).perform(click())
 
     // fill reg form
-    onView(withId(R.id.acc_email_input)).perform(typeText(KNOWN_ACCOUNT_EMAIL))
-    onView(withId(R.id.acc_password_input)).perform(typeText(KNOWN_ACCOUNT_PASSWORD))
+    onView(withId(R.id.acc_email_input)).perform(typeText(email))
+    onView(withId(R.id.acc_password_input)).perform(typeText(password))
     Espresso.closeSoftKeyboard()
 
-    // click register button
+    // click confirm button
     onView(withId(R.id.confirm_button)).perform(click())
 }
 

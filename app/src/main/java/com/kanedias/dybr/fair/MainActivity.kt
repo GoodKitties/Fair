@@ -10,9 +10,7 @@ import android.preference.PreferenceManager
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentStatePagerAdapter
-import androidx.fragment.app.FragmentTransaction
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.GravityCompat
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -43,6 +41,7 @@ import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.Sidebar
+import com.kanedias.dybr.fair.ui.getTopFragment
 import kotlinx.coroutines.*
 import java.util.*
 
@@ -122,11 +121,6 @@ class MainActivity : AppCompatActivity() {
      */
     lateinit var styleLevel: StyleLevel
 
-    /**
-     * Tab adapter for [pager] <-> [tabs] synchronisation
-     */
-    private val tabAdapter = TabAdapter()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -177,7 +171,6 @@ class MainActivity : AppCompatActivity() {
 
         // setup tabs
         tabs.setupWithViewPager(pager, true)
-        pager.adapter = tabAdapter
 
         // handle first launch
         if (preferences.getBoolean("first-app-launch", true)) {
@@ -348,15 +341,6 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    /**
-     * Find current tab and try to refresh its contents
-     */
-    private fun refreshCurrentTab() {
-        val plPredicate = { it: Fragment -> it is UserContentListFragment && it.userVisibleHint }
-        val currentTab = supportFragmentManager.fragments.find(plPredicate) as UserContentListFragment?
-        currentTab?.loadMore(reset = true)
-    }
-
     override fun onBackPressed() {
         // close drawer if it's open and stop processing further back actions
         if (drawer.isDrawerOpen(GravityCompat.START) || drawer.isDrawerOpen(GravityCompat.END)) {
@@ -440,8 +424,7 @@ class MainActivity : AppCompatActivity() {
                     pager.setCurrentItem(NOTIFICATIONS_TAB, true)
 
                     // if the fragment is already loaded, try to refresh it
-                    val notifPredicate = { it: Fragment -> it is NotificationListFragment }
-                    val notifFragment = supportFragmentManager.fragments.find(notifPredicate) as NotificationListFragment?
+                    val notifFragment = getTopFragment(NotificationListFragment::class)
                     notifFragment?.loadMore(reset = true)
                 }
 
@@ -531,7 +514,6 @@ class MainActivity : AppCompatActivity() {
             MaterialDialog(this)
                     .title(R.string.switch_profile)
                     .message(R.string.no_profiles_create_one)
-                    .negativeButton(R.string.no_profile, click = { Auth.user.lastProfileId = "0"; refresh() })
                     .positiveButton(R.string.create_new, click = { addProfile() })
                     .show()
             return
@@ -549,7 +531,6 @@ class MainActivity : AppCompatActivity() {
         MaterialDialog(this)
                 .title(R.string.switch_profile)
                 .customListAdapter(profAdapter)
-                .negativeButton(R.string.no_profile, click = { Auth.user.lastProfileId = "0"; refresh() })
                 .positiveButton(R.string.create_new, click = { addProfile() })
                 .show { profAdapter.toDismiss = this }
 
@@ -589,7 +570,7 @@ class MainActivity : AppCompatActivity() {
 
 
     /**
-     * Delete specified profile and report it
+     * Delete specified profile from server and report it
      * @param prof profile to remove
      */
     private fun deleteProfile(prof: OwnProfile) {
@@ -602,17 +583,30 @@ class MainActivity : AppCompatActivity() {
             }
 
             if (Auth.profile == prof) {
+                Auth.user.lastProfileId = null
+                DbProvider.helper.accDao.update(Auth.user)
+
                 // we deleted current profile, need to become guest
-                becomeGuest()
+                becomeOrphan()
             }
         }
     }
 
     /**
+     * Become a user with no profile
+     * What to do if current profile was deleted
+     */
+    private fun becomeOrphan() {
+        Auth.updateCurrentProfile(null)
+        drawer.openDrawer(GravityCompat.START)
+        refresh()
+    }
+
+    /**
+     * Become a guest user with no profile
      * What to do if auth failed/current account/profile was deleted
      */
     private fun becomeGuest() {
-        // couldn't log in, become guest
         Auth.updateCurrentUser(Auth.guest)
         refresh()
         drawer.openDrawer(GravityCompat.START)
@@ -628,8 +622,7 @@ class MainActivity : AppCompatActivity() {
 
         // load current blog and favorites
         GlobalScope.launch(Dispatchers.Main) {
-            sidebar.updateSidebar()
-            refreshTabs()
+            refreshUI()
 
             // the whole application may be started because of link click
             handleIntent(intent)
@@ -637,12 +630,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun refreshTabs() {
-        tabAdapter.apply {
-            account = Auth.user
-            selfProfile = Auth.profile ?: Auth.emptyBlogMarker
+    private fun refreshUI() {
+        sidebar.updateSidebar()
+        when (Auth.user) {
+            Auth.guest -> pager.adapter = GuestTabAdapter()
+            else -> pager.adapter = TabAdapter(Auth.profile)
         }
-        tabAdapter.notifyDataSetChanged()
     }
 
     /**
@@ -653,7 +646,7 @@ class MainActivity : AppCompatActivity() {
     fun addEntry() {
         // use `instantiate` here because getItem returns new item with each invocation
         // we know that fragment is already present so it will return cached one
-        val currFragment = tabAdapter.instantiateItem(pager, pager.currentItem) as? EntryListFragment ?: return
+        val currFragment = pager.adapter!!.instantiateItem(pager, pager.currentItem) as? EntryListFragment ?: return
 
         if (currFragment.ribbonRefresher.isRefreshing) {
             // diary is not loaded yet
@@ -664,27 +657,23 @@ class MainActivity : AppCompatActivity() {
         currFragment.addCreateNewEntryForm()
     }
 
-    inner class TabAdapter: FragmentStatePagerAdapter(supportFragmentManager) {
+    inner class GuestTabAdapter: FragmentStatePagerAdapter(supportFragmentManager) {
 
-        var account: Account? = null
-        var selfProfile: OwnProfile? = null
+        override fun getCount() = 1 // only world
+
+        override fun getItem(position: Int) = EntryListFragment().apply { profile = Auth.worldMarker }
+
+        override fun getPageTitle(position: Int): CharSequence? = getString(R.string.world)
+    }
+
+    inner class TabAdapter(private val self: OwnProfile?): FragmentStatePagerAdapter(supportFragmentManager) {
 
         override fun getCount(): Int {
-            if (account == null) {
-                // not initialized yet
-                return 0
-            }
-
-            if (account === Auth.guest) {
-                // guest can't see anything without logging in yet
-                return 0
-            }
-
-            return 4 // favorites, world and own blog
+            return 4 // own blog, favorites, world and notifications
         }
 
         override fun getItem(position: Int) = when(position) {
-            MY_DIARY_TAB -> EntryListFragment().apply { profile = this@TabAdapter.selfProfile }
+            MY_DIARY_TAB -> EntryListFragment().apply { profile = this@TabAdapter.self }
             FAV_TAB  -> EntryListFragment().apply { profile = Auth.favoritesMarker }
             WORLD_TAB -> EntryListFragment().apply { profile = Auth.worldMarker }
             NOTIFICATIONS_TAB -> NotificationListFragment()
@@ -742,9 +731,8 @@ class MainActivity : AppCompatActivity() {
                             .message(R.string.confirm_profile_deletion)
                             .negativeButton(android.R.string.no)
                             .positiveButton(R.string.confirm, click = {
+                                removeItem(pos)
                                 deleteProfile(prof)
-                                profiles.remove(prof)
-                                this@ProfileListAdapter.notifyItemRemoved(pos)
                             }).show()
                 }
 
@@ -752,6 +740,11 @@ class MainActivity : AppCompatActivity() {
                     selectProfile(prof)
                     toDismiss.dismiss()
                 }
+            }
+
+            private fun removeItem(pos: Int) {
+                profiles.removeAt(pos)
+                notifyItemRemoved(pos)
             }
         }
     }

@@ -2,12 +2,11 @@ package com.kanedias.dybr.fair
 
 import androidx.test.filters.LargeTest
 import androidx.test.rule.ActivityTestRule
-import androidx.test.runner.AndroidJUnit4
 import android.text.Spannable
 import android.view.WindowManager
-import junit.framework.Assert
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.Assert
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

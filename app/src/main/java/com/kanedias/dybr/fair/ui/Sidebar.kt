@@ -154,9 +154,16 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
             // setup account row - set email as account name
             accName.text = acc.email
             accName.setOnClickListener {
+                // account name clicked, make it active
+                Auth.user.current = false
+                DbProvider.helper.accDao.update(Auth.user)
+
+                acc.current = true
+                DbProvider.helper.accDao.update(acc)
+
+                // start re-login sequence
                 drawer.closeDrawers()
                 activity.reLogin(acc)
-                updateSidebar()
             }
 
             // setup account row - handle click on delete button
@@ -180,6 +187,9 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
         val guestName = guestRow.findViewById<TextView>(R.id.account_name)
         guestName.text = activity.getString(R.string.guest)
         guestName.setOnClickListener {
+            Auth.user.current = false
+            DbProvider.helper.accDao.update(Auth.user)
+
             drawer.closeDrawers()
             activity.reLogin(Auth.guest)
         }

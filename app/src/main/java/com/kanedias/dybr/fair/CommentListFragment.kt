@@ -46,7 +46,10 @@ class CommentListFragment : UserContentListFragment() {
     override fun getRibbonView() = commentRibbon
     override fun getRefresher() = ribbonRefresher
     override fun getRibbonAdapter() = commentAdapter
-    override fun retrieveData(pageNum: Int) = { Network.loadComments(entry = this.entry!!, pageNum = pageNum) }
+    override fun retrieveData(pageNum: Int, starter: Long) = {
+        // comments go from new to last, no need for a limiter
+        Network.loadComments(entry = this.entry!!, pageNum = pageNum)
+    }
 
     var entry: Entry? = null
 

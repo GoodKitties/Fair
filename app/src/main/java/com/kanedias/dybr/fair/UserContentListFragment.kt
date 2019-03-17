@@ -31,8 +31,9 @@ abstract class UserContentListFragment : Fragment() {
     abstract fun getRibbonView(): RecyclerView
     abstract fun getRefresher(): SwipeRefreshLayout
     abstract fun getRibbonAdapter(): UserContentListFragment.LoadMoreAdapter
-    abstract fun retrieveData(pageNum: Int) : () -> List<Resource>
+    abstract fun retrieveData(pageNum: Int, starter: Long) : () -> List<Resource>
 
+    private var pageStarter = System.currentTimeMillis()
     protected var allLoaded = false
 
     private lateinit var loadJob: Job
@@ -72,6 +73,7 @@ abstract class UserContentListFragment : Fragment() {
             getRibbonView().scrollTo(0, 0)
             getRibbonAdapter().clearItems()
 
+            pageStarter = System.currentTimeMillis()
             allLoaded = false
         }
 
@@ -81,7 +83,9 @@ abstract class UserContentListFragment : Fragment() {
         uiScope.launch(Dispatchers.Main) {
 
             try {
-                val success = withContext(Dispatchers.IO) { retrieveData(pageNum = nextPage).invoke() }
+                val success = withContext(Dispatchers.IO) {
+                    retrieveData(pageNum = nextPage, starter = pageStarter).invoke()
+                }
                 onMoreDataLoaded(success)
             } catch (ex: Exception) {
                 if (isActive) {

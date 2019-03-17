@@ -12,7 +12,7 @@ import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.dto.Auth
-import com.kanedias.dybr.fair.dto.BlogCreateRequest
+import com.kanedias.dybr.fair.dto.ProfileCreateRequest
 import kotlinx.coroutines.*
 
 /**
@@ -53,18 +53,18 @@ class AddBlogFragment: Fragment() {
 
     @OnClick(R.id.blog_create_button)
     fun confirm() {
-        val blogReq = BlogCreateRequest().apply {
-            slug = slugInput.text.toString()
-            title = titleInput.text.toString()
-            profile.set(Auth.profile)
+        val profReq = ProfileCreateRequest().apply {
+            id = Auth.profile?.id
+            blogSlug = slugInput.text.toString()
+            blogTitle = titleInput.text.toString()
         }
 
         uiScope.launch(Dispatchers.Main) {
             progressDialog.show()
 
             try {
-                val blog = withContext(Dispatchers.IO) { Network.createBlog(blogReq) }
-                //Auth.updateBlog(blog)
+                val updated = withContext(Dispatchers.IO) { Network.updateProfile(profReq) }
+                Auth.updateCurrentProfile(updated)
 
                 //we created blog successfully, return to main activity
                 Toast.makeText(requireContext(), R.string.blog_created, Toast.LENGTH_SHORT).show()

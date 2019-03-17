@@ -161,6 +161,11 @@ class CreateNewEntryFragment : Fragment() {
         val adapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_dropdown_item_1line, tags)
         tagsInput.setTokenizer(MultiAutoCompleteTextView.CommaTokenizer())
         tagsInput.threshold = 1
+        tagsInput.onFocusChangeListener = View.OnFocusChangeListener { _, focused ->
+            if (focused && tagsInput.text.isNullOrBlank()) {
+                tagsInput.setText("#")
+            }
+        }
         tagsInput.setAdapter(adapter)
     }
 

@@ -119,7 +119,6 @@
     <string name="switch_profile">Switch profile</string>
     <string name="remove_profile">Remove profile</string>
     <string name="profile_created">Profile created</string>
-    <string name="no_profile">No profile</string>
     <string name="add_profile">Add profile</string>
     <string name="create_blog">Create blog</string>
     <string name="blog_address" translatable="false"><![CDATA[dybr.ru/<address>]]></string>
@@ -237,4 +236,9 @@
     <string name="report_bug">Report bug</string>
     <string name="github_issue_tracker">Github issue tracker</string>
     <string name="reply">Reply</string>
+    <string name="email_not_activated_yet">This email is not yet activated</string>
+    <string name="email_not_found">Email not found</string>
+    <string name="email_is_invalid">Email is invalid</string>
+    <string name="incorrect_password">Incorrect password</string>
+    <string name="email_already_added">This email is already added</string>
 </resources>

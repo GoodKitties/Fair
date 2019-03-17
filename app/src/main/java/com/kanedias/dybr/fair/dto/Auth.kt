@@ -42,8 +42,8 @@ object Auth {
         this.profile = null
     }
 
-    fun updateCurrentProfile(prof: OwnProfile) {
-        this.user.lastProfileId = prof.id
+    fun updateCurrentProfile(prof: OwnProfile?) {
+        this.user.lastProfileId = prof?.id
         this.profile = prof
 
         DbProvider.helper.accDao.update(Auth.user)

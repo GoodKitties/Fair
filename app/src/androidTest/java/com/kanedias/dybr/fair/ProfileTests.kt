@@ -9,12 +9,16 @@ import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.filters.LargeTest
 import androidx.test.rule.ActivityTestRule
-import androidx.test.runner.AndroidJUnit4
 import android.view.WindowManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.j256.ormlite.table.TableUtils
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.database.entities.Account
+import com.kanedias.dybr.fair.dto.Auth
 import org.apache.commons.text.RandomStringGenerator
+import org.awaitility.Awaitility.await
+import org.awaitility.Duration
+import org.awaitility.Duration.*
 import org.hamcrest.Matchers.*
 import org.junit.*
 
@@ -30,67 +34,18 @@ import java.util.concurrent.TimeUnit
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 @RunWith(AndroidJUnit4::class)
-@FixMethodOrder(value = MethodSorters.NAME_ASCENDING)
 @LargeTest
-class AddProfileTest {
-
-    @get:Rule
-    var mActivityRule = ActivityTestRule<MainActivity>(MainActivity::class.java)
-
-    private lateinit var activity: MainActivity
-
-    // need to remember these to reuse in other tests
-    companion object {
-
-        private val strGen = RandomStringGenerator.Builder()
-                .usingRandom { maxInt -> Random().nextInt(maxInt)  }
-                .withinRange('a'.toInt(), 'z'.toInt()).build()
-        private val nickname = strGen.generate(10)
-
-    }
+class ProfileTests: StandardFairTest() {
 
 
     private val gen10 = { strGen.generate(10) }
-
-    @Before
-    fun unlockScreen() {
-        activity = mActivityRule.activity
-
-        activity.runOnUiThread {
-            activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-            // API 26 is Google API only for now
-            //val km: KeyguardManager = activity.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
-            //km.requestDismissKeyguard(activity, null)
-            //activity.setTurnScreenOn(true)
-        }
-    }
-
-    @Before
-    fun espressoPreconditions() {
-        IdlingPolicies.setMasterPolicyTimeout(2, TimeUnit.MINUTES)
-    }
-
-    @After
-    fun getRidOfAllAccounts() {
-        TableUtils.clearTable(DbProvider.helper.connectionSource, Account::class.java)
-    }
-
-    /**
-     * Close drawers so next test can open them
-     */
-    @After
-    fun closeDrawers() {
-        activity.runOnUiThread { activity.drawer.closeDrawers() }
-    }
+    private val nickname = strGen.generate(10)
 
     @Test
-    fun test1AddDeleteRandomProfile() {
+    fun addDeleteRandomProfile() {
         addKnownAccount(activity)
 
-        // it has quite a lot of profiles already and profile deletion doesn't work... yet... so let's pretend
-        // it was all just as planned!
-        // it should show dialog with all profiles listed, create new one
+        await().atMost(TEN_SECONDS).until { Auth.user !== Auth.guest }
         onView(withText(R.string.switch_profile)).inRoot(isDialog()).check(matches(isDisplayed()))
         onView(withText(R.string.create_new)).inRoot(isDialog()).perform(click())
 
@@ -120,9 +75,9 @@ class AddProfileTest {
         onView(withText(R.string.confirm)).inRoot(isDialog()).perform(click())
 
         // now return back to the main one, should disappear
-        onView(withText(R.string.no_profile)).inRoot(isDialog()).perform(click())
+        onView(withText(R.string.create_new)).inRoot(isDialog()).perform(pressBack())
 
         // check we're the guest now
-        onView(withId(R.id.current_user_name)).check(matches(withText((R.string.guest))))
+        onView(withId(R.id.current_user_name)).check(matches(withText((KNOWN_ACCOUNT_EMAIL))))
     }
 }

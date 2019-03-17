@@ -27,19 +27,31 @@ class ProfileCreateRequest: Resource() {
      * Chosen nickname
      */
     @field:Json(name = "nickname")
-    lateinit var nickname: String
+    var nickname: String? = null
 
     /**
      * Birthday in DD-MM format
      */
     @field:Json(name = "birthday")
-    lateinit var birthday: String
+    var birthday: String? = null
 
     /**
      * Description of this profile (multiline text)
      */
     @field:Json(name = "description")
-    lateinit var description: String
+    var description: String? = null
+
+    /**
+     * Slug of the blog associated with this profile
+     */
+    @field:Json(name = "blog-slug")
+    var blogSlug: String? = null
+
+    /**
+     * Title of the blog associated with this profile
+     */
+    @field:Json(name = "blog-title")
+    var blogTitle: String? = null
 }
 
 /**
@@ -143,3 +155,6 @@ data class Tag(
 ) : Serializable
 
 typealias OwnProfile = ProfileResponse
+
+fun isBlogWritable(profile: OwnProfile?) = profile == Auth.profile
+fun isMarkerBlog(profile: OwnProfile?) = profile == Auth.favoritesMarker || profile == Auth.worldMarker

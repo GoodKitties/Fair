@@ -30,7 +30,7 @@ open class NotificationListFragment: UserContentListFragment() {
     override fun getRibbonView() = notifRibbon
     override fun getRefresher() = ribbonRefresher
     override fun getRibbonAdapter() = notifAdapter
-    override fun retrieveData(pageNum: Int) = { Network.loadNotifications(pageNum = pageNum) }
+    override fun retrieveData(pageNum: Int, starter: Long) = { Network.loadNotifications(pageNum = pageNum) }
 
     private val notifAdapter = NotificationListAdapter()
 

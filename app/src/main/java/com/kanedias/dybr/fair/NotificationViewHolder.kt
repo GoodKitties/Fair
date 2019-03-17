@@ -1,6 +1,5 @@
 package com.kanedias.dybr.fair
 
-import androidx.fragment.app.FragmentTransaction
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import android.view.View

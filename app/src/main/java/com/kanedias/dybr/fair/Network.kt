@@ -98,8 +98,6 @@ object Network {
             .add(RegisterResponse::class.java)
             .add(ProfileCreateRequest::class.java)
             .add(ProfileResponse::class.java)
-            .add(BlogCreateRequest::class.java)
-            .add(BlogResponse::class.java)
             .add(EntryCreateRequest::class.java)
             .add(EntryResponse::class.java)
             .add(CreateCommentRequest::class.java)
@@ -158,6 +156,7 @@ object Network {
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(false)
                 .connectionPool(ConnectionPool())
                 .dispatcher(Dispatcher())
                 .addInterceptor(authorizer)
@@ -186,6 +185,7 @@ object Network {
         BLOGS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/blogs"
         ENTRIES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/entries"
         COMMENTS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/comments"
+        NOTIFICATIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/notifications"
     }
 
     /**
@@ -252,7 +252,6 @@ object Network {
                 createdAt = user.createdAt
                 updatedAt = user.updatedAt
                 isAdult = user.isAdult
-                lastProfileId = user.activeProfile
             }
         }
 
@@ -373,7 +372,7 @@ object Network {
      * @param nickname nickname of profile to load
      */
     fun loadProfileByNickname(nickname: String): OwnProfile {
-        val req = Request.Builder().url("$PROFILES_ENDPOINT?filters[nickname]=$nickname&include=blog,favorites").build()
+        val req = Request.Builder().url("$PROFILES_ENDPOINT?filters[nickname]=$nickname&include=favorites").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw extractErrors(resp, "Can't load profile for nickname $nickname")
@@ -450,19 +449,15 @@ object Network {
             throw extractErrors(resp, "Can't remove favorite for profile ${prof.nickname}")
     }
 
-    /**
-     * Create new blog for logged in user
-     * @param blog blog creation request with all info filled in
-     */
-    fun createBlog(blog: BlogCreateRequest): Blog {
-        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(blog))
-        val req = Request.Builder().url(BLOGS_ENDPOINT).post(reqBody).build()
+    fun updateProfile(profReq: ProfileCreateRequest): OwnProfile {
+        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(profReq))
+        val req = Request.Builder().url("$PROFILES_ENDPOINT/${profReq.id}").patch(reqBody).build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw extractErrors(resp, "Can't create blog")
+            throw extractErrors(resp, "Can't update profile")
 
         // response is returned after execute call, body is not null
-        return fromWrappedJson(resp.body()!!.source(), Blog::class.java)!!
+        return fromWrappedJson(resp.body()!!.source(), OwnProfile::class.java)!!
     }
 
     /**
@@ -508,8 +503,12 @@ object Network {
      *
      * @param prof profile with blog to retrieve entries from
      * @param pageNum page number to retrieve
+     * @param starter timestamp in the form of unixtime, used to indicate start of paging sequence
      */
-    fun loadEntries(prof: OwnProfile?, pageNum: Int = 1): ArrayDocument<Entry> {
+    fun loadEntries(prof: OwnProfile? = null,
+                    pageNum: Int = 1,
+                    filters: Map<String, String> = emptyMap(),
+                    starter: Long = System.currentTimeMillis()): ArrayDocument<Entry> {
         // handle special case when we selected tab with favorites
         val builder = when (prof) {
             Auth.favoritesMarker -> { // workaround, filter entries by profile ids
@@ -530,8 +529,13 @@ object Network {
 
         builder.addQueryParameter("page[number]", pageNum.toString())
                 .addQueryParameter("page[size]", PAGE_SIZE.toString())
-                .addQueryParameter("include", "profile,blog")
+       //         .addQueryParameter("page[starter]", starter.toString())
+                .addQueryParameter("include", "profile")
                 .addQueryParameter("sort", "-created-at")
+
+        for ((type, value) in filters) {
+            builder.addQueryParameter("filters[$type]", value)
+        }
 
         val req = Request.Builder().url(builder.build()).build()
         val resp = httpClient.newCall(req).execute()
@@ -543,33 +547,12 @@ object Network {
         return fromWrappedListJson(resp.body()!!.source(), Entry::class.java)
     }
 
-    fun loadFilteredEntries(filters: Map<String, String>, pageNum: Int = 1): ArrayDocument<Entry> {
-        val builder = HttpUrl.parse(ENTRIES_ENDPOINT)!!.newBuilder()
-                .addQueryParameter("page[number]", pageNum.toString())
-                .addQueryParameter("page[size]", PAGE_SIZE.toString())
-                .addQueryParameter("include", "profile,blog")
-                .addQueryParameter("sort", "-created-at")
-
-        for ((type, value) in filters) {
-            builder.addQueryParameter("filters[$type]", value)
-        }
-
-        val req = Request.Builder().url(builder.build()).build()
-        val resp = httpClient.newCall(req).execute()
-        if (!resp.isSuccessful) {
-            throw extractErrors(resp, "Can't load filtered entries for filters $filters")
-        }
-
-        // response is returned after execute call, body is not null
-        return fromWrappedListJson(resp.body()!!.source(), Entry::class.java)
-    }
-
     /**
      * Load one particular entry by its ID. Includes blog and profile.
      * @param id identifier of requested entry
      */
     fun loadEntry(id: String): Entry {
-        val req = Request.Builder().url("$ENTRIES_ENDPOINT/$id?include=blog,profile").build()
+        val req = Request.Builder().url("$ENTRIES_ENDPOINT/$id?include=profile").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw extractErrors(resp, "Can't load entry $id")
@@ -864,10 +847,13 @@ object Network {
      * @param ctx context to get error string from
      * @param errMapping mapping of ids like `HttpUrlConnection.HTTP_NOT_FOUND -> R.string.not_found`
      */
-    fun reportErrors(ctx: Context, ex: Exception, errMapping: Map<Int, Int> = emptyMap()) = when (ex) {
+    fun reportErrors(ctx: Context,
+                     ex: Exception,
+                     errMapping: Map<Int, Int> = emptyMap(),
+                     detailMapping: Map<String, String> = emptyMap()) = when (ex) {
         // API exchange error, most specific
         is HttpApiException -> for (error in ex.errors) {
-            Toast.makeText(ctx, error.detail, Toast.LENGTH_SHORT).show()
+            Toast.makeText(ctx, detailMapping[error.detail] ?: error.detail, Toast.LENGTH_LONG).show()
         }
 
         // non-200 code, but couldn't deduce any API errors

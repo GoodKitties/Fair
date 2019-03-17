@@ -2,7 +2,6 @@ package com.kanedias.dybr.fair
 
 import android.os.Bundle
 import androidx.fragment.app.FragmentStatePagerAdapter
-import androidx.fragment.app.FragmentTransaction
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -34,7 +33,9 @@ open class EntryListFragment: UserContentListFragment() {
     override fun getRibbonView() = entryRibbon
     override fun getRefresher() = ribbonRefresher
     override fun getRibbonAdapter() = entryAdapter
-    override fun retrieveData(pageNum: Int) = { Network.loadEntries(prof = this.profile, pageNum = pageNum) }
+    override fun retrieveData(pageNum: Int, starter: Long) = {
+        Network.loadEntries(prof = this.profile, pageNum = pageNum, starter = starter)
+    }
 
     var profile: OwnProfile? = null
 
@@ -108,6 +109,7 @@ open class EntryListFragment: UserContentListFragment() {
         if (profile?.blogSlug == null) {
             // profile doesn't have a blog yet, ask to create
             entryRibbon.adapter = EmptyBlogAdapter()
+            allLoaded = true
             ribbonRefresher.isRefreshing = false
             return true
         }
