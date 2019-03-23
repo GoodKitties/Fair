@@ -58,6 +58,12 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
     lateinit var blogArea: RelativeLayout
 
     /**
+     * "My Bookmarks" row
+     */
+    @BindView(R.id.bookmarks_area)
+    lateinit var bookmarksArea: RelativeLayout
+
+    /**
      * Label that shows current username near welcome text
      */
     @BindView(R.id.current_user_name)
@@ -129,6 +135,7 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
         updateAccountsArea()
         updateProfileRow()
         updateBlogRow()
+        updateBookmarksRow()
     }
 
     /**
@@ -293,6 +300,20 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
             }
             activity.pager.setCurrentItem(0, true)
             drawer.closeDrawers()
+        }
+    }
+
+    private fun updateBookmarksRow() {
+        val bookmarksIcon = bookmarksArea.findViewById<TextView>(R.id.my_bookmarks)
+
+        when (Auth.profile) {
+            null -> bookmarksIcon.isEnabled = false
+            else -> bookmarksIcon.isEnabled = true
+        }
+
+        bookmarksIcon.setOnClickListener {
+            drawer.closeDrawers()
+            activity.showFullscreenFragment(BookmarkListFragmentFull())
         }
     }
 

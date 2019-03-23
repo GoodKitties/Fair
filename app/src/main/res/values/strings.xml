@@ -241,4 +241,10 @@
     <string name="email_is_invalid">Email is invalid</string>
     <string name="incorrect_password">Incorrect password</string>
     <string name="email_already_added">This email is already added</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="my_bookmarks">My bookmarks</string>
+    <string name="add_to_bookmarks">Add to bookmarks</string>
+    <string name="remove_from_bookmarks">Remove from bookmarks</string>
+    <string name="entry_bookmarked">Entry bookmarked</string>
+    <string name="entry_removed_from_bookmarks">Entry removed from bookmarks</string>
 </resources>

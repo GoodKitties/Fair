@@ -10,6 +10,7 @@ import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.filters.LargeTest
 import androidx.test.rule.ActivityTestRule
 import android.view.WindowManager
+import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.j256.ormlite.table.TableUtils
 import com.kanedias.dybr.fair.database.DbProvider
@@ -38,12 +39,11 @@ import java.util.concurrent.TimeUnit
 class ProfileTests: StandardFairTest() {
 
 
-    private val gen10 = { strGen.generate(10) }
     private val nickname = strGen.generate(10)
 
     @Test
     fun addDeleteRandomProfile() {
-        addKnownAccount(activity)
+        addKnownAccount()
 
         await().atMost(TEN_SECONDS).until { Auth.user !== Auth.guest }
         onView(withText(R.string.switch_profile)).inRoot(isDialog()).check(matches(isDisplayed()))
@@ -75,7 +75,7 @@ class ProfileTests: StandardFairTest() {
         onView(withText(R.string.confirm)).inRoot(isDialog()).perform(click())
 
         // now return back to the main one, should disappear
-        onView(withText(R.string.create_new)).inRoot(isDialog()).perform(pressBack())
+        Espresso.pressBack()
 
         // check we're the guest now
         onView(withId(R.id.current_user_name)).check(matches(withText((KNOWN_ACCOUNT_EMAIL))))

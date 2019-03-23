@@ -88,6 +88,7 @@ object Network {
     private var ENTRIES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/entries"
     private var COMMENTS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/comments"
     private var NOTIFICATIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/notifications"
+    private var BOOKMARKS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/bookmarks"
 
     private val MIME_JSON_API = MediaType.parse("application/vnd.api+json")
 
@@ -529,7 +530,7 @@ object Network {
 
         builder.addQueryParameter("page[number]", pageNum.toString())
                 .addQueryParameter("page[size]", PAGE_SIZE.toString())
-       //         .addQueryParameter("page[starter]", starter.toString())
+                .addQueryParameter("page[starter]", starter.toString())
                 .addQueryParameter("include", "profile")
                 .addQueryParameter("sort", "-created-at")
 
@@ -789,6 +790,54 @@ object Network {
         if (!resp.isSuccessful) {
             throw extractErrors(resp, "Can't (un)subscribe to entry ${entry.id}")
         }
+    }
+
+    /**
+     * Update current profile's bookmark to [entry]
+     *
+     * @param entry entry to modify status for
+     * @param bookmark if true, bookmark, else remove bookmark to denoted entry
+     */
+    fun updateBookmark(entry: Entry, bookmark: Boolean) {
+        val bookmarkReq = CreateBookmarkRequest().apply {
+            this.entry = HasOne(entry)
+        }
+
+        val req = Request.Builder()
+                .apply {
+                    if (bookmark) {
+                        this.post(RequestBody.create(MIME_JSON_API, toWrappedJson(bookmarkReq)))
+                            .url(BOOKMARKS_ENDPOINT)
+                    } else {
+                        this.delete()
+                            .url("$BOOKMARKS_ENDPOINT/${entry.id}") // FIXME: SPEC VIOLATION
+                    }
+                }
+                .build()
+
+        val resp = httpClient.newCall(req).execute()
+
+        // unprocessable entity error can be returned when something is wrong with your input
+        if (!resp.isSuccessful) {
+            throw extractErrors(resp, "Can't (un)bookmark to entry ${entry.id}")
+        }
+    }
+
+    fun loadBookmarks(pageNum: Int): ArrayDocument<Bookmark> {
+        val builder = HttpUrl.parse(BOOKMARKS_ENDPOINT)!!.newBuilder()
+                .addQueryParameter("page[number]", pageNum.toString())
+                .addQueryParameter("page[size]", PAGE_SIZE.toString())
+                .addQueryParameter("include", "entry,profile")
+                .addQueryParameter("sort", "-created-at")
+
+        val req = Request.Builder().url(builder.build()).build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful) {
+            throw extractErrors(resp, "Can't load bookmarks")
+        }
+
+        // response is returned after execute call, body is not null
+        return fromWrappedListJson(resp.body()!!.source(), Bookmark::class.java)
     }
 
     /**

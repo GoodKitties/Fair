@@ -21,7 +21,6 @@ import android.text.TextPaint
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import com.afollestad.materialdialogs.list.listItems
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
@@ -64,7 +63,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     @BindView(R.id.entry_draft_state)
     lateinit var draftStateView: TextView
 
-    @BindViews(R.id.entry_subscribe, R.id.entry_edit, R.id.entry_delete, R.id.entry_more_options)
+    @BindViews(R.id.entry_bookmark, R.id.entry_subscribe, R.id.entry_edit, R.id.entry_delete, R.id.entry_more_options)
     lateinit var buttons: List<@JvmSuppressWildcards ImageView>
 
     @BindViews(R.id.entry_participants_indicator, R.id.entry_comments_indicator)
@@ -168,6 +167,28 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         }
     }
 
+    @OnClick(R.id.entry_bookmark)
+    fun bookmarkEntry(button: ImageView) {
+        val bookmark = !(metadata?.bookmark ?: false)
+
+        val toastText = when (bookmark) {
+            true -> R.string.entry_bookmarked
+            false -> R.string.entry_removed_from_bookmarks
+        }
+
+        GlobalScope.launch(Dispatchers.Main) {
+            try {
+                withContext(Dispatchers.IO) { Network.updateBookmark(entry, bookmark) }
+                showToastAtView(button, itemView.context.getString(toastText))
+
+                metadata?.bookmark = bookmark
+                setupButtons()
+            } catch (ex: Exception) {
+                Network.reportErrors(itemView.context, ex)
+            }
+        }
+    }
+
     @OnClick(R.id.entry_delete)
     fun deleteEntry() {
         val activity = itemView.context as AppCompatActivity
@@ -258,6 +279,13 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
             false -> subButton.apply { visibility = View.VISIBLE; setImageResource(R.drawable.star_border) }
             null -> subButton.visibility = View.GONE
         }
+
+        val bookmarkButton = buttons.first {it.id == R.id.entry_bookmark}
+        when (metadata?.bookmark) {
+            true -> bookmarkButton.apply { visibility = View.VISIBLE; setImageResource(R.drawable.bookmark_filled) }
+            false -> bookmarkButton.apply { visibility = View.VISIBLE; setImageResource(R.drawable.bookmark_add) }
+            null -> bookmarkButton.visibility = View.GONE
+        }
     }
 
     /**
@@ -294,9 +322,11 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         // setup bottom row of buttons
         setupButtons()
 
-        // hack
-        if (!standalone) {
+        // don't show subscribe button if we can't subscribe
+        // guests can't do anything
+        if (Auth.profile == null) {
             buttons.first { it.id == R.id.entry_subscribe }.visibility = View.GONE
+            buttons.first { it.id == R.id.entry_bookmark }.visibility = View.GONE
         }
 
         bodyView.handleMarkdown(entry.content)

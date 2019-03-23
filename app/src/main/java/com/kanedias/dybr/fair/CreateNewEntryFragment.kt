@@ -314,7 +314,9 @@ class CreateNewEntryFragment : Fragment() {
                 currentFrg?.loadMore(reset = true)
             } catch (ex: Exception) {
                 // don't close the fragment, just report errors
-                Network.reportErrors(requireContext(), ex)
+                if (isActive) {
+                    Network.reportErrors(requireContext(), ex)
+                }
             }
         }
     }

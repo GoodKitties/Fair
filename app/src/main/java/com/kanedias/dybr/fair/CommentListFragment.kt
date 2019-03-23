@@ -16,10 +16,12 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.ftinc.scoop.Scoop
+import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.dto.Comment
 import com.kanedias.dybr.fair.dto.Entry
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.*
+import com.kanedias.dybr.fair.ui.getTopFragment
 import kotlinx.coroutines.*
 
 /**
@@ -135,11 +137,13 @@ class CommentListFragment : UserContentListFragment() {
                 getRibbonAdapter().replaceHeader(0, entry!!)
 
                 // mark related notifications read
+                if (Auth.profile == null)
+                    return@launch // nothing to mark, we're nobody
+
                 val markedRead = withContext(Dispatchers.IO) { Network.markNotificationsReadFor(entry!!) }
                 if (markedRead) {
                     // we changed notifications, update fragment with them if present
-                    val notifPredicate = { it: Fragment -> it is NotificationListFragment }
-                    val notifFragment = fragmentManager?.fragments?.find(notifPredicate) as NotificationListFragment?
+                    val notifFragment = activity.getTopFragment(NotificationListFragment::class)
                     notifFragment?.loadMore(reset = true)
                 }
             } catch (ex: Exception) {

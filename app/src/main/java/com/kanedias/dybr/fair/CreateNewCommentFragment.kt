@@ -231,7 +231,9 @@ class CreateNewCommentFragment : Fragment() {
                 requireFragmentManager().popBackStack()
             } catch (ex: Exception) {
                 // don't close the fragment, just report errors
-                Network.reportErrors(requireContext(), ex)
+                if (isActive) {
+                    Network.reportErrors(requireContext(), ex)
+                }
             }
         }
     }

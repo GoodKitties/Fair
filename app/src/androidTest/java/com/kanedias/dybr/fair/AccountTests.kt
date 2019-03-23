@@ -1,5 +1,6 @@
 package com.kanedias.dybr.fair
 
+import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.*
@@ -48,12 +49,12 @@ class AccountTests: StandardFairTest() {
         onView(withId(R.id.add_profile)).check(matches(allOf(isDisplayed(), isEnabled())))
 
         // test adding same account fails
-        addKnownAccount(activity, email, password)
+        addKnownAccount(email, password)
 
         onView(withText(R.string.email_already_added)).inRoot(withDecorView(not(activity.window.decorView))).check(matches(isDisplayed()))
 
         // wait till dialog closes and navigate back from this fragment
-        onView(withId(R.id.register_checkbox)).perform(pressBack())
+        Espresso.pressBack()
 
         deleteAccount(activity, email)
     }
@@ -84,7 +85,7 @@ class AccountTests: StandardFairTest() {
         performRegistration(KNOWN_ACCOUNT_EMAIL, KNOWN_ACCOUNT_PASSWORD)
 
         // wait till dialog closes and navigate back from this fragment
-        onView(withId(R.id.register_checkbox)).perform(pressBack())
+        Espresso.pressBack()
 
         // open drawer
         onView(withContentDescription(R.string.open)).perform(click())
@@ -94,12 +95,12 @@ class AccountTests: StandardFairTest() {
     }
 
     @Test
-    fun currentAccountDeletionMakesYouGuest() {
-        addKnownAccount(activity)
+    fun currentAccountDeletionMakesYouOrphan() {
+        addKnownAccount()
 
         // click "ok" on success dialog
         await().atMost(TEN_SECONDS).until { Auth.user !== Auth.guest }
-        onView(withText(R.string.create_new)).inRoot(isDialog()).perform(pressBack())
+        Espresso.pressBack()
 
         deleteAccount(activity, KNOWN_ACCOUNT_EMAIL)
 
@@ -109,7 +110,7 @@ class AccountTests: StandardFairTest() {
 
     @Test
     fun addingAccountWithoutProfilesAsksToCreateOne() {
-        addKnownAccount(activity)
+        addKnownAccount()
 
         // dialog should pop up, asking to create profile
         await().atMost(TEN_SECONDS).until { Auth.user !== Auth.guest }
@@ -118,7 +119,7 @@ class AccountTests: StandardFairTest() {
         onView(withText(R.string.create_new)).inRoot(isDialog()).check(matches(isDisplayed()))
 
         // we don't want to.. we're just checking
-        onView(withText(R.string.create_new)).inRoot(isDialog()).perform(pressBack())
+        Espresso.pressBack()
 
         deleteAccount(activity, KNOWN_ACCOUNT_EMAIL)
     }

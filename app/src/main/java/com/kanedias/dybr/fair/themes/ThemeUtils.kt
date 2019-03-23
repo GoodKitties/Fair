@@ -151,7 +151,7 @@ private class BgDrawableTarget(view: View): CustomViewTarget<View, Drawable>(vie
     }
 
     override fun onResourceCleared(placeholder: Drawable?) {
-
+        view.background = null
     }
 
     inner class BgAdapter(private val view: View) : Transition.ViewAdapter {

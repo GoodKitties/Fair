@@ -176,6 +176,15 @@
 
             <ImageView
                 android:theme="@style/Ripple.Item"
+                android:id="@+id/entry_bookmark"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="8dp"
+                android:src="@drawable/bookmark_add"
+                android:contentDescription="@string/add_to_bookmarks"/>
+
+            <ImageView
+                android:theme="@style/Ripple.Item"
                 android:id="@+id/entry_subscribe"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
