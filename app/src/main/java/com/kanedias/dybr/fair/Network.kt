@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.preference.PreferenceManager
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.WorkerThread
 import com.kanedias.dybr.fair.database.entities.Account
@@ -157,7 +158,6 @@ object Network {
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
-                .retryOnConnectionFailure(false)
                 .connectionPool(ConnectionPool())
                 .dispatcher(Dispatcher())
                 .addInterceptor(authorizer)
@@ -166,7 +166,7 @@ object Network {
     }
 
     private fun setupEndpoints(ctx: Context, pref: SharedPreferences) {
-        val endpoint = pref.getString("home-server", DEFAULT_DYBR_API_ENDPOINT)
+        val endpoint = pref.getString("home-server", DEFAULT_DYBR_API_ENDPOINT)!!
 
         // endpoint itself must be valid url
         val valid = HttpUrl.parse(endpoint)
@@ -509,7 +509,7 @@ object Network {
     fun loadEntries(prof: OwnProfile? = null,
                     pageNum: Int = 1,
                     filters: Map<String, String> = emptyMap(),
-                    starter: Long = System.currentTimeMillis()): ArrayDocument<Entry> {
+                    starter: Long = System.currentTimeMillis() / 1000): ArrayDocument<Entry> {
         // handle special case when we selected tab with favorites
         val builder = when (prof) {
             Auth.favoritesMarker -> { // workaround, filter entries by profile ids
@@ -920,8 +920,9 @@ object Network {
 
         // generic connection-level error, show as-is
         is IOException -> {
+            Log.w("Fair/Network", "Connection error", ex)
             val errorText = ctx.getString(R.string.error_connecting)
-            Toast.makeText(ctx, "$errorText: ${ex.localizedMessage}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(ctx, "$errorText: ${ex.message}", Toast.LENGTH_SHORT).show()
         }
 
         else -> throw ex

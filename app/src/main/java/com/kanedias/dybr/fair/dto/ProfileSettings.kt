@@ -13,7 +13,9 @@ import java.io.Serializable
  *     "designs": {...},
  *     "notifications": {...},
  *     "pagination": {...},
- *     "privacy": {...}
+ *     "privacy": {...},
+ *     "permissions": {...},
+ *     "pinned-entries": ["1", "2", "3"]
  * }
  * ```
  *
@@ -42,7 +44,13 @@ data class ProfileSettings(
         val pagination: PaginationSettings?,
 
         @field:Json(name = "privacy")
-        val privacy: PrivacySettings?
+        val privacy: PrivacySettings?,
+
+        @field:Json(name = "permissions")
+        val permissions: RecordPermissions?,
+
+        @field:Json(name = "pinned-entries")
+        val pinnedEntries: List<String>
 ) : Serializable
 
 /**

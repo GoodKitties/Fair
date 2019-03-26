@@ -85,10 +85,10 @@ class SyncNotificationsJob: Job() {
 
             // get data from website notification
             val text = Html2Markdown().parse(comment.content).lines().firstOrNull { it.isNotEmpty() }.orEmpty() + "..."
-            val converted = Markwon.markdown(context, text).toString()
+            //val converted = Markwon.markdown(context, text).toString()
             val msgStyle = NotificationCompat.MessagingStyle(userPerson)
                     .setConversationTitle(source.blogTitle)
-                    .addMessage(converted, comment.createdAt.time, authorPerson)
+                    .addMessage(text, comment.createdAt.time, authorPerson)
 
             // fill Android notification intents
             // what to do on action click

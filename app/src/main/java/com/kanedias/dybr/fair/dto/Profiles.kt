@@ -52,6 +52,12 @@ class ProfileCreateRequest: Resource() {
      */
     @field:Json(name = "blog-title")
     var blogTitle: String? = null
+
+    /**
+     * Preferences structure for this profile
+     */
+    @field:Json(name = "settings")
+    var settings: ProfileSettings? = null
 }
 
 /**

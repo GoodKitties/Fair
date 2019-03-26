@@ -33,7 +33,7 @@ abstract class UserContentListFragment : Fragment() {
     abstract fun getRibbonAdapter(): UserContentListFragment.LoadMoreAdapter
     abstract fun retrieveData(pageNum: Int, starter: Long) : () -> List<Resource>
 
-    private var pageStarter = System.currentTimeMillis()
+    private var pageStarter = System.currentTimeMillis() / 1000
     protected var allLoaded = false
 
     private lateinit var loadJob: Job
@@ -73,7 +73,7 @@ abstract class UserContentListFragment : Fragment() {
             getRibbonView().scrollTo(0, 0)
             getRibbonAdapter().clearItems()
 
-            pageStarter = System.currentTimeMillis()
+            pageStarter = System.currentTimeMillis() / 1000
             allLoaded = false
         }
 
