@@ -291,8 +291,8 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     /**
      * Called when this holder should be refreshed based on what it must show now
      */
-    override fun setup(entity: Entry, standalone: Boolean) {
-        super.setup(entity, standalone)
+    override fun setup(entity: Entry) {
+        super.setup(entity)
 
         // bind variables
         this.entry = entity

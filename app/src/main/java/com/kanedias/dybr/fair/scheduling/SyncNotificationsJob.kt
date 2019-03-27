@@ -19,7 +19,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.request.RequestOptions
 import com.kanedias.dybr.fair.dto.Notification
 import com.kanedias.dybr.fair.dto.OwnProfile
-import ru.noties.markwon.Markwon
+import com.kanedias.dybr.fair.ui.mdRendererFrom
 import java.lang.Exception
 import java.util.*
 
@@ -85,7 +85,7 @@ class SyncNotificationsJob: Job() {
 
             // get data from website notification
             val text = Html2Markdown().parse(comment.content).lines().firstOrNull { it.isNotEmpty() }.orEmpty() + "..."
-            //val converted = Markwon.markdown(context, text).toString()
+            val converted = mdRendererFrom(context).toMarkdown(text).toString()
             val msgStyle = NotificationCompat.MessagingStyle(userPerson)
                     .setConversationTitle(source.blogTitle)
                     .addMessage(text, comment.createdAt.time, authorPerson)
@@ -161,7 +161,7 @@ class SyncNotificationsJob: Job() {
 
         return try {
             val bitmap = Glide.with(context).asBitmap()
-                    .apply(RequestOptions().transform(CircleCrop()))
+                    .apply(RequestOptions().circleCrop())
                     .load(prof.settings?.avatar).submit().get(5, TimeUnit.SECONDS)
             IconCompat.createWithBitmap(bitmap)
         } catch (ex: Exception) {

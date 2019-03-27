@@ -632,6 +632,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun refreshUI() {
         sidebar.updateSidebar()
+
+        // don't show add entry button if we don't have blog to add it
+        // can't move this code to EntryListFragments because context
+        // is not attached when their user visible hint is set
+        when (Auth.profile?.blogSlug) {
+            null -> actionButton.hide()
+            else -> actionButton.show()
+        }
+
         when (Auth.user) {
             Auth.guest -> pager.adapter = GuestTabAdapter()
             else -> pager.adapter = TabAdapter(Auth.profile)
@@ -668,9 +677,7 @@ class MainActivity : AppCompatActivity() {
 
     inner class TabAdapter(private val self: OwnProfile?): FragmentStatePagerAdapter(supportFragmentManager) {
 
-        override fun getCount(): Int {
-            return 4 // own blog, favorites, world and notifications
-        }
+        override fun getCount() = 4 // own blog, favorites, world and notifications
 
         override fun getItem(position: Int) = when(position) {
             MY_DIARY_TAB -> EntryListFragment().apply { profile = this@TabAdapter.self }

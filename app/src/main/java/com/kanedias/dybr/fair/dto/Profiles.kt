@@ -162,5 +162,5 @@ data class Tag(
 
 typealias OwnProfile = ProfileResponse
 
-fun isBlogWritable(profile: OwnProfile?) = profile == Auth.profile
+fun isBlogWritable(profile: OwnProfile?) = profile?.blogSlug != null && profile == Auth.profile
 fun isMarkerBlog(profile: OwnProfile?) = profile == Auth.favoritesMarker || profile == Auth.worldMarker

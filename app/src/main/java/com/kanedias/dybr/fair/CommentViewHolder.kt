@@ -126,8 +126,8 @@ class CommentViewHolder(iv: View, private val parent: View, private val entry: E
     /**
      * Called when this holder should be refreshed based on what it must show now
      */
-    override fun setup(entity: Comment, standalone: Boolean) {
-        super.setup(entity, standalone)
+    override fun setup(entity: Comment) {
+        super.setup(entity)
 
         this.comment = entity
 

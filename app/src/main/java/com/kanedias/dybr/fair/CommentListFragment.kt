@@ -19,6 +19,7 @@ import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.dto.Comment
 import com.kanedias.dybr.fair.dto.Entry
+import com.kanedias.dybr.fair.dto.writable
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.getTopFragment
@@ -87,6 +88,9 @@ class CommentListFragment : UserContentListFragment() {
         ribbonRefresher.setOnRefreshListener { loadMore(reset = true) }
         commentRibbon.layoutManager = LinearLayoutManager(activity)
         commentRibbon.adapter = commentAdapter
+
+        if (!entry.writable) // guests can't post comments
+            addCommentButton.visibility = View.GONE
     }
 
     private fun setupTheming() {
@@ -178,7 +182,7 @@ class CommentListFragment : UserContentListFragment() {
                 ITEM_HEADER -> {
                     val entry = headers[position] as Entry
                     (holder as EntryViewHolder).apply {
-                        setup(entry, true)
+                        setup(entry)
                         itemView.isClickable = false
                     }
                 }

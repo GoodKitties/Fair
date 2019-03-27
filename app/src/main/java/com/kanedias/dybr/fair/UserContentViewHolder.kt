@@ -42,7 +42,7 @@ abstract class UserContentViewHolder<T: Authored>(iv: View): RecyclerView.ViewHo
     abstract fun getProfileAvatarView(): ImageView
     abstract fun getContentView(): TextView
 
-    open fun setup(entity: T, standalone: Boolean = false) {
+    open fun setup(entity: T) {
         val profile = entity.profile.get(entity.document)
 
         getCreationDateView().text = DateUtils.getRelativeTimeSpanString(entity.createdAt.time)
@@ -51,7 +51,7 @@ abstract class UserContentViewHolder<T: Authored>(iv: View): RecyclerView.ViewHo
         val avatar = profile.settings?.avatar
         if (avatar != null && HttpUrl.parse(avatar) != null) {
             Glide.with(getProfileAvatarView()).load(avatar)
-                    .apply(RequestOptions().downsample(DownsampleStrategy.CENTER_INSIDE))
+                    .apply(RequestOptions().centerInside())
                     .into(getProfileAvatarView())
         } else {
             getProfileAvatarView().setImageDrawable(null)

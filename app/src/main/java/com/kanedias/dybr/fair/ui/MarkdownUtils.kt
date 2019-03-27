@@ -26,16 +26,18 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.graphics.drawable.DrawableCompat
 import butterknife.BindView
 import butterknife.ButterKnife
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.SimpleTarget
-import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
+import com.ftinc.scoop.binding.AbstractBinding
 import com.kanedias.dybr.fair.BuildConfig
 import com.kanedias.dybr.fair.Network
 import com.kanedias.dybr.fair.R
+import com.kanedias.dybr.fair.themes.TEXT
 import com.kanedias.html2md.Html2Markdown
 import com.stfalcon.imageviewer.StfalconImageViewer
 import kotlinx.coroutines.*
@@ -47,13 +49,30 @@ import ru.noties.markwon.html.HtmlPlugin
 import ru.noties.markwon.image.*
 import ru.noties.markwon.image.network.NetworkSchemeHandler
 import java.io.*
+import java.lang.ref.WeakReference
 import java.util.*
 
-private fun mdCtxFrom(ctx: Context): Markwon {
+/**
+ * Get markdown setup from context.
+ * This is stripped-down version for use in
+ *
+ * @param ctx context to initialize from
+ */
+fun mdRendererFrom(ctx: Context): Markwon {
     return Markwon.builder(ctx)
             .usePlugin(HtmlPlugin.create())
-            .usePlugin(ImagesPlugin.create(ctx))
-            .usePlugin(MarkwonGlidePlugin.create(ctx))
+            .usePlugin(StrikethroughPlugin.create())
+            .build()
+}
+
+/**
+ * Get commonly-used markdown setup for text views
+ */
+fun mdRendererFrom(txt: TextView): Markwon {
+    return Markwon.builder(txt.context)
+            .usePlugin(HtmlPlugin.create())
+            .usePlugin(ImagesPlugin.create(txt.context))
+            .usePlugin(MarkwonGlidePlugin.create(txt))
             .usePlugin(StrikethroughPlugin.create())
             .build()
 }
@@ -69,7 +88,7 @@ infix fun TextView.handleMarkdown(html: String) {
     GlobalScope.launch(Dispatchers.Main) {
         // this is computation-intensive task, better do it smoothly
         val span = withContext(Dispatchers.IO) {
-            val spanned = mdCtxFrom(label.context).toMarkdown(Html2Markdown().parse(html)) as SpannableStringBuilder
+            val spanned = mdRendererFrom(label).toMarkdown(Html2Markdown().parse(html)) as SpannableStringBuilder
             postProcessSpans(spanned, label)
 
             spanned
@@ -164,7 +183,7 @@ fun postProcessMore(spanned: SpannableStringBuilder, view: TextView) {
 
         // content of opening tag may be HTML
         val auxMd = Html2Markdown().parse(moreText)
-        val auxSpanned = mdCtxFrom(view.context).toMarkdown(auxMd)
+        val auxSpanned = mdRendererFrom(view).toMarkdown(auxMd)
 
         spanned.replace(outerRange.start, outerRange.endInclusive + 1, auxSpanned) // replace it just with text
         val wrapper = object : ClickableSpan() {
@@ -238,33 +257,36 @@ private fun postProcessDrawablesLoad(spanned: SpannableStringBuilder, view: Text
  * @see handleMarkdown
  */
 infix fun TextView.handleMarkdownRaw(markdown: String) {
-    val spanned = mdCtxFrom(this.context).toMarkdown(markdown) as SpannableStringBuilder
+    val spanned = mdRendererFrom(this).toMarkdown(markdown) as SpannableStringBuilder
     postProcessSpans(spanned, this)
 
     this.text = spanned
 }
 
-class MarkwonGlidePlugin(private val ctx: Context): AbstractMarkwonPlugin() {
+/**
+ * A plugin to implement image caching by means of using [Glide]
+ */
+class MarkwonGlidePlugin(private val txt: TextView): AbstractMarkwonPlugin() {
 
     companion object {
-        fun create(ctx: Context): MarkwonGlidePlugin {
-            return MarkwonGlidePlugin(ctx)
+        fun create(txt: TextView): MarkwonGlidePlugin {
+            return MarkwonGlidePlugin(txt)
         }
     }
 
+    /**
+     * Reroute image loading through the Glide cache
+     */
     inner class GlideHandler: SchemeHandler() {
 
         override fun handle(raw: String, uri: Uri): ImageItem? {
             val base = HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT) ?: return null
             val resolved = base.resolve(raw) ?: return null
 
-            val glide = Glide.with(ctx)
+            val glide = Glide.with(txt.context)
                     .downloadOnly()
                     .load(resolved.toString())
-                    .apply(RequestOptions()
-                            .placeholder(R.drawable.image)
-                            .error(R.drawable.image_broken)
-                            .centerInside())
+                    .apply(RequestOptions().centerInside())
                     .submit()
 
             return ImageItem("image/*", glide.get().inputStream())
@@ -272,71 +294,41 @@ class MarkwonGlidePlugin(private val ctx: Context): AbstractMarkwonPlugin() {
 
     }
 
-    @Suppress("DEPRECATION") // Keep compatibility with old API
-    override fun configureImages(builder: AsyncDrawableLoader.Builder) {
-        builder.placeholderDrawableProvider { ctx.resources.getDrawable(R.drawable.download_image_progress) }
-        builder.addSchemeHandler(NetworkSchemeHandler.SCHEME_HTTP, GlideHandler())
-        builder.addSchemeHandler(NetworkSchemeHandler.SCHEME_HTTPS, GlideHandler())
-    }
-}
+    /**
+     * Helper class that tints drawable according to current style.
+     * In short, this makes placeholders dark in light theme and light in dark one.
+     */
+    inner class DrawableBinding(drawable: Drawable, topping: Int): AbstractBinding(topping) {
 
-/**
- * Class responsible for loading pictures inside markdown-enabled text-views.
- * Uses [Glide] to cache and down-sample images.
- */
-class DrawableLoader(private val view: TextView): AsyncDrawableLoader() {
+        private val dwRef = WeakReference(drawable)
 
-    override fun placeholder(): Drawable? {
-        @Suppress("DEPRECATION") // Keep compatibility with old API
-        return view.context.resources.getDrawable(R.drawable.image_broken)
-    }
-
-    override fun cancel(destination: String) {
-        // we don't need to cancel load as we replace images with placeholders
-    }
-
-    override fun load(imageUrl: String, drawable: AsyncDrawable) {
-        // resolve URL if it's not absolute
-        val base = HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT) ?: return
-        val resolved = base.resolve(imageUrl) ?: return
-
-        GlobalScope.launch(Dispatchers.Main) {
-            try {
-                while (view.width == 0) // just inflated
-                    delay(500)
-
-                // initialize bounds
-                drawable.initWithKnownDimensions(view.width, 18F)
-
-                // load image
-                Glide.with(view)
-                        .load(resolved.toString())
-                        .apply(RequestOptions()
-                                .placeholder(R.drawable.image_broken)
-                                .centerInside())
-                        .into(AsyncDrawableTarget(view.width, drawable))
-
-            } catch (ioex: IOException) {
-                // ignore, just don't load image
-                Log.e("Fair/Markdown", "Couldn't load image", ioex)
+        override fun update(color: Int) {
+            dwRef.get()?.let {
+                val wrapped = DrawableCompat.wrap(it)
+                DrawableCompat.setTint(wrapped, color)
             }
         }
+
+        override fun unbind() {
+            dwRef.clear()
+        }
+
     }
 
-    inner class AsyncDrawableTarget(width: Int, private val drawable: AsyncDrawable): SimpleTarget<Drawable>(width, Target.SIZE_ORIGINAL) {
-
-        override fun onLoadStarted(placeholder: Drawable?) {
-            placeholder?.let { drawable.result = placeholder }
+    @Suppress("DEPRECATION") // Keep compatibility with old API
+    override fun configureImages(builder: AsyncDrawableLoader.Builder) {
+        builder.placeholderDrawableProvider {
+            txt.context.resources.getDrawable(R.drawable.image).apply {
+                txt.styleLevel?.bind(TEXT, DrawableBinding(this, TEXT))
+            }
         }
-
-        override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
-            resource.setBounds(0, 0, resource.intrinsicWidth, resource.intrinsicHeight)
-            drawable.result = resource
+        builder.errorDrawableProvider {
+            txt.context.resources.getDrawable(R.drawable.image_broken).apply {
+                txt.styleLevel?.bind(TEXT, DrawableBinding(this, TEXT))
+            }
         }
-
-        override fun onLoadCleared(placeholder: Drawable?) {
-            placeholder?.let { drawable.result = placeholder }
-        }
+        builder.addSchemeHandler(NetworkSchemeHandler.SCHEME_HTTP, GlideHandler())
+        builder.addSchemeHandler(NetworkSchemeHandler.SCHEME_HTTPS, GlideHandler())
     }
 }
 

@@ -164,8 +164,11 @@ class EntryResponse: Authored() {
 class EntryMeta {
     var commenters = 0
     var comments = 0
-    var subscribed = false
-    var bookmark = false
+    var subscribed: Boolean? = null
+    var bookmark: Boolean? = null
 }
 
 typealias Entry = EntryResponse
+
+val Entry?.writable: Boolean
+    get() = Auth.profile != null

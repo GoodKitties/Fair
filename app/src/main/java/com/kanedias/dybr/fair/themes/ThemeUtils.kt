@@ -122,7 +122,6 @@ fun updateBackgroundDrawables(design: Design, withDrawables: Map<View, Int>) {
         Glide.with(entry.key)
                 .load(resolved.toString())
                 .apply(RequestOptions()
-                        .placeholder(android.R.drawable.progress_indeterminate_horizontal)
                         .override(entry.key.width, entry.key.height)
                         .centerCrop())
                 .into(BgDrawableTarget(entry.key))
