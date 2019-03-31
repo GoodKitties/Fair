@@ -21,8 +21,8 @@ android {
         applicationId "com.kanedias.dybr.fair"
         targetSdkVersion 28 // device you test on
         minSdkVersion 19    // device you allow your users to be on :)
-        versionCode 49
-        versionName "1.9.9"
+        versionCode 50
+        versionName "1.9.10"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -115,7 +115,7 @@ dependencies {
     implementation 'com.evernote:android-job:1.2.6'                             // job scheduler
     implementation 'com.jakewharton:butterknife:10.0.0'                         // Annotation processor
     implementation 'com.j256.ormlite:ormlite-android:5.0'                       // ORM for local storage
-    implementation 'com.squareup.okhttp3:okhttp:3.14.0'                         // android http client
+    implementation 'com.squareup.okhttp3:okhttp:3.12.0'                         // android http client - 3.12 is last with Android < 5
     implementation 'com.afollestad.material-dialogs:core:2.0.0-rc7'             // material design for dialogs
     implementation 'com.github.Adonai.Scoops:scoops:1.3.5'                      // theming engine
     implementation 'com.github.Adonai.Scoops:scoops-core:1.3.5'                 // theming engine api
