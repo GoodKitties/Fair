@@ -15,25 +15,52 @@
         android:layout_height="wrap_content"
         android:padding="8dp">
 
-        <TextView
-            android:id="@+id/entry_draft_state"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:id="@+id/top_indicators_row"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:padding="5dp"
-            android:textColor="@color/md_amber_600"
-            android:visibility="visible"
-            android:text="@string/draft"/>
+            android:layout_alignParentStart="true">
+
+            <TextView
+                android:id="@+id/entry_draft_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"
+                android:padding="5dp"
+                android:textColor="@color/md_amber_600"
+                android:visibility="visible"
+                android:text="@string/draft"/>
+
+            <ImageView
+                android:id="@+id/entry_pinned"
+                android:layout_height="28dp"
+                android:layout_width="28dp"
+                android:layout_alignParentEnd="true"
+                android:padding="8dp"
+                android:src="@drawable/pin"
+                android:contentDescription="@string/entry_pinned_status"/>
+
+            <ImageView
+                android:id="@+id/entry_permissions"
+                android:layout_height="28dp"
+                android:layout_width="28dp"
+                android:layout_toStartOf="@id/entry_pinned"
+                android:layout_alignWithParentIfMissing="true"
+                android:padding="8dp"
+                android:src="@drawable/lock"
+                android:contentDescription="@string/entry_access_permissions"/>
+
+
+        </RelativeLayout>
 
         <ImageView
             android:id="@+id/entry_avatar"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:layout_below="@+id/entry_draft_state"
+            android:layout_below="@+id/top_indicators_row"
             android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
             android:contentDescription="@string/user_avatar" />
 
         <TextView
@@ -41,31 +68,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/entry_avatar"
-            android:layout_toRightOf="@id/entry_avatar"
             android:layout_toEndOf="@id/entry_avatar"
             android:padding="8dp"
             android:text="@string/placeholder_long"
             android:textStyle="bold"/>
 
-        <ImageView
-            android:id="@+id/entry_permissions"
-            android:layout_height="12dp"
-            android:layout_width="12dp"
-            android:layout_alignTop="@id/entry_date"
-            android:layout_alignBottom="@id/entry_date"
-            android:layout_toLeftOf="@id/entry_date"
-            android:layout_toStartOf="@id/entry_date"
-            android:layout_margin="8dp"
-            android:src="@drawable/lock"
-            android:contentDescription="@string/entry_access_permissions"/>
-
         <TextView
             android:id="@+id/entry_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/entry_draft_state"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
             android:layout_alignBaseline="@id/entry_author"
             android:padding="8dp"
             android:text="@string/placeholder_date"/>
@@ -75,7 +87,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/entry_avatar"
-            android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:padding="5dp"
             android:textAppearance="?android:attr/textAppearanceMedium"
@@ -86,7 +97,6 @@
             android:id="@+id/entry_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_below="@id/entry_title"
             android:padding="5dp"
@@ -121,14 +131,12 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/entry_meta_divider"
             android:layout_marginTop="8dp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true">
+            android:layout_alignParentStart="true">
 
             <ImageView
                 android:id="@+id/entry_participants_indicator"
                 android:layout_width="16dp"
                 android:layout_height="36dp"
-                android:layout_marginLeft="8dp"
                 android:layout_marginStart="8dp"
                 android:src="@drawable/community"
                 android:scaleType="fitCenter"
@@ -138,7 +146,6 @@
                 android:id="@+id/entry_participants_text"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
-                android:layout_marginLeft="8dp"
                 android:layout_marginStart="8dp"
                 android:gravity="center_vertical"
                 android:text="@string/zero" />
@@ -147,7 +154,6 @@
                 android:id="@+id/entry_comments_indicator"
                 android:layout_width="16dp"
                 android:layout_height="36dp"
-                android:layout_marginLeft="8dp"
                 android:layout_marginStart="8dp"
                 android:src="@drawable/comments"
                 android:scaleType="fitCenter"
@@ -157,7 +163,6 @@
                 android:id="@+id/entry_comments_text"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
-                android:layout_marginLeft="8dp"
                 android:layout_marginStart="8dp"
                 android:gravity="center_vertical"
                 android:text="@string/zero"/>
@@ -171,8 +176,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_below="@id/entry_meta_divider"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"> <!-- invisible for entries you don't own -->
+            android:layout_alignParentEnd="true"> <!-- invisible for entries you don't own -->
 
             <ImageView
                 android:theme="@style/Ripple.Item"
@@ -218,7 +222,7 @@
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:padding="8dp"
-                android:src="@drawable/more"
+                android:src="@drawable/overflow"
                 android:contentDescription="@string/more_options"/>
 
         </LinearLayout>

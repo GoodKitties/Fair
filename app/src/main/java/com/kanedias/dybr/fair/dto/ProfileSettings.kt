@@ -29,28 +29,28 @@ import java.io.Serializable
  */
 data class ProfileSettings(
         @field:Json(name = "avatar")
-        val avatar: String?,
+        val avatar: String? = null,
 
         @field:Json(name = "subtext")
-        val subtext: String?,
+        val subtext: String? = null,
 
         @field:Json(name = "current-design")
-        val currentDesign: String?,
+        val currentDesign: String? = null,
 
         @field:Json(name = "notifications")
-        val notifications: NotificationSettings?,
+        val notifications: NotificationSettings? = null,
 
         @field:Json(name = "pagination")
-        val pagination: PaginationSettings?,
+        val pagination: PaginationSettings? = null,
 
         @field:Json(name = "privacy")
-        val privacy: PrivacySettings?,
+        val privacy: PrivacySettings? = null,
 
         @field:Json(name = "permissions")
-        val permissions: RecordPermissions?,
+        val permissions: RecordPermissions? = null,
 
         @field:Json(name = "pinned-entries")
-        val pinnedEntries: List<String>
+        val pinnedEntries: MutableSet<String>? = null
 ) : Serializable
 
 /**
@@ -63,8 +63,8 @@ data class ProfileSettings(
  * @see NotificationConfig
  */
 data class NotificationSettings(
-        val comments: NotificationConfig?,
-        val entries: NotificationConfig?
+        val comments: NotificationConfig? = null,
+        val entries: NotificationConfig? = null
 ) : Serializable
 
 /**
@@ -77,8 +77,8 @@ data class NotificationSettings(
  * ```
  */
 data class NotificationConfig(
-        val enable: Boolean?,
-        val regularity: String?
+        val enable: Boolean? = null,
+        val regularity: String? = null
 ) : Serializable
 
 /**
@@ -93,10 +93,10 @@ data class NotificationConfig(
  * ```
  */
 data class PaginationSettings(
-        val blogs: Int?,
-        val comments: Int?,
-        val entries: Int?,
-        val profiles: Int?
+        val blogs: Int? = null,
+        val comments: Int? = null,
+        val entries: Int? = null,
+        val profiles: Int? = null
 ) : Serializable
 
 /**
@@ -108,5 +108,5 @@ data class PaginationSettings(
  * ```
  */
 data class PrivacySettings(
-        val dybrfeed: Boolean?
+        val dybrfeed: Boolean? = null
 ) : Serializable

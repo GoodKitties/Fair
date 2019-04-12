@@ -30,7 +30,7 @@ data class RecordPermissions (
          * The items are applied from first to last for more complex scenarios.
          */
         @field:Json(name = "access")
-        val access: List<RecordAccessItem?>
+        val access: List<RecordAccessItem>? = null
 ) : Serializable
 
 /**

@@ -57,6 +57,9 @@ open class EntryListFragmentFull: EntryListFragment() {
         styleLevel.bind(ACCENT, addEntryButton, FabColorAdapter())
         styleLevel.bind(ACCENT_TEXT, addEntryButton, FabIconAdapter())
 
+        styleLevel.bind(ACCENT, fastJumpButton, FabColorAdapter())
+        styleLevel.bind(ACCENT_TEXT, fastJumpButton, FabIconAdapter())
+
         styleLevel.bindStatusBar(activity, STATUS_BAR)
 
         val backgrounds = mapOf<View, Int>(entryRibbon to BACKGROUND/*, toolbar to TOOLBAR*/)

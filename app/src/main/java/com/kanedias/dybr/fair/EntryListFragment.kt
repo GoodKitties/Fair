@@ -1,18 +1,24 @@
 package com.kanedias.dybr.fair
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.os.Bundle
+import android.view.*
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import butterknife.BindView
 import butterknife.ButterKnife
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.kanedias.dybr.fair.dto.*
+import com.kanedias.dybr.fair.misc.setMaxFlingVelocity
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
-import com.kanedias.dybr.fair.themes.BACKGROUND
+import com.kanedias.dybr.fair.themes.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import moe.banana.jsonapi2.ArrayDocument
 
 
 /**
@@ -27,19 +33,22 @@ open class EntryListFragment: UserContentListFragment() {
     @BindView(R.id.entry_ribbon)
     lateinit var entryRibbon: RecyclerView
 
+    @BindView(R.id.fast_jump_button)
+    lateinit var fastJumpButton: FloatingActionButton
+
     @BindView(R.id.entry_list_area)
     lateinit var ribbonRefresher: SwipeRefreshLayout
 
     override fun getRibbonView() = entryRibbon
     override fun getRefresher() = ribbonRefresher
     override fun getRibbonAdapter() = entryAdapter
-    override fun retrieveData(pageNum: Int, starter: Long) = {
+    override fun retrieveData(pageNum: Int, starter: Long): () -> ArrayDocument<Entry> = {
         Network.loadEntries(prof = this.profile, pageNum = pageNum, starter = starter)
     }
 
     var profile: OwnProfile? = null
 
-    private lateinit var entryAdapter: UserContentListFragment.LoadMoreAdapter
+    private lateinit var entryAdapter: LoadMoreAdapter
     protected lateinit var activity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -69,7 +78,9 @@ open class EntryListFragment: UserContentListFragment() {
 
     open fun setupUI() {
         ribbonRefresher.setOnRefreshListener { loadMore(reset = true) }
+        entryRibbon.onFlingListener = FastJumpListener()
         entryRibbon.layoutManager = LinearLayoutManager(activity)
+        entryRibbon.setMaxFlingVelocity(100_000)
         entryRibbon.adapter = entryAdapter
     }
 
@@ -77,6 +88,9 @@ open class EntryListFragment: UserContentListFragment() {
         styleLevel = activity.styleLevel
 
         styleLevel.bind(BACKGROUND, entryRibbon)
+
+        styleLevel.bind(ACCENT, fastJumpButton, FabColorAdapter())
+        styleLevel.bind(ACCENT_TEXT, fastJumpButton, FabIconAdapter())
     }
 
     /**
@@ -185,6 +199,55 @@ open class EntryListFragment: UserContentListFragment() {
                     EntryViewHolder(view, parent)
                 }
                 else -> super.onCreateViewHolder(parent, viewType)
+            }
+        }
+    }
+
+    inner class FastJumpListener : RecyclerView.OnFlingListener() {
+
+        private val minTriggerSpeed = 10000
+
+        private var fadeJob: Job? = null
+
+        override fun onFling(velocityX: Int, velocityY: Int): Boolean {
+            if (fastJumpButton.visibility == View.VISIBLE) {
+                return false
+            }
+
+            when {
+                velocityY > minTriggerSpeed -> {
+                    allowFastJump()
+                    fastJumpButton.setOnClickListener { entryRibbon.fling(0, 100_000) }
+                    fastJumpButton.rotation = -90f
+                }
+                velocityY < -minTriggerSpeed -> {
+                    allowFastJump()
+                    fastJumpButton.setOnClickListener { entryRibbon.fling(0, -100_000) }
+                    fastJumpButton.rotation = 90f
+                }
+            }
+            return false
+        }
+
+        private fun allowFastJump() {
+            // cancel fading if it's in progress
+            fadeJob?.cancel()
+
+            fastJumpButton.visibility = View.VISIBLE
+            fastJumpButton.alpha = 0.5f
+
+            fadeJob = uiScope.launch {
+                delay(2000)
+
+                fastJumpButton.animate()
+                        .alpha(0.0f)
+                        .setDuration(300)
+                        .setListener(object: AnimatorListenerAdapter() {
+                            override fun onAnimationEnd(animation: Animator?) {
+                                fastJumpButton.visibility = View.INVISIBLE
+                            }
+                        })
+                        .start()
             }
         }
     }

@@ -247,4 +247,9 @@
     <string name="remove_from_bookmarks">Remove from bookmarks</string>
     <string name="entry_bookmarked">Entry bookmarked</string>
     <string name="entry_removed_from_bookmarks">Entry removed from bookmarks</string>
+    <string name="pin_entry">Pin entry</string>
+    <string name="pinned_entry">Pinned entry</string>
+    <string name="non_pinned_entry">Non-pinned entry</string>
+    <string name="entry_pinned_status">Entry pinned status</string>
+    <string name="insert_more_tag">Insert MORE tag</string>
 </resources>

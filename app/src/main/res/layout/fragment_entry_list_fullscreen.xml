@@ -22,20 +22,36 @@
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/entry_list_area"
         android:layout_marginStart="4dp"
-        android:layout_marginLeft="4dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/entry_ribbon"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"
-            android:clipToPadding="false"
-            android:scrollbars="vertical"
-            android:fadeScrollbars="true"/>
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/entry_ribbon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:clipToPadding="false"
+                android:scrollbars="vertical"
+                android:fadeScrollbars="true"/>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fast_jump_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|end"
+                android:layout_margin="@dimen/activity_vertical_margin"
+                android:src="@drawable/jump_to_start"
+                android:rotation="90"
+                android:alpha="0.5"
+                android:visibility="invisible"/>
+
+        </FrameLayout>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

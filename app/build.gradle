@@ -23,6 +23,7 @@ android {
         minSdkVersion 19    // device you allow your users to be on :)
         versionCode 50
         versionName "1.9.10"
+        multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -103,11 +104,16 @@ play {
 }
 
 dependencies {
+    // fix https://developer.android.com/studio/build/multidex
+    implementation 'com.android.support:multidex:1.0.3'                         // temporary
+
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"     // Kotlin language support
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"         // Kotlin reflection support
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.0"        // Kotlin coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.0"     // Kotlin UI context
-    implementation 'com.google.android.material:material:1.1.0-alpha04'         // Material design support lib
-    implementation 'androidx.appcompat:appcompat:1.1.0-alpha03'                 // basic toolbars etc.
+    implementation 'com.google.android.material:material:1.1.0-alpha05'         // Material design support lib
+    implementation 'androidx.appcompat:appcompat:1.1.0-alpha04'                 // basic toolbars etc.
     implementation 'androidx.cardview:cardview:1.0.0'                           // snappy cardview for lists
     implementation 'androidx.preference:preference:1.0.0'                       // preference fragment compatibility
     implementation "ch.acra:acra-mail:$acraVersion"                             // crash handler
@@ -132,7 +138,6 @@ dependencies {
     implementation 'com.auth0.android:jwtdecode:1.2.0'                          // handling JWT from server
     implementation 'com.github.stfalcon:stfalcon-imageviewer:0.1.0'             // embedded image viewer
     implementation 'com.github.marcoscgdev:EasyAbout:1.0.6'                     // about dialog
-
 
     googleplayImplementation 'com.android.billingclient:billing:1.0'            // billing library from Google
 

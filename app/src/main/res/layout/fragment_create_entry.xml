@@ -73,6 +73,16 @@
                             android:text="@string/select_permission_type"/>
 
                         <CheckBox
+                            android:id="@+id/entry_pinned_switch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginLeft="4dp"
+                            android:layout_marginStart="4dp"
+                            android:text="@string/non_pinned_entry"
+                            android:checked="false"/>
+
+                        <CheckBox
                             android:id="@+id/entry_draft_switch"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"

@@ -41,7 +41,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="-27dp"
-                android:layout_marginLeft="-27dp"
                 android:padding="16dp"
                 android:text="@string/guest"
                 android:textColor="#fff"
@@ -55,7 +54,6 @@
             android:layout_alignParentBottom="true"
             android:gravity="end"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
             android:orientation="horizontal">
 
             <ImageView
@@ -87,9 +85,7 @@
                 android:layout_width="26dp"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="26dp"
-                android:layout_marginRight="26dp"
                 android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
                 android:src="@drawable/add"/>
 
             <TextView
@@ -117,10 +113,8 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:drawableLeft="@drawable/profile"
             android:drawableStart="@drawable/profile"
             android:drawablePadding="26dp"
-            android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
             android:text="@string/my_profile"
             android:textSize="14sp"
@@ -132,10 +126,8 @@
             android:layout_height="match_parent"
             android:orientation="horizontal"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="2dp"
-            android:layout_marginRight="2dp">
+            android:layout_marginEnd="2dp">
 
             <ImageView
                 android:id="@+id/switch_profile"
@@ -169,10 +161,8 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:drawableLeft="@drawable/home"
             android:drawableStart="@drawable/home"
             android:drawablePadding="26dp"
-            android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
             android:text="@string/my_blog"
             android:textSize="14sp"
@@ -184,10 +174,8 @@
             android:layout_height="match_parent"
             android:orientation="horizontal"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="2dp"
-            android:layout_marginRight="2dp">
+            android:layout_marginEnd="2dp">
 
             <!-- you can't have many blogs in one profile -->
             <!-- but bloc can be not yet created for a profile -->
@@ -216,10 +204,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:drawableLeft="@drawable/bookmark_list"
             android:drawableStart="@drawable/bookmark_list"
             android:drawablePadding="26dp"
-            android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
             android:text="@string/my_bookmarks"
             android:textSize="14sp"
@@ -247,8 +233,6 @@
                 android:layout_height="match_parent"
                 android:layout_marginEnd="26dp"
                 android:layout_marginStart="16dp"
-                android:layout_marginRight="26dp"
-                android:layout_marginLeft="16dp"
                 android:src="@drawable/sidebar_inbox" />
 
             <TextView
@@ -265,11 +249,9 @@
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
             android:background="@drawable/roundedback"
             android:gravity="center"
             android:textColor="#fff"
@@ -291,10 +273,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:drawableLeft="@drawable/settings"
             android:drawableStart="@drawable/settings"
             android:drawablePadding="26dp"
-            android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
             android:text="@string/settings"
             android:textSize="14sp"
@@ -337,10 +317,8 @@
             android:layout_height="36dp"
             android:layout_alignBottom="@+id/goto_input_filter"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
             android:padding="8dp"
             android:theme="@style/Ripple.Item"
             android:visibility="gone"

@@ -54,7 +54,9 @@ import java.util.*
 
 /**
  * Get markdown setup from context.
- * This is stripped-down version for use in
+ *
+ * This is stripped-down version for use in notifications and other
+ * cases where user interaction is not needed.
  *
  * @param ctx context to initialize from
  */
@@ -88,7 +90,8 @@ infix fun TextView.handleMarkdown(html: String) {
     GlobalScope.launch(Dispatchers.Main) {
         // this is computation-intensive task, better do it smoothly
         val span = withContext(Dispatchers.IO) {
-            val spanned = mdRendererFrom(label).toMarkdown(Html2Markdown().parse(html)) as SpannableStringBuilder
+            val mdContent = Html2Markdown().parse(html)
+            val spanned = mdRendererFrom(label).toMarkdown(mdContent) as SpannableStringBuilder
             postProcessSpans(spanned, label)
 
             spanned
@@ -318,7 +321,7 @@ class MarkwonGlidePlugin(private val txt: TextView): AbstractMarkwonPlugin() {
     @Suppress("DEPRECATION") // Keep compatibility with old API
     override fun configureImages(builder: AsyncDrawableLoader.Builder) {
         builder.placeholderDrawableProvider {
-            txt.context.resources.getDrawable(R.drawable.image).apply {
+            txt.context.resources.getDrawable(R.drawable.image).mutate().apply {
                 txt.styleLevel?.bind(TEXT, DrawableBinding(this, TEXT))
             }
         }

@@ -78,6 +78,9 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     @BindView(R.id.entry_permissions)
     lateinit var permissionIcon: ImageView
 
+    @BindView(R.id.entry_pinned)
+    lateinit var pinIcon: ImageView
+
     /**
      * Entry that this holder represents
      */
@@ -129,6 +132,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         styleLevel.bind(TEXT_LINKS, bodyView, TextViewLinksAdapter())
         styleLevel.bind(TEXT_LINKS, tagsView, TextViewLinksAdapter())
         styleLevel.bind(TEXT_LINKS, permissionIcon)
+        styleLevel.bind(TEXT_LINKS, pinIcon)
         styleLevel.bind(DIVIDER, metaDivider)
         (buttons + indicators + participants + comments).forEach { styleLevel.bind(TEXT_LINKS, it) }
     }
@@ -310,6 +314,15 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         } else {
             permissionIcon.visibility = View.VISIBLE
             permissionIcon.setOnClickListener { showToastAtView(permissionIcon, accessItem.toDescription(it.context)) }
+        }
+
+        // setup pin icon
+        val pinned = profile.settings?.pinnedEntries?.contains(entry.id)
+        if (pinned == true) {
+            pinIcon.visibility = View.VISIBLE
+            pinIcon.setOnClickListener { showToastAtView(pinIcon, it.context.getString(R.string.pinned_entry)) }
+        } else {
+            pinIcon.visibility = View.GONE
         }
 
         // show tags if they are present

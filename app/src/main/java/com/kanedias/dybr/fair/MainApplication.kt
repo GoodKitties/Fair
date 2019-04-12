@@ -1,10 +1,10 @@
 package com.kanedias.dybr.fair
 
-import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import androidx.multidex.MultiDexApplication
 import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.dto.Auth
@@ -27,7 +27,7 @@ import com.kanedias.dybr.fair.scheduling.SyncNotificationsJob
 @AcraDialog(resIcon = R.mipmap.ic_launcher, resText = R.string.app_crashed, resCommentPrompt = R.string.leave_crash_comment, resTheme = R.style.AppTheme)
 @AcraMailSender(mailTo = "kanedias@xaker.ru", resSubject = R.string.app_crash_report, reportFileName = "crash-report.json")
 @AcraCore(buildConfigClass = BuildConfig::class, reportFormat = StringFormat.JSON, alsoReportToAndroidFramework = true)
-class MainApplication : Application() {
+class MainApplication : MultiDexApplication() {
 
     private var syncNotificationsJobId: Int = 0
 

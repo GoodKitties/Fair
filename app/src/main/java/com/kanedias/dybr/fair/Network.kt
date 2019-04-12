@@ -846,9 +846,10 @@ object Network {
      * @param image content of image
      */
     fun uploadImage(image: ByteArray): String {
+        val uploadForm = RequestBody.create(MediaType.parse("image/*"), image)
         val body = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
-                .addFormDataPart("file", "android-${Auth.profile?.nickname?:"nobody"}", RequestBody.create(MediaType.parse("image/*"), image))
+                .addFormDataPart("file", "android-${Auth.profile?.blogSlug?:"nobody"}", uploadForm)
                 .build()
 
         val req = Request.Builder().post(body).url(IMG_UPLOAD_ENDPOINT).build()

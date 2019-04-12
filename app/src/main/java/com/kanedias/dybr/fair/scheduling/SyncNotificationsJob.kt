@@ -88,7 +88,7 @@ class SyncNotificationsJob: Job() {
             val converted = mdRendererFrom(context).toMarkdown(text).toString()
             val msgStyle = NotificationCompat.MessagingStyle(userPerson)
                     .setConversationTitle(source.blogTitle)
-                    .addMessage(text, comment.createdAt.time, authorPerson)
+                    .addMessage(converted, comment.createdAt.time, authorPerson)
 
             // fill Android notification intents
             // what to do on action click

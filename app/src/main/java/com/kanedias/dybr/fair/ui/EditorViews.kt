@@ -100,14 +100,21 @@ class EditorViews : Fragment() {
     @OnClick(
             R.id.edit_quick_bold, R.id.edit_quick_italic, R.id.edit_quick_underlined, R.id.edit_quick_strikethrough,
             R.id.edit_quick_code, R.id.edit_quick_quote, R.id.edit_quick_number_list, R.id.edit_quick_bullet_list,
-            R.id.edit_quick_link
+            R.id.edit_quick_link, R.id.edit_quick_more
     )
     fun editSelection(clicked: View) {
         val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val paste = if (clipboardSwitch.isChecked && clipboard.hasPrimaryClip() && clipboard.primaryClip!!.itemCount > 0) {
+        var paste = if (clipboardSwitch.isChecked && clipboard.hasPrimaryClip() && clipboard.primaryClip!!.itemCount > 0) {
             clipboard.primaryClip!!.getItemAt(0).text.toString()
         } else {
             ""
+        }
+
+        // check whether we have text selected in content input
+        if (paste.isEmpty() && contentInput.hasSelection()) {
+            // delete selection
+            paste = contentInput.text.substring(contentInput.selectionStart until contentInput.selectionEnd)
+            contentInput.text.delete(contentInput.selectionStart, contentInput.selectionEnd)
         }
 
         when (clicked.id) {
@@ -121,6 +128,7 @@ class EditorViews : Fragment() {
             R.id.edit_quick_bullet_list -> insertInCursorPosition("\n* ", paste, "\n* \n* ")
             R.id.edit_quick_link -> insertInCursorPosition("<a href=\"$paste\">", paste, "</a>")
             R.id.edit_quick_image -> insertInCursorPosition("<img src='", paste, "' />")
+            R.id.edit_quick_more -> insertInCursorPosition("[MORE]", paste, "[/MORE]")
         }
 
         clipboardSwitch.isChecked = false

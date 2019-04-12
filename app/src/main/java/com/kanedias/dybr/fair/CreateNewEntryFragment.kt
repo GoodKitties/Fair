@@ -36,6 +36,7 @@ import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * Fragment responsible for showing create entry/edit entry form.
@@ -83,10 +84,18 @@ class CreateNewEntryFragment : Fragment() {
     lateinit var previewSwitcher: ViewSwitcher
 
     /**
-     * Switch between publucation and draft
+     * Switch between publication and draft.
+     * Draft entries are only visible to the owner and have "draft" attribute set.
      */
     @BindView(R.id.entry_draft_switch)
     lateinit var draftSwitch: CheckBox
+
+    /**
+     * Switch between "pinned" and "unpinned" state of entry.
+     * Pinned entries are always on top of the blog.
+     */
+    @BindView(R.id.entry_pinned_switch)
+    lateinit var pinSwitch: CheckBox
 
     /**
      * Switch between input and preview
@@ -183,7 +192,9 @@ class CreateNewEntryFragment : Fragment() {
         styleLevel.bind(TEXT_LINKS, submitButton, TextViewColorAdapter())
         styleLevel.bind(TEXT_LINKS, permissionSpinner, SpinnerDropdownColorAdapter())
         styleLevel.bind(TEXT, draftSwitch, TextViewColorAdapter())
+        styleLevel.bind(TEXT, pinSwitch, TextViewColorAdapter())
         styleLevel.bind(TEXT_LINKS, draftSwitch, CheckBoxAdapter())
+        styleLevel.bind(TEXT_LINKS, pinSwitch, CheckBoxAdapter())
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -203,6 +214,7 @@ class CreateNewEntryFragment : Fragment() {
     private fun populateEditUI() {
         titleInput.setText(editEntry.title)
         draftSwitch.isChecked = editEntry.state == "published"
+        pinSwitch.isChecked = profile.settings?.pinnedEntries?.contains(editEntry.id) ?: false
         // need to convert entry content (html) to Markdown somehow...
         val markdown = Html2Markdown().parse(editEntry.content)
         contentInput.setText(markdown)
@@ -239,6 +251,18 @@ class CreateNewEntryFragment : Fragment() {
             draftSwitch.setText(R.string.publish_entry)
         } else {
             draftSwitch.setText(R.string.make_draft_entry)
+        }
+    }
+
+    /**
+     * Change text on pin-unpin checkbox based on what's currently selected
+     */
+    @OnCheckedChanged(R.id.entry_pinned_switch)
+    fun togglePinnedState(pinned: Boolean) {
+        if (pinned) {
+            pinSwitch.setText(R.string.pinned_entry)
+        } else {
+            pinSwitch.setText(R.string.non_pinned_entry)
         }
     }
 
@@ -303,8 +327,28 @@ class CreateNewEntryFragment : Fragment() {
                 } else {
                     // create new
                     entry.blog = HasOne(profile)
-                    withContext(Dispatchers.IO) { Network.createEntry(entry) }
+                    entry.id = withContext(Dispatchers.IO) { Network.createEntry(entry) }.id
                     Toast.makeText(activity, R.string.entry_created, Toast.LENGTH_SHORT).show()
+                }
+
+                // pin if needed
+                val settings = profile.settings ?: ProfileSettings()
+                val pinnedAlready = settings.pinnedEntries ?: mutableSetOf()
+                when {
+                    pinSwitch.isChecked && !pinnedAlready.contains(entry.id) -> {
+                        val req = ProfileCreateRequest().apply {
+                            this.id = profile.id
+                            this.settings = settings.copy(pinnedEntries = pinnedAlready.apply { add(entry.id) })
+                        }
+                        withContext(Dispatchers.IO) { Network.updateProfile(req) }
+                    }
+                    !pinSwitch.isChecked && pinnedAlready.contains(entry.id) -> {
+                        val req = ProfileCreateRequest().apply {
+                            this.id = profile.id
+                            this.settings = settings.copy(pinnedEntries = pinnedAlready.apply { remove(entry.id) })
+                        }
+                        withContext(Dispatchers.IO) { Network.updateProfile(req) }
+                    }
                 }
                 requireFragmentManager().popBackStack()
 
@@ -455,7 +499,13 @@ class CreateNewEntryFragment : Fragment() {
         }
     }
 
-    inner class PermissionSpinnerAdapter(items: List<RecordAccessItem?>): ArrayAdapter<RecordAccessItem>(activity, 0, items) {
+    /**
+     * Adapter for the spinner below the content editor.
+     * Allows to select permission setting for current entry.
+     *
+     * Values vary from "visible for all" to "visible only for me"
+     */
+    inner class PermissionSpinnerAdapter(items: List<RecordAccessItem?>): ArrayAdapter<RecordAccessItem>(requireContext(), 0, items) {
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             return getDropDownView(position, convertView, parent)
