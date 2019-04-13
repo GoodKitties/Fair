@@ -44,6 +44,7 @@ import kotlinx.coroutines.*
 import okhttp3.HttpUrl
 import ru.noties.markwon.AbstractMarkwonPlugin
 import ru.noties.markwon.Markwon
+import ru.noties.markwon.MarkwonConfiguration
 import ru.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import ru.noties.markwon.html.HtmlPlugin
 import ru.noties.markwon.image.*
@@ -133,7 +134,7 @@ fun postProcessDrawables(spanned: SpannableStringBuilder, view: TextView) {
         val end = spanned.getSpanEnd(img)
         val spansToWrap = spanned.getSpans(start, end, CharacterStyle::class.java)
         if (spansToWrap.any { it is ClickableSpan }) {
-            // the image is clickable, we can't replace it
+            // the image is already clickable, we can't replace it
             continue
         }
 
@@ -320,11 +321,14 @@ class MarkwonGlidePlugin(private val txt: TextView): AbstractMarkwonPlugin() {
 
     @Suppress("DEPRECATION") // Keep compatibility with old API
     override fun configureImages(builder: AsyncDrawableLoader.Builder) {
+        /*
+        // doesn't work yet, see https://github.com/noties/Markwon/issues/115
         builder.placeholderDrawableProvider {
             txt.context.resources.getDrawable(R.drawable.image).mutate().apply {
                 txt.styleLevel?.bind(TEXT, DrawableBinding(this, TEXT))
             }
         }
+        */
         builder.errorDrawableProvider {
             txt.context.resources.getDrawable(R.drawable.image_broken).apply {
                 txt.styleLevel?.bind(TEXT, DrawableBinding(this, TEXT))
