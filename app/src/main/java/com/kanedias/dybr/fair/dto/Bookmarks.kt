@@ -56,7 +56,7 @@ class CreateBookmarkResponse: Resource() {
      * Entry this bookmark points to.
      * Must be set.
      */
-    lateinit var entry: HasOne<Entry>
+    var entry: HasOne<Entry>? = null
 }
 
 typealias Bookmark = CreateBookmarkResponse

@@ -93,12 +93,12 @@ class AddAccountFragment : Fragment() {
     fun switchToRegister(checked: Boolean) {
         if (checked) {
             confirmButton.setText(R.string.register)
-            loginInputs.forEach { it -> it.visibility = View.GONE }
-            regInputs.forEach { it -> it.visibility = View.VISIBLE }
+            loginInputs.forEach { it.visibility = View.GONE }
+            regInputs.forEach { it.visibility = View.VISIBLE }
         } else {
             confirmButton.setText(R.string.enter)
-            regInputs.forEach { it -> it.visibility = View.GONE }
-            loginInputs.forEach { it -> it.visibility = View.VISIBLE }
+            regInputs.forEach { it.visibility = View.GONE }
+            loginInputs.forEach { it.visibility = View.VISIBLE }
         }
         emailInput.requestFocus()
     }
@@ -122,7 +122,7 @@ class AddAccountFragment : Fragment() {
      * Creates session for the user, saves auth and closes fragment on success.
      */
     private fun doLogin() {
-        if (!DbProvider.helper.accDao.queryForEq("email", emailInput.text.toString()).isEmpty()) {
+        if (DbProvider.helper.accDao.queryForEq("email", emailInput.text.toString()).isNotEmpty()) {
             // we already have this account as active, skip!
             Toast.makeText(activity, R.string.email_already_added, Toast.LENGTH_SHORT).show()
             return

@@ -11,6 +11,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
 import kotlinx.coroutines.*
+import moe.banana.jsonapi2.ArrayDocument
 
 /**
  * Fragment which displays list of notifications for current profile.
@@ -30,7 +31,9 @@ open class NotificationListFragment: UserContentListFragment() {
     override fun getRibbonView() = notifRibbon
     override fun getRefresher() = ribbonRefresher
     override fun getRibbonAdapter() = notifAdapter
-    override fun retrieveData(pageNum: Int, starter: Long) = { Network.loadNotifications(pageNum = pageNum) }
+    override fun retrieveData(pageNum: Int, starter: Long): () -> ArrayDocument<Notification> = {
+        Network.loadNotifications(pageNum = pageNum)
+    }
 
     private val notifAdapter = NotificationListAdapter()
 

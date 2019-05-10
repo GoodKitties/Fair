@@ -6,7 +6,6 @@ import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.appcompat.widget.Toolbar
 import butterknife.BindView
 import com.ftinc.scoop.Scoop
-import com.ftinc.scoop.StyleLevel
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
 import moe.banana.jsonapi2.ArrayDocument
@@ -64,9 +63,9 @@ open class BookmarkListFragmentFull: EntryListFragment() {
         Scoop.getInstance().popStyleLevel( false)
     }
 
-    override fun retrieveData(pageNum: Int, starter: Long) = {
+    override fun retrieveData(pageNum: Int, starter: Long): () -> ArrayDocument<Entry> = {
         val bookmarks = Network.loadBookmarks(pageNum)
-        val entries = bookmarks.map { it.entry.get(it.document) }
+        val entries = bookmarks.mapNotNull { it.entry?.get(it.document) }
 
         ArrayDocument<Entry>(bookmarks).apply { addAll(entries) }
     }

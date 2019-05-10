@@ -22,11 +22,10 @@ import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItems
-import com.ftinc.scoop.Scoop
 import com.ftinc.scoop.adapters.TextViewColorAdapter
 import com.kanedias.dybr.fair.Network
 import com.kanedias.dybr.fair.R
-import com.kanedias.dybr.fair.UserContentListFragment
+import com.kanedias.dybr.fair.misc.styleLevel
 import com.kanedias.dybr.fair.themes.*
 import kotlinx.coroutines.*
 
@@ -117,6 +116,8 @@ class EditorViews : Fragment() {
             contentInput.text.delete(contentInput.selectionStart, contentInput.selectionEnd)
         }
 
+        val moreTxt = { requireContext().getString(R.string.more_tag_default) }
+
         when (clicked.id) {
             R.id.edit_quick_bold -> insertInCursorPosition("<b>", paste, "</b>")
             R.id.edit_quick_italic -> insertInCursorPosition( "<i>", paste, "</i>")
@@ -128,7 +129,7 @@ class EditorViews : Fragment() {
             R.id.edit_quick_bullet_list -> insertInCursorPosition("\n* ", paste, "\n* \n* ")
             R.id.edit_quick_link -> insertInCursorPosition("<a href=\"$paste\">", paste, "</a>")
             R.id.edit_quick_image -> insertInCursorPosition("<img src='", paste, "' />")
-            R.id.edit_quick_more -> insertInCursorPosition("[MORE]", paste, "[/MORE]")
+            R.id.edit_quick_more -> insertInCursorPosition("[MORE=${moreTxt.invoke()}]", paste, "[/MORE]")
         }
 
         clipboardSwitch.isChecked = false

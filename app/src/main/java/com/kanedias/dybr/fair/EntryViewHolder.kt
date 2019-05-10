@@ -27,7 +27,7 @@ import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.openUrlExternally
 import com.kanedias.dybr.fair.ui.showToastAtView
-import com.kanedias.dybr.fair.ui.styleLevel
+import com.kanedias.dybr.fair.misc.styleLevel
 import kotlinx.coroutines.*
 
 /**

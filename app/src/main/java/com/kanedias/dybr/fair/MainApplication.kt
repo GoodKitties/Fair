@@ -3,8 +3,11 @@ package com.kanedias.dybr.fair
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Build
 import androidx.multidex.MultiDexApplication
+import androidx.preference.PreferenceManager
+import androidx.work.WorkManager
 import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.dto.Auth
@@ -14,9 +17,8 @@ import org.acra.annotation.AcraCore
 import org.acra.annotation.AcraDialog
 import org.acra.annotation.AcraMailSender
 import org.acra.data.StringFormat
-import com.evernote.android.job.JobManager
-import com.kanedias.dybr.fair.scheduling.SyncJobCreator
-import com.kanedias.dybr.fair.scheduling.SyncNotificationsJob
+import com.kanedias.dybr.fair.scheduling.SyncNotificationsWorker
+import java.util.*
 
 
 /**
@@ -29,7 +31,11 @@ import com.kanedias.dybr.fair.scheduling.SyncNotificationsJob
 @AcraCore(buildConfigClass = BuildConfig::class, reportFormat = StringFormat.JSON, alsoReportToAndroidFramework = true)
 class MainApplication : MultiDexApplication() {
 
-    private var syncNotificationsJobId: Int = 0
+    private val preferenceListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        when(key) {
+            "notification-check-interval" -> rescheduleJobs()
+        }
+    }
 
     override fun attachBaseContext(base: Context?) {
         super.attachBaseContext(base)
@@ -40,18 +46,32 @@ class MainApplication : MultiDexApplication() {
 
     override fun onCreate() {
         super.onCreate()
+
         DbProvider.setHelper(this)
         Network.init(this)
         Auth.init(this)
-        JobManager.create(this).addJobCreator(SyncJobCreator())
+
         initTheming()
         initStatusNotifications()
+        rescheduleJobs()
 
         // load last account if it exists
         val acc = DbProvider.helper.accDao.queryBuilder().where().eq("current", true).queryForFirst()
         acc?.let {
             Auth.updateCurrentUser(acc)
         }
+
+        // setup configuration change listener
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        prefs.registerOnSharedPreferenceChangeListener(preferenceListener)
+    }
+
+    private fun rescheduleJobs() {
+        // stop scheduling current jobs
+        WorkManager.getInstance().cancelUniqueWork(SYNC_NOTIFICATIONS_UNIQUE_JOB).result.get()
+
+        // replace with new one
+        SyncNotificationsWorker.scheduleJob(this)
     }
 
     private fun initStatusNotifications() {
@@ -64,9 +84,6 @@ class MainApplication : MultiDexApplication() {
 
             notifMgr.createNotificationChannel(syncNotifChannel)
         }
-
-        // start notification job
-        syncNotificationsJobId = SyncNotificationsJob.scheduleJob()
     }
 
     private fun initTheming() {

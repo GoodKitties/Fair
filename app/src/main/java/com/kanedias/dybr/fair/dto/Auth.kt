@@ -15,7 +15,6 @@ import com.kanedias.dybr.fair.database.entities.Account
 object Auth {
     // service variables, changed only once
     lateinit var guest: Account
-    lateinit var emptyBlogMarker: OwnProfile
     lateinit var favoritesMarker: OwnProfile
     lateinit var worldMarker: OwnProfile
 
@@ -29,10 +28,9 @@ object Auth {
 
     fun init(ctx: Context) {
         // setup special values
-        this.emptyBlogMarker = OwnProfile().apply { id = "dummy" }
+        this.guest = Account().apply { email = ctx.getString(R.string.guest) }
         this.worldMarker = OwnProfile().apply { id = "world"; blogSlug = ctx.getString(R.string.world) }
         this.favoritesMarker = OwnProfile().apply { id = "favorites"; blogSlug = ctx.getString(R.string.favorite) }
-        this.guest = Account().apply { email = ctx.getString(R.string.guest) }
 
         this.user = guest
     }

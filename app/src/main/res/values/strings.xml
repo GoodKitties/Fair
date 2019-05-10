@@ -49,6 +49,23 @@
         <item>Visible for all</item>             <!-- 3 -->
     </string-array>
 
+    <string-array name="notification_intervals_desc">
+        <item>Never</item>                       <!--    0 -->
+        <item>Every 15 minutes</item>            <!--   15 -->
+        <item>Every hour</item>                  <!--   60 -->
+        <item>Every 12 hours</item>              <!--  720 -->
+        <item>Daily</item>                       <!-- 1440 -->
+    </string-array>
+
+    <string-array name="notification_intervals" translatable="false">
+        <item>0</item>
+        <item>15</item>
+        <item>60</item>
+        <item>720</item>
+        <item>1440</item>
+    </string-array>
+
+    <!-- regular strings -->
     <string name="my_profile">My Profile</string>
     <string name="my_diary">My Diary</string>
     <string name="refresh">Refresh</string>
@@ -252,4 +269,7 @@
     <string name="non_pinned_entry">Non-pinned entry</string>
     <string name="entry_pinned_status">Entry pinned status</string>
     <string name="insert_more_tag">Insert MORE tag</string>
+    <string name="more_tag_default">Read more</string>
+    <string name="notifications_check_frequency">Notifications check frequency</string>
+    <string name="notifications_check_frequency_sum">How often check for new notifications should be performed</string>
 </resources>

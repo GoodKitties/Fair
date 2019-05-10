@@ -14,6 +14,8 @@ import java.util.*
 import com.kanedias.dybr.fair.dto.Notification
 import com.kanedias.dybr.fair.dto.NotificationRequest
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
+import com.kanedias.dybr.fair.misc.styleLevel
+import com.kanedias.dybr.fair.scheduling.SyncNotificationsWorker
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.*
 import kotlinx.coroutines.*
@@ -26,7 +28,7 @@ import kotlinx.coroutines.*
  */
 class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
-    @BindView(R.id.notification_area)
+    @BindView(R.id.notification_content_area)
     lateinit var notificationArea: RelativeLayout
 
     @BindView(R.id.notification_cause)
@@ -58,7 +60,7 @@ class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
     /**
      * Listener to show comments of this entry
      */
-    private val commentShow  = View.OnClickListener { it ->
+    private val commentShow  = View.OnClickListener {
         val activity = it.context as AppCompatActivity
 
         GlobalScope.launch(Dispatchers.Main) {
@@ -66,7 +68,10 @@ class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
                 val linkedEntry = withContext(Dispatchers.IO) { Network.loadEntry(notification.entryId) }
                 val commentsPage = CommentListFragment().apply { entry = linkedEntry }
                 activity.showFullscreenFragment(commentsPage)
-                markRead()
+
+                if (notification.state == "new") {
+                    switchRead()
+                }
             } catch (ex: Exception) {
                 Network.reportErrors(itemView.context, ex)
             }
@@ -82,17 +87,19 @@ class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
     }
 
     @OnClick(R.id.notification_read)
-    fun markRead() {
+    fun switchRead() {
         val marked = NotificationRequest().apply {
             id = notification.id
-            state = "read"
+            state = if (notification.state == "new") { "read" } else { "new" }
         }
 
         GlobalScope.launch(Dispatchers.Main) {
             try {
                 withContext(Dispatchers.IO) { Network.updateNotification(marked) }
-                readButton.setImageResource(R.drawable.done_all)
-                toggleEnableRecursive(notificationArea, enabled = false)
+                SyncNotificationsWorker.markRead(itemView.context, notification)
+
+                notification.state = marked.state
+                updateState()
             } catch (ex: Exception) {
                 Network.reportErrors(itemView.context, ex)
             }
@@ -116,15 +123,9 @@ class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
      * Called when this holder should be refreshed based on what it must show now
      */
     fun setup(notification: Notification) {
-        if (notification.state == "read") {
-            readButton.setImageResource(R.drawable.done_all)
-            toggleEnableRecursive(notificationArea, enabled = false)
-        } else {
-            readButton.setImageResource(R.drawable.done)
-            toggleEnableRecursive(notificationArea, enabled = true)
-        }
-
         this.notification = notification
+
+        updateState()
 
         val comment = notification.comment.get(notification.document)
         val profile = notification.profile.get(notification.document)
@@ -136,5 +137,16 @@ class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
         authorView.text = profile.nickname
         blogView.text = source.blogTitle
         bodyView.handleMarkdown(comment.content)
+
+    }
+
+    private fun updateState() {
+        if (notification.state == "read") {
+            readButton.setImageResource(R.drawable.done_all)
+            toggleEnableRecursive(notificationArea, enabled = false)
+        } else { // state == "new"
+            readButton.setImageResource(R.drawable.done)
+            toggleEnableRecursive(notificationArea, enabled = true)
+        }
     }
 }

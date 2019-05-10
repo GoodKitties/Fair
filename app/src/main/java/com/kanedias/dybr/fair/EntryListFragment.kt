@@ -4,7 +4,9 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.os.Bundle
 import android.view.*
-import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -82,6 +84,23 @@ open class EntryListFragment: UserContentListFragment() {
         entryRibbon.layoutManager = LinearLayoutManager(activity)
         entryRibbon.setMaxFlingVelocity(100_000)
         entryRibbon.adapter = entryAdapter
+
+        // show/hide action button when user switches tab to this fragment
+        lifecycle.addObserver(object: LifecycleObserver {
+
+            @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+            fun showActionButton() {
+                when (isBlogWritable(profile)) {
+                    true -> activity.actionButton.show()
+                    false -> activity.actionButton.hide()
+                }
+            }
+
+            @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+            fun hideActionButton() {
+                activity.actionButton.hide()
+            }
+        })
     }
 
     open fun setupTheming() {
@@ -91,24 +110,6 @@ open class EntryListFragment: UserContentListFragment() {
 
         styleLevel.bind(ACCENT, fastJumpButton, FabColorAdapter())
         styleLevel.bind(ACCENT_TEXT, fastJumpButton, FabIconAdapter())
-    }
-
-    /**
-     * [FragmentStatePagerAdapter] calls this when fragment becomes active (e.g. tab is selected)
-     */
-    override fun setUserVisibleHint(isVisibleToUser: Boolean) {
-        super.setUserVisibleHint(isVisibleToUser)
-
-        // don't touch any views if fragment is just instantiated and not attached yet
-        // FragmentStatePagerAdapter does this when creating items anew
-        if (context == null)
-            return
-
-        // for now we can only write entries in blog if it's our own
-        when (isVisibleToUser && isBlogWritable(profile)) {
-            true -> activity.actionButton.show()
-            false -> activity.actionButton.hide()
-        }
     }
 
     /**
@@ -203,6 +204,9 @@ open class EntryListFragment: UserContentListFragment() {
         }
     }
 
+    /**
+     * Show fling up/down buttons on fast scroll of recycler view
+     */
     inner class FastJumpListener : RecyclerView.OnFlingListener() {
 
         private val minTriggerSpeed = 10000

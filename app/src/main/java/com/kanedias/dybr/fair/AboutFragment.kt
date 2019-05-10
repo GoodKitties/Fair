@@ -18,7 +18,7 @@ import com.marcoscg.easyabout.items.NormalAboutItem
  */
 class AboutFragment: EasyAboutFragment() {
 
-    lateinit var donateHelper: DonateHelper
+    private lateinit var donateHelper: DonateHelper
 
     override fun configureFragment(ctx: Context, root: View, state: Bundle?) {
         @Suppress("DEPRECATION")

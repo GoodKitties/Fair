@@ -25,4 +25,14 @@
         android:summaryOn="@string/auto_load_images_on"
         android:summaryOff="@string/auto_load_images_off"/>
 
+    <ListPreference
+        android:icon="@drawable/notification"
+        android:key="notification-check-interval"
+        android:defaultValue="15"
+        android:title="@string/notifications_check_frequency"
+        android:summary="@string/notifications_check_frequency_sum"
+        android:entries="@array/notification_intervals_desc"
+        android:entryValues="@array/notification_intervals"/>
+
+
 </PreferenceScreen>

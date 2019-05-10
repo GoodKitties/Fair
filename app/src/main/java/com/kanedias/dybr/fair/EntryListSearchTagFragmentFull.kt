@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.kanedias.dybr.fair.dto.Entry
+import moe.banana.jsonapi2.ArrayDocument
 
 /**
  * Filtering fragment which is able to show list of entries filtered by arbitrary option
@@ -31,7 +33,7 @@ class EntryListSearchTagFragmentFull: EntryListFragmentFull() {
         toolbar.title = "#${filters["tag"]}"
     }
 
-    override fun retrieveData(pageNum: Int, starter: Long) = {
+    override fun retrieveData(pageNum: Int, starter: Long): () -> ArrayDocument<Entry> = {
         Network.loadEntries(filters = this.filters, pageNum = pageNum, starter = starter)
     }
 

@@ -2,8 +2,6 @@ package com.kanedias.dybr.fair
 
 import android.os.Bundle
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,8 +20,10 @@ import com.kanedias.dybr.fair.dto.Entry
 import com.kanedias.dybr.fair.dto.writable
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.*
-import com.kanedias.dybr.fair.ui.getTopFragment
+import com.kanedias.dybr.fair.misc.getTopFragment
+import com.kanedias.dybr.fair.scheduling.SyncNotificationsWorker
 import kotlinx.coroutines.*
+import moe.banana.jsonapi2.ArrayDocument
 
 /**
  * Fragment which displays selected entry and its comments below.
@@ -49,14 +49,14 @@ class CommentListFragment : UserContentListFragment() {
     override fun getRibbonView() = commentRibbon
     override fun getRefresher() = ribbonRefresher
     override fun getRibbonAdapter() = commentAdapter
-    override fun retrieveData(pageNum: Int, starter: Long) = {
+    override fun retrieveData(pageNum: Int, starter: Long): () -> ArrayDocument<Comment> = {
         // comments go from new to last, no need for a limiter
         Network.loadComments(entry = this.entry!!, pageNum = pageNum)
     }
 
     var entry: Entry? = null
 
-    private lateinit var commentAdapter: UserContentListFragment.LoadMoreAdapter
+    private lateinit var commentAdapter: LoadMoreAdapter
 
     private lateinit var activity: MainActivity
 
@@ -149,6 +149,9 @@ class CommentListFragment : UserContentListFragment() {
                     // we changed notifications, update fragment with them if present
                     val notifFragment = activity.getTopFragment(NotificationListFragment::class)
                     notifFragment?.loadMore(reset = true)
+
+                    // update android notifications
+                    SyncNotificationsWorker.markReadFor(activity, entry!!.id)
                 }
             } catch (ex: Exception) {
                 Network.reportErrors(activity, ex)

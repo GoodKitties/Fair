@@ -37,6 +37,7 @@ import com.ftinc.scoop.binding.AbstractBinding
 import com.kanedias.dybr.fair.BuildConfig
 import com.kanedias.dybr.fair.Network
 import com.kanedias.dybr.fair.R
+import com.kanedias.dybr.fair.misc.styleLevel
 import com.kanedias.dybr.fair.themes.TEXT
 import com.kanedias.html2md.Html2Markdown
 import com.stfalcon.imageviewer.StfalconImageViewer
@@ -44,7 +45,6 @@ import kotlinx.coroutines.*
 import okhttp3.HttpUrl
 import ru.noties.markwon.AbstractMarkwonPlugin
 import ru.noties.markwon.Markwon
-import ru.noties.markwon.MarkwonConfiguration
 import ru.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import ru.noties.markwon.html.HtmlPlugin
 import ru.noties.markwon.image.*
@@ -99,6 +99,19 @@ infix fun TextView.handleMarkdown(html: String) {
         }
 
         label.text = span
+
+        // FIXME: see https://github.com/noties/Markwon/issues/120
+        label.addOnAttachStateChangeListener(object: View.OnAttachStateChangeListener {
+            override fun onViewDetachedFromWindow(v: View?) {
+
+            }
+
+            override fun onViewAttachedToWindow(v: View?) {
+                AsyncDrawableScheduler.schedule(label)
+            }
+
+        })
+
         AsyncDrawableScheduler.schedule(label)
     }
 }
@@ -293,7 +306,12 @@ class MarkwonGlidePlugin(private val txt: TextView): AbstractMarkwonPlugin() {
                     .apply(RequestOptions().centerInside())
                     .submit()
 
-            return ImageItem("image/*", glide.get().inputStream())
+            return try {
+                ImageItem("image/*", glide.get().inputStream())
+            } catch (e: Exception) {
+                Log.w("Markdown/Images", "Image loading failed", e)
+                null
+            }
         }
 
     }
@@ -321,16 +339,15 @@ class MarkwonGlidePlugin(private val txt: TextView): AbstractMarkwonPlugin() {
 
     @Suppress("DEPRECATION") // Keep compatibility with old API
     override fun configureImages(builder: AsyncDrawableLoader.Builder) {
-        /*
-        // doesn't work yet, see https://github.com/noties/Markwon/issues/115
         builder.placeholderDrawableProvider {
             txt.context.resources.getDrawable(R.drawable.image).mutate().apply {
+                DrawableUtils.applyIntrinsicBoundsIfEmpty(this)
                 txt.styleLevel?.bind(TEXT, DrawableBinding(this, TEXT))
             }
         }
-        */
         builder.errorDrawableProvider {
             txt.context.resources.getDrawable(R.drawable.image_broken).apply {
+                DrawableUtils.applyIntrinsicBoundsIfEmpty(this)
                 txt.styleLevel?.bind(TEXT, DrawableBinding(this, TEXT))
             }
         }
@@ -436,7 +453,7 @@ class ImageShowOverlay(ctx: Context,
      */
     private fun saveToShared(image: File) : Uri? {
         try {
-            val sharedImgs = File(context.cacheDir, "shared_images");
+            val sharedImgs = File(context.cacheDir, "shared_images")
             if (!sharedImgs.exists() && !sharedImgs.mkdir()) {
                 Log.e("Fair/Markdown", "Couldn't create dir for shared imgs! Path: $sharedImgs")
                 return null

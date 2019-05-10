@@ -30,7 +30,7 @@ abstract class UserContentListFragment : Fragment() {
 
     abstract fun getRibbonView(): RecyclerView
     abstract fun getRefresher(): SwipeRefreshLayout
-    abstract fun getRibbonAdapter(): UserContentListFragment.LoadMoreAdapter
+    abstract fun getRibbonAdapter(): LoadMoreAdapter
     abstract fun retrieveData(pageNum: Int, starter: Long) : () -> List<Resource>
 
     private var pageStarter = System.currentTimeMillis() / 1000
@@ -160,9 +160,7 @@ abstract class UserContentListFragment : Fragment() {
         }
 
         override fun getItemId(position: Int): Long {
-            val type = getItemViewType(position)
-
-            val item = when (type) {
+            val item = when (getItemViewType(position)) {
                 ITEM_HEADER -> headers[position]
                 ITEM_REGULAR -> items[position - headers.size]
                 else -> null

@@ -1,7 +1,6 @@
 package com.kanedias.dybr.fair
 
 import android.os.Bundle
-import androidx.fragment.app.FragmentTransaction
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import android.text.format.DateUtils
@@ -13,11 +12,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.kanedias.dybr.fair.dto.Authored
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
-import com.kanedias.dybr.fair.ui.getTopFragment
+import com.kanedias.dybr.fair.misc.getTopFragment
 import com.kanedias.dybr.fair.ui.showToastAtView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

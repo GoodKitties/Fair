@@ -467,7 +467,12 @@ object Network {
      * @return current design of the profile or null if nothing found
      */
     fun loadProfileDesign(prof: OwnProfile): Design? {
-        val designId = prof.settings?.currentDesign ?: return null
+        val designId = prof.settings?.currentDesign
+
+        if (designId.isNullOrEmpty() || designId == "0") {
+            // use parent/default design
+            return null
+        }
 
         val req = Request.Builder().url("$PROFILES_ENDPOINT/${prof.id}/relationships/designs/$designId").build()
         val resp = httpClient.newCall(req).execute()

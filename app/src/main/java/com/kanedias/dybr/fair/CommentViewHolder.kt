@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.Lifecycle
 import butterknife.BindView
 import butterknife.BindViews
 import butterknife.ButterKnife
@@ -16,7 +17,7 @@ import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.handleMarkdown
-import com.kanedias.dybr.fair.ui.styleLevel
+import com.kanedias.dybr.fair.misc.styleLevel
 import kotlinx.coroutines.*
 
 
@@ -93,7 +94,7 @@ class CommentViewHolder(iv: View, private val parent: View, private val entry: E
                     Toast.makeText(activity, R.string.comment_deleted, Toast.LENGTH_SHORT).show()
 
                     // if we have current tab, refresh it
-                    val clPredicate = { it: Fragment -> it is CommentListFragment && it.userVisibleHint }
+                    val clPredicate = { it: Fragment -> it is CommentListFragment && it.lifecycle.currentState == Lifecycle.State.RESUMED }
                     val currentTab = activity.supportFragmentManager.fragments.find(clPredicate) as CommentListFragment?
                     currentTab?.loadMore(reset = true)
                 } catch (ex: Exception) {

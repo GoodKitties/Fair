@@ -10,80 +10,87 @@
     app:cardElevation="2dp"
     app:cardMaxElevation="4dp">
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/notification_area"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:padding="8dp">
 
-        <TextView
-            android:id="@+id/notification_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:padding="5dp"
-            android:text="@string/placeholder_date"/>
-
-        <TextView
-            android:id="@+id/notification_cause"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:padding="5dp"
-            android:textStyle="bold"
-            android:text="@string/placeholder_short"
-            android:maxEms="20"/>
-
-        <TextView
-            android:id="@+id/notification_profile"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/notification_cause"
-            android:padding="5dp"
-            android:text="@string/placeholder_short"
-            android:maxEms="20"/>
-
-        <TextView
-            android:id="@+id/notification_divider"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/notification_cause"
-            android:layout_toEndOf="@id/notification_profile"
-            android:padding="5dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:textStyle="bold"
-            android:text="@string/text_divider"/>
-
-        <TextView
-            android:id="@+id/notification_blog"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/notification_cause"
-            android:layout_toEndOf="@id/notification_divider"
-            android:padding="5dp"
-            android:maxEms="20"
-            android:text="@string/placeholder_short"/>
-
-        <com.kanedias.dybr.fair.misc.ClickPreventingTextView
-            android:id="@+id/notification_message"
+        <RelativeLayout
+            android:id="@+id/notification_content_area"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_below="@id/notification_profile"
-            android:padding="5dp"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="@string/placeholder_huge"/>
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/notification_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:padding="5dp"
+                android:text="@string/placeholder_date"/>
+
+            <TextView
+                android:id="@+id/notification_cause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:padding="5dp"
+                android:textStyle="bold"
+                android:text="@string/placeholder_short"
+                android:maxEms="20"/>
+
+            <TextView
+                android:id="@+id/notification_profile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/notification_cause"
+                android:padding="5dp"
+                android:text="@string/placeholder_short"
+                android:maxEms="20"/>
+
+            <TextView
+                android:id="@+id/notification_divider"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/notification_cause"
+                android:layout_toEndOf="@id/notification_profile"
+                android:padding="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:textStyle="bold"
+                android:text="@string/text_divider"/>
+
+            <TextView
+                android:id="@+id/notification_blog"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/notification_cause"
+                android:layout_toEndOf="@id/notification_divider"
+                android:padding="5dp"
+                android:maxEms="20"
+                android:text="@string/placeholder_short"/>
+
+            <com.kanedias.dybr.fair.misc.ClickPreventingTextView
+                android:id="@+id/notification_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_below="@id/notification_profile"
+                android:padding="5dp"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="@string/placeholder_huge"/>
+
+        </RelativeLayout>
 
         <LinearLayout
-            android:id="@+id/notification_icon_area"
+            android:id="@+id/notification_icons_area"
             android:orientation="horizontal"
             android:layout_marginTop="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/notification_message"
-            android:layout_alignParentEnd="true">
+            android:layout_gravity="end">
 
             <ImageView
                 style="@style/Ripple.Item"
@@ -96,5 +103,5 @@
 
         </LinearLayout>
 
-    </RelativeLayout>
+    </LinearLayout>
 </androidx.cardview.widget.CardView>

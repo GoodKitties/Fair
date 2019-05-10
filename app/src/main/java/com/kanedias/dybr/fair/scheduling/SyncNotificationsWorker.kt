@@ -4,41 +4,36 @@ import android.app.PendingIntent
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.evernote.android.job.Job
-import com.evernote.android.job.JobRequest
 import com.kanedias.dybr.fair.*
 import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.html2md.Html2Markdown
-import java.util.concurrent.TimeUnit
 import android.content.Intent
 import androidx.core.app.Person
 import androidx.core.graphics.drawable.IconCompat
 import android.util.Log
+import androidx.preference.PreferenceManager
+import androidx.work.*
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.request.RequestOptions
+import com.kanedias.dybr.fair.R
 import com.kanedias.dybr.fair.dto.Notification
 import com.kanedias.dybr.fair.dto.OwnProfile
 import com.kanedias.dybr.fair.ui.mdRendererFrom
 import java.lang.Exception
 import java.util.*
+import java.util.concurrent.TimeUnit.*
 
 /**
  * Sync job that periodically retrieves notifications and notifies user about non-read ones in status bar.
  *
- * @see SyncJobCreator
  * @see InternalReceiver
  * @author Kanedias
  *
  * Created on 21.10.18
  */
-class SyncNotificationsJob: Job() {
+class SyncNotificationsWorker(val ctx: Context, params: WorkerParameters): Worker(ctx, params) {
 
-    override fun onRunJob(params: Params): Result {
-        if (MainActivity.onScreen) {
-            // we don't want notifications to be showing when we have activity open
-            return Result.RESCHEDULE
-        }
+    override fun doWork(): Result {
 
         // from now on please keep in mind that website notifications != android notifications
         // website notifications represent what comment was left where and by whom
@@ -48,31 +43,30 @@ class SyncNotificationsJob: Job() {
         val notifications = try {
             Network.loadNotifications()
         } catch (ex: Exception) {
-            Network.reportErrors(context, ex)
+            Network.reportErrors(ctx, ex)
             emptyList<Notification>()
         }
 
         // filter them so we only process non-read and non-skipped ones
         val nonRead = notifications.filter { it.state == "new" }
-        val nonSkipped = nonRead.filter { !skippedNotificationIds.contains(it.id) }
-        val nonSkippedAndNew = nonSkipped.filter { !currentlyShownIds.contains(it.id) }
+        val nonSkipped = nonRead - skipped
+        val nonSkippedAndNew = nonSkipped - currentlyShown
 
         if (nonSkippedAndNew.isEmpty()) {
             // cancel all android notifications if there's nothing to display
-            NotificationManagerCompat.from(context).cancel(NEW_COMMENTS_NOTIFICATION)
-            return Result.SUCCESS
+            NotificationManagerCompat.from(ctx).cancel(NEW_COMMENTS_NOTIFICATION)
+            return Result.success()
         }
 
-        // what to do on android notification click
-        // currently simple and same for all notifications - just opens notifications tab in main activity
-        val openIntent = Intent(context, MainActivity::class.java).apply {
+        // what to do on group notification click - open notifications tab
+        val openTabIntent = Intent(ctx, MainActivity::class.java).apply {
             action = ACTION_NOTIF_OPEN
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         }
-        val openPI = PendingIntent.getActivity(context, 0, openIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val openTabPI = PendingIntent.getActivity(ctx, 0, openTabIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         // configure own avatar
-        val userProfile = Auth.profile ?: return Result.SUCCESS // shouldn't happen
+        val userProfile = Auth.profile ?: return Result.success() // shouldn't happen
         val userPerson = Person.Builder().setName(userProfile.nickname).setIcon(loadAvatar(userProfile)).build()
 
         // convert each website notification to android notification
@@ -85,45 +79,52 @@ class SyncNotificationsJob: Job() {
 
             // get data from website notification
             val text = Html2Markdown().parse(comment.content).lines().firstOrNull { it.isNotEmpty() }.orEmpty() + "..."
-            val converted = mdRendererFrom(context).toMarkdown(text).toString()
+            val converted = mdRendererFrom(ctx).toMarkdown(text).toString()
             val msgStyle = NotificationCompat.MessagingStyle(userPerson)
                     .setConversationTitle(source.blogTitle)
                     .addMessage(converted, comment.createdAt.time, authorPerson)
 
             // fill Android notification intents
-            // what to do on action click
-            val markReadIntent = Intent(context, InternalReceiver::class.java).apply {
-                action = ACTION_NOTIF_MARK_READ
-                addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-                putExtra(EXTRA_NOTIF_ID, msgNotif.id)
+
+            // what to do on android notification click
+            val openIntent = Intent(ctx, MainActivity::class.java).apply {
+                action = ACTION_NOTIF_OPEN
+                putExtra(EXTRA_NOTIFICATION, msgNotif)
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             }
-            val mrPI = PendingIntent.getBroadcast(context, UUID.randomUUID().hashCode(), markReadIntent, 0)
+            val openPI = PendingIntent.getActivity(ctx, 0, openIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+            // what to do on mark read action click
+            val markReadIntent = Intent(ctx, InternalReceiver::class.java).apply {
+                action = ACTION_NOTIF_MARK_READ
+                putExtra(EXTRA_NOTIFICATION, msgNotif)
+            }
+            val mrPI = PendingIntent.getBroadcast(ctx, UUID.randomUUID().hashCode(), markReadIntent, 0)
 
             // what to do on notification swipe
-            val skipIntent = Intent(context, InternalReceiver::class.java).apply {
+            val skipIntent = Intent(ctx, InternalReceiver::class.java).apply {
                 action = ACTION_NOTIF_SKIP
-                addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-                putExtra(EXTRA_NOTIF_ID, msgNotif.id)
+                putExtra(EXTRA_NOTIFICATION, msgNotif)
             }
-            val skipPI = PendingIntent.getBroadcast(context, UUID.randomUUID().hashCode(), skipIntent, 0)
+            val skipPI = PendingIntent.getBroadcast(ctx, UUID.randomUUID().hashCode(), skipIntent, 0)
 
             // android notification itself
-            val statusUpdate = NotificationCompat.Builder(context, NC_SYNC_NOTIFICATIONS)
+            val statusUpdate = NotificationCompat.Builder(ctx, NC_SYNC_NOTIFICATIONS)
                     .setSmallIcon(R.drawable.app_icon)
-                    .setContentTitle(context.getString(R.string.new_comments))
-                    .setContentText(context.getString(R.string.youve_received_new_comments))
-                    .setGroup(context.getString(R.string.notifications))
+                    .setContentTitle(ctx.getString(R.string.new_comments))
+                    .setContentText(ctx.getString(R.string.youve_received_new_comments))
+                    .setGroup(ctx.getString(R.string.notifications))
                     .setOnlyAlertOnce(true)
                     .setCategory(NotificationCompat.CATEGORY_SOCIAL)
                     .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
                     .setStyle(msgStyle)
                     .setDeleteIntent(skipPI)
                     .setContentIntent(openPI)
-                    .addAction(R.drawable.done, context.getString(R.string.mark_read), mrPI)
+                    .addAction(R.drawable.done, ctx.getString(R.string.mark_read), mrPI)
                     .build()
 
             // make Android OS show the created notification
-            NotificationManagerCompat.from(context).notify(msgNotif.id, NEW_COMMENTS_NOTIFICATION, statusUpdate)
+            NotificationManagerCompat.from(ctx).notify(msgNotif.id, NEW_COMMENTS_NOTIFICATION, statusUpdate)
         }
 
         // create grouping android notification
@@ -134,25 +135,25 @@ class SyncNotificationsJob: Job() {
             groupStyle.addLine("${author.nickname} · ${source.blogTitle}")
         }
 
-        val groupNotif = NotificationCompat.Builder(context, NC_SYNC_NOTIFICATIONS)
+        val groupNotif = NotificationCompat.Builder(ctx, NC_SYNC_NOTIFICATIONS)
                 .setSmallIcon(R.drawable.app_icon)
-                .setContentTitle(context.getString(R.string.new_comments))
-                .setContentText(context.getString(R.string.youve_received_new_comments))
-                .setGroup(context.getString(R.string.notifications))
+                .setContentTitle(ctx.getString(R.string.new_comments))
+                .setContentText(ctx.getString(R.string.youve_received_new_comments))
+                .setGroup(ctx.getString(R.string.notifications))
                 .setGroupSummary(true)
                 .setOnlyAlertOnce(true)
                 .setCategory(NotificationCompat.CATEGORY_SOCIAL)
                 .setStyle(groupStyle)
-                .setContentIntent(openPI)
+                .setContentIntent(openTabPI)
                 .build()
 
-        NotificationManagerCompat.from(context).notify(NEW_COMMENTS_NOTIFICATION_SUMMARY_TAG, NEW_COMMENTS_NOTIFICATION, groupNotif)
+        NotificationManagerCompat.from(ctx).notify(NEW_COMMENTS_NOTIFICATION_SUMMARY_TAG, NEW_COMMENTS_NOTIFICATION, groupNotif)
 
         // track what's shown currently in status bar
         // Keep in mind that this is a set so duplicates will be skipped
-        currentlyShownIds.addAll(nonSkippedAndNew.map { it -> it.id })
+        currentlyShown += nonSkippedAndNew
 
-        return Result.SUCCESS
+        return Result.success()
     }
 
     private fun loadAvatar(prof: OwnProfile): IconCompat? {
@@ -160,9 +161,9 @@ class SyncNotificationsJob: Job() {
             return null
 
         return try {
-            val bitmap = Glide.with(context).asBitmap()
+            val bitmap = Glide.with(ctx).asBitmap()
                     .apply(RequestOptions().circleCrop())
-                    .load(prof.settings?.avatar).submit().get(5, TimeUnit.SECONDS)
+                    .load(prof.settings?.avatar).submit().get(5, SECONDS)
             IconCompat.createWithBitmap(bitmap)
         } catch (ex: Exception) {
             Log.e("SyncJob", "Couldn't load avatar for profile ${prof.nickname}")
@@ -174,69 +175,81 @@ class SyncNotificationsJob: Job() {
         /**
          * This set always represents what website notifications ids are currently shown in status bar.
          */
-        val currentlyShownIds: MutableSet<String> = Collections.synchronizedSet(mutableSetOf<String>())
+        val currentlyShown: MutableSet<Notification> = Collections.synchronizedSet(mutableSetOf<Notification>())
 
         /**
          * This set keeps track of skipped website notification ids. These notifications will never be
          * again shown to the user.
          */
-        val skippedNotificationIds: MutableSet<String> = Collections.synchronizedSet(mutableSetOf<String>())
+        val skipped: MutableSet<Notification> = Collections.synchronizedSet(mutableSetOf<Notification>())
 
         /**
          * Called on application/activity start. Schedules periodic job executions
          */
-        fun scheduleJob(): Int {
-            JobRequest.Builder(JOB_TAG_NOTIFICATIONS_INITIAL)
-                    .setExecutionWindow(5_000L, 30_000L)
-                    .setBackoffCriteria(5_000L, JobRequest.BackoffPolicy.EXPONENTIAL)
-                    .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
-                    .setRequirementsEnforced(true)
-                    .build()
-                    .schedule()
+        fun scheduleJob(ctx: Context) {
+            val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
+            val periodMinutes = prefs.getString("notification-check-interval", "15")?.toLong() ?: return
 
-            return JobRequest.Builder(JOB_TAG_NOTIFICATIONS_PERIODIC)
-                    .setPeriodic(TimeUnit.MINUTES.toMillis(15), TimeUnit.MINUTES.toMillis(5))
-                    .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
-                    .setRequiresBatteryNotLow(true)
-                    .setRequirementsEnforced(true)
-                    .setUpdateCurrent(true)
+            if (periodMinutes <= 0) {
+                // user selected not to check for notifications
+                return
+            }
+
+            // how much to wait before executing the job for the first time
+            val flexPeriodSeconds = MINUTES.toSeconds(periodMinutes) - 15
+
+            val periodicWorkRequest = PeriodicWorkRequestBuilder<SyncNotificationsWorker>(periodMinutes, MINUTES, flexPeriodSeconds, SECONDS)
+                    .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 15, SECONDS)
+                    .setConstraints(Constraints.Builder()
+                            .setRequiredNetworkType(NetworkType.CONNECTED)
+                            .setRequiresBatteryNotLow(true)
+                            .build())
                     .build()
-                    .schedule()
+
+            WorkManager.getInstance().enqueueUniquePeriodicWork(
+                    SYNC_NOTIFICATIONS_UNIQUE_JOB,
+                    ExistingPeriodicWorkPolicy.REPLACE,
+                    periodicWorkRequest)
         }
 
         /**
          * Mark android notification as read and remove it from the status bar
-         * @param notifId website notification id associated with this android notification
+         * @param notif website notification associated with this android notification
          * @param ctx context to use when injecting [NotificationManagerCompat]
          */
-        fun markRead(ctx: Context, notifId: String) {
+        fun markRead(ctx: Context, notif: Notification) {
             val nm = NotificationManagerCompat.from(ctx)
 
-            nm.cancel(notifId, NEW_COMMENTS_NOTIFICATION)
-            currentlyShownIds.remove(notifId)
+            nm.cancel(notif.id, NEW_COMMENTS_NOTIFICATION)
+            currentlyShown.remove(notif)
 
             // hide summary android notification if there's nothing to group
-            if (currentlyShownIds.isEmpty()) {
+            if (currentlyShown.isEmpty()) {
                 nm.cancel(NEW_COMMENTS_NOTIFICATION_SUMMARY_TAG, NEW_COMMENTS_NOTIFICATION)
             }
+        }
+
+        fun markReadFor(ctx: Context, entryId: String) {
+            val shownForEntry = currentlyShown.filter { it.entryId == entryId }
+            shownForEntry.forEach { markRead(ctx, it) }
         }
 
         /**
          * Mark android notification as skipped. User himself removed this notification from the status bar,
          * we don't need to do anything manually.
          *
-         * @param notifId website notification id associated with this android notification
+         * @param notif website notification associated with this android notification
          * @param ctx context to use when injecting [NotificationManagerCompat]
          */
-        fun markSkipped(ctx: Context, notifId: String) {
+        fun markSkipped(ctx: Context, notif: Notification) {
             val nm = NotificationManagerCompat.from(ctx)
 
-            skippedNotificationIds.add(notifId)
-            currentlyShownIds.remove(notifId)
+            skipped.add(notif)
+            currentlyShown.remove(notif)
 
             // hide summary android notification if there's nothing to group
             // not actually required, android deletes group one along with the last
-            if (currentlyShownIds.isEmpty()) {
+            if (currentlyShown.isEmpty()) {
                 nm.cancel(NEW_COMMENTS_NOTIFICATION_SUMMARY_TAG, NEW_COMMENTS_NOTIFICATION)
             }
         }

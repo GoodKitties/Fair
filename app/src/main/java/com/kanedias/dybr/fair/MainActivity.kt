@@ -11,7 +11,6 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import androidx.fragment.app.FragmentStatePagerAdapter
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.GravityCompat
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.SearchView
@@ -41,7 +40,8 @@ import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.Sidebar
-import com.kanedias.dybr.fair.ui.getTopFragment
+import com.kanedias.dybr.fair.misc.getTopFragment
+import com.kanedias.dybr.fair.scheduling.SyncNotificationsWorker
 import kotlinx.coroutines.*
 import java.util.*
 
@@ -143,10 +143,6 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         onScreen = true
-
-        // cancel all notifications
-        val nm = NotificationManagerCompat.from(this)
-        nm.cancelAll()
     }
 
     override fun onPause() {
@@ -417,6 +413,28 @@ class MainActivity : AppCompatActivity() {
 
         when (cause.action) {
             ACTION_NOTIF_OPEN -> {
+                val notification = intent.getSerializableExtra(EXTRA_NOTIFICATION) as? Notification
+                if (notification != null) {
+                    // we have notification, can handle notification click
+                    GlobalScope.launch(Dispatchers.Main) {
+                        try {
+                            // load entry
+                            val entry = withContext(Dispatchers.IO) { Network.loadEntry(notification.entryId) }
+
+                            // launch comment list
+                            val frag = CommentListFragment().apply { this.entry = entry }
+                            showFullscreenFragment(frag)
+
+                            // mark notification read
+                            SyncNotificationsWorker.markRead(this@MainActivity, notification)
+                        } catch (ex: Exception) {
+                            Network.reportErrors(this@MainActivity, ex)
+                        }
+                    }
+                    return
+                }
+
+                // we don't have entry or notification, open notifications tab
                 val backToNotifications = {
                     for (i in 0..supportFragmentManager.backStackEntryCount) {
                         supportFragmentManager.popBackStack()
@@ -666,7 +684,7 @@ class MainActivity : AppCompatActivity() {
         currFragment.addCreateNewEntryForm()
     }
 
-    inner class GuestTabAdapter: FragmentStatePagerAdapter(supportFragmentManager) {
+    inner class GuestTabAdapter: FragmentStatePagerAdapter(supportFragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
         override fun getCount() = 1 // only world
 
@@ -675,7 +693,7 @@ class MainActivity : AppCompatActivity() {
         override fun getPageTitle(position: Int): CharSequence? = getString(R.string.world)
     }
 
-    inner class TabAdapter(private val self: OwnProfile?): FragmentStatePagerAdapter(supportFragmentManager) {
+    inner class TabAdapter(private val self: OwnProfile?): FragmentStatePagerAdapter(supportFragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
         override fun getCount() = 4 // own blog, favorites, world and notifications
 

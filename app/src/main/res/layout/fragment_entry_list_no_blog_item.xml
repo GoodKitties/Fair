@@ -9,7 +9,6 @@
         android:id="@+id/no_blog_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/entry_draft_state"
         android:layout_centerHorizontal="true"
         android:padding="8dp"
         android:text="@string/no_blog_yet"

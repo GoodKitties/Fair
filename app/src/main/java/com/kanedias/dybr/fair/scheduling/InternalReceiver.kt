@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.kanedias.dybr.fair.*
+import com.kanedias.dybr.fair.dto.Notification
 import com.kanedias.dybr.fair.dto.NotificationRequest
 import kotlinx.coroutines.*
 import java.lang.Exception
@@ -20,9 +21,9 @@ class InternalReceiver: BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         when(intent.action) {
             ACTION_NOTIF_MARK_READ -> {
-                val notifId = intent.getStringExtra(EXTRA_NOTIF_ID) ?: return
+                val notif = intent.getSerializableExtra(EXTRA_NOTIFICATION) as? Notification ?: return
                 val marked = NotificationRequest().apply {
-                    id = notifId
+                    id = notif.id
                     state = "read"
                 }
 
@@ -30,15 +31,15 @@ class InternalReceiver: BroadcastReceiver() {
                 GlobalScope.launch(Dispatchers.Main) {
                     try {
                         withContext(Dispatchers.IO) { Network.updateNotification(marked) }
-                        SyncNotificationsJob.markRead(context, notifId)
+                        SyncNotificationsWorker.markRead(context, notif)
                     } catch (ex: Exception) {
                         Network.reportErrors(context, ex)
                     }
                 }
             }
             ACTION_NOTIF_SKIP -> {
-                val notifId = intent.getStringExtra(EXTRA_NOTIF_ID) ?: return
-                SyncNotificationsJob.markSkipped(context, notifId)
+                val notif = intent.getSerializableExtra(EXTRA_NOTIFICATION) as? Notification ?: return
+                SyncNotificationsWorker.markSkipped(context, notif)
             }
             else -> return
         }

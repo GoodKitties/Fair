@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.widget.AppCompatMultiAutoCompleteTextView
+import androidx.lifecycle.Lifecycle
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnCheckedChanged
@@ -26,7 +27,7 @@ import com.kanedias.dybr.fair.database.entities.OfflineDraft
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.handleMarkdownRaw
-import com.kanedias.dybr.fair.ui.styleLevel
+import com.kanedias.dybr.fair.misc.styleLevel
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.*
 import moe.banana.jsonapi2.HasOne
@@ -353,7 +354,7 @@ class CreateNewEntryFragment : Fragment() {
                 requireFragmentManager().popBackStack()
 
                 // if we have current tab set, refresh it
-                val frgPredicate = { it: Fragment -> it is UserContentListFragment && it.userVisibleHint }
+                val frgPredicate = { it: Fragment -> it is UserContentListFragment && it.lifecycle.currentState == Lifecycle.State.RESUMED }
                 val currentFrg = requireFragmentManager().fragments.reversed().find(frgPredicate) as UserContentListFragment?
                 currentFrg?.loadMore(reset = true)
             } catch (ex: Exception) {
