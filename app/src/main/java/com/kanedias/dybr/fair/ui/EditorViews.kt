@@ -214,7 +214,7 @@ class EditorViews : Fragment() {
                 val link = withContext(Dispatchers.IO) { Network.uploadImage(stream.readBytes()) }
                 MaterialDialog(requireContext())
                         .title(R.string.insert_image)
-                        .message(R.string.select_image_height)
+                        .message(R.string.select_image_width)
                         .listItems(res = R.array.image_sizes, selection = {_, index, _ ->
                             val spec = when (index) {
                                 0 -> "100"

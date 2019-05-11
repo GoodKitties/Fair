@@ -9,6 +9,7 @@
         <item>поўны памер</item>  <!-- 5 -->
     </string-array>
 
+    <!-- regular strings -->
     <string name="my_profile">Мой профiль</string>
     <string name="my_diary">Мой дзеннiк</string>
     <string name="refresh">Абнавiць</string>

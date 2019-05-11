@@ -16,6 +16,15 @@
         <item>Видно всем</item>             <!-- 3 -->
     </string-array>
 
+    <string-array name="notification_intervals_desc">
+        <item>Никогда</item>                       <!--    0 -->
+        <item>Каждые 15 минут</item>            <!--   15 -->
+        <item>Каждый час</item>                  <!--   60 -->
+        <item>Каждые 12 часов</item>              <!--  720 -->
+        <item>Ежедневно</item>                       <!-- 1440 -->
+    </string-array>
+
+    <!-- regular strings -->
     <string name="my_profile">Мой профиль</string>
     <string name="my_diary">Мой дневник</string>
     <string name="refresh">Обновить</string>
@@ -86,7 +95,6 @@
     <string name="switch_profile">Сменить профиль</string>
     <string name="remove_profile">Удалить профиль</string>
     <string name="profile_created">Профиль создан</string>
-    <string name="no_profile">Нет профиля</string>
     <string name="add_profile">Добавить профиль</string>
     <string name="create_blog">Создать дневник</string>
     <string name="blog_title">Название дневника</string>
@@ -143,7 +151,7 @@
     <string name="last_page">Больше нет страниц!</string>
     <string name="participants_number_indicator">Индикатор количества участников</string>
     <string name="markdown_basics"><![CDATA[О форматировании: <a href="https://ru.wikipedia.org/wiki/Markdown">Markdown</a>]]></string>
-    <string name="select_image_height">Выберите высоту изображения:</string>
+    <string name="select_image_width">Выберите ширину изображения:</string>
     <string name="no_permissions">Отказано в доступе, невозможно выполнить действие</string>
     <string name="world">Лента</string>
     <string name="user_avatar">Аватар пользователя</string>
@@ -201,4 +209,23 @@
     <string name="report_bug">Отчёт об ошибке</string>
     <string name="github_issue_tracker">Трекер задач GitHub</string>
     <string name="reply">Ответить</string>
+    <string name="email_not_activated_yet">Этот e-mail ещё не активирован</string>
+    <string name="email_not_found">Такой e-mail не найден</string>
+    <string name="email_is_invalid">Некорректный e-mail</string>
+    <string name="incorrect_password">Некорректный пароль</string>
+    <string name="email_already_added">Этот e-mail уже добавлен</string>
+    <string name="bookmarks">Закладки</string>
+    <string name="my_bookmarks">Мои закладки</string>
+    <string name="add_to_bookmarks">Добавить в закладки</string>
+    <string name="remove_from_bookmarks">Удалить из закладок</string>
+    <string name="entry_bookmarked">Запись добавлена в закладки</string>
+    <string name="entry_removed_from_bookmarks">Запись удалена из закладок</string>
+    <string name="pin_entry">Закрепить запись</string>
+    <string name="pinned_entry">Закреплённая запись</string>
+    <string name="non_pinned_entry">Незакреплённая запись</string>
+    <string name="entry_pinned_status">Статус закрепления записи</string>
+    <string name="insert_more_tag">Вставить тэг MORE</string>
+    <string name="more_tag_default">Читать далее</string>
+    <string name="notifications_check_frequency">Частота проверки уведомлений</string>
+    <string name="notifications_check_frequency_sum">Насколько часто производить проверку новых уведомлений</string>
 </resources>
