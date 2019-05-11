@@ -413,7 +413,7 @@ class MainActivity : AppCompatActivity() {
 
         when (cause.action) {
             ACTION_NOTIF_OPEN -> {
-                val notification = intent.getSerializableExtra(EXTRA_NOTIFICATION) as? Notification
+                val notification = cause.getSerializableExtra(EXTRA_NOTIFICATION) as? Notification
                 if (notification != null) {
                     // we have notification, can handle notification click
                     GlobalScope.launch(Dispatchers.Main) {

@@ -18,12 +18,16 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="UnusedAttribute">
+
+        <!-- notification events receiver -->
         <receiver android:name=".scheduling.InternalReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="com.kanedias.dybr.fair.action.notif.MARK_READ" />
                 <action android:name="com.kanedias.dybr.fair.action.notif.SKIP" />
             </intent-filter>
         </receiver>
+
+        <!-- file provider for sharing images from this app -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -33,6 +37,8 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/shared_filepaths" />
         </provider>
+
+        <!-- main activity -->
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
@@ -49,6 +55,8 @@
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
+
+        <!-- settings activity -->
         <activity android:name=".SettingsActivity" />
     </application>
 

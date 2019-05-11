@@ -92,7 +92,7 @@ class SyncNotificationsWorker(val ctx: Context, params: WorkerParameters): Worke
                 putExtra(EXTRA_NOTIFICATION, msgNotif)
                 addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             }
-            val openPI = PendingIntent.getActivity(ctx, 0, openIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+            val openPI = PendingIntent.getActivity(ctx, UUID.randomUUID().hashCode(), openIntent, 0)
 
             // what to do on mark read action click
             val markReadIntent = Intent(ctx, InternalReceiver::class.java).apply {

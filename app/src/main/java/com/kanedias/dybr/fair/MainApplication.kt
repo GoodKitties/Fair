@@ -67,6 +67,10 @@ class MainApplication : MultiDexApplication() {
     }
 
     private fun rescheduleJobs() {
+        // don't schedule anything in crash reporter process
+        if (ACRA.isACRASenderServiceProcess())
+            return
+
         // stop scheduling current jobs
         WorkManager.getInstance().cancelUniqueWork(SYNC_NOTIFICATIONS_UNIQUE_JOB).result.get()
 
