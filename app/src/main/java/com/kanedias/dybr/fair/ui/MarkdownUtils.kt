@@ -32,6 +32,7 @@ import butterknife.ButterKnife
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.request.target.Target.*
 import com.bumptech.glide.request.transition.Transition
 import com.ftinc.scoop.binding.AbstractBinding
 import com.kanedias.dybr.fair.BuildConfig
@@ -43,12 +44,11 @@ import com.kanedias.html2md.Html2Markdown
 import com.stfalcon.imageviewer.StfalconImageViewer
 import kotlinx.coroutines.*
 import okhttp3.HttpUrl
-import ru.noties.markwon.AbstractMarkwonPlugin
-import ru.noties.markwon.Markwon
-import ru.noties.markwon.ext.strikethrough.StrikethroughPlugin
-import ru.noties.markwon.html.HtmlPlugin
-import ru.noties.markwon.image.*
-import ru.noties.markwon.image.network.NetworkSchemeHandler
+import io.noties.markwon.Markwon
+import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
+import io.noties.markwon.html.HtmlPlugin
+import io.noties.markwon.image.*
+import io.noties.markwon.image.glide.GlideImagesPlugin
 import java.io.*
 import java.lang.ref.WeakReference
 import java.util.*
@@ -74,10 +74,27 @@ fun mdRendererFrom(ctx: Context): Markwon {
 fun mdRendererFrom(txt: TextView): Markwon {
     return Markwon.builder(txt.context)
             .usePlugin(HtmlPlugin.create())
-            .usePlugin(ImagesPlugin.create(txt.context))
-            .usePlugin(MarkwonGlidePlugin.create(txt))
+            .usePlugin(GlideImagesPlugin.create(txt.context))
+            .usePlugin(GlideImagesPlugin.create(
+                    Glide.with(txt.context)
+                         .applyDefaultRequestOptions(RequestOptions()
+                                 .centerInside()
+                                 .override(txt.context.resources.displayMetrics.widthPixels, SIZE_ORIGINAL)
+                                 .placeholder(wrapStyleDrawable(txt, R.drawable.image))
+                                 .fallback(wrapStyleDrawable(txt, R.drawable.image_broken)))))
             .usePlugin(StrikethroughPlugin.create())
             .build()
+}
+
+/**
+ * Style placeholder drawables
+ */
+@Suppress("DEPRECATION")
+fun wrapStyleDrawable(view: View, image: Int): Drawable {
+    val drawable = view.context.resources.getDrawable(R.drawable.image).mutate()
+    DrawableUtils.applyIntrinsicBoundsIfEmpty(drawable)
+    view.styleLevel?.bind(TEXT, DrawableBinding(drawable, TEXT))
+    return drawable
 }
 
 /**
@@ -281,79 +298,24 @@ infix fun TextView.handleMarkdownRaw(markdown: String) {
 }
 
 /**
- * A plugin to implement image caching by means of using [Glide]
+ * Helper class that tints drawable according to current style.
+ * In short, this makes placeholders dark in light theme and light in dark one.
  */
-class MarkwonGlidePlugin(private val txt: TextView): AbstractMarkwonPlugin() {
+class DrawableBinding(drawable: Drawable, topping: Int): AbstractBinding(topping) {
 
-    companion object {
-        fun create(txt: TextView): MarkwonGlidePlugin {
-            return MarkwonGlidePlugin(txt)
+    private val dwRef = WeakReference(drawable)
+
+    override fun update(color: Int) {
+        dwRef.get()?.let {
+            val wrapped = DrawableCompat.wrap(it)
+            DrawableCompat.setTint(wrapped, color)
         }
     }
 
-    /**
-     * Reroute image loading through the Glide cache
-     */
-    inner class GlideHandler: SchemeHandler() {
-
-        override fun handle(raw: String, uri: Uri): ImageItem? {
-            val base = HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT) ?: return null
-            val resolved = base.resolve(raw) ?: return null
-
-            val glide = Glide.with(txt.context)
-                    .downloadOnly()
-                    .load(resolved.toString())
-                    .apply(RequestOptions().centerInside())
-                    .submit()
-
-            return try {
-                ImageItem("image/*", glide.get().inputStream())
-            } catch (e: Exception) {
-                Log.w("Markdown/Images", "Image loading failed", e)
-                null
-            }
-        }
-
+    override fun unbind() {
+        dwRef.clear()
     }
 
-    /**
-     * Helper class that tints drawable according to current style.
-     * In short, this makes placeholders dark in light theme and light in dark one.
-     */
-    inner class DrawableBinding(drawable: Drawable, topping: Int): AbstractBinding(topping) {
-
-        private val dwRef = WeakReference(drawable)
-
-        override fun update(color: Int) {
-            dwRef.get()?.let {
-                val wrapped = DrawableCompat.wrap(it)
-                DrawableCompat.setTint(wrapped, color)
-            }
-        }
-
-        override fun unbind() {
-            dwRef.clear()
-        }
-
-    }
-
-    @Suppress("DEPRECATION") // Keep compatibility with old API
-    override fun configureImages(builder: AsyncDrawableLoader.Builder) {
-        builder.placeholderDrawableProvider {
-            txt.context.resources.getDrawable(R.drawable.image).mutate().apply {
-                DrawableUtils.applyIntrinsicBoundsIfEmpty(this)
-                txt.styleLevel?.bind(TEXT, DrawableBinding(this, TEXT))
-            }
-        }
-        builder.errorDrawableProvider {
-            txt.context.resources.getDrawable(R.drawable.image_broken).apply {
-                DrawableUtils.applyIntrinsicBoundsIfEmpty(this)
-                txt.styleLevel?.bind(TEXT, DrawableBinding(this, TEXT))
-            }
-        }
-        builder.addSchemeHandler(NetworkSchemeHandler.SCHEME_HTTP, GlideHandler())
-        builder.addSchemeHandler(NetworkSchemeHandler.SCHEME_HTTPS, GlideHandler())
-    }
 }
 
 /**
