@@ -1,10 +1,7 @@
 package com.kanedias.dybr.fair.dto
 
 import com.squareup.moshi.Json
-import moe.banana.jsonapi2.HasOne
-import moe.banana.jsonapi2.JsonApi
-import moe.banana.jsonapi2.Policy
-import moe.banana.jsonapi2.Resource
+import moe.banana.jsonapi2.*
 
 /**
  * Entry creation request
@@ -98,6 +95,9 @@ class EntryCreateRequest : Resource() {
  *       "title": "Aliquam sit repudiandae inventore."
  *     },
  *     "relationships": {
+ *       "reactions" : {
+ *         "data": [ ... ]
+ *       }
  *       "blog": {
  *         "links": {
  *           "self": "http://www.example.com/v1/entries/16/relationships/blog",
@@ -147,6 +147,13 @@ class EntryResponse: Authored() {
      */
     @field:Json(name = "state")
     var state = "published"
+
+    /**
+     * Reactions that are attached to this entry
+     * @see Reaction
+     */
+    @field:Json(name = "reactions")
+    var reactions: HasMany<Reaction>? = null
 
     /**
      * Settings for this entry. Include feed settings, privacy controls

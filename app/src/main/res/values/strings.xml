@@ -24,6 +24,7 @@
             Time&apos;s standing still, then there&apos;s blood on the sand\n
         ]]>
     </string>
+    <string name="placeholder_emoji" translatable="false">🏭</string>
     <string name="placeholder_date" translatable="false">10.13.2015</string>
     <string name="placeholder_number_short" translatable="false">1</string>
     <string name="placeholder_number_long" translatable="false">65536</string>

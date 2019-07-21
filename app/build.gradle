@@ -104,10 +104,6 @@ play {
 }
 
 dependencies {
-    // fix https://developer.android.com/studio/build/multidex
-    implementation 'androidx.multidex:multidex:2.0.1'                           // temporary
-
-
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"     // Kotlin language support
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"         // Kotlin reflection support
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1"        // Kotlin coroutines
@@ -135,7 +131,7 @@ dependencies {
     implementation "io.noties.markwon:ext-strikethrough:$markwonVersion"
     //implementation 'com.github.clans:fab:1.6.4'                               // Floating action button with menu
     implementation 'com.github.bumptech.glide:okhttp3-integration:4.8.0'
-    implementation 'com.github.bumptech.glide:glide:4.8.0'                      // image processing/caching lib
+    implementation 'com.github.bumptech.glide:glide:4.9.0'                      // image processing/caching lib
     implementation 'com.auth0.android:jwtdecode:1.2.0'                          // handling JWT from server
     implementation 'com.github.stfalcon:stfalcon-imageviewer:0.1.0'             // embedded image viewer
     implementation 'com.github.marcoscgdev:EasyAbout:1.0.6'                     // about dialog
