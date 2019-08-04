@@ -1,11 +1,11 @@
 package com.kanedias.dybr.fair
 
+import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
-import androidx.multidex.MultiDexApplication
 import androidx.preference.PreferenceManager
 import androidx.work.WorkManager
 import com.ftinc.scoop.Scoop
@@ -18,7 +18,6 @@ import org.acra.annotation.AcraDialog
 import org.acra.annotation.AcraMailSender
 import org.acra.data.StringFormat
 import com.kanedias.dybr.fair.scheduling.SyncNotificationsWorker
-import java.util.*
 
 
 /**
@@ -29,7 +28,7 @@ import java.util.*
 @AcraDialog(resIcon = R.mipmap.ic_launcher, resText = R.string.app_crashed, resCommentPrompt = R.string.leave_crash_comment, resTheme = R.style.AppTheme)
 @AcraMailSender(mailTo = "kanedias@xaker.ru", resSubject = R.string.app_crash_report, reportFileName = "crash-report.json")
 @AcraCore(buildConfigClass = BuildConfig::class, reportFormat = StringFormat.JSON, alsoReportToAndroidFramework = true)
-class MainApplication : MultiDexApplication() {
+class MainApplication : Application() {
 
     private val preferenceListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         when(key) {

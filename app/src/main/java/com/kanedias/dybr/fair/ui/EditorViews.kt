@@ -116,7 +116,7 @@ class EditorViews : Fragment() {
             contentInput.text.delete(contentInput.selectionStart, contentInput.selectionEnd)
         }
 
-        val moreTxt = { requireContext().getString(R.string.more_tag_default) }
+        val moreTxt = requireContext().getString(R.string.more_tag_default)
 
         when (clicked.id) {
             R.id.edit_quick_bold -> insertInCursorPosition("<b>", paste, "</b>")
@@ -129,7 +129,7 @@ class EditorViews : Fragment() {
             R.id.edit_quick_bullet_list -> insertInCursorPosition("\n* ", paste, "\n* \n* ")
             R.id.edit_quick_link -> insertInCursorPosition("<a href=\"$paste\">", paste, "</a>")
             R.id.edit_quick_image -> insertInCursorPosition("<img src='", paste, "' />")
-            R.id.edit_quick_more -> insertInCursorPosition("[MORE=${moreTxt.invoke()}]", paste, "[/MORE]")
+            R.id.edit_quick_more -> insertInCursorPosition("[MORE=$moreTxt]", paste, "[/MORE]")
         }
 
         clipboardSwitch.isChecked = false

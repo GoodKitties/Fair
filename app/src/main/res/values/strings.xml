@@ -273,4 +273,7 @@
     <string name="more_tag_default">Read more</string>
     <string name="notifications_check_frequency">Notifications check frequency</string>
     <string name="notifications_check_frequency_sum">How often check for new notifications should be performed</string>
+    <string name="reaction_deleted">Reaction deleted</string>
+    <string name="add_reaction">Add reaction</string>
+    <string name="reaction_added">Reaction added</string>
 </resources>

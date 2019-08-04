@@ -96,6 +96,10 @@ fun applyTheme(ctx: Context, profile: OwnProfile, level: StyleLevel, withDrawabl
     }
 }
 
+fun isDark() {
+
+}
+
 fun updateBackgroundDrawables(design: Design, withDrawables: Map<View, Int>) {
     for (entry in withDrawables.entries) {
         val enabled = when (entry.value) {

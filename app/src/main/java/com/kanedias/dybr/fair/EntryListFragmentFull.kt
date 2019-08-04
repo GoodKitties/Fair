@@ -6,7 +6,6 @@ import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.appcompat.widget.Toolbar
 import butterknife.BindView
 import com.ftinc.scoop.Scoop
-import com.ftinc.scoop.StyleLevel
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
 
@@ -54,10 +53,10 @@ open class EntryListFragmentFull: EntryListFragment() {
         styleLevel.bind(TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
         styleLevel.bind(TOOLBAR_TEXT, toolbar, ToolbarIconsAdapter())
 
-        styleLevel.bind(ACCENT, addEntryButton, FabColorAdapter())
+        styleLevel.bind(ACCENT, addEntryButton, BackgroundTintColorAdapter())
         styleLevel.bind(ACCENT_TEXT, addEntryButton, FabIconAdapter())
 
-        styleLevel.bind(ACCENT, fastJumpButton, FabColorAdapter())
+        styleLevel.bind(ACCENT, fastJumpButton, BackgroundTintColorAdapter())
         styleLevel.bind(ACCENT_TEXT, fastJumpButton, FabIconAdapter())
 
         styleLevel.bindStatusBar(activity, STATUS_BAR)

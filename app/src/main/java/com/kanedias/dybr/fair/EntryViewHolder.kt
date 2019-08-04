@@ -5,9 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.view.View
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
 import butterknife.BindView
 import butterknife.BindViews
 import butterknife.ButterKnife
@@ -20,9 +17,15 @@ import android.text.SpannableStringBuilder
 import android.text.TextPaint
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.WindowManager
+import android.widget.*
+import androidx.appcompat.widget.ListPopupWindow
 import androidx.fragment.app.Fragment
 import com.afollestad.materialdialogs.list.listItems
 import com.kanedias.dybr.fair.dto.*
+import com.kanedias.dybr.fair.misc.idMatches
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.openUrlExternally
@@ -63,7 +66,10 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     @BindView(R.id.entry_draft_state)
     lateinit var draftStateView: TextView
 
-    @BindViews(R.id.entry_bookmark, R.id.entry_subscribe, R.id.entry_edit, R.id.entry_delete, R.id.entry_more_options)
+    @BindViews(
+            R.id.entry_bookmark, R.id.entry_subscribe, R.id.entry_edit,
+            R.id.entry_delete, R.id.entry_more_options, R.id.entry_add_reaction
+    )
     lateinit var buttons: List<@JvmSuppressWildcards ImageView>
 
     @BindViews(R.id.entry_participants_indicator, R.id.entry_comments_indicator)
@@ -81,6 +87,9 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     @BindView(R.id.entry_pinned)
     lateinit var pinIcon: ImageView
 
+    @BindView(R.id.entry_reactions)
+    lateinit var reactionArea: LinearLayout
+
     /**
      * Entry that this holder represents
      */
@@ -90,6 +99,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
      * Optional metadata associated with current entry
      */
     private var metadata: EntryMeta? = null
+    private var reactions: MutableList<Reaction> = mutableListOf()
 
     /**
      * Blog this entry belongs to
@@ -193,6 +203,43 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         }
     }
 
+    @OnClick(R.id.entry_add_reaction)
+    fun openReactionMenu(button: ImageView) {
+        GlobalScope.launch(Dispatchers.Main) {
+            try {
+                val reactionSets = withContext(Dispatchers.IO) { Network.loadReactionSets() }
+                if (!reactionSets.isNullOrEmpty()) {
+                    showReactionMenu(button, reactionSets.first())
+                }
+            } catch (ex: Exception) {
+                Network.reportErrors(itemView.context, ex)
+            }
+        }
+    }
+
+    private fun showReactionMenu(view: View, reactionSet: ReactionSet) {
+        val reactionTypes = reactionSet.reactionTypes?.get(reactionSet.document).orEmpty()
+
+        val emojiTable = View.inflate(view.context, R.layout.view_emoji_panel, null) as GridLayout
+        val pw = PopupWindow().apply {
+            height = WindowManager.LayoutParams.WRAP_CONTENT
+            width = WindowManager.LayoutParams.WRAP_CONTENT
+            contentView = emojiTable
+            isOutsideTouchable = true
+        }
+
+        for (type in reactionTypes.sortedBy { it.id }) {
+            emojiTable.addView(TextView(view.context).apply {
+                text = type.emoji
+                setOnClickListener {
+                    toggleReaction(view, type)
+                    pw.dismiss()
+                }
+            })
+        }
+        pw.showAsDropDown(view, 0, 0, Gravity.TOP)
+    }
+
     @OnClick(R.id.entry_delete)
     fun deleteEntry() {
         val activity = itemView.context as AppCompatActivity
@@ -284,7 +331,8 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
             null -> subButton.visibility = View.GONE
         }
 
-        val bookmarkButton = buttons.first {it.id == R.id.entry_bookmark}
+        // setup bookmark button
+        val bookmarkButton = buttons.first { it.id == R.id.entry_bookmark }
         when (metadata?.bookmark) {
             true -> bookmarkButton.apply { visibility = View.VISIBLE; setImageResource(R.drawable.bookmark_filled) }
             false -> bookmarkButton.apply { visibility = View.VISIBLE; setImageResource(R.drawable.bookmark_add) }
@@ -302,6 +350,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         this.entry = entity
         this.metadata = Network.bufferToObject<EntryMeta>(entry.meta)
         this.profile = entity.profile.get(entity.document)
+        this.reactions = entity.reactions?.get(entity.document) ?: mutableListOf()
 
         // setup text views from entry data
         titleView.text = entry.title
@@ -335,6 +384,9 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         // setup bottom row of buttons
         setupButtons()
 
+        // setup reaction row
+        setupReactions()
+
         // don't show subscribe button if we can't subscribe
         // guests can't do anything
         if (Auth.profile == null) {
@@ -343,6 +395,85 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         }
 
         bodyView.handleMarkdown(entry.content)
+    }
+
+    /**
+     * Setup reactions row, to show reactions which were attached to this entry
+     */
+    private fun setupReactions() {
+        reactionArea.removeAllViews()
+
+        if (reactions.isEmpty()) {
+            // no reactions for this entry
+            reactionArea.visibility = View.GONE
+            return
+        } else {
+            reactionArea.visibility = View.VISIBLE
+        }
+
+        // there are some reactions, display them
+        val styleLevel = parent.styleLevel ?: return
+        val counts = reactions.groupBy { it.reactionType.get().id }
+        val types = reactions.map { it.reactionType.get(it.document) }.associateBy { it.id }
+        for (reactionTypeId in counts.keys) {
+            // for each reaction type get reaction counts and authors
+            val reactionType = types[reactionTypeId] ?: continue
+            val postedWithThisType = counts[reactionTypeId] ?: continue
+            val includingMe = postedWithThisType.any { Auth.profile?.idMatches(it.author.get()) == true }
+
+            val reactionView = LayoutInflater.from(itemView.context).inflate(R.layout.view_reaction, reactionArea, false)
+
+            reactionView.setOnClickListener { toggleReaction(it, reactionType) }
+            if (includingMe) {
+                reactionView.isSelected = true
+            }
+
+            val emojiTxt = reactionView.findViewById<TextView>(R.id.reaction_emoji)
+            val emojiCount = reactionView.findViewById<TextView>(R.id.reaction_count)
+
+            emojiTxt.text = reactionType.emoji
+            emojiCount.text = postedWithThisType.size.toString()
+
+            styleLevel.bind(TEXT_LINKS, reactionView, BackgroundTintColorAdapter())
+            styleLevel.bind(TEXT, emojiCount)
+
+            reactionArea.addView(reactionView)
+        }
+    }
+
+    private fun toggleReaction(view: View, reactionType: ReactionType) {
+        // find reaction with this type
+        val myReaction = reactions
+                .filter { reactionType.idMatches(it.reactionType.get()) }
+                .find { Auth.profile?.idMatches(it.author.get()) == true }
+
+        if (myReaction != null) {
+            // it's there, delete it
+            GlobalScope.launch(Dispatchers.Main) {
+                try {
+                    withContext(Dispatchers.IO) { Network.deleteReaction(myReaction) }
+                    showToastAtView(view, view.context.getString(R.string.reaction_deleted))
+
+                    reactions.remove(myReaction)
+                    setupReactions()
+                } catch (ex: Exception) {
+                    Network.reportErrors(view.context, ex)
+                }
+            }
+        } else {
+            // add it
+            GlobalScope.launch(Dispatchers.Main) {
+                try {
+                    val newReaction = withContext(Dispatchers.IO) { Network.createReaction(entry, reactionType) }
+                    showToastAtView(view, view.context.getString(R.string.reaction_added))
+
+                    reactions.add(newReaction)
+                    setupReactions()
+                } catch (ex: Exception) {
+                    Network.reportErrors(view.context, ex)
+                }
+            }
+        }
     }
 
     /**

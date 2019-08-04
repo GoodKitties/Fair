@@ -49,7 +49,7 @@ open class BookmarkListFragmentFull: EntryListFragment() {
         styleLevel.bind(TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
         styleLevel.bind(TOOLBAR_TEXT, toolbar, ToolbarIconsAdapter())
 
-        styleLevel.bind(ACCENT, addEntryButton, FabColorAdapter())
+        styleLevel.bind(ACCENT, addEntryButton, BackgroundTintColorAdapter())
         styleLevel.bind(ACCENT_TEXT, addEntryButton, FabIconAdapter())
 
         styleLevel.bindStatusBar(activity, STATUS_BAR)

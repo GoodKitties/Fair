@@ -108,9 +108,10 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"         // Kotlin reflection support
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1"        // Kotlin coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.0"     // Kotlin UI context
-    implementation 'com.google.android.material:material:1.1.0-alpha08'         // Material design support lib
+    implementation 'com.google.android.material:material:1.1.0-alpha09'         // Material design support lib
     implementation 'androidx.appcompat:appcompat:1.1.0-rc01'                    // basic toolbars etc.
     implementation 'androidx.cardview:cardview:1.0.0'                           // snappy cardview for lists
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.0.0'       // swipe-to-refresh layout
     implementation 'androidx.preference:preference:1.0.0'                       // preference fragment compatibility
     implementation "ch.acra:acra-mail:$acraVersion"                             // crash handler
     implementation "ch.acra:acra-dialog:$acraVersion"

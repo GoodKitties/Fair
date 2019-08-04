@@ -108,7 +108,7 @@ open class EntryListFragment: UserContentListFragment() {
 
         styleLevel.bind(BACKGROUND, entryRibbon)
 
-        styleLevel.bind(ACCENT, fastJumpButton, FabColorAdapter())
+        styleLevel.bind(ACCENT, fastJumpButton, BackgroundTintColorAdapter())
         styleLevel.bind(ACCENT_TEXT, fastJumpButton, FabIconAdapter())
     }
 

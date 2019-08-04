@@ -90,6 +90,8 @@ object Network {
     private var COMMENTS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/comments"
     private var NOTIFICATIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/notifications"
     private var BOOKMARKS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/bookmarks"
+    private var REACTIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/reactions"
+    private var REACTION_SETS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/reaction-sets"
 
     private val MIME_JSON_API = MediaType.parse("application/vnd.api+json")
 
@@ -105,6 +107,10 @@ object Network {
             .add(CreateCommentRequest::class.java)
             .add(CommentResponse::class.java)
             .add(DesignResponse::class.java)
+            .add(ReactionTypeResponse::class.java)
+            .add(ReactionSetResponse::class.java)
+            .add(CreateReactionRequest::class.java)
+            .add(ReactionResponse::class.java)
             .build()
 
     private val jsonConverter = Moshi.Builder()
@@ -285,7 +291,7 @@ object Network {
         val type = Types.newParameterizedType(Document::class.java, clazz)
         val reqAdapter = jsonConverter.adapter<Document>(type)
         val doc = reqAdapter.fromJson(obj)!!
-        return doc.asArrayDocument<T>()
+        return doc.asArrayDocument()
     }
 
     /**
@@ -536,7 +542,7 @@ object Network {
         builder.addQueryParameter("page[number]", pageNum.toString())
                 .addQueryParameter("page[size]", PAGE_SIZE.toString())
                 .addQueryParameter("page[starter]", starter.toString())
-                .addQueryParameter("include", "profile")
+                .addQueryParameter("include", "profile,reactions")
                 .addQueryParameter("sort", "-created-at")
 
         for ((type, value) in filters) {
@@ -558,7 +564,7 @@ object Network {
      * @param id identifier of requested entry
      */
     fun loadEntry(id: String): Entry {
-        val req = Request.Builder().url("$ENTRIES_ENDPOINT/$id?include=profile").build()
+        val req = Request.Builder().url("$ENTRIES_ENDPOINT/$id?include=profile,reactions").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw extractErrors(resp, "Can't load entry $id")
@@ -843,6 +849,63 @@ object Network {
 
         // response is returned after execute call, body is not null
         return fromWrappedListJson(resp.body()!!.source(), Bookmark::class.java)
+    }
+
+    /**
+     * Load reaction sets. Only one reaction set is present atm, it's the first one.
+     */
+    fun loadReactionSets(): List<ReactionSet> {
+        val req = Request.Builder().url("$REACTION_SETS_ENDPOINT?include=reactions").build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful) {
+            throw extractErrors(resp, "Can't load reaction sets")
+        }
+
+        // response is returned after execute call, body is not null
+        return fromWrappedListJson(resp.body()!!.source(), ReactionSet::class.java)
+    }
+
+    /**
+     * Create reaction with type [reactionType] that will be attached to [entry]
+     *
+     * @param entry Entry for which reaction should be created
+     * @param reactionType emoji to attach
+     */
+    fun createReaction(entry: Entry, reactionType: ReactionType): Reaction {
+        val reactionReq = CreateReactionRequest().apply {
+            this.reactionType = HasOne(reactionType)
+            this.author = HasOne(Auth.profile)
+            this.entry = HasOne(entry)
+        }
+
+        val req = Request.Builder()
+                .post(RequestBody.create(MIME_JSON_API, toWrappedJson(reactionReq)))
+                .url(REACTIONS_ENDPOINT)
+                .build()
+
+        val resp = httpClient.newCall(req).execute()
+
+        // unprocessable entity error can be returned when something is wrong with your input
+        if (!resp.isSuccessful) {
+            throw extractErrors(resp, "Can't (un)bookmark to entry ${entry.id}")
+        }
+
+        // we need to add reaction type as an include to this document
+        // as type is not returned as response
+        return fromWrappedJson(resp.body()!!.source(), Reaction::class.java)!!.apply {
+            document.addInclude(reactionType)
+        }
+    }
+
+    /**
+     * Deletes reaction [myReaction]. This reaction must exist and must have
+     * current profile as its author.
+     */
+    fun deleteReaction(myReaction: Reaction) {
+        val req = Request.Builder().url("$REACTIONS_ENDPOINT/${myReaction.id}").delete().build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful)
+            throw extractErrors(resp, "Can't delete reaction ${myReaction.id}")
     }
 
     /**

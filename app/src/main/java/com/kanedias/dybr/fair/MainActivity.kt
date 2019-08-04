@@ -189,7 +189,7 @@ class MainActivity : AppCompatActivity() {
         styleLevel.bind(TOOLBAR_TEXT, tabs, TabLayoutTextAdapter())
         styleLevel.bind(TOOLBAR_TEXT, tabs, TabLayoutLineAdapter())
 
-        styleLevel.bind(ACCENT, actionButton, FabColorAdapter())
+        styleLevel.bind(ACCENT, actionButton, BackgroundTintColorAdapter())
         styleLevel.bind(ACCENT_TEXT, actionButton, FabIconAdapter())
     }
 

@@ -121,11 +121,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_below="@id/entry_tags"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp">
-
-        </LinearLayout>
+            android:layout_below="@id/entry_tags"/>
 
         <View
             android:id="@+id/entry_meta_divider"
@@ -188,6 +184,15 @@
             android:layout_marginTop="8dp"
             android:layout_below="@id/entry_meta_divider"
             android:layout_alignParentEnd="true"> <!-- invisible for entries you don't own -->
+
+            <ImageView
+                android:theme="@style/Ripple.Item"
+                android:id="@+id/entry_add_reaction"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="8dp"
+                android:src="@drawable/smile"
+                android:contentDescription="@string/add_reaction"/>
 
             <ImageView
                 android:theme="@style/Ripple.Item"

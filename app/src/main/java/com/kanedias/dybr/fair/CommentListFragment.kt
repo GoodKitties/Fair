@@ -101,7 +101,7 @@ class CommentListFragment : UserContentListFragment() {
         styleLevel.bind(TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
         styleLevel.bind(TOOLBAR_TEXT, toolbar, ToolbarIconsAdapter())
 
-        styleLevel.bind(ACCENT, addCommentButton, FabColorAdapter())
+        styleLevel.bind(ACCENT, addCommentButton, BackgroundTintColorAdapter())
         styleLevel.bind(ACCENT_TEXT, addCommentButton, FabIconAdapter())
 
         styleLevel.bind(BACKGROUND, commentRibbon)

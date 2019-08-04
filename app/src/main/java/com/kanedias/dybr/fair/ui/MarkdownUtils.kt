@@ -213,13 +213,13 @@ fun postProcessMore(spanned: SpannableStringBuilder, view: TextView) {
         val moreText = match.groups[2]!!.value // content inside opening tag [MORE=...]
         val innerRange = match.groups[3]!!.range // range between opening and closing tag of MORE
         val innerText = match.groups[3]!!.value // content between opening and closing tag of MORE
-        val innerSpanned = spanned.subSequence(innerRange.start, innerRange.start + innerText.length) // contains all spans there
+        val innerSpanned = spanned.subSequence(innerRange.first, innerRange.first + innerText.length) // contains all spans there
 
         // content of opening tag may be HTML
         val auxMd = Html2Markdown().parse(moreText)
         val auxSpanned = mdRendererFrom(view).toMarkdown(auxMd)
 
-        spanned.replace(outerRange.start, outerRange.endInclusive + 1, auxSpanned) // replace it just with text
+        spanned.replace(outerRange.first, outerRange.last + 1, auxSpanned) // replace it just with text
         val wrapper = object : ClickableSpan() {
 
             override fun onClick(widget: View?) {
@@ -236,7 +236,7 @@ fun postProcessMore(spanned: SpannableStringBuilder, view: TextView) {
                 AsyncDrawableScheduler.schedule(view)
             }
         }
-        spanned.setSpan(wrapper, outerRange.start, outerRange.start + auxSpanned.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spanned.setSpan(wrapper, outerRange.first, outerRange.first + auxSpanned.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
 }
 

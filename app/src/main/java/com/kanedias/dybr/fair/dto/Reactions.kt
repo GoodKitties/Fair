@@ -40,7 +40,7 @@ class ReactionTypeResponse: Resource() {
     /**
      * Name of this reaction type
      */
-    @field:Json(name = "author")
+    @field:Json(name = "emoji")
     lateinit var emoji: String
 
     /**
@@ -61,7 +61,7 @@ typealias ReactionType = ReactionTypeResponse
 
 
 @JsonApi(type = "reactions", policy = Policy.SERIALIZATION_ONLY)
-class ReactionCreateRequest: Resource() {
+class CreateReactionRequest: Resource() {
 
     /**
      * Person who created this reaction

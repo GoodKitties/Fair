@@ -45,15 +45,16 @@ class TabUnderlineAdapter: ColorAdapter<TabLayout> {
     }
 }
 
-class FabColorAdapter : ColorAdapter<FloatingActionButton> {
+class BackgroundTintColorAdapter : ColorAdapter<View> {
 
-    override fun applyColor(view: FloatingActionButton, @ColorInt color: Int) {
+    override fun applyColor(view: View, @ColorInt color: Int) {
         val colorStateList = ColorStateList.valueOf(color)
         view.backgroundTintList = colorStateList
     }
 
-    override fun getColor(view: FloatingActionButton): Int {
-        return view.backgroundTintList!!.defaultColor
+    override fun getColor(view: View): Int {
+        val tintList = view.backgroundTintList ?: return Color.TRANSPARENT
+        return tintList.defaultColor
     }
 }
 
