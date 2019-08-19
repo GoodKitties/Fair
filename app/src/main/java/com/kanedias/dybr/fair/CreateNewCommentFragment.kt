@@ -93,7 +93,7 @@ class CreateNewCommentFragment : Fragment() {
         Scoop.getInstance().addStyleLevel()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         savedInstanceState?.getBoolean("editMode")?.let { editMode = it }
         savedInstanceState?.getSerializable("editComment")?.let { editComment = it as Comment }
         savedInstanceState?.getSerializable("entry")?.let { entry = it as Entry }

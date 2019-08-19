@@ -92,7 +92,7 @@ class ProfileFragment: DialogFragment() {
         }
 
         // set avatar
-        val avatarUrl = profile.settings?.avatar
+        val avatarUrl = profile.settings.avatar
         if (!avatarUrl.isNullOrBlank()) {
             // resolve URL if it's not absolute
             val base = HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT) ?: return

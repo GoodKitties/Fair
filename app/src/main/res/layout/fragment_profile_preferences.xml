@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/profile_preferences_fragment_area"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/md_grey_850">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/profile_preferences_header"
+        android:fitsSystemWindows="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/profile_preferences_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/standard_toolbar_height"
+            android:minHeight="@dimen/standard_toolbar_height"
+            android:title="@string/comments"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <TextView
+            android:id="@+id/notifications_screen_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="8dp"
+            android:text="@string/notifications_settings"/>
+
+        <LinearLayout
+            android:id="@+id/notifications_screen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/transparent_rectangle_rounded_border"
+            android:orientation="vertical"
+            android:layout_margin="8dp"
+            android:padding="4dp">
+
+            <Switch
+                android:id="@+id/new_posts_in_favorites_switch"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="center_vertical"
+                android:drawableStart="@drawable/bell"
+                android:drawablePadding="26dp"
+                android:layout_marginStart="16dp"
+                android:text="@string/new_posts_in_favorites"
+                android:textSize="14sp"/>
+
+            <Switch
+                android:id="@+id/new_comments_in_subscribed_switch"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="center_vertical"
+                android:drawableStart="@drawable/bell"
+                android:drawablePadding="26dp"
+                android:layout_marginStart="16dp"
+                android:text="@string/new_comments_in_subscribed"
+                android:textSize="14sp"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/privacy_screen_text"
+            android:layout_marginTop="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/privacy_settings"/>
+
+        <LinearLayout
+            android:id="@+id/privacy_screen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/transparent_rectangle_rounded_border"
+            android:orientation="vertical"
+            android:layout_margin="8dp"
+            android:padding="4dp">
+
+            <Switch
+                android:id="@+id/participate_in_feed_switch"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="center_vertical"
+                android:drawableStart="@drawable/feed"
+                android:drawablePadding="26dp"
+                android:layout_marginStart="16dp"
+                android:text="@string/participate_in_feed"
+                android:textOn="@string/participate_in_feed"
+                android:textOff="@string/dont_participate_in_feed"
+                android:textSize="14sp"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/reactions_screen_text"
+            android:layout_marginTop="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/reactions_settings"/>
+
+        <LinearLayout
+            android:id="@+id/reactions_screen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/transparent_rectangle_rounded_border"
+            android:orientation="vertical"
+            android:layout_margin="8dp"
+            android:padding="4dp">
+
+            <Switch
+                android:id="@+id/reactions_global_switch"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="center_vertical"
+                android:drawableStart="@drawable/smile"
+                android:drawablePadding="26dp"
+                android:layout_marginStart="16dp"
+                android:text="@string/enable_everywhere"
+                android:textOn="@string/enable_everywhere"
+                android:textOff="@string/disable_everywhere"
+                android:textSize="14sp"/>
+
+            <Switch
+                android:id="@+id/reactions_in_blog_switch"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="center_vertical"
+                android:drawableStart="@drawable/smile"
+                android:drawablePadding="26dp"
+                android:layout_marginStart="16dp"
+                android:text="@string/enable_in_my_blog"
+                android:textOn="@string/enable_in_my_blog"
+                android:textOff="@string/disable_in_my_blog"
+                android:textSize="14sp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -209,12 +209,14 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
         val profName = profileArea.findViewById<TextView>(R.id.my_profile)
         val profSwap = profileArea.findViewById<ImageView>(R.id.switch_profile)
         val profAdd = profileArea.findViewById<ImageView>(R.id.add_profile)
+        val profSetup = profileArea.findViewById<ImageView>(R.id.setup_profile)
 
         if (Auth.profile == null) {
             // no profile, set to disabled
             profName.isEnabled = false
             profSwap.visibility = View.GONE
             profAdd.visibility = View.GONE
+            profSetup.visibility = View.GONE
 
             // if account is present, enable "add-profile" button
             if (Auth.user !== Auth.guest) {
@@ -231,6 +233,7 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
         profName.isEnabled = true
         profAdd.visibility = View.GONE
         profSwap.visibility = View.VISIBLE
+        profSetup.visibility = View.VISIBLE
 
         // handle click on profile change button
         // we need to ignore subsequent clicks if profiles are already loading
@@ -257,6 +260,11 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
 
         profSwap.setOnClickListener {
             profileSwapActor.offer(Unit)
+        }
+
+        profSetup.setOnClickListener {
+            activity.showProfilePreferences()
+            drawer.closeDrawers()
         }
     }
 

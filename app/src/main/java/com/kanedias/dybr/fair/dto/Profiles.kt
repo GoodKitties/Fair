@@ -128,7 +128,7 @@ class ProfileResponse : Dated() {
      * Preferences structure for this profile
      */
     @field:Json(name = "settings")
-    var settings: ProfileSettings? = null
+    var settings: ProfileSettings = ProfileSettings()
 
     /**
      * Tags that this profile is using

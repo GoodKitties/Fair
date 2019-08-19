@@ -5,6 +5,8 @@
     android:id="@+id/main_drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:focusable="true"
+    android:clickable="true"
     tools:context="com.kanedias.dybr.fair.MainActivity">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout

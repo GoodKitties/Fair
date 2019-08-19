@@ -215,7 +215,7 @@ class CreateNewEntryFragment : Fragment() {
     private fun populateEditUI() {
         titleInput.setText(editEntry.title)
         draftSwitch.isChecked = editEntry.state == "published"
-        pinSwitch.isChecked = profile.settings?.pinnedEntries?.contains(editEntry.id) ?: false
+        pinSwitch.isChecked = profile.settings.pinnedEntries.contains(editEntry.id) ?: false
         // need to convert entry content (html) to Markdown somehow...
         val markdown = Html2Markdown().parse(editEntry.content)
         contentInput.setText(markdown)
@@ -333,8 +333,8 @@ class CreateNewEntryFragment : Fragment() {
                 }
 
                 // pin if needed
-                val settings = profile.settings ?: ProfileSettings()
-                val pinnedAlready = settings.pinnedEntries ?: mutableSetOf()
+                val settings = profile.settings
+                val pinnedAlready = settings.pinnedEntries
                 when {
                     pinSwitch.isChecked && !pinnedAlready.contains(entry.id) -> {
                         val req = ProfileCreateRequest().apply {

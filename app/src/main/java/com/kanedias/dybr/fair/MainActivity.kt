@@ -554,6 +554,16 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    fun showProfilePreferences() {
+        val profile = Auth.profile ?: return
+
+        showFullscreenFragment(ProfilePreferencesFragment().apply {
+            arguments = Bundle().apply {
+                putSerializable(ProfilePreferencesFragment.PROFILE, profile)
+            }
+        })
+    }
+
     /**
      * Called when user selects profile from a dialog
      */

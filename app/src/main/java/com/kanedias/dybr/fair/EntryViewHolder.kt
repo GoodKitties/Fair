@@ -21,7 +21,6 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.WindowManager
 import android.widget.*
-import androidx.appcompat.widget.ListPopupWindow
 import androidx.fragment.app.Fragment
 import com.afollestad.materialdialogs.list.listItems
 import com.kanedias.dybr.fair.dto.*
@@ -338,6 +337,17 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
             false -> bookmarkButton.apply { visibility = View.VISIBLE; setImageResource(R.drawable.bookmark_add) }
             null -> bookmarkButton.visibility = View.GONE
         }
+
+        // setup reactions button
+        val reactionButton = buttons.first { it.id == R.id.entry_add_reaction }
+        when {
+            // disabled globally by current user
+            Auth.profile?.settings?.reactions?.disable == true -> reactionButton.visibility = View.GONE
+            // disabled in current blog by owner
+            profile.settings.reactions.disableInBlog -> reactionButton.visibility = View.GONE
+            // enabled, show the button
+            else -> reactionButton.visibility = View.VISIBLE
+        }
     }
 
     /**
@@ -366,8 +376,8 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         }
 
         // setup pin icon
-        val pinned = profile.settings?.pinnedEntries?.contains(entry.id)
-        if (pinned == true) {
+        val pinned = profile.settings.pinnedEntries.contains(entry.id)
+        if (pinned) {
             pinIcon.visibility = View.VISIBLE
             pinIcon.setOnClickListener { showToastAtView(pinIcon, it.context.getString(R.string.pinned_entry)) }
         } else {
@@ -403,8 +413,11 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     private fun setupReactions() {
         reactionArea.removeAllViews()
 
-        if (reactions.isEmpty()) {
-            // no reactions for this entry
+        val reactionsDisabled = Auth.profile?.settings?.reactions?.disable == true
+        val reactionsDisabledInThisBlog = profile.settings.reactions.disableInBlog
+
+        if (reactions.isEmpty() || reactionsDisabled || reactionsDisabledInThisBlog) {
+            // no reactions for this entry or reactions disabled
             reactionArea.visibility = View.GONE
             return
         } else {

@@ -276,4 +276,18 @@
     <string name="reaction_deleted">Reaction deleted</string>
     <string name="add_reaction">Add reaction</string>
     <string name="reaction_added">Reaction added</string>
+    <string name="profile_settings">Profile settings</string>
+    <string name="new_posts_in_favorites">New posts in favorites</string>
+    <string name="new_comments_in_subscribed">New comments in subscribed</string>
+    <string name="notifications_settings">Notifications settings</string>
+    <string name="feed_settings">Feed settings</string>
+    <string name="privacy_settings">Privacy settings</string>
+    <string name="participate_in_feed">Participate in feed</string>
+    <string name="dont_participate_in_feed">Don\'t participate in feed</string>
+    <string name="reactions_settings">Reactions settings</string>
+    <string name="disable_everywhere">Disable everywhere</string>
+    <string name="enable_everywhere">Enable everywhere</string>
+    <string name="disable_in_my_blog">Disable in my blog</string>
+    <string name="enable_in_my_blog">Enable in my blog</string>
+    <string name="applied">Applied</string>
 </resources>
