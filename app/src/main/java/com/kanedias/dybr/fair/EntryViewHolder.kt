@@ -17,6 +17,7 @@ import android.text.SpannableStringBuilder
 import android.text.TextPaint
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.WindowManager
@@ -230,6 +231,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         for (type in reactionTypes.sortedBy { it.id }) {
             emojiTable.addView(TextView(view.context).apply {
                 text = type.emoji
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
                 setOnClickListener {
                     toggleReaction(view, type)
                     pw.dismiss()
