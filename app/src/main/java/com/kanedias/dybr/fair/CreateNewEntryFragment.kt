@@ -28,6 +28,7 @@ import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.handleMarkdownRaw
 import com.kanedias.dybr.fair.misc.styleLevel
+import com.kanedias.dybr.fair.ui.markdownToHtml
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.*
 import moe.banana.jsonapi2.HasOne
@@ -37,7 +38,6 @@ import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * Fragment responsible for showing create entry/edit entry form.
@@ -215,7 +215,7 @@ class CreateNewEntryFragment : Fragment() {
     private fun populateEditUI() {
         titleInput.setText(editEntry.title)
         draftSwitch.isChecked = editEntry.state == "published"
-        pinSwitch.isChecked = profile.settings.pinnedEntries.contains(editEntry.id) ?: false
+        pinSwitch.isChecked = profile.settings.pinnedEntries.contains(editEntry.id)
         // need to convert entry content (html) to Markdown somehow...
         val markdown = Html2Markdown().parse(editEntry.content)
         contentInput.setText(markdown)
@@ -295,12 +295,6 @@ class CreateNewEntryFragment : Fragment() {
         val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view!!.windowToken, 0)
 
-        // hide edit form, show loading spinner
-        val extensions = listOf(StrikethroughExtension.create(), TablesExtension.create())
-        val parser = Parser.builder().extensions(extensions).build()
-        val document = parser.parse(contentInput.text.toString())
-        val htmlContent = HtmlRenderer.builder().extensions(extensions).build().render(document)
-
         val access = when(permissionSpinner.selectedItemPosition) {
             0 -> RecordAccessItem("private", false)
             1 -> RecordAccessItem("registered", true)
@@ -312,7 +306,7 @@ class CreateNewEntryFragment : Fragment() {
         val entry = EntryCreateRequest().apply {
             title = titleInput.text.toString()
             state = if (draftSwitch.isChecked) { "published" } else { "draft" }
-            content = htmlContent
+            content = markdownToHtml(contentInput.text.toString())
             tags = tagList
             settings = RecordSettings(permissions = RecordPermissions(listOfNotNull(access)))
         }

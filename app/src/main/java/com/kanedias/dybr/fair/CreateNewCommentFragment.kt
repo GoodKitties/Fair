@@ -24,6 +24,7 @@ import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.EditorViews
 import com.kanedias.dybr.fair.ui.handleMarkdownRaw
 import com.kanedias.dybr.fair.misc.styleLevel
+import com.kanedias.dybr.fair.ui.markdownToHtml
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.*
 import moe.banana.jsonapi2.HasOne
@@ -199,13 +200,7 @@ class CreateNewCommentFragment : Fragment() {
         val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view!!.windowToken, 0)
 
-        // hide edit form, show loading spinner
-        val extensions = listOf(StrikethroughExtension.create(), TablesExtension.create())
-        val parser = Parser.builder().extensions(extensions).build()
-        val document = parser.parse(contentInput.text.toString())
-        val htmlContent = HtmlRenderer.builder().extensions(extensions).build().render(document)
-
-        val comment = CreateCommentRequest().apply { content = htmlContent }
+        val comment = CreateCommentRequest().apply { content = markdownToHtml(contentInput.text.toString()) }
 
         // make http request
         uiScope.launch(Dispatchers.Main) {

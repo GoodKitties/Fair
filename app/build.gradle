@@ -23,7 +23,6 @@ android {
         minSdkVersion 21    // device you allow your users to be on :)
         versionCode 58
         versionName "1.13.2"
-        multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -108,11 +107,11 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"         // Kotlin reflection support
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1"        // Kotlin coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.0"     // Kotlin UI context
-    implementation 'com.google.android.material:material:1.1.0-alpha09'         // Material design support lib
-    implementation 'androidx.appcompat:appcompat:1.1.0-rc01'                    // basic toolbars etc.
+    implementation 'com.google.android.material:material:1.2.0-alpha02'         // Material design support lib
+    implementation 'androidx.appcompat:appcompat:1.2.0-alpha01'                 // basic toolbars etc.
     implementation 'androidx.cardview:cardview:1.0.0'                           // snappy cardview for lists
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.0.0'       // swipe-to-refresh layout
-    implementation 'androidx.preference:preference:1.0.0'                       // preference fragment compatibility
+    implementation 'androidx.preference:preference:1.1.0'                       // preference fragment compatibility
     implementation "ch.acra:acra-mail:$acraVersion"                             // crash handler
     implementation "ch.acra:acra-dialog:$acraVersion"
     implementation "android.arch.work:work-runtime-ktx:1.0.1"                   // job scheduler

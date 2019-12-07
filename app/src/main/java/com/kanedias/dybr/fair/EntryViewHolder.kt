@@ -2,6 +2,8 @@ package com.kanedias.dybr.fair
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.view.View
@@ -224,6 +226,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         val pw = PopupWindow().apply {
             height = WindowManager.LayoutParams.WRAP_CONTENT
             width = WindowManager.LayoutParams.WRAP_CONTENT
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT)) // hack for Android 5.1.1, see https://stackoverflow.com/questions/12232724/popupwindow-dismiss-when-clicked-outside
             contentView = emojiTable
             isOutsideTouchable = true
         }

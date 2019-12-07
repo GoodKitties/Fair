@@ -32,7 +32,7 @@ import butterknife.ButterKnife
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.SimpleTarget
-import com.bumptech.glide.request.target.Target.*
+import com.bumptech.glide.request.target.Target.SIZE_ORIGINAL
 import com.bumptech.glide.request.transition.Transition
 import com.ftinc.scoop.binding.AbstractBinding
 import com.kanedias.dybr.fair.BuildConfig
@@ -42,14 +42,25 @@ import com.kanedias.dybr.fair.misc.styleLevel
 import com.kanedias.dybr.fair.themes.TEXT
 import com.kanedias.html2md.Html2Markdown
 import com.stfalcon.imageviewer.StfalconImageViewer
-import kotlinx.coroutines.*
-import okhttp3.HttpUrl
 import io.noties.markwon.Markwon
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.noties.markwon.html.HtmlPlugin
-import io.noties.markwon.image.*
+import io.noties.markwon.image.AsyncDrawableScheduler
+import io.noties.markwon.image.AsyncDrawableSpan
+import io.noties.markwon.image.DrawableUtils
 import io.noties.markwon.image.glide.GlideImagesPlugin
-import java.io.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl
+import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
+import org.commonmark.ext.gfm.tables.TablesExtension
+import org.commonmark.parser.Parser
+import org.commonmark.renderer.html.HtmlRenderer
+import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
 import java.lang.ref.WeakReference
 import java.util.*
 
@@ -91,7 +102,7 @@ fun mdRendererFrom(txt: TextView): Markwon {
  */
 @Suppress("DEPRECATION")
 fun wrapStyleDrawable(view: View, image: Int): Drawable {
-    val drawable = view.context.resources.getDrawable(R.drawable.image).mutate()
+    val drawable = view.context.resources.getDrawable(image).mutate()
     DrawableUtils.applyIntrinsicBoundsIfEmpty(drawable)
     view.styleLevel?.bind(TEXT, DrawableBinding(drawable, TEXT))
     return drawable
@@ -196,6 +207,10 @@ fun postProcessDrawables(spanned: SpannableStringBuilder, view: TextView) {
     }
 }
 
+const val MORE_START_REGEX = "\\[MORE=(.+?)]"
+const val MORE_END_REGEX = "\\[/MORE]"
+val MORE_FULL_REGEX = Regex("(${MORE_START_REGEX}(.*?)${MORE_END_REGEX})", RegexOption.DOT_MATCHES_ALL)
+
 /**
  * Post-process MORE statements in the text. They act like `<spoiler>` or `<cut>` tag in some websites
  * @param spanned text to be modified to cut out MORE tags and insert replacements instead of them
@@ -204,8 +219,7 @@ fun postProcessDrawables(spanned: SpannableStringBuilder, view: TextView) {
 fun postProcessMore(spanned: SpannableStringBuilder, view: TextView) {
     while (true) {
         // we need to process all MOREs in the text, start from inner ones, get back to outer in next loops
-        val moreDetector = Regex(".*(\\[MORE=(.+?)](.*?)\\[/MORE])", RegexOption.DOT_MATCHES_ALL)
-        val match = moreDetector.find(spanned) ?: break
+        val match = MORE_FULL_REGEX.find(spanned) ?: break
         // we have a match, make a replacement
 
         // get group content out of regex
@@ -438,4 +452,15 @@ class ImageShowOverlay(ctx: Context,
 
         return null
     }
+}
+
+fun markdownToHtml(md: String): String {
+    var mdPreprocessed = md
+
+    mdPreprocessed = mdPreprocessed.replace("\n", "\n<br/>")
+
+    val extensions = listOf(StrikethroughExtension.create(), TablesExtension.create())
+    val parser = Parser.builder().extensions(extensions).build()
+    val document = parser.parse(mdPreprocessed)
+    return HtmlRenderer.builder().extensions(extensions).build().render(document)
 }
