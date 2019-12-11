@@ -209,7 +209,9 @@ fun postProcessDrawables(spanned: SpannableStringBuilder, view: TextView) {
 
 const val MORE_START_REGEX = "\\[MORE=(.+?)]"
 const val MORE_END_REGEX = "\\[/MORE]"
-val MORE_FULL_REGEX = Regex("(${MORE_START_REGEX}(.*?)${MORE_END_REGEX})", RegexOption.DOT_MATCHES_ALL)
+
+// starting ,* is required to capture only inner MORE, see https://regex101.com/r/zbpWUK/1
+val MORE_FULL_REGEX = Regex(".*(${MORE_START_REGEX}(.*?)${MORE_END_REGEX})", RegexOption.DOT_MATCHES_ALL)
 
 /**
  * Post-process MORE statements in the text. They act like `<spoiler>` or `<cut>` tag in some websites
@@ -456,8 +458,6 @@ class ImageShowOverlay(ctx: Context,
 
 fun markdownToHtml(md: String): String {
     var mdPreprocessed = md
-
-    mdPreprocessed = mdPreprocessed.replace("\n", "\n<br/>")
 
     val extensions = listOf(StrikethroughExtension.create(), TablesExtension.create())
     val parser = Parser.builder().extensions(extensions).build()
