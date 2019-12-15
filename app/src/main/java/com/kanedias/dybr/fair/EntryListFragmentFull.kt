@@ -64,9 +64,4 @@ open class EntryListFragmentFull: EntryListFragment() {
         val backgrounds = mapOf<View, Int>(entryRibbon to BACKGROUND/*, toolbar to TOOLBAR*/)
         profile?.let { applyTheme(activity, it, styleLevel, backgrounds) }
     }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        Scoop.getInstance().popStyleLevel( false)
-    }
 }

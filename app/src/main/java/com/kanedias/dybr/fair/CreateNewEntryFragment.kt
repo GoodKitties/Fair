@@ -20,6 +20,7 @@ import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.customListAdapter
 import com.ftinc.scoop.Scoop
+import com.ftinc.scoop.StyleLevel
 import com.ftinc.scoop.adapters.TextViewColorAdapter
 import com.ftinc.scoop.util.Utils
 import com.kanedias.dybr.fair.database.DbProvider
@@ -32,10 +33,6 @@ import com.kanedias.dybr.fair.ui.markdownToHtml
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.*
 import moe.banana.jsonapi2.HasOne
-import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
-import org.commonmark.ext.gfm.tables.TablesExtension
-import org.commonmark.parser.Parser
-import org.commonmark.renderer.html.HtmlRenderer
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -113,6 +110,8 @@ class CreateNewEntryFragment : Fragment() {
     private val submitJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + submitJob)
 
+    private lateinit var styleLevel: StyleLevel
+
     var editMode = false // create new by default
 
     /**
@@ -147,14 +146,8 @@ class CreateNewEntryFragment : Fragment() {
         return view
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Scoop.getInstance().addStyleLevel()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
-        Scoop.getInstance().popStyleLevel(false)
         submitJob.cancel()
     }
 
@@ -180,7 +173,8 @@ class CreateNewEntryFragment : Fragment() {
     }
 
     private fun setupTheming(view: View) {
-        val styleLevel = view.styleLevel ?: return
+        styleLevel = Scoop.getInstance().addStyleLevel()
+        lifecycle.addObserver(styleLevel)
 
         styleLevel.bind(TEXT_BLOCK, view, BackgroundNoAlphaAdapter())
         styleLevel.bind(TEXT, titleInput, EditTextAdapter())

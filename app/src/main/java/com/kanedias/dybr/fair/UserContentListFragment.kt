@@ -37,7 +37,7 @@ abstract class UserContentListFragment : Fragment() {
     protected var allLoaded = false
 
     private lateinit var loadJob: Job
-    protected lateinit var uiScope: CoroutineScope
+    lateinit var uiScope: CoroutineScope
 
     lateinit var styleLevel: StyleLevel
 

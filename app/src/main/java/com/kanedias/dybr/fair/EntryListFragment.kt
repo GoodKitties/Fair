@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.BindView
 import butterknife.ButterKnife
+import com.ftinc.scoop.Scoop
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.misc.setMaxFlingVelocity
@@ -104,12 +105,16 @@ open class EntryListFragment: UserContentListFragment() {
     }
 
     open fun setupTheming() {
-        styleLevel = activity.styleLevel
+        styleLevel = Scoop.getInstance().addStyleLevel()
+        lifecycle.addObserver(styleLevel)
 
         styleLevel.bind(BACKGROUND, entryRibbon)
 
         styleLevel.bind(ACCENT, fastJumpButton, BackgroundTintColorAdapter())
         styleLevel.bind(ACCENT_TEXT, fastJumpButton, FabIconAdapter())
+
+        val backgrounds = mapOf<View, Int>(entryRibbon to BACKGROUND/*, toolbar to TOOLBAR*/)
+        Auth.profile?.let { applyTheme(activity, it, styleLevel, backgrounds) }
     }
 
     /**
@@ -197,7 +202,7 @@ open class EntryListFragment: UserContentListFragment() {
             return when (viewType) {
                 ITEM_REGULAR -> {
                     val view = inflater.inflate(R.layout.fragment_entry_list_item, parent, false)
-                    EntryViewHolder(view, parent)
+                    EntryViewHolder(view, this@EntryListFragment)
                 }
                 else -> super.onCreateViewHolder(parent, viewType)
             }

@@ -87,8 +87,9 @@ fun applyTheme(ctx: Context, profile: OwnProfile, level: StyleLevel, withDrawabl
     GlobalScope.launch(Dispatchers.Main) {
         try {
             val design = withContext(Dispatchers.IO) { Network.loadProfileDesign(profile) } ?: return@launch
+            rebindIfRequired(level, design, withDrawables)
+
             updateColorBindings(design, level)
-            updateBackgroundDrawables(design, withDrawables)
         } catch (ex: Exception) {
             // do nothing - themes are optional
             Log.e("ThemeEngine", "Couldn't apply theme", ex)
@@ -96,72 +97,13 @@ fun applyTheme(ctx: Context, profile: OwnProfile, level: StyleLevel, withDrawabl
     }
 }
 
-fun isDark() {
-
-}
-
-fun updateBackgroundDrawables(design: Design, withDrawables: Map<View, Int>) {
-    for (entry in withDrawables.entries) {
-        val enabled = when (entry.value) {
-            BACKGROUND -> design.data.background?.enable ?: false
-            TOOLBAR -> design.data.header?.image?.enable ?: false
-            else -> false
+fun rebindIfRequired(level: StyleLevel, design: Design, withDrawables: Map<View, Int>) {
+    design.data.background?.url?.let {
+        for (entry in withDrawables.entries) {
+            if (entry.value == BACKGROUND) {
+                level.bind(BACKGROUND, entry.key, BackgroundDelayedAdapter(it))
+            }
         }
-
-        if (!enabled)
-            continue
-
-        val url = when (entry.value) {
-            BACKGROUND -> design.data.background?.url
-            TOOLBAR -> design.data.header?.image?.url
-            else -> null
-        }
-
-        if (url.isNullOrBlank())
-            continue
-
-        val base = HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT) ?: continue
-        val resolved = base.resolve(url) ?: continue
-
-        Glide.with(entry.key)
-                .load(resolved.toString())
-                .apply(RequestOptions()
-                        .override(entry.key.width, entry.key.height)
-                        .centerCrop())
-                .into(BgDrawableTarget(entry.key))
-    }
-}
-
-private class BgDrawableTarget(view: View): CustomViewTarget<View, Drawable>(view) {
-
-    val cf = DrawableCrossFadeTransition(300, true)
-
-    override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
-        resource.setBounds(0, 0, resource.intrinsicWidth, resource.intrinsicHeight)
-        GlobalScope.launch(Dispatchers.Main) {
-            delay(600)
-            cf.transition(resource, BgAdapter(view))
-        }
-    }
-
-    override fun onLoadFailed(errorDrawable: Drawable?) {
-
-    }
-
-    override fun onResourceCleared(placeholder: Drawable?) {
-        view.background = null
-    }
-
-    inner class BgAdapter(private val view: View) : Transition.ViewAdapter {
-
-        override fun getView() = view
-
-        override fun getCurrentDrawable(): Drawable? = view.background
-
-        override fun setDrawable(drawable: Drawable) {
-            view.background = drawable
-        }
-
     }
 }
 

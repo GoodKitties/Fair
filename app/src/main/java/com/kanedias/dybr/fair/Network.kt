@@ -92,6 +92,7 @@ object Network {
     private var BOOKMARKS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/bookmarks"
     private var REACTIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/reactions"
     private var REACTION_SETS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/reaction-sets"
+    private var ACTION_LISTS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/lists"
 
     private val MIME_JSON_API = MediaType.parse("application/vnd.api+json")
 
@@ -193,6 +194,10 @@ object Network {
         ENTRIES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/entries"
         COMMENTS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/comments"
         NOTIFICATIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/notifications"
+        BOOKMARKS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/bookmarks"
+        REACTIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/reactions"
+        REACTION_SETS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/reaction-sets"
+        ACTION_LISTS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/lists"
     }
 
     /**
@@ -414,14 +419,7 @@ object Network {
      * @param prof profile creation request with all info filled in
      */
     fun createProfile(prof: ProfileCreateRequest): OwnProfile {
-        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(prof))
-        val req = Request.Builder().url(PROFILES_ENDPOINT).post(reqBody).build()
-        val resp = httpClient.newCall(req).execute()
-        if (!resp.isSuccessful)
-            throw extractErrors(resp, "Can't create profile")
-
-        // response is returned after execute call, body is not null
-        return fromWrappedJson(resp.body()!!.source(), OwnProfile::class.java)!!
+        return createEntity(PROFILES_ENDPOINT, prof)
     }
 
     /**
@@ -601,14 +599,7 @@ object Network {
      * @param comment comment to create. Must not exist on server. Should be filled with entry, body content etc.
      */
     fun createComment(comment: CreateCommentRequest): Comment {
-        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(comment))
-        val req = Request.Builder().url(COMMENTS_ENDPOINT).post(reqBody).build()
-        val resp = httpClient.newCall(req).execute()
-        if (!resp.isSuccessful)
-            throw extractErrors(resp, "Can't create comment")
-
-        // response is returned after execute call, body is not null
-        return fromWrappedJson(resp.body()!!.source(), Comment::class.java)!!
+        return createEntity(COMMENTS_ENDPOINT, comment)
     }
 
     /**
@@ -642,14 +633,7 @@ object Network {
      * @param entry entry to create. Must not exist on server. Should be filled with blog, title, body content etc.
      */
     fun createEntry(entry: EntryCreateRequest): Entry {
-        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(entry))
-        val req = Request.Builder().url(ENTRIES_ENDPOINT).post(reqBody).build()
-        val resp = httpClient.newCall(req).execute()
-        if (!resp.isSuccessful)
-            throw extractErrors(resp, "Can't create entry")
-
-        // response is returned after execute call, body is not null
-        return fromWrappedJson(resp.body()!!.source(), Entry::class.java)!!
+        return createEntity(ENTRIES_ENDPOINT, entry)
     }
 
     /**
@@ -906,6 +890,21 @@ object Network {
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
             throw extractErrors(resp, "Can't delete reaction ${myReaction.id}")
+    }
+
+    fun createActionList(listItem: ActionListRequest): ActionListResponse {
+        return createEntity(ACTION_LISTS_ENDPOINT, listItem)
+    }
+
+    private inline fun <reified S: ResourceIdentifier, reified R: ResourceIdentifier> createEntity(endpoint: String, entity: S): R {
+        val reqBody = RequestBody.create(MIME_JSON_API, toWrappedJson(entity))
+        val req = Request.Builder().url(endpoint).post(reqBody).build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful)
+            throw extractErrors(resp, "Can't create ${entity.type}")
+
+        // response is returned after execute call, body is not null
+        return fromWrappedJson(resp.body()!!.source(), R::class.java)!!
     }
 
     /**

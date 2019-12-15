@@ -8,6 +8,7 @@ import android.view.*
 import butterknife.BindView
 import butterknife.ButterKnife
 import com.afollestad.materialdialogs.MaterialDialog
+import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
 import kotlinx.coroutines.*
@@ -99,9 +100,12 @@ open class NotificationListFragment: UserContentListFragment() {
     }
 
     open fun setupTheming() {
-        styleLevel = activity.styleLevel
+        styleLevel = Scoop.getInstance().addStyleLevel()
+        lifecycle.addObserver(styleLevel)
 
         styleLevel.bind(BACKGROUND, notifRibbon)
+        val backgrounds = mapOf<View, Int>(notifRibbon to BACKGROUND/*, toolbar to TOOLBAR*/)
+        Auth.profile?.let { applyTheme(activity, it, styleLevel, backgrounds) }
     }
 
     /**

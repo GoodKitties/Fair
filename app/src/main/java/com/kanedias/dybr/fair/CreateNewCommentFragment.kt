@@ -16,6 +16,7 @@ import butterknife.OnLongClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.customListAdapter
 import com.ftinc.scoop.Scoop
+import com.ftinc.scoop.StyleLevel
 import com.ftinc.scoop.adapters.TextViewColorAdapter
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.database.entities.OfflineDraft
@@ -23,15 +24,10 @@ import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.EditorViews
 import com.kanedias.dybr.fair.ui.handleMarkdownRaw
-import com.kanedias.dybr.fair.misc.styleLevel
 import com.kanedias.dybr.fair.ui.markdownToHtml
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.*
 import moe.banana.jsonapi2.HasOne
-import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
-import org.commonmark.ext.gfm.tables.TablesExtension
-import org.commonmark.parser.Parser
-import org.commonmark.renderer.html.HtmlRenderer
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -77,6 +73,8 @@ class CreateNewCommentFragment : Fragment() {
     private val submitJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + submitJob)
 
+    private lateinit var styleLevel: StyleLevel
+
     /**
      * Entry this comment belongs to. Should be always set.
      */
@@ -88,11 +86,6 @@ class CreateNewCommentFragment : Fragment() {
      * Comment that is being edited. Only set if [editMode] is `true`.
      */
     lateinit var editComment : Comment
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Scoop.getInstance().addStyleLevel()
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         savedInstanceState?.getBoolean("editMode")?.let { editMode = it }
@@ -116,12 +109,12 @@ class CreateNewCommentFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Scoop.getInstance().popStyleLevel(false)
         submitJob.cancel()
     }
 
     private fun setupTheming(view: View) {
-        val styleLevel = view.styleLevel ?: return
+        styleLevel = Scoop.getInstance().addStyleLevel()
+        lifecycle.addObserver(styleLevel)
 
         styleLevel.bind(TEXT_BLOCK, view, BackgroundNoAlphaAdapter())
         styleLevel.bind(TEXT, preview)

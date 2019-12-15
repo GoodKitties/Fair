@@ -4,6 +4,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.TransitionDrawable
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import androidx.annotation.ColorInt
@@ -22,8 +23,19 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.MenuItemCompat
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.CustomViewTarget
+import com.bumptech.glide.request.transition.DrawableCrossFadeTransition
+import com.bumptech.glide.request.transition.Transition
 import com.ftinc.scoop.adapters.ColorAdapter
 import com.ftinc.scoop.adapters.TextViewColorAdapter
+import com.kanedias.dybr.fair.Network
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import okhttp3.HttpUrl
 
 /**
  * @author Kanedias
@@ -42,6 +54,61 @@ class TabUnderlineAdapter: ColorAdapter<TabLayout> {
     override fun applyColor(view: TabLayout, @ColorInt color: Int) {
         this.color = color
         view.setSelectedTabIndicatorColor(color)
+    }
+}
+
+class BackgroundDelayedAdapter(private val url: String): ColorAdapter<View> {
+
+    override fun getColor(view: View): Int {
+        return Color.TRANSPARENT
+    }
+
+    override fun applyColor(view: View, @ColorInt color: Int) {
+        if (url.isBlank() || view.background is TransitionDrawable)
+            return
+
+        val base = HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT) ?: return
+        val resolved = base.resolve(url) ?: return
+
+        Glide.with(view)
+                .load(resolved.toString())
+                .apply(RequestOptions()
+                        .override(view.width, view.height)
+                        .centerCrop())
+                .into(BgDrawableTarget(view))
+    }
+
+    inner class BgDrawableTarget(view: View): CustomViewTarget<View, Drawable>(view) {
+
+        private val cf = DrawableCrossFadeTransition(300, true)
+
+        override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
+            resource.setBounds(0, 0, resource.intrinsicWidth, resource.intrinsicHeight)
+            GlobalScope.launch(Dispatchers.Main) {
+                delay(600)
+                cf.transition(resource, BgAdapter(view))
+            }
+        }
+
+        override fun onLoadFailed(errorDrawable: Drawable?) {
+
+        }
+
+        override fun onResourceCleared(placeholder: Drawable?) {
+            view.background = null
+        }
+    }
+
+    inner class BgAdapter(private val view: View) : Transition.ViewAdapter {
+
+        override fun getView() = view
+
+        override fun getCurrentDrawable(): Drawable? = view.background
+
+        override fun setDrawable(drawable: Drawable) {
+            view.background = drawable
+        }
+
     }
 }
 

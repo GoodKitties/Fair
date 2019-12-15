@@ -42,7 +42,7 @@ import kotlinx.coroutines.*
  * @see EntryListFragment.entryRibbon
  * @author Kanedias
  */
-class EntryViewHolder(iv: View, private val parent: View, private val allowSelection: Boolean = false) : UserContentViewHolder<Entry>(iv) {
+class EntryViewHolder(iv: View, private val parent: UserContentListFragment, private val allowSelection: Boolean = false) : UserContentViewHolder<Entry>(iv) {
 
     @BindView(R.id.entry_avatar)
     lateinit var avatarView: ImageView
@@ -134,7 +134,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     }
 
     private fun setupTheming() {
-        val styleLevel = parent.styleLevel ?: return
+        val styleLevel = parent.styleLevel
 
         styleLevel.bind(TEXT_BLOCK, itemView, CardViewColorAdapter())
         styleLevel.bind(TEXT_HEADERS, titleView)
@@ -170,7 +170,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
             false -> R.string.unsubscribed_from_entry
         }
 
-        GlobalScope.launch(Dispatchers.Main) {
+        parent.uiScope.launch(Dispatchers.Main) {
             try {
                 withContext(Dispatchers.IO) { Network.updateSubscription(entry, subscribe) }
                 showToastAtView(button, itemView.context.getString(toastText))
@@ -192,7 +192,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
             false -> R.string.entry_removed_from_bookmarks
         }
 
-        GlobalScope.launch(Dispatchers.Main) {
+        parent.uiScope.launch(Dispatchers.Main) {
             try {
                 withContext(Dispatchers.IO) { Network.updateBookmark(entry, bookmark) }
                 showToastAtView(button, itemView.context.getString(toastText))
@@ -207,7 +207,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
 
     @OnClick(R.id.entry_add_reaction)
     fun openReactionMenu(button: ImageView) {
-        GlobalScope.launch(Dispatchers.Main) {
+        parent.uiScope.launch(Dispatchers.Main) {
             try {
                 val reactionSets = withContext(Dispatchers.IO) { Network.loadReactionSets() }
                 if (!reactionSets.isNullOrEmpty()) {
@@ -250,16 +250,13 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
 
         // delete callback
         val delete = {
-            GlobalScope.launch(Dispatchers.Main) {
+            parent.uiScope.launch(Dispatchers.Main) {
                 try {
                     withContext(Dispatchers.IO) { Network.deleteEntry(entry) }
                     Toast.makeText(activity, R.string.entry_deleted, Toast.LENGTH_SHORT).show()
                     activity.supportFragmentManager.popBackStack()
 
-                    // if we have current tab, refresh it
-                    val plPredicate = { it: Fragment -> it is EntryListFragment && it.userVisibleHint }
-                    val currentTab = activity.supportFragmentManager.fragments.find(plPredicate) as EntryListFragment?
-                    currentTab?.loadMore(reset = true)
+                    parent.loadMore(reset = true)
                 } catch (ex: Exception) {
                     Network.reportErrors(itemView.context, ex)
                 }
@@ -278,17 +275,52 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
     @OnClick(R.id.entry_more_options)
     fun showOverflowMenu() {
         val ctx = itemView.context
-        val items = listOf(
+        val items = mutableListOf(
                 ctx.getString(R.string.open_in_browser),
                 ctx.getString(R.string.share)
-                )
+        )
+
+        if (parent is EntryListFragment && parent.profile === Auth.worldMarker) {
+            // show hide-from-feed option
+            items.add(ctx.getString(R.string.hide_author_from_feed))
+        }
 
         MaterialDialog(itemView.context)
                 .title(R.string.entry_menu)
                 .listItems(items = items, selection = {_, index, _ ->  when (index) {
                     0 -> showInWebView()
                     1 -> sharePost()
+                    2 -> hideFromFeed()
                 }}).show()
+    }
+
+    private fun hideFromFeed() {
+        // hide callback
+        val hide = {
+            val activity = itemView.context as AppCompatActivity
+
+            val listItem = ActionListRequest().apply {
+                scope = "feed"
+                profiles.add(profile)
+            }
+
+            parent.uiScope.launch(Dispatchers.Main) {
+                try {
+                    withContext(Dispatchers.IO) { Network.createActionList(listItem) }
+                    Toast.makeText(activity, R.string.author_hidden_from_feed, Toast.LENGTH_SHORT).show()
+                    parent.loadMore(reset = true)
+                } catch (ex: Exception) {
+                    Network.reportErrors(itemView.context, ex)
+                }
+            }
+        }
+
+        MaterialDialog(itemView.context)
+                .title(R.string.confirm_action)
+                .message(R.string.are_you_sure)
+                .negativeButton(android.R.string.no)
+                .positiveButton(android.R.string.yes, click = { hide() })
+                .show()
     }
 
     private fun sharePost() {
@@ -430,7 +462,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
         }
 
         // there are some reactions, display them
-        val styleLevel = parent.styleLevel ?: return
+        val styleLevel = parent.styleLevel
         val counts = reactions.groupBy { it.reactionType.get().id }
         val types = reactions.map { it.reactionType.get(it.document) }.associateBy { it.id }
         for (reactionTypeId in counts.keys) {
@@ -467,7 +499,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
 
         if (myReaction != null) {
             // it's there, delete it
-            GlobalScope.launch(Dispatchers.Main) {
+            parent.uiScope.launch(Dispatchers.Main) {
                 try {
                     withContext(Dispatchers.IO) { Network.deleteReaction(myReaction) }
                     showToastAtView(view, view.context.getString(R.string.reaction_deleted))
@@ -480,7 +512,7 @@ class EntryViewHolder(iv: View, private val parent: View, private val allowSelec
             }
         } else {
             // add it
-            GlobalScope.launch(Dispatchers.Main) {
+            parent.uiScope.launch(Dispatchers.Main) {
                 try {
                     val newReaction = withContext(Dispatchers.IO) { Network.createReaction(entry, reactionType) }
                     showToastAtView(view, view.context.getString(R.string.reaction_added))

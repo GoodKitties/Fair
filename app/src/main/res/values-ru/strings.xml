@@ -228,4 +228,6 @@
     <string name="more_tag_default">Читать далее</string>
     <string name="notifications_check_frequency">Частота проверки уведомлений</string>
     <string name="notifications_check_frequency_sum">Насколько часто производить проверку новых уведомлений</string>
+    <string name="hide_author_from_feed">Скрыть этого автора из ленты</string>
+    <string name="author_hidden_from_feed">Автор скрыт из ленты</string>
 </resources>

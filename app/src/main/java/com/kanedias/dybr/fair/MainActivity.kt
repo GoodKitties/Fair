@@ -4,7 +4,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.database.Cursor
 import android.database.MatrixCursor
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.preference.PreferenceManager
 import com.google.android.material.appbar.AppBarLayout
@@ -20,6 +19,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.cursoradapter.widget.SimpleCursorAdapter
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.RecyclerView
@@ -58,8 +58,6 @@ class MainActivity : AppCompatActivity() {
         private const val FAV_TAB = 1
         private const val WORLD_TAB = 2
         private const val NOTIFICATIONS_TAB = 3
-
-        var onScreen = false
     }
 
     /**
@@ -140,16 +138,6 @@ class MainActivity : AppCompatActivity() {
         reLogin(Auth.user)
     }
 
-    override fun onResume() {
-        super.onResume()
-        onScreen = true
-    }
-
-    override fun onPause() {
-        super.onPause()
-        onScreen = false
-    }
-
     private fun setupUI() {
         // init drawer and sidebar
         sidebar = Sidebar(drawer, this)
@@ -173,10 +161,24 @@ class MainActivity : AppCompatActivity() {
             drawer.openDrawer(GravityCompat.START)
             preferences.edit().putBoolean("first-app-launch", false).apply()
         }
+
+        // hack: resume fragment that is activated on tapping "back"
+        supportFragmentManager.addOnBackStackChangedListener {
+            val backStackEntryCount = supportFragmentManager.backStackEntryCount
+            if (backStackEntryCount == 0) {
+                styleLevel.rebind()
+                return@addOnBackStackChangedListener
+            }
+
+            // rebind style levels on top
+            val top = supportFragmentManager.fragments.findLast { it is UserContentListFragment }
+            (top as? UserContentListFragment)?.styleLevel?.rebind()
+        }
     }
 
     private fun setupTheming() {
         styleLevel = Scoop.getInstance().addStyleLevel()
+        lifecycle.addObserver(styleLevel)
 
         styleLevel.bindStatusBar(this, STATUS_BAR)
 
@@ -191,11 +193,6 @@ class MainActivity : AppCompatActivity() {
 
         styleLevel.bind(ACCENT, actionButton, BackgroundTintColorAdapter())
         styleLevel.bind(ACCENT_TEXT, actionButton, FabIconAdapter())
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Scoop.getInstance().popStyleLevel()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

@@ -96,6 +96,7 @@ class CommentListFragment : UserContentListFragment() {
     private fun setupTheming() {
         // this is a fullscreen fragment, add new style
         styleLevel = Scoop.getInstance().addStyleLevel()
+        lifecycle.addObserver(styleLevel)
 
         styleLevel.bind(TOOLBAR, toolbar)
         styleLevel.bind(TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
@@ -109,11 +110,6 @@ class CommentListFragment : UserContentListFragment() {
 
         val backgrounds = mapOf<View, Int>(commentRibbon to BACKGROUND/*, toolbar to TOOLBAR*/)
         entry?.profile?.get(entry?.document)?.let { applyTheme(activity, it, styleLevel, backgrounds) }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        Scoop.getInstance().popStyleLevel(false)
     }
 
     override fun handleLoadSkip(): Boolean {
@@ -202,7 +198,7 @@ class CommentListFragment : UserContentListFragment() {
             return when (viewType) {
                 ITEM_HEADER -> {
                     val view = inflater.inflate(R.layout.fragment_entry_list_item, parent, false)
-                    EntryViewHolder(view, parent, allowSelection = true)
+                    EntryViewHolder(view, this@CommentListFragment, allowSelection = true)
                 }
                 ITEM_REGULAR -> {
                     val view = inflater.inflate(R.layout.fragment_comment_list_item, parent, false)

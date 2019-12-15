@@ -42,6 +42,7 @@ open class BookmarkListFragmentFull: EntryListFragment() {
     override fun setupTheming() {
         // this is a fullscreen fragment, add new style
         styleLevel = Scoop.getInstance().addStyleLevel()
+        lifecycle.addObserver(styleLevel)
 
         styleLevel.bind(BACKGROUND, entryRibbon)
 
@@ -56,11 +57,6 @@ open class BookmarkListFragmentFull: EntryListFragment() {
 
         val backgrounds = mapOf<View, Int>(entryRibbon to BACKGROUND/*, toolbar to TOOLBAR*/)
         profile?.let { applyTheme(activity, it, styleLevel, backgrounds) }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        Scoop.getInstance().popStyleLevel( false)
     }
 
     override fun retrieveData(pageNum: Int, starter: Long): () -> ArrayDocument<Entry> = {

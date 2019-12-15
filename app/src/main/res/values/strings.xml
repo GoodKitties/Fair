@@ -290,4 +290,6 @@
     <string name="disable_in_my_blog">Disable in my blog</string>
     <string name="enable_in_my_blog">Enable in my blog</string>
     <string name="applied">Applied</string>
+    <string name="hide_author_from_feed">Hide this author from feed</string>
+    <string name="author_hidden_from_feed">This author is hidden from feed</string>
 </resources>

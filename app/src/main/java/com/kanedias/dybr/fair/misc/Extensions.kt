@@ -16,7 +16,7 @@ fun FragmentActivity.showFullscreenFragment(frag: Fragment) {
     supportFragmentManager.beginTransaction()
             .addToBackStack("Showing fragment: $frag")
             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-            .add(R.id.main_drawer_layout, frag)
+            .add(R.id.main_layout, frag)
             .commit()
 }
 
