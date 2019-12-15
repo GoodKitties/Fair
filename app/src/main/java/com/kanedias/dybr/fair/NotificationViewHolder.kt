@@ -26,7 +26,7 @@ import kotlinx.coroutines.*
  * @see NotificationListFragment.notifRibbon
  * @author Kanedias
  */
-class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
+class NotificationViewHolder(iv: View, val parentFragment: UserContentListFragment) : RecyclerView.ViewHolder(iv) {
 
     @BindView(R.id.notification_content_area)
     lateinit var notificationArea: RelativeLayout
@@ -63,7 +63,7 @@ class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
     private val commentShow  = View.OnClickListener {
         val activity = it.context as AppCompatActivity
 
-        GlobalScope.launch(Dispatchers.Main) {
+        parentFragment.uiScope.launch(Dispatchers.Main) {
             try {
                 val linkedEntry = withContext(Dispatchers.IO) { Network.loadEntry(notification.entryId) }
                 val commentsPage = CommentListFragment().apply { entry = linkedEntry }
@@ -93,7 +93,7 @@ class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
             state = if (notification.state == "new") { "read" } else { "new" }
         }
 
-        GlobalScope.launch(Dispatchers.Main) {
+        parentFragment.uiScope.launch(Dispatchers.Main) {
             try {
                 withContext(Dispatchers.IO) { Network.updateNotification(marked) }
                 SyncNotificationsWorker.markRead(itemView.context, notification)
@@ -107,7 +107,7 @@ class NotificationViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
     }
 
     private fun setupTheming() {
-        val styleLevel = itemView.styleLevel ?: return
+        val styleLevel = parentFragment.styleLevel
 
         styleLevel.bind(TEXT_BLOCK, itemView, CardViewColorAdapter())
         styleLevel.bind(TEXT, causeView, TextViewDisableAwareColorAdapter())

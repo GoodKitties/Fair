@@ -24,7 +24,8 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.WindowManager
 import android.widget.*
-import androidx.fragment.app.Fragment
+import com.afollestad.materialdialogs.input.getInputField
+import com.afollestad.materialdialogs.input.input
 import com.afollestad.materialdialogs.list.listItems
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.misc.idMatches
@@ -32,17 +33,18 @@ import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.openUrlExternally
 import com.kanedias.dybr.fair.ui.showToastAtView
-import com.kanedias.dybr.fair.misc.styleLevel
 import kotlinx.coroutines.*
 
 /**
- * View holder for showing regular entries in diary view.
+ * View holder for showing regular entries in blog view.
+ *
  * @param iv inflated view to be used by this holder
  * @param allowSelection whether text in this view can be selected and copied
  * @see EntryListFragment.entryRibbon
  * @author Kanedias
  */
-class EntryViewHolder(iv: View, private val parent: UserContentListFragment, private val allowSelection: Boolean = false) : UserContentViewHolder<Entry>(iv) {
+class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private val allowSelection: Boolean = false)
+    : UserContentViewHolder<Entry>(iv, parentFragment) {
 
     @BindView(R.id.entry_avatar)
     lateinit var avatarView: ImageView
@@ -134,7 +136,7 @@ class EntryViewHolder(iv: View, private val parent: UserContentListFragment, pri
     }
 
     private fun setupTheming() {
-        val styleLevel = parent.styleLevel
+        val styleLevel = parentFragment.styleLevel
 
         styleLevel.bind(TEXT_BLOCK, itemView, CardViewColorAdapter())
         styleLevel.bind(TEXT_HEADERS, titleView)
@@ -170,7 +172,7 @@ class EntryViewHolder(iv: View, private val parent: UserContentListFragment, pri
             false -> R.string.unsubscribed_from_entry
         }
 
-        parent.uiScope.launch(Dispatchers.Main) {
+        parentFragment.uiScope.launch(Dispatchers.Main) {
             try {
                 withContext(Dispatchers.IO) { Network.updateSubscription(entry, subscribe) }
                 showToastAtView(button, itemView.context.getString(toastText))
@@ -192,7 +194,7 @@ class EntryViewHolder(iv: View, private val parent: UserContentListFragment, pri
             false -> R.string.entry_removed_from_bookmarks
         }
 
-        parent.uiScope.launch(Dispatchers.Main) {
+        parentFragment.uiScope.launch(Dispatchers.Main) {
             try {
                 withContext(Dispatchers.IO) { Network.updateBookmark(entry, bookmark) }
                 showToastAtView(button, itemView.context.getString(toastText))
@@ -207,7 +209,7 @@ class EntryViewHolder(iv: View, private val parent: UserContentListFragment, pri
 
     @OnClick(R.id.entry_add_reaction)
     fun openReactionMenu(button: ImageView) {
-        parent.uiScope.launch(Dispatchers.Main) {
+        parentFragment.uiScope.launch(Dispatchers.Main) {
             try {
                 val reactionSets = withContext(Dispatchers.IO) { Network.loadReactionSets() }
                 if (!reactionSets.isNullOrEmpty()) {
@@ -250,13 +252,13 @@ class EntryViewHolder(iv: View, private val parent: UserContentListFragment, pri
 
         // delete callback
         val delete = {
-            parent.uiScope.launch(Dispatchers.Main) {
+            parentFragment.uiScope.launch(Dispatchers.Main) {
                 try {
                     withContext(Dispatchers.IO) { Network.deleteEntry(entry) }
                     Toast.makeText(activity, R.string.entry_deleted, Toast.LENGTH_SHORT).show()
                     activity.supportFragmentManager.popBackStack()
 
-                    parent.loadMore(reset = true)
+                    parentFragment.loadMore(reset = true)
                 } catch (ex: Exception) {
                     Network.reportErrors(itemView.context, ex)
                 }
@@ -280,7 +282,7 @@ class EntryViewHolder(iv: View, private val parent: UserContentListFragment, pri
                 ctx.getString(R.string.share)
         )
 
-        if (parent is EntryListFragment && parent.profile === Auth.worldMarker) {
+        if (parentFragment is EntryListFragment && parentFragment.profile === Auth.worldMarker) {
             // show hide-from-feed option
             items.add(ctx.getString(R.string.hide_author_from_feed))
         }
@@ -296,19 +298,20 @@ class EntryViewHolder(iv: View, private val parent: UserContentListFragment, pri
 
     private fun hideFromFeed() {
         // hide callback
-        val hide = {
+        val hide = { reason: String ->
             val activity = itemView.context as AppCompatActivity
 
             val listItem = ActionListRequest().apply {
                 scope = "feed"
+                name = reason
                 profiles.add(profile)
             }
 
-            parent.uiScope.launch(Dispatchers.Main) {
+            parentFragment.uiScope.launch(Dispatchers.Main) {
                 try {
                     withContext(Dispatchers.IO) { Network.createActionList(listItem) }
                     Toast.makeText(activity, R.string.author_hidden_from_feed, Toast.LENGTH_SHORT).show()
-                    parent.loadMore(reset = true)
+                    parentFragment.loadMore(reset = true)
                 } catch (ex: Exception) {
                     Network.reportErrors(itemView.context, ex)
                 }
@@ -317,9 +320,9 @@ class EntryViewHolder(iv: View, private val parent: UserContentListFragment, pri
 
         MaterialDialog(itemView.context)
                 .title(R.string.confirm_action)
-                .message(R.string.are_you_sure)
-                .negativeButton(android.R.string.no)
-                .positiveButton(android.R.string.yes, click = { hide() })
+                .input(hintRes = R.string.reason)
+                .negativeButton(android.R.string.cancel)
+                .positiveButton(R.string.submit, click = { md -> hide(md.getInputField().text.toString()) })
                 .show()
     }
 
@@ -462,7 +465,7 @@ class EntryViewHolder(iv: View, private val parent: UserContentListFragment, pri
         }
 
         // there are some reactions, display them
-        val styleLevel = parent.styleLevel
+        val styleLevel = parentFragment.styleLevel
         val counts = reactions.groupBy { it.reactionType.get().id }
         val types = reactions.map { it.reactionType.get(it.document) }.associateBy { it.id }
         for (reactionTypeId in counts.keys) {
@@ -499,7 +502,7 @@ class EntryViewHolder(iv: View, private val parent: UserContentListFragment, pri
 
         if (myReaction != null) {
             // it's there, delete it
-            parent.uiScope.launch(Dispatchers.Main) {
+            parentFragment.uiScope.launch(Dispatchers.Main) {
                 try {
                     withContext(Dispatchers.IO) { Network.deleteReaction(myReaction) }
                     showToastAtView(view, view.context.getString(R.string.reaction_deleted))
@@ -512,7 +515,7 @@ class EntryViewHolder(iv: View, private val parent: UserContentListFragment, pri
             }
         } else {
             // add it
-            parent.uiScope.launch(Dispatchers.Main) {
+            parentFragment.uiScope.launch(Dispatchers.Main) {
                 try {
                     val newReaction = withContext(Dispatchers.IO) { Network.createReaction(entry, reactionType) }
                     showToastAtView(view, view.context.getString(R.string.reaction_added))

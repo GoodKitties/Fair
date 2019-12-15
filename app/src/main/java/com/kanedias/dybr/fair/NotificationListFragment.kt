@@ -142,7 +142,7 @@ open class NotificationListFragment: UserContentListFragment() {
             return when (viewType) {
                 ITEM_REGULAR -> {
                     val view = inflater.inflate(R.layout.fragment_notification_list_item, parent, false)
-                    NotificationViewHolder(view)
+                    NotificationViewHolder(view, this@NotificationListFragment)
                 }
                 else -> super.onCreateViewHolder(parent, viewType)
             }

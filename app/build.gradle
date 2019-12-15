@@ -119,7 +119,8 @@ dependencies {
     implementation 'com.jakewharton:butterknife:10.0.0'                         // Annotation processor
     implementation 'com.j256.ormlite:ormlite-android:5.1'                       // ORM for local storage
     implementation 'com.squareup.okhttp3:okhttp:3.14.0'                         // android http client
-    implementation 'com.afollestad.material-dialogs:core:2.0.0'                 // material design for dialogs
+    implementation 'com.afollestad.material-dialogs:core:3.1.1'                 // material design for dialogs
+    implementation 'com.afollestad.material-dialogs:input:3.1.1'
     implementation 'com.github.Adonai:Scoops:1.4.0'                             // theming engine
     implementation 'moe.banana:moshi-jsonapi:3.5.0'                             // JSON-API parser
     implementation 'com.squareup.moshi:moshi-kotlin:1.6.0'                      // Moshi Kotlin support

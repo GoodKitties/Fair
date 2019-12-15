@@ -33,7 +33,7 @@ import java.util.*
  *
  * Created on 04.01.19
  */
-abstract class UserContentViewHolder<T: Authored>(iv: View): RecyclerView.ViewHolder(iv) {
+abstract class UserContentViewHolder<T: Authored>(iv: View, val parentFragment: UserContentListFragment): RecyclerView.ViewHolder(iv) {
 
     abstract fun getCreationDateView(): TextView
     abstract fun getAuthorNameView(): TextView

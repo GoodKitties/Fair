@@ -1,7 +1,6 @@
 package com.kanedias.dybr.fair
 
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import android.widget.ImageView
@@ -17,7 +16,6 @@ import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.handleMarkdown
-import com.kanedias.dybr.fair.misc.styleLevel
 import kotlinx.coroutines.*
 
 
@@ -27,7 +25,7 @@ import kotlinx.coroutines.*
  * @see CommentListFragment.commentRibbon
  * @author Kanedias
  */
-class CommentViewHolder(iv: View, private val parent: View, private val entry: Entry) : UserContentViewHolder<Comment>(iv) {
+class CommentViewHolder(iv: View, parentFragment: UserContentListFragment, private val entry: Entry) : UserContentViewHolder<Comment>(iv, parentFragment) {
 
     @BindView(R.id.comment_avatar)
     lateinit var avatarView: ImageView
@@ -60,7 +58,7 @@ class CommentViewHolder(iv: View, private val parent: View, private val entry: E
     override fun getContentView() = bodyView
 
     private fun setupTheming() {
-        val styleLevel = parent.styleLevel ?: return
+        val styleLevel = parentFragment.styleLevel
 
         styleLevel.bind(TEXT_BLOCK, itemView, CardViewColorAdapter())
         styleLevel.bind(TEXT, authorView)
@@ -88,7 +86,7 @@ class CommentViewHolder(iv: View, private val parent: View, private val entry: E
 
         // delete callback
         val delete = {
-            GlobalScope.launch(Dispatchers.Main) {
+            parentFragment.uiScope.launch(Dispatchers.Main) {
                 try {
                     withContext(Dispatchers.IO) { Network.deleteComment(comment) }
                     Toast.makeText(activity, R.string.comment_deleted, Toast.LENGTH_SHORT).show()
