@@ -6,6 +6,7 @@ import android.content.ActivityNotFoundException
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -201,7 +202,7 @@ class EditorViews : Fragment() {
         if (intent?.data == null)
             return
 
-        val stream = activity?.contentResolver?.openInputStream(intent.data) ?: return
+        val stream = activity?.contentResolver?.openInputStream(intent.data as Uri) ?: return
 
         val dialog = MaterialDialog(requireContext())
                 .title(R.string.please_wait)

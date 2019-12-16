@@ -180,7 +180,7 @@ fun postProcessDrawables(spanned: SpannableStringBuilder, view: TextView) {
         }
 
         val wrapperClick = object : ClickableSpan() {
-            override fun onClick(widget: View?) {
+            override fun onClick(widget: View) {
                 val index = imgSpans.indexOf(img)
                 if (index == -1) {
                     // something modified spannable in a way image is no longer here
@@ -238,7 +238,7 @@ fun postProcessMore(spanned: SpannableStringBuilder, view: TextView) {
         spanned.replace(outerRange.first, outerRange.last + 1, auxSpanned) // replace it just with text
         val wrapper = object : ClickableSpan() {
 
-            override fun onClick(widget: View?) {
+            override fun onClick(widget: View) {
                 // replace wrappers with real previous spans
 
                 val start = spanned.getSpanStart(this)
@@ -279,7 +279,7 @@ private fun postProcessDrawablesLoad(spanned: SpannableStringBuilder, view: Text
         val wrapperImg = ImageSpan(view.context, R.drawable.download_image)
         val wrapperClick = object: ClickableSpan() {
 
-            override fun onClick(widget: View?) {
+            override fun onClick(widget: View) {
                 // replace wrappers with real previous spans
 
                 // text can be already moved around (due to MORE etc.), refresh start/end variables

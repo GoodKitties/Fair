@@ -10,7 +10,7 @@ plugins {
 }
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
 
     lintOptions {
         disable 'MissingTranslation'
@@ -19,10 +19,10 @@ android {
 
     defaultConfig {
         applicationId "com.kanedias.dybr.fair"
-        targetSdkVersion 28 // device you test on
+        targetSdkVersion 29 // device you test on
         minSdkVersion 21    // device you allow your users to be on :)
-        versionCode 61
-        versionName "1.13.5"
+        versionCode 62
+        versionName "1.13.6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -49,6 +49,10 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
     }
 
     flavorDimensions "purity"
@@ -116,12 +120,12 @@ dependencies {
     implementation "ch.acra:acra-mail:$acraVersion"                             // crash handler
     implementation "ch.acra:acra-dialog:$acraVersion"
     implementation "android.arch.work:work-runtime-ktx:1.0.1"                   // job scheduler
-    implementation 'com.jakewharton:butterknife:10.0.0'                         // Annotation processor
+    implementation 'com.jakewharton:butterknife:10.2.0'                         // Annotation processor
     implementation 'com.j256.ormlite:ormlite-android:5.1'                       // ORM for local storage
     implementation 'com.squareup.okhttp3:okhttp:3.14.0'                         // android http client
     implementation 'com.afollestad.material-dialogs:core:3.1.1'                 // material design for dialogs
     implementation 'com.afollestad.material-dialogs:input:3.1.1'
-    implementation 'com.github.Adonai:Scoops:1.4.0'                             // theming engine
+    implementation 'com.github.Adonai:Scoops:1.4.1'                             // theming engine
     implementation 'moe.banana:moshi-jsonapi:3.5.0'                             // JSON-API parser
     implementation 'com.squareup.moshi:moshi-kotlin:1.6.0'                      // Moshi Kotlin support
     implementation 'com.squareup.moshi:moshi-adapters:1.6.0'                    // Moshi serializers collection
@@ -139,7 +143,7 @@ dependencies {
 
     googleplayImplementation 'com.android.billingclient:billing:1.0'            // billing library from Google
 
-    kapt 'com.jakewharton:butterknife-compiler:10.0.0'                           // Kotlin annotation processors
+    kapt 'com.jakewharton:butterknife-compiler:10.2.0'                           // Kotlin annotation processors
 
     // Core library
     androidTestImplementation 'androidx.test:core:1.2.0'
