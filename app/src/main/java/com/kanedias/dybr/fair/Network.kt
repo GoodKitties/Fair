@@ -471,7 +471,7 @@ object Network {
      * @return current design of the profile or null if nothing found
      */
     fun loadProfileDesign(prof: OwnProfile): Design? {
-        val designId = prof.settings?.currentDesign
+        val designId = prof.settings.currentDesign
 
         if (designId.isNullOrEmpty() || designId == "0") {
             // use parent/default design
@@ -540,7 +540,7 @@ object Network {
         builder.addQueryParameter("page[number]", pageNum.toString())
                 .addQueryParameter("page[size]", PAGE_SIZE.toString())
                 .addQueryParameter("page[starter]", starter.toString())
-                .addQueryParameter("include", "profile,reactions")
+                .addQueryParameter("include", "profiles,reactions")
                 .addQueryParameter("sort", "-created-at")
 
         for ((type, value) in filters) {
@@ -562,7 +562,7 @@ object Network {
      * @param id identifier of requested entry
      */
     fun loadEntry(id: String): Entry {
-        val req = Request.Builder().url("$ENTRIES_ENDPOINT/$id?include=profile,reactions").build()
+        val req = Request.Builder().url("$ENTRIES_ENDPOINT/$id?include=profiles,reactions").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw extractErrors(resp, "Can't load entry $id")
@@ -581,7 +581,7 @@ object Network {
         val builder = HttpUrl.parse("$ENTRIES_ENDPOINT/${entry.id}/comments")!!.newBuilder()
                 .addQueryParameter("page[number]", pageNum.toString())
                 .addQueryParameter("page[size]", PAGE_SIZE.toString())
-                .addQueryParameter("include", "profile")
+                .addQueryParameter("include", "profiles,entries")
                 .addQueryParameter("sort", "created-at")
 
         val req = Request.Builder().url(builder.build()).build()
@@ -822,7 +822,7 @@ object Network {
         val builder = HttpUrl.parse(BOOKMARKS_ENDPOINT)!!.newBuilder()
                 .addQueryParameter("page[number]", pageNum.toString())
                 .addQueryParameter("page[size]", PAGE_SIZE.toString())
-                .addQueryParameter("include", "entry,profile")
+                .addQueryParameter("include", "entries,profiles")
                 .addQueryParameter("sort", "-created-at")
 
         val req = Request.Builder().url(builder.build()).build()

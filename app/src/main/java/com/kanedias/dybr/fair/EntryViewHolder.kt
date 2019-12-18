@@ -130,9 +130,6 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
 
         tagsView.movementMethod = LinkMovementMethod()
         iv.setOnClickListener(commentShow)
-        if (allowSelection) {
-            bodyView.isLongClickable = true
-        }
     }
 
     private fun setupTheming() {
@@ -445,6 +442,14 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
         }
 
         bodyView.handleMarkdown(entry.content)
+
+        if (allowSelection) {
+            // make text selectable
+            // XXX: this is MAGIC: see https://stackoverflow.com/a/56224791/1696844
+            bodyView.setTextIsSelectable(false)
+            bodyView.measure(-1, -1)
+            bodyView.setTextIsSelectable(true)
+        }
     }
 
     /**

@@ -20,12 +20,16 @@ import kotlinx.coroutines.*
 
 
 /**
- * View holder for showing comments in entry view.
+ * View holder for showing comments in entry view. Has quick buttons for editing actions if this
+ * comment is yours.
  *
+ * @param parentFragment fragment that this view holder belongs to. Needed for styling and
+ *                       proper async job lifecycle
+ * @param entry entry that this comment is posted to
  * @see CommentListFragment.commentRibbon
  * @author Kanedias
  */
-class CommentViewHolder(iv: View, parentFragment: UserContentListFragment, private val entry: Entry) : UserContentViewHolder<Comment>(iv, parentFragment) {
+class CommentViewHolder(iv: View, parentFragment: UserContentListFragment) : UserContentViewHolder<Comment>(iv, parentFragment) {
 
     @BindView(R.id.comment_avatar)
     lateinit var avatarView: ImageView
@@ -47,9 +51,6 @@ class CommentViewHolder(iv: View, parentFragment: UserContentListFragment, priva
     init {
         ButterKnife.bind(this, iv)
         setupTheming()
-
-        // make text selectable
-        bodyView.isLongClickable = true
     }
 
     override fun getCreationDateView() = dateView
@@ -71,8 +72,9 @@ class CommentViewHolder(iv: View, parentFragment: UserContentListFragment, priva
     @OnClick(R.id.comment_edit)
     fun editComment() {
         val activity = itemView.context as AppCompatActivity
+        val parentEntry = comment.entry.get(comment.document)
         val commentEdit = CreateNewCommentFragment().apply {
-            entry = this@CommentViewHolder.entry
+            entry = parentEntry
             editComment = this@CommentViewHolder.comment
             editMode = true
         }
@@ -134,5 +136,13 @@ class CommentViewHolder(iv: View, parentFragment: UserContentListFragment, priva
 
         val profile = comment.profile.get(comment.document)
         toggleEditButtons(isBlogWritable(profile))
+
+        // make text selectable
+        // XXX: this is MAGIC: see https://stackoverflow.com/a/56224791/1696844
+        bodyView.setTextIsSelectable(false)
+        bodyView.measure(-1, -1)
+        bodyView.setTextIsSelectable(true)
     }
+
+
 }
