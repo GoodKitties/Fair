@@ -53,6 +53,11 @@ class ClickPreventingTextView : TextView {
         return res
     }
 
+    override fun setTextIsSelectable(selectable: Boolean) {
+        super.setTextIsSelectable(selectable)
+        this.movementMethod = LocalLinkMovementMethod()
+    }
+
     /**
      * Subclasses [ArrowKeyMovementMethod] so it handles selection of text inside this text view
      * but also has parts from [LinkMovementMethod] that are responsible for clicking on links
