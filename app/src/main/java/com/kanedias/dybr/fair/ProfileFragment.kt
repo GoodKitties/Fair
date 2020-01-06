@@ -10,6 +10,7 @@ import android.text.Html
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
@@ -99,7 +100,7 @@ class ProfileFragment: DialogFragment() {
             val resolved = base.resolve(avatarUrl) ?: return
 
             // load avatar asynchronously
-            GlobalScope.launch(Dispatchers.Main) {
+            lifecycleScope.launch {
                 try {
                     val req = Request.Builder().url(resolved).build()
                     val bitmap = withContext(Dispatchers.IO) {
@@ -108,7 +109,7 @@ class ProfileFragment: DialogFragment() {
                     }
                     authorAvatar.setImageBitmap(bitmap)
                 } catch (ioex: IOException) {
-                    Network.reportErrors(activity, ioex)
+                    Network.reportErrors(context, ioex)
                 }
             }
         } else {
@@ -125,7 +126,7 @@ class ProfileFragment: DialogFragment() {
     @OnClick(R.id.author_add_to_favorites)
     fun toggleFavorite() {
         // if it's clicked then it's visible
-        GlobalScope.launch(Dispatchers.Main) {
+        lifecycleScope.launch {
             try {
                 if (Auth.profile?.favorites?.any { it.idMatches(profile) } == true) {
                     // remove from favorites
@@ -144,7 +145,7 @@ class ProfileFragment: DialogFragment() {
                     Toast.makeText(activity, R.string.added_to_favorites, Toast.LENGTH_SHORT).show()
                 }
             } catch (ioex: IOException) {
-                Network.reportErrors(activity, ioex)
+                Network.reportErrors(context, ioex)
             }
         }
     }

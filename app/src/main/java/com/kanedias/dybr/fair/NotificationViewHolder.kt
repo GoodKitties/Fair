@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.lifecycle.lifecycleScope
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
@@ -63,7 +64,7 @@ class NotificationViewHolder(iv: View, val parentFragment: UserContentListFragme
     private val commentShow  = View.OnClickListener {
         val activity = it.context as AppCompatActivity
 
-        parentFragment.uiScope.launch(Dispatchers.Main) {
+        parentFragment.lifecycleScope.launch {
             try {
                 val linkedEntry = withContext(Dispatchers.IO) { Network.loadEntry(notification.entryId) }
                 val commentsPage = CommentListFragment().apply { entry = linkedEntry }
@@ -93,7 +94,7 @@ class NotificationViewHolder(iv: View, val parentFragment: UserContentListFragme
             state = if (notification.state == "new") { "read" } else { "new" }
         }
 
-        parentFragment.uiScope.launch(Dispatchers.Main) {
+        parentFragment.lifecycleScope.launch {
             try {
                 withContext(Dispatchers.IO) { Network.updateNotification(marked) }
                 SyncNotificationsWorker.markRead(itemView.context, notification)

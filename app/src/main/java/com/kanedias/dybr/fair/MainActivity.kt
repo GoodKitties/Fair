@@ -22,6 +22,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cursoradapter.widget.SimpleCursorAdapter
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import butterknife.BindView
@@ -253,7 +254,7 @@ class MainActivity : AppCompatActivity() {
                 val type = EntityType.valueOf(cursor.getString(cursor.getColumnIndex("type")))
 
                 // jump to respective blog or profile if they exist
-                GlobalScope.launch(Dispatchers.Main) {
+                lifecycleScope.launch {
                     try {
                         when (type) {
                             EntityType.PROFILE -> {
@@ -365,7 +366,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        GlobalScope.launch(Dispatchers.Main) {
+        lifecycleScope.launch {
             val progressDialog = MaterialDialog(this@MainActivity)
                     .cancelable(false)
                     .title(R.string.please_wait)
@@ -413,7 +414,7 @@ class MainActivity : AppCompatActivity() {
                 val notification = cause.getSerializableExtra(EXTRA_NOTIFICATION) as? Notification
                 if (notification != null) {
                     // we have notification, can handle notification click
-                    GlobalScope.launch(Dispatchers.Main) {
+                    lifecycleScope.launch {
                         try {
                             // load entry
                             val entry = withContext(Dispatchers.IO) { Network.loadEntry(notification.entryId) }
@@ -456,7 +457,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            Intent.ACTION_VIEW -> GlobalScope.launch(Dispatchers.Main) {
+            Intent.ACTION_VIEW -> lifecycleScope.launch {
                 // try to detect if it's someone trying to open the dybr.ru link with us
                 if (cause.data?.authority?.contains("dybr.ru") == true) {
                     consumeCallingUrl(cause)
@@ -488,7 +489,9 @@ class MainActivity : AppCompatActivity() {
                         else -> return
                     }
 
-                    showFullscreenFragment(fragment)
+                    lifecycleScope.launchWhenResumed {
+                        showFullscreenFragment(fragment)
+                    }
                 }
                 "profile" -> {
                     val fragment = when (address.size) {
@@ -499,7 +502,9 @@ class MainActivity : AppCompatActivity() {
                         else -> return
                     }
 
-                    fragment.show(supportFragmentManager, "Showing intent-requested profile fragment")
+                    lifecycleScope.launchWhenResumed {
+                        fragment.show(supportFragmentManager, "Showing intent-requested profile fragment")
+                    }
                 }
                 else -> return
             }
@@ -566,7 +571,7 @@ class MainActivity : AppCompatActivity() {
      */
     private fun selectProfile(prof: OwnProfile) {
         // need to retrieve selected profile fully, i.e. with favorites and stuff
-        GlobalScope.launch(Dispatchers.Main) {
+        lifecycleScope.launch {
             try {
                 withContext(Dispatchers.IO) { Network.makeProfileActive(prof) }
                 val fullProf = withContext(Dispatchers.IO) { Network.loadProfile(prof.id) }
@@ -599,7 +604,7 @@ class MainActivity : AppCompatActivity() {
      * @param prof profile to remove
      */
     private fun deleteProfile(prof: OwnProfile) {
-        GlobalScope.launch(Dispatchers.Main) {
+        lifecycleScope.launch {
             try {
                 withContext(Dispatchers.IO) { Network.removeProfile(prof) }
                 Toast.makeText(this@MainActivity, R.string.profile_deleted, Toast.LENGTH_SHORT).show()
@@ -646,7 +651,7 @@ class MainActivity : AppCompatActivity() {
         Auth.profile?.let { applyTheme(this, it, styleLevel) }
 
         // load current blog and favorites
-        GlobalScope.launch(Dispatchers.Main) {
+        lifecycleScope.launch {
             refreshUI()
 
             // the whole application may be started because of link click

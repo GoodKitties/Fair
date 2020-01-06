@@ -5,6 +5,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import android.view.*
+import androidx.lifecycle.lifecycleScope
 import butterknife.BindView
 import butterknife.ButterKnife
 import com.afollestad.materialdialogs.MaterialDialog
@@ -75,12 +76,12 @@ open class NotificationListFragment: UserContentListFragment() {
 
     private fun markAllRead() {
         val markRoutine = {
-            GlobalScope.launch(Dispatchers.Main) {
+            lifecycleScope.launch {
                 try {
                     withContext(Dispatchers.IO) { Network.markAllNotificationsRead() }
                     loadMore(true)
                 } catch (ex: Exception) {
-                    Network.reportErrors(activity, ex)
+                    Network.reportErrors(context, ex)
                 }
             }
         }

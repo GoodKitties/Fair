@@ -24,6 +24,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.WindowManager
 import android.widget.*
+import androidx.lifecycle.lifecycleScope
 import com.afollestad.materialdialogs.input.getInputField
 import com.afollestad.materialdialogs.input.input
 import com.afollestad.materialdialogs.list.listItems
@@ -169,7 +170,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
             false -> R.string.unsubscribed_from_entry
         }
 
-        parentFragment.uiScope.launch(Dispatchers.Main) {
+        parentFragment.lifecycleScope.launch {
             try {
                 withContext(Dispatchers.IO) { Network.updateSubscription(entry, subscribe) }
                 showToastAtView(button, itemView.context.getString(toastText))
@@ -191,7 +192,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
             false -> R.string.entry_removed_from_bookmarks
         }
 
-        parentFragment.uiScope.launch(Dispatchers.Main) {
+        parentFragment.lifecycleScope.launch {
             try {
                 withContext(Dispatchers.IO) { Network.updateBookmark(entry, bookmark) }
                 showToastAtView(button, itemView.context.getString(toastText))
@@ -206,7 +207,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
 
     @OnClick(R.id.entry_add_reaction)
     fun openReactionMenu(button: ImageView) {
-        parentFragment.uiScope.launch(Dispatchers.Main) {
+        parentFragment.lifecycleScope.launch {
             try {
                 val reactionSets = withContext(Dispatchers.IO) { Network.loadReactionSets() }
                 if (!reactionSets.isNullOrEmpty()) {
@@ -249,7 +250,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
 
         // delete callback
         val delete = {
-            parentFragment.uiScope.launch(Dispatchers.Main) {
+            parentFragment.lifecycleScope.launch {
                 try {
                     withContext(Dispatchers.IO) { Network.deleteEntry(entry) }
                     Toast.makeText(activity, R.string.entry_deleted, Toast.LENGTH_SHORT).show()
@@ -304,7 +305,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
                 profiles.add(profile)
             }
 
-            parentFragment.uiScope.launch(Dispatchers.Main) {
+            parentFragment.lifecycleScope.launch {
                 try {
                     withContext(Dispatchers.IO) { Network.createActionList(listItem) }
                     Toast.makeText(activity, R.string.author_hidden_from_feed, Toast.LENGTH_SHORT).show()
@@ -507,7 +508,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
 
         if (myReaction != null) {
             // it's there, delete it
-            parentFragment.uiScope.launch(Dispatchers.Main) {
+            parentFragment.lifecycleScope.launch {
                 try {
                     withContext(Dispatchers.IO) { Network.deleteReaction(myReaction) }
                     showToastAtView(view, view.context.getString(R.string.reaction_deleted))
@@ -520,7 +521,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
             }
         } else {
             // add it
-            parentFragment.uiScope.launch(Dispatchers.Main) {
+            parentFragment.lifecycleScope.launch {
                 try {
                     val newReaction = withContext(Dispatchers.IO) { Network.createReaction(entry, reactionType) }
                     showToastAtView(view, view.context.getString(R.string.reaction_added))

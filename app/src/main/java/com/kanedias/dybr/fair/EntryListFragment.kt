@@ -7,6 +7,7 @@ import android.view.*
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -245,7 +246,7 @@ open class EntryListFragment: UserContentListFragment() {
             fastJumpButton.visibility = View.VISIBLE
             fastJumpButton.alpha = 0.5f
 
-            fadeJob = uiScope.launch {
+            fadeJob = lifecycleScope.launch {
                 delay(2000)
 
                 fastJumpButton.animate()

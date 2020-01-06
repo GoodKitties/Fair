@@ -13,6 +13,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.widget.AppCompatMultiAutoCompleteTextView
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnCheckedChanged
@@ -107,9 +108,6 @@ class CreateNewEntryFragment : Fragment() {
     @BindView(R.id.entry_submit)
     lateinit var submitButton: Button
 
-    private val submitJob = Job()
-    private val uiScope = CoroutineScope(Dispatchers.Main + submitJob)
-
     private lateinit var styleLevel: StyleLevel
 
     var editMode = false // create new by default
@@ -144,11 +142,6 @@ class CreateNewEntryFragment : Fragment() {
         }
 
         return view
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        submitJob.cancel()
     }
 
     private fun setupUI() {
@@ -306,7 +299,7 @@ class CreateNewEntryFragment : Fragment() {
         }
 
         // make http request
-        uiScope.launch(Dispatchers.Main) {
+        lifecycleScope.launch {
             try {
                 if (editMode) {
                     // alter existing entry
@@ -348,7 +341,7 @@ class CreateNewEntryFragment : Fragment() {
             } catch (ex: Exception) {
                 // don't close the fragment, just report errors
                 if (isActive) {
-                    Network.reportErrors(requireContext(), ex)
+                    Network.reportErrors(context, ex)
                 }
             }
         }

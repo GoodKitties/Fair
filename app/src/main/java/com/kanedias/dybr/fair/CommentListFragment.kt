@@ -10,6 +10,7 @@ import androidx.appcompat.widget.Toolbar
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.lifecycleScope
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
@@ -131,7 +132,7 @@ class CommentListFragment : UserContentListFragment() {
         super.loadMore(reset)
 
         // update entry comment meta counters and mark notifications as read for current entry
-        uiScope.launch(Dispatchers.Main) {
+        lifecycleScope.launch {
             try {
                 entry = withContext(Dispatchers.IO) { Network.loadEntry(entry!!.id) }
                 getRibbonAdapter().replaceHeader(0, entry!!)
@@ -150,7 +151,7 @@ class CommentListFragment : UserContentListFragment() {
                     SyncNotificationsWorker.markReadFor(activity, entry!!.id)
                 }
             } catch (ex: Exception) {
-                Network.reportErrors(activity, ex)
+                Network.reportErrors(context, ex)
             }
         }
     }

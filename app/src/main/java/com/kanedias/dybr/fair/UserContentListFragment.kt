@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -36,21 +37,7 @@ abstract class UserContentListFragment : Fragment() {
     private var pageStarter = System.currentTimeMillis() / 1000
     protected var allLoaded = false
 
-    private lateinit var loadJob: Job
-    lateinit var uiScope: CoroutineScope
-
     lateinit var styleLevel: StyleLevel
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        loadJob = Job()
-        uiScope = CoroutineScope(Dispatchers.Main + loadJob)
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        loadJob.cancel()
-    }
 
     /**
      * Detect conditions in which loading of entries should be skipped
@@ -80,7 +67,7 @@ abstract class UserContentListFragment : Fragment() {
         getRefresher().isRefreshing = true
         val nextPage = getRibbonAdapter().items.size / PAGE_SIZE + 1
 
-        uiScope.launch(Dispatchers.Main) {
+        lifecycleScope.launch {
 
             try {
                 val success = withContext(Dispatchers.IO) {
@@ -89,7 +76,7 @@ abstract class UserContentListFragment : Fragment() {
                 onMoreDataLoaded(success)
             } catch (ex: Exception) {
                 if (isActive) {
-                    Network.reportErrors(requireContext(), ex)
+                    Network.reportErrors(context, ex)
                 }
             }
 

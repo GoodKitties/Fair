@@ -60,6 +60,7 @@ release-alpha:
   stage: release
   except:
     - tags
+    - merge_requests
   script:
     - *decrypt_publish_json
     - ./gradlew app:publishGoogleplayRelease
@@ -71,6 +72,8 @@ release-alpha:
 
 release-gold:
   stage: release
+  except:
+    - merge_requests
   only:
     - tags
   script:

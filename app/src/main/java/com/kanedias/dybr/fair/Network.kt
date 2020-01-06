@@ -964,35 +964,43 @@ object Network {
      * @param ctx context to get error string from
      * @param errMapping mapping of ids like `HttpUrlConnection.HTTP_NOT_FOUND -> R.string.not_found`
      */
-    fun reportErrors(ctx: Context,
+    fun reportErrors(ctx: Context?,
                      ex: Exception,
                      errMapping: Map<Int, Int> = emptyMap(),
-                     detailMapping: Map<String, String> = emptyMap()) = when (ex) {
-        // API exchange error, most specific
-        is HttpApiException -> for (error in ex.errors) {
-            Toast.makeText(ctx, detailMapping[error.detail] ?: error.detail, Toast.LENGTH_LONG).show()
+                     detailMapping: Map<String, String> = emptyMap()) {
+        if (ctx == null) {
+            // user left the app/closed the fragment
+            return
         }
 
-        // non-200 code, but couldn't deduce any API errors
-        is HttpException -> {
-            if (errMapping.containsKey(ex.code)) {
-                // we have, take value from map
-                val key = ctx.getString(errMapping.getValue(ex.code))
-                Toast.makeText(ctx, key, Toast.LENGTH_SHORT).show()
-            } else {
-                // we haven't, show generic error
-                val errorText = ctx.getString(R.string.unexpected_website_error)
+        when (ex) {
+            // API exchange error, most specific
+            is HttpApiException -> for (error in ex.errors) {
+                Toast.makeText(ctx, detailMapping[error.detail]
+                        ?: error.detail, Toast.LENGTH_LONG).show()
+            }
+
+            // non-200 code, but couldn't deduce any API errors
+            is HttpException -> {
+                if (errMapping.containsKey(ex.code)) {
+                    // we have, take value from map
+                    val key = ctx.getString(errMapping.getValue(ex.code))
+                    Toast.makeText(ctx, key, Toast.LENGTH_SHORT).show()
+                } else {
+                    // we haven't, show generic error
+                    val errorText = ctx.getString(R.string.unexpected_website_error)
+                    Toast.makeText(ctx, "$errorText: ${ex.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            // generic connection-level error, show as-is
+            is IOException -> {
+                Log.w("Fair/Network", "Connection error", ex)
+                val errorText = ctx.getString(R.string.error_connecting)
                 Toast.makeText(ctx, "$errorText: ${ex.message}", Toast.LENGTH_SHORT).show()
             }
-        }
 
-        // generic connection-level error, show as-is
-        is IOException -> {
-            Log.w("Fair/Network", "Connection error", ex)
-            val errorText = ctx.getString(R.string.error_connecting)
-            Toast.makeText(ctx, "$errorText: ${ex.message}", Toast.LENGTH_SHORT).show()
+            else -> throw ex
         }
-
-        else -> throw ex
     }
 }

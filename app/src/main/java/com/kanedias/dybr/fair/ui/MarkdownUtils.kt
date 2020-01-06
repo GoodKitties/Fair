@@ -49,6 +49,7 @@ import io.noties.markwon.image.AsyncDrawableScheduler
 import io.noties.markwon.image.AsyncDrawableSpan
 import io.noties.markwon.image.DrawableUtils
 import io.noties.markwon.image.glide.GlideImagesPlugin
+import io.noties.markwon.utils.NoCopySpannableFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -92,7 +93,7 @@ fun mdRendererFrom(txt: TextView): Markwon {
                                  .centerInside()
                                  .override(txt.context.resources.displayMetrics.widthPixels, SIZE_ORIGINAL)
                                  .placeholder(wrapStyleDrawable(txt, R.drawable.image))
-                                 .fallback(wrapStyleDrawable(txt, R.drawable.image_broken)))))
+                                 .error(wrapStyleDrawable(txt, R.drawable.image_broken)))))
             .usePlugin(StrikethroughPlugin.create())
             .build()
 }
@@ -115,6 +116,7 @@ fun wrapStyleDrawable(view: View, image: Int): Drawable {
  */
 infix fun TextView.handleMarkdown(html: String) {
     val label = this
+    label.setSpannableFactory(NoCopySpannableFactory())
 
     GlobalScope.launch(Dispatchers.Main) {
         // this is computation-intensive task, better do it smoothly

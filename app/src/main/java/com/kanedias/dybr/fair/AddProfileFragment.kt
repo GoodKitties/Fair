@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
@@ -57,7 +58,7 @@ class AddProfileFragment: Fragment() {
             description = descInput.text.toString()
         }
 
-        GlobalScope.launch(Dispatchers.Main) {
+        lifecycleScope.launch {
             progressDialog.show()
 
             try {
@@ -65,10 +66,10 @@ class AddProfileFragment: Fragment() {
                 Auth.updateCurrentProfile(profile)
 
                 //we created profile successfully, return to main activity
-                Toast.makeText(activity, R.string.profile_created, Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, R.string.profile_created, Toast.LENGTH_SHORT).show()
                 handleSuccess()
             } catch (ex: Exception) {
-                Network.reportErrors(activity, ex, mapOf(422 to R.string.invalid_credentials))
+                Network.reportErrors(context, ex, mapOf(422 to R.string.invalid_credentials))
             }
 
             progressDialog.hide()

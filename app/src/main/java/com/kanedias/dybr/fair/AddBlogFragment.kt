@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
@@ -30,9 +31,6 @@ class AddBlogFragment: Fragment() {
     @BindView(R.id.blog_title_input)
     lateinit var titleInput: EditText
 
-    private val submitJob = Job()
-    private val uiScope = CoroutineScope(Dispatchers.Main + submitJob)
-
     private lateinit var progressDialog: MaterialDialog
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -46,11 +44,6 @@ class AddBlogFragment: Fragment() {
         return view
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        submitJob.cancel()
-    }
-
     @OnClick(R.id.blog_create_button)
     fun confirm() {
         val profReq = ProfileCreateRequest().apply {
@@ -59,7 +52,7 @@ class AddBlogFragment: Fragment() {
             blogTitle = titleInput.text.toString()
         }
 
-        uiScope.launch(Dispatchers.Main) {
+        lifecycleScope.launch {
             progressDialog.show()
 
             try {
@@ -70,7 +63,7 @@ class AddBlogFragment: Fragment() {
                 Toast.makeText(requireContext(), R.string.blog_created, Toast.LENGTH_SHORT).show()
                 handleSuccess()
             } catch (ex: Exception) {
-                Network.reportErrors(requireContext(), ex)
+                Network.reportErrors(context, ex)
             }
 
             progressDialog.hide()

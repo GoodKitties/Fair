@@ -10,6 +10,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.lifecycle.lifecycleScope
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -88,7 +89,7 @@ abstract class UserContentViewHolder<T: Authored>(iv: View, val parentFragment: 
                 .title(R.string.please_wait)
                 .message(R.string.loading_profile)
 
-        GlobalScope.launch(Dispatchers.Main) {
+        parentFragment.lifecycleScope.launch {
             dialog.show()
 
             try {
@@ -142,6 +143,7 @@ abstract class UserContentViewHolder<T: Authored>(iv: View, val parentFragment: 
                     }
 
                     activity.showFullscreenFragment(commentAdd)
+                    mode.finish()
                     return true
                 }
                 else -> return false

@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import butterknife.*
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.database.DbProvider
@@ -60,9 +61,6 @@ class AddAccountFragment : Fragment() {
     @BindViews(R.id.acc_email, R.id.acc_password)
     lateinit var loginInputs: List<@JvmSuppressWildcards View>
 
-    private val submitJob = Job()
-    private val uiScope = CoroutineScope(Dispatchers.Main + submitJob)
-
     private lateinit var progressDialog: MaterialDialog
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -79,11 +77,6 @@ class AddAccountFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         progressDialog.dismiss()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        submitJob.cancel()
     }
 
     /**
@@ -134,7 +127,7 @@ class AddAccountFragment : Fragment() {
             current = true
         }
 
-        uiScope.launch(Dispatchers.Main) {
+        lifecycleScope.launch {
             progressDialog.show()
 
             try {
@@ -157,7 +150,7 @@ class AddAccountFragment : Fragment() {
                         "password_invalid" to getString(R.string.incorrect_password)
                 )
 
-                Network.reportErrors(ctx = requireContext(), ex = ex, detailMapping = errorMap)
+                Network.reportErrors(ctx = context, ex = ex, detailMapping = errorMap)
             }
 
             progressDialog.hide()
@@ -177,7 +170,7 @@ class AddAccountFragment : Fragment() {
             isAdult = isAdultSwitch.isChecked
         }
 
-        uiScope.launch(Dispatchers.Main) {
+        lifecycleScope.launch {
             progressDialog.show()
 
             try {

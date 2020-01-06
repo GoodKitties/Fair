@@ -7,6 +7,7 @@ import android.content.Intent
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import android.view.View
 import android.widget.*
+import androidx.lifecycle.lifecycleScope
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
@@ -112,7 +113,7 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
                 .title(R.string.please_wait)
                 .message(R.string.loading_profile)
 
-        GlobalScope.launch(Dispatchers.Main) {
+        activity.lifecycleScope.launch {
             dialog.show()
 
             try {
@@ -237,7 +238,7 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
 
         // handle click on profile change button
         // we need to ignore subsequent clicks if profiles are already loading
-        val profileSwapActor = GlobalScope.actor<Unit>(Dispatchers.Main) {
+        val profileSwapActor = activity.lifecycleScope.actor<Unit> {
             for (event in channel) {
                 val swapAnim = ValueAnimator.ofFloat(1f, -1f, 1f)
                 swapAnim.interpolator = FastOutSlowInInterpolator()

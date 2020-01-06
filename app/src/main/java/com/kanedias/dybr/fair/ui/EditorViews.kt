@@ -228,7 +228,7 @@ class EditorViews : Fragment() {
                             insertInCursorPosition("<img width='$spec' height='auto' src='", link, "' />")
                         }).show()
             } catch (ex: Exception) {
-                Network.reportErrors(requireContext(), ex)
+                Network.reportErrors(context, ex)
             }
 
             dialog.dismiss()

@@ -9,6 +9,7 @@ import android.widget.Switch
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import butterknife.BindView
 import butterknife.ButterKnife
 import com.kanedias.dybr.fair.dto.OwnProfile
@@ -45,9 +46,6 @@ class ProfilePreferencesFragment: Fragment() {
     @BindView(R.id.reactions_in_blog_switch)
     lateinit var reactionsInBlog: Switch
 
-    private lateinit var loadJob: Job
-    private lateinit var uiScope: CoroutineScope
-
     /**
      * Profile that we are editing
      */
@@ -57,17 +55,6 @@ class ProfilePreferencesFragment: Fragment() {
         super.onCreate(savedInstanceState)
 
         profile = arguments!!.get(PROFILE) as OwnProfile
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        loadJob = Job()
-        uiScope = CoroutineScope(Dispatchers.Main + loadJob)
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        loadJob.cancel()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -127,12 +114,12 @@ class ProfilePreferencesFragment: Fragment() {
             settings = profile.settings
         }
 
-        uiScope.launch {
+        lifecycleScope.launch {
             try {
                 withContext(Dispatchers.IO) { Network.updateProfile(profReq) }
                 showToastAtView(view, getString(R.string.applied))
             } catch (ex: Exception) {
-                Network.reportErrors(requireContext(), ex)
+                Network.reportErrors(context, ex)
             }
         }
     }

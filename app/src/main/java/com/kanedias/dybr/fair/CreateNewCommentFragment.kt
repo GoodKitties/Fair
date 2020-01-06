@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.lifecycle.lifecycleScope
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
@@ -70,9 +71,6 @@ class CreateNewCommentFragment : Fragment() {
     @BindView(R.id.comment_submit)
     lateinit var submitButton: Button
 
-    private val submitJob = Job()
-    private val uiScope = CoroutineScope(Dispatchers.Main + submitJob)
-
     private lateinit var styleLevel: StyleLevel
 
     /**
@@ -105,11 +103,6 @@ class CreateNewCommentFragment : Fragment() {
         setupTheming(view)
 
         return view
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        submitJob.cancel()
     }
 
     private fun setupTheming(view: View) {
@@ -196,7 +189,7 @@ class CreateNewCommentFragment : Fragment() {
         val comment = CreateCommentRequest().apply { content = markdownToHtml(contentInput.text.toString()) }
 
         // make http request
-        uiScope.launch(Dispatchers.Main) {
+        lifecycleScope.launch {
             try {
                 // if we have current comment list, refresh it
                 val frgPredicate = { it: Fragment -> it is UserContentListFragment }
@@ -220,7 +213,7 @@ class CreateNewCommentFragment : Fragment() {
             } catch (ex: Exception) {
                 // don't close the fragment, just report errors
                 if (isActive) {
-                    Network.reportErrors(requireContext(), ex)
+                    Network.reportErrors(context, ex)
                 }
             }
         }

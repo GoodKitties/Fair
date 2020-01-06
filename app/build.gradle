@@ -114,6 +114,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.2.0-alpha02'         // Material design support lib
     implementation 'androidx.appcompat:appcompat:1.2.0-alpha01'                 // basic toolbars etc.
     implementation 'androidx.lifecycle:lifecycle-common-java8:2.2.0-rc03'       // android lifecycle callbacks
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.2.0-rc03'        // coroutines lifecycle scopes
     implementation 'androidx.cardview:cardview:1.0.0'                           // snappy cardview for lists
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.0.0'       // swipe-to-refresh layout
     implementation 'androidx.preference:preference:1.1.0'                       // preference fragment compatibility

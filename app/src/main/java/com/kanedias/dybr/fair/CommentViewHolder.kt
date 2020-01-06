@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import butterknife.BindView
 import butterknife.BindViews
 import butterknife.ButterKnife
@@ -88,7 +89,7 @@ class CommentViewHolder(iv: View, parentFragment: UserContentListFragment) : Use
 
         // delete callback
         val delete = {
-            parentFragment.uiScope.launch(Dispatchers.Main) {
+            parentFragment.lifecycleScope.launch {
                 try {
                     withContext(Dispatchers.IO) { Network.deleteComment(comment) }
                     Toast.makeText(activity, R.string.comment_deleted, Toast.LENGTH_SHORT).show()
