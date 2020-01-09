@@ -30,6 +30,7 @@ import com.afollestad.materialdialogs.input.input
 import com.afollestad.materialdialogs.list.listItems
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.misc.idMatches
+import com.kanedias.dybr.fair.misc.onClickSingleOnly
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.openUrlExternally
@@ -236,7 +237,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
                 text = type.emoji
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
                 setOnClickListener {
-                    toggleReaction(view, type)
+                    parentFragment.lifecycleScope.launch { toggleReaction(view, type) }
                     pw.dismiss()
                 }
             })
@@ -484,7 +485,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
 
             val reactionView = LayoutInflater.from(itemView.context).inflate(R.layout.view_reaction, reactionArea, false)
 
-            reactionView.setOnClickListener { toggleReaction(it, reactionType) }
+            reactionView.onClickSingleOnly { toggleReaction(it, reactionType) }
             if (includingMe) {
                 reactionView.isSelected = true
             }
@@ -502,7 +503,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
         }
     }
 
-    private fun toggleReaction(view: View, reactionType: ReactionType) {
+    private suspend fun toggleReaction(view: View, reactionType: ReactionType) {
         // find reaction with this type
         val myReaction = reactions
                 .filter { reactionType.idMatches(it.reactionType.get()) }
@@ -510,29 +511,25 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
 
         if (myReaction != null) {
             // it's there, delete it
-            parentFragment.lifecycleScope.launch {
-                try {
-                    withContext(Dispatchers.IO) { Network.deleteReaction(myReaction) }
-                    showToastAtView(view, view.context.getString(R.string.reaction_deleted))
+            try {
+                withContext(Dispatchers.IO) { Network.deleteReaction(myReaction) }
+                showToastAtView(view, view.context.getString(R.string.reaction_deleted))
 
-                    reactions.remove(myReaction)
-                    setupReactions()
-                } catch (ex: Exception) {
-                    Network.reportErrors(view.context, ex)
-                }
+                reactions.remove(myReaction)
+                setupReactions()
+            } catch (ex: Exception) {
+                Network.reportErrors(view.context, ex)
             }
         } else {
             // add it
-            parentFragment.lifecycleScope.launch {
-                try {
-                    val newReaction = withContext(Dispatchers.IO) { Network.createReaction(entry, reactionType) }
-                    showToastAtView(view, view.context.getString(R.string.reaction_added))
+            try {
+                val newReaction = withContext(Dispatchers.IO) { Network.createReaction(entry, reactionType) }
+                showToastAtView(view, view.context.getString(R.string.reaction_added))
 
-                    reactions.add(newReaction)
-                    setupReactions()
-                } catch (ex: Exception) {
-                    Network.reportErrors(view.context, ex)
-                }
+                reactions.add(newReaction)
+                setupReactions()
+            } catch (ex: Exception) {
+                Network.reportErrors(view.context, ex)
             }
         }
     }

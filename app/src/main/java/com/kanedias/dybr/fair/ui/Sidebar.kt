@@ -16,6 +16,7 @@ import com.kanedias.dybr.fair.*
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.database.entities.Account
+import com.kanedias.dybr.fair.misc.onClickSingleOnly
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.*
@@ -238,29 +239,23 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
 
         // handle click on profile change button
         // we need to ignore subsequent clicks if profiles are already loading
-        val profileSwapActor = activity.lifecycleScope.actor<Unit> {
-            for (event in channel) {
-                val swapAnim = ValueAnimator.ofFloat(1f, -1f, 1f)
-                swapAnim.interpolator = FastOutSlowInInterpolator()
-                swapAnim.addUpdateListener { profSwap.scaleY = swapAnim.animatedValue as Float }
-                swapAnim.duration = 1_000
-                swapAnim.repeatCount = ValueAnimator.INFINITE
-                swapAnim.start()
+        profSwap.onClickSingleOnly {
+            val swapAnim = ValueAnimator.ofFloat(1f, -1f, 1f)
+            swapAnim.interpolator = FastOutSlowInInterpolator()
+            swapAnim.addUpdateListener { profSwap.scaleY = swapAnim.animatedValue as Float }
+            swapAnim.duration = 1_000
+            swapAnim.repeatCount = ValueAnimator.INFINITE
+            swapAnim.start()
 
-                try {
-                    // force profile selection even if we only have one
-                    activity.startProfileSelector(true)
-                    drawer.closeDrawers()
-                } catch (ex: Exception) {
-                    Network.reportErrors(activity, ex)
-                }
-
-                swapAnim.repeatCount = 0 // stop gracefully
+            try {
+                // force profile selection even if we only have one
+                activity.startProfileSelector(true)
+                drawer.closeDrawers()
+            } catch (ex: Exception) {
+                Network.reportErrors(activity, ex)
             }
-        }
 
-        profSwap.setOnClickListener {
-            profileSwapActor.offer(Unit)
+            swapAnim.repeatCount = 0 // stop gracefully
         }
 
         profSetup.setOnClickListener {
