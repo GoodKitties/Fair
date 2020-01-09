@@ -167,13 +167,18 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.addOnBackStackChangedListener {
             val backStackEntryCount = supportFragmentManager.backStackEntryCount
             if (backStackEntryCount == 0) {
+                // we're in the main activity
+                Scoop.getInstance().setLastLevel(styleLevel)
                 styleLevel.rebind()
                 return@addOnBackStackChangedListener
             }
 
             // rebind style levels on top
             val top = supportFragmentManager.fragments.findLast { it is UserContentListFragment }
-            (top as? UserContentListFragment)?.styleLevel?.rebind()
+            (top as? UserContentListFragment)?.styleLevel?.apply {
+                Scoop.getInstance().setLastLevel(this)
+                this.rebind()
+            }
         }
     }
 
