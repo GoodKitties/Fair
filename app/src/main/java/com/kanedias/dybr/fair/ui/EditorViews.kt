@@ -74,6 +74,11 @@ class EditorViews : Fragment() {
 
         // start editing content right away
         contentInput.requestFocus()
+
+        // doesn't work reliable enough
+        //val editor = MarkwonEditor.create(mdRendererFrom(requireContext()))
+        //contentInput.addTextChangedListener(MarkwonEditorTextWatcher.withProcess(editor))
+
         setupTheming(view)
 
         return view
