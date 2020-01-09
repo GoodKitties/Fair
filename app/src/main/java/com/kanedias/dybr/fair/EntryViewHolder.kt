@@ -383,6 +383,8 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
             Auth.profile?.settings?.reactions?.disable == true -> reactionButton.visibility = View.GONE
             // disabled in current blog by owner
             profile.settings.reactions.disableInBlog -> reactionButton.visibility = View.GONE
+            // not authorized, can't add reactions
+            Auth.profile == null -> reactionButton.visibility = View.GONE
             // enabled, show the button
             else -> reactionButton.visibility = View.VISIBLE
         }
