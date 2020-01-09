@@ -146,9 +146,9 @@ class CreateNewEntryFragment : Fragment() {
 
     private fun setupUI() {
         permissionSpinner.adapter = PermissionSpinnerAdapter(listOf(
-                RecordAccessItem("private", false),
-                RecordAccessItem("registered", true),
-                RecordAccessItem("favorites", true),
+                RecordAccessItem("private"),
+                RecordAccessItem("registered"),
+                RecordAccessItem("favorites"),
                 null /* visible for all */))
         permissionSpinner.setSelection(3) // select "Visible for all" by default
 
@@ -160,6 +160,7 @@ class CreateNewEntryFragment : Fragment() {
         tagsInput.onFocusChangeListener = View.OnFocusChangeListener { _, focused ->
             if (focused && tagsInput.text.isNullOrBlank()) {
                 tagsInput.setText("#")
+                tagsInput.showDropDown()
             }
         }
         tagsInput.setAdapter(adapter)
@@ -210,9 +211,9 @@ class CreateNewEntryFragment : Fragment() {
 
         // permission settings, if exist
         when (editEntry.settings?.permissions?.access?.firstOrNull()) {
-            RecordAccessItem("private", false) -> permissionSpinner.setSelection(0)
-            RecordAccessItem("registered", true) -> permissionSpinner.setSelection(1)
-            RecordAccessItem("favorites", true) -> permissionSpinner.setSelection(2)
+            RecordAccessItem("private") -> permissionSpinner.setSelection(0)
+            RecordAccessItem("registered") -> permissionSpinner.setSelection(1)
+            RecordAccessItem("favorites") -> permissionSpinner.setSelection(2)
             else -> permissionSpinner.setSelection(3) // visible for all
         }
     }
@@ -283,9 +284,9 @@ class CreateNewEntryFragment : Fragment() {
         imm.hideSoftInputFromWindow(view!!.windowToken, 0)
 
         val access = when(permissionSpinner.selectedItemPosition) {
-            0 -> RecordAccessItem("private", false)
-            1 -> RecordAccessItem("registered", true)
-            2 -> RecordAccessItem("favorites", true)
+            0 -> RecordAccessItem("private")
+            1 -> RecordAccessItem("registered")
+            2 -> RecordAccessItem("favorites")
             else -> null // visible for all
         }
 
@@ -500,9 +501,9 @@ class CreateNewEntryFragment : Fragment() {
 
             (view as TextView).let {
                 val accessDrawableRes = when(item) {
-                    RecordAccessItem("private", false) -> R.drawable.eye_crossed
-                    RecordAccessItem("registered", true) -> R.drawable.portrait
-                    RecordAccessItem("favorites", true) -> R.drawable.star_filled
+                    RecordAccessItem("private") -> R.drawable.eye_crossed
+                    RecordAccessItem("registered") -> R.drawable.portrait
+                    RecordAccessItem("favorites") -> R.drawable.star_filled
                     else -> R.drawable.earth
                 }
 

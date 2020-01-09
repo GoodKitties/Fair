@@ -50,21 +50,15 @@ data class RecordAccessItem (
          * type of access item. Can be "private", "registered", "favorites"
          */
         @field:Json(name = "type")
-        val type: String,
-
-        /**
-         * Allow or deny this type of access
-         */
-        @field:Json(name = "allow")
-        val allow: Boolean
+        val type: String
 ) : Serializable
 
 infix fun RecordAccessItem?.toDescription(ctx: Context) : String {
     val descArray = ctx.resources.getStringArray(R.array.permission_types)
     return when (this) {
-        RecordAccessItem("private", false) -> descArray[0]
-        RecordAccessItem("registered", true) -> descArray[1]
-        RecordAccessItem("favorites", true) -> descArray[2]
+        RecordAccessItem("private") -> descArray[0]
+        RecordAccessItem("registered") -> descArray[1]
+        RecordAccessItem("favorites") -> descArray[2]
         else -> descArray[3] // visible for all
     }
 }
