@@ -9,7 +9,6 @@ import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Environment
-import android.preference.PreferenceManager
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.CharacterStyle
@@ -27,6 +26,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.preference.PreferenceManager
 import butterknife.BindView
 import butterknife.ButterKnife
 import com.bumptech.glide.Glide
@@ -146,6 +146,21 @@ infix fun TextView.handleMarkdown(html: String) {
     }
 }
 
+const val MORE_START_PATTERN = "\\[MORE=(.+?)]"
+const val MORE_END_PATTERN = "\\[/MORE]"
+
+const val MORE_TAG_START_PATTERN = "<details><summary>(.*?)</summary>"
+const val MORE_TAG_END_PATTERN = "</details>"
+
+val MORE_START_REGEX = Regex(MORE_START_PATTERN, RegexOption.DOT_MATCHES_ALL)
+val MORE_END_REGEX = Regex(MORE_END_PATTERN, RegexOption.DOT_MATCHES_ALL)
+
+val MORE_TAG_START_REGEX = Regex(MORE_TAG_START_PATTERN, RegexOption.DOT_MATCHES_ALL)
+val MORE_TAG_END_REGEX = Regex(MORE_TAG_END_PATTERN, RegexOption.DOT_MATCHES_ALL)
+
+// starting ,* is required to capture only inner MORE, see https://regex101.com/r/zbpWUK/1
+val MORE_FULL_REGEX = Regex("(${MORE_START_PATTERN}(.*?)${MORE_END_PATTERN})", RegexOption.DOT_MATCHES_ALL)
+
 /**
  * Post-process spans like MORE or image loading
  * @param spanned editable spannable to change
@@ -208,12 +223,6 @@ fun postProcessDrawables(spanned: SpannableStringBuilder, view: TextView) {
         spanned.setSpan(wrapperClick, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
 }
-
-const val MORE_START_REGEX = "\\[MORE=(.+?)]"
-const val MORE_END_REGEX = "\\[/MORE]"
-
-// starting ,* is required to capture only inner MORE, see https://regex101.com/r/zbpWUK/1
-val MORE_FULL_REGEX = Regex(".*(${MORE_START_REGEX}(.*?)${MORE_END_REGEX})", RegexOption.DOT_MATCHES_ALL)
 
 /**
  * Post-process MORE statements in the text. They act like `<spoiler>` or `<cut>` tag in some websites
@@ -458,11 +467,29 @@ class ImageShowOverlay(ctx: Context,
     }
 }
 
+/**
+ * Converts Markdown to HTML.
+ * Required for posting and commenting routines.
+ */
 fun markdownToHtml(md: String): String {
-    var mdPreprocessed = md
+    // we have to convert MORE tags to normal HTML tags
+    // otherwise we can end up in the situation when HTML tag, say, <p>, is opened
+    // outside the MORE and closed inside, causing messy logic on the website version
+    // to close MORE as well, before it really needs to be closed
+    // see example text here: https://regex101.com/r/ruWyDj/1
+    // without postprocessing it is converted into this: https://regex101.com/r/HNrPE9/1
+    val mdPostProcessed = md
+            .replace(MORE_START_REGEX, "<details><summary>$1</summary>")
+            .replace(MORE_END_REGEX, "</details>")
 
     val extensions = listOf(StrikethroughExtension.create(), TablesExtension.create())
     val parser = Parser.builder().extensions(extensions).build()
-    val document = parser.parse(mdPreprocessed)
-    return HtmlRenderer.builder().extensions(extensions).build().render(document)
+    val document = parser.parse(mdPostProcessed)
+    val html = HtmlRenderer.builder().extensions(extensions).build().render(document)
+
+    // and then we convert it back to BB-style tags so the logic on the website
+    // can pick it up from here. Uhh, this is clearly a hack and I'm so not happy about this...
+    return html
+            .replace(MORE_TAG_START_REGEX, "[MORE=$1]")
+            .replace(MORE_TAG_END_REGEX, "[/MORE]")
 }
