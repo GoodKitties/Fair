@@ -83,7 +83,6 @@ open class EntryListFragment: UserContentListFragment() {
     open fun setupUI() {
         ribbonRefresher.setOnRefreshListener { loadMore(reset = true) }
         entryRibbon.onFlingListener = FastJumpListener()
-        entryRibbon.layoutManager = LinearLayoutManager(activity)
         entryRibbon.setMaxFlingVelocity(100_000)
         entryRibbon.adapter = entryAdapter
 

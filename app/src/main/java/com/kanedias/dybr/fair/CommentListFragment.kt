@@ -87,7 +87,6 @@ class CommentListFragment : UserContentListFragment() {
         toolbar.setNavigationOnClickListener { fragmentManager?.popBackStack() }
 
         ribbonRefresher.setOnRefreshListener { loadMore(reset = true) }
-        commentRibbon.layoutManager = LinearLayoutManager(activity)
         commentRibbon.adapter = commentAdapter
 
         if (!entry.writable) // guests can't post comments

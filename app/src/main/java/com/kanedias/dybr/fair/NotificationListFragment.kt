@@ -96,7 +96,6 @@ open class NotificationListFragment: UserContentListFragment() {
 
     open fun setupUI() {
         ribbonRefresher.setOnRefreshListener { loadMore(true) }
-        notifRibbon.layoutManager = LinearLayoutManager(activity)
         notifRibbon.adapter = notifAdapter
     }
 
