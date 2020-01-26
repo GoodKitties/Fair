@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.recyclerview.widget.RecyclerView
+    <com.kanedias.dybr.fair.misc.NoScrollRecyclerView
         android:id="@+id/notif_ribbon"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

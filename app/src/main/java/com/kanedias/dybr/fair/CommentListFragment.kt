@@ -4,7 +4,6 @@ import android.os.Bundle
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.appcompat.widget.Toolbar
 import android.view.LayoutInflater

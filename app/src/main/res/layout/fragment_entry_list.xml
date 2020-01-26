@@ -12,7 +12,7 @@
 
         <!-- bottom padding is 56 dp + 4dp -->
         <!-- so floating action button doesn't obstruct view to other views -->
-        <androidx.recyclerview.widget.RecyclerView
+        <com.kanedias.dybr.fair.misc.NoScrollRecyclerView
             android:id="@+id/entry_ribbon"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
