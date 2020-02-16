@@ -28,9 +28,9 @@ import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.database.entities.OfflineDraft
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.themes.*
-import com.kanedias.dybr.fair.ui.handleMarkdownRaw
+import com.kanedias.dybr.fair.markdown.handleMarkdownRaw
 import com.kanedias.dybr.fair.misc.styleLevel
-import com.kanedias.dybr.fair.ui.markdownToHtml
+import com.kanedias.dybr.fair.markdown.markdownToHtml
 import com.kanedias.html2md.Html2Markdown
 import kotlinx.coroutines.*
 import moe.banana.jsonapi2.HasOne

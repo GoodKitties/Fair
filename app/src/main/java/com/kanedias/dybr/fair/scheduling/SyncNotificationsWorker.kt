@@ -18,7 +18,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.kanedias.dybr.fair.R
 import com.kanedias.dybr.fair.dto.Notification
 import com.kanedias.dybr.fair.dto.OwnProfile
-import com.kanedias.dybr.fair.ui.mdRendererFrom
+import com.kanedias.dybr.fair.markdown.mdRendererFrom
 import java.lang.Exception
 import java.util.*
 import java.util.concurrent.TimeUnit.*

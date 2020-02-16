@@ -16,7 +16,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.*
-import com.kanedias.dybr.fair.ui.handleMarkdown
+import com.kanedias.dybr.fair.markdown.handleMarkdown
 import kotlinx.coroutines.*
 
 
@@ -110,7 +110,7 @@ class CommentViewHolder(iv: View, parentFragment: UserContentListFragment) : Use
                 .message(R.string.are_you_sure)
                 .negativeButton(android.R.string.no)
                 .positiveButton(android.R.string.yes, click = { delete() })
-                .show()
+                .showThemed(parentFragment.styleLevel)
     }
 
     /**

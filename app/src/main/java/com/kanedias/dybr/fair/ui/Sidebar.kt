@@ -18,6 +18,7 @@ import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.database.entities.Account
 import com.kanedias.dybr.fair.misc.onClickSingleOnly
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
+import com.kanedias.dybr.fair.themes.showThemed
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.*
 
@@ -115,7 +116,7 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
                 .message(R.string.loading_profile)
 
         activity.lifecycleScope.launch {
-            dialog.show()
+            dialog.showThemed(activity.styleLevel)
 
             try {
                 val prof = withContext(Dispatchers.IO) { Network.loadProfile(Auth.profile!!.id) }
@@ -182,7 +183,7 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
                         .message(R.string.are_you_sure)
                         .positiveButton(android.R.string.yes, click = { deleteAccount(acc) })
                         .negativeButton(android.R.string.no)
-                        .show()
+                        .showThemed(activity.styleLevel)
             }
 
             // add finished account row to the layout

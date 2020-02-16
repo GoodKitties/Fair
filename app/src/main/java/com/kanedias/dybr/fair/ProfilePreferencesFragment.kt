@@ -1,19 +1,24 @@
 package com.kanedias.dybr.fair
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Switch
+import android.widget.TextView
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
+import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import butterknife.BindView
+import butterknife.BindViews
 import butterknife.ButterKnife
+import com.ftinc.scoop.Scoop
+import com.ftinc.scoop.StyleLevel
+import com.ftinc.scoop.adapters.TextViewColorAdapter
 import com.kanedias.dybr.fair.dto.OwnProfile
 import com.kanedias.dybr.fair.dto.ProfileCreateRequest
+import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.showToastAtView
 import kotlinx.coroutines.*
 
@@ -32,24 +37,39 @@ class ProfilePreferencesFragment: Fragment() {
     lateinit var toolbar: Toolbar
 
     @BindView(R.id.new_posts_in_favorites_switch)
-    lateinit var newPostsInFavs: Switch
+    lateinit var newPostsInFavs: SwitchCompat
 
     @BindView(R.id.new_comments_in_subscribed_switch)
-    lateinit var newCommentsInSubs: Switch
+    lateinit var newCommentsInSubs: SwitchCompat
 
     @BindView(R.id.participate_in_feed_switch)
-    lateinit var participateInFeed: Switch
+    lateinit var participateInFeed: SwitchCompat
 
     @BindView(R.id.reactions_global_switch)
-    lateinit var reactionsGlobal: Switch
+    lateinit var reactionsGlobal: SwitchCompat
 
     @BindView(R.id.reactions_in_blog_switch)
-    lateinit var reactionsInBlog: Switch
+    lateinit var reactionsInBlog: SwitchCompat
+
+    @BindViews(
+            R.id.new_posts_in_favorites_switch, R.id.new_comments_in_subscribed_switch,
+            R.id.participate_in_feed_switch, R.id.reactions_global_switch,
+            R.id.reactions_in_blog_switch
+    )
+    lateinit var switches: List<@JvmSuppressWildcards SwitchCompat>
+
+    @BindViews(
+            R.id.notifications_screen_text, R.id.privacy_screen_text,
+            R.id.reactions_screen_text
+    )
+    lateinit var titles: List<@JvmSuppressWildcards TextView>
 
     /**
      * Profile that we are editing
      */
     private lateinit var profile: OwnProfile
+
+    private lateinit var styleLevel: StyleLevel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,15 +81,38 @@ class ProfilePreferencesFragment: Fragment() {
         val view = inflater.inflate(R.layout.fragment_profile_preferences, container, false)
         ButterKnife.bind(this, view)
 
-        populateUI()
+        setupUI()
+        setupTheming(view)
 
         return view
+    }
+
+    private fun setupTheming(view: View) {
+        styleLevel = Scoop.getInstance().addStyleLevel()
+        lifecycle.addObserver(styleLevel)
+
+        styleLevel.bind(TEXT_BLOCK, view, BackgroundNoAlphaAdapter())
+
+        styleLevel.bind(TOOLBAR, toolbar)
+        styleLevel.bind(TOOLBAR_TEXT, toolbar, ToolbarTextAdapter())
+        styleLevel.bind(TOOLBAR_TEXT, toolbar, ToolbarIconsAdapter())
+
+        styleLevel.bindStatusBar(activity, STATUS_BAR)
+
+        switches.forEach {
+            styleLevel.bind(TEXT_LINKS, it, SwitchColorThumbAdapter())
+            styleLevel.bind(TEXT_LINKS, it, SwitchDrawableColorAdapter())
+            styleLevel.bind(TEXT, it, SwitchColorAdapter())
+            styleLevel.bind(TEXT, it, TextViewColorAdapter())
+        }
+
+        titles.forEach { styleLevel.bind(TEXT_HEADERS, it) }
     }
 
     /**
      * Apply settings from profile to switches
      */
-    private fun populateUI() {
+    private fun setupUI() {
         toolbar.setTitle(R.string.profile_settings)
         toolbar.navigationIcon = DrawerArrowDrawable(activity).apply { progress = 1.0f }
         toolbar.setNavigationOnClickListener { fragmentManager?.popBackStack() }
@@ -99,11 +142,10 @@ class ProfilePreferencesFragment: Fragment() {
             applySettings(view)
         }
 
-        reactionsInBlog.isChecked = !profile.settings.reactions.disableInBlog
-        //reactionsInBlog.isEnabled = reactionsGlobal.isChecked
-        reactionsInBlog.isEnabled = false
+        reactionsInBlog.isChecked = !profile.settings.reactions.disabledInBlog
+        reactionsInBlog.isEnabled = reactionsGlobal.isChecked
         reactionsInBlog.setOnCheckedChangeListener { view, isChecked ->
-            profile.settings.reactions.disableInBlog = !isChecked
+            profile.settings.reactions.disabledInBlog = !isChecked
             applySettings(view)
         }
     }

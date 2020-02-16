@@ -1,4 +1,4 @@
-package com.kanedias.dybr.fair.ui
+package com.kanedias.dybr.fair.markdown
 
 import android.Manifest
 import android.app.Activity
@@ -30,16 +30,12 @@ import androidx.preference.PreferenceManager
 import butterknife.BindView
 import butterknife.ButterKnife
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.SimpleTarget
-import com.bumptech.glide.request.target.Target.SIZE_ORIGINAL
 import com.bumptech.glide.request.transition.Transition
 import com.ftinc.scoop.binding.AbstractBinding
 import com.kanedias.dybr.fair.BuildConfig
 import com.kanedias.dybr.fair.Network
 import com.kanedias.dybr.fair.R
-import com.kanedias.dybr.fair.misc.styleLevel
-import com.kanedias.dybr.fair.themes.TEXT
 import com.kanedias.html2md.Html2Markdown
 import com.stfalcon.imageviewer.StfalconImageViewer
 import io.noties.markwon.Markwon
@@ -47,7 +43,6 @@ import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.noties.markwon.html.HtmlPlugin
 import io.noties.markwon.image.AsyncDrawableScheduler
 import io.noties.markwon.image.AsyncDrawableSpan
-import io.noties.markwon.image.DrawableUtils
 import io.noties.markwon.image.glide.GlideImagesPlugin
 import io.noties.markwon.utils.NoCopySpannableFactory
 import kotlinx.coroutines.Dispatchers
@@ -86,27 +81,9 @@ fun mdRendererFrom(ctx: Context): Markwon {
 fun mdRendererFrom(txt: TextView): Markwon {
     return Markwon.builder(txt.context)
             .usePlugin(HtmlPlugin.create())
-            .usePlugin(GlideImagesPlugin.create(txt.context))
-            .usePlugin(GlideImagesPlugin.create(
-                    Glide.with(txt.context)
-                         .applyDefaultRequestOptions(RequestOptions()
-                                 .centerInside()
-                                 .override(txt.context.resources.displayMetrics.widthPixels, SIZE_ORIGINAL)
-                                 .placeholder(wrapStyleDrawable(txt, R.drawable.image))
-                                 .error(wrapStyleDrawable(txt, R.drawable.image_broken)))))
+            .usePlugin(GlideImagesPlugin.create(GlideGifSupportStore(txt)))
             .usePlugin(StrikethroughPlugin.create())
             .build()
-}
-
-/**
- * Style placeholder drawables
- */
-@Suppress("DEPRECATION")
-fun wrapStyleDrawable(view: View, image: Int): Drawable {
-    val drawable = view.context.resources.getDrawable(image).mutate()
-    DrawableUtils.applyIntrinsicBoundsIfEmpty(drawable)
-    view.styleLevel?.bind(TEXT, DrawableBinding(drawable, TEXT))
-    return drawable
 }
 
 /**
@@ -159,7 +136,7 @@ val MORE_TAG_START_REGEX = Regex(MORE_TAG_START_PATTERN, RegexOption.DOT_MATCHES
 val MORE_TAG_END_REGEX = Regex(MORE_TAG_END_PATTERN, RegexOption.DOT_MATCHES_ALL)
 
 // starting ,* is required to capture only inner MORE, see https://regex101.com/r/zbpWUK/1
-val MORE_FULL_REGEX = Regex("(${MORE_START_PATTERN}(.*?)${MORE_END_PATTERN})", RegexOption.DOT_MATCHES_ALL)
+val MORE_FULL_REGEX = Regex("($MORE_START_PATTERN(.*?)$MORE_END_PATTERN)", RegexOption.DOT_MATCHES_ALL)
 
 /**
  * Post-process spans like MORE or image loading
@@ -208,8 +185,7 @@ fun postProcessDrawables(spanned: SpannableStringBuilder, view: TextView) {
                 overlay.update(imgSpans[index])
 
                 StfalconImageViewer.Builder<AsyncDrawableSpan>(view.context, imgSpans) { view, span ->
-                    val base = HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT) ?: return@Builder
-                    val resolved = base.resolve(span.drawable.destination) ?: return@Builder
+                    val resolved = Network.resolve(span.drawable.destination) ?: return@Builder
                     Glide.with(view).load(resolved.toString()).into(view)
                 }
                         .withOverlayView(overlay)
@@ -364,8 +340,7 @@ class ImageShowOverlay(ctx: Context,
     }
 
     fun update(span: AsyncDrawableSpan) {
-        val base = HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT) ?: return
-        val resolved = base.resolve(span.drawable.destination) ?: return
+        val resolved = Network.resolve(span.drawable.destination) ?: return
 
         // share button: share the image using file provider
         share.setOnClickListener {

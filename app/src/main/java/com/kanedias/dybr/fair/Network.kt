@@ -3,10 +3,11 @@ package com.kanedias.dybr.fair
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
-import android.preference.PreferenceManager
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
+import androidx.preference.PreferenceManager
 import com.kanedias.dybr.fair.database.entities.Account
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
@@ -77,22 +78,21 @@ import java.lang.IllegalStateException
 object Network {
 
     private const val USER_AGENT = "Fair ${BuildConfig.VERSION_NAME}"
-    private const val DEFAULT_DYBR_API_ENDPOINT = "https://dybr.ru/v2"
+    private const val DEFAULT_DYBR_API_ENDPOINT = "https://dybr.ru/v2/"
 
-    var MAIN_DYBR_API_ENDPOINT = DEFAULT_DYBR_API_ENDPOINT
-
-    private val IMG_UPLOAD_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/image-upload"
-    private var USERS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/users"
-    private var SESSIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/sessions"
-    private var PROFILES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/profiles"
-    private var BLOGS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/blogs"
-    private var ENTRIES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/entries"
-    private var COMMENTS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/comments"
-    private var NOTIFICATIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/notifications"
-    private var BOOKMARKS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/bookmarks"
-    private var REACTIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/reactions"
-    private var REACTION_SETS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/reaction-sets"
-    private var ACTION_LISTS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/lists"
+    lateinit var MAIN_DYBR_API_ENDPOINT: HttpUrl
+    lateinit var IMG_UPLOAD_ENDPOINT: String
+    lateinit var USERS_ENDPOINT: String
+    lateinit var SESSIONS_ENDPOINT: String
+    lateinit var PROFILES_ENDPOINT: String
+    lateinit var BLOGS_ENDPOINT: String
+    lateinit var ENTRIES_ENDPOINT: String
+    lateinit var COMMENTS_ENDPOINT: String
+    lateinit var NOTIFICATIONS_ENDPOINT: String
+    lateinit var BOOKMARKS_ENDPOINT: String
+    lateinit var REACTIONS_ENDPOINT: String
+    lateinit var REACTION_SETS_ENDPOINT: String
+    lateinit var ACTION_LISTS_ENDPOINT: String
 
     private val MIME_JSON_API = MediaType.parse("application/vnd.api+json")
 
@@ -149,8 +149,9 @@ object Network {
                 .build())
     }
 
-    lateinit var httpClient: OkHttpClient
+    private lateinit var httpClient: OkHttpClient
 
+    @UiThread
     fun init(ctx: Context) {
 
         // reinitialize endpoints
@@ -172,32 +173,42 @@ object Network {
                 .build()
     }
 
+    @UiThread
     private fun setupEndpoints(ctx: Context, pref: SharedPreferences) {
         val endpoint = pref.getString("home-server", DEFAULT_DYBR_API_ENDPOINT)!!
 
         // endpoint itself must be valid url
         val valid = HttpUrl.parse(endpoint)
-        if (valid == null) {
+        if (valid == null || !endpoint.endsWith("/")) {
             // url is invalid
             Toast.makeText(ctx, R.string.invalid_dybr_endpoint, Toast.LENGTH_SHORT).show()
-            MAIN_DYBR_API_ENDPOINT = DEFAULT_DYBR_API_ENDPOINT
+            MAIN_DYBR_API_ENDPOINT = HttpUrl.parse(DEFAULT_DYBR_API_ENDPOINT)!!
             pref.edit().putString("home-server", DEFAULT_DYBR_API_ENDPOINT).apply()
         } else {
             // url is valid, proceed
-            MAIN_DYBR_API_ENDPOINT = endpoint
+            MAIN_DYBR_API_ENDPOINT = HttpUrl.parse(endpoint)!!
         }
 
-        USERS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/users"
-        SESSIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/sessions"
-        PROFILES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/profiles"
-        BLOGS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/blogs"
-        ENTRIES_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/entries"
-        COMMENTS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/comments"
-        NOTIFICATIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/notifications"
-        BOOKMARKS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/bookmarks"
-        REACTIONS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/reactions"
-        REACTION_SETS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/reaction-sets"
-        ACTION_LISTS_ENDPOINT = "$MAIN_DYBR_API_ENDPOINT/lists"
+        IMG_UPLOAD_ENDPOINT = resolve("image-upload")!!.toString()
+        USERS_ENDPOINT = resolve("users")!!.toString()
+        SESSIONS_ENDPOINT = resolve("sessions")!!.toString()
+        PROFILES_ENDPOINT = resolve("profiles")!!.toString()
+        BLOGS_ENDPOINT = resolve("blogs")!!.toString()
+        ENTRIES_ENDPOINT = resolve("entries")!!.toString()
+        COMMENTS_ENDPOINT = resolve("comments")!!.toString()
+        NOTIFICATIONS_ENDPOINT = resolve("notifications")!!.toString()
+        BOOKMARKS_ENDPOINT = resolve("bookmarks")!!.toString()
+        REACTIONS_ENDPOINT = resolve("reactions")!!.toString()
+        REACTION_SETS_ENDPOINT = resolve("reaction-sets")!!.toString()
+        ACTION_LISTS_ENDPOINT = resolve("lists")!!.toString()
+    }
+
+    @UiThread
+    fun resolve(url: String?): HttpUrl? {
+        if (url.isNullOrEmpty())
+            return null
+
+        return MAIN_DYBR_API_ENDPOINT.resolve(url)
     }
 
     /**

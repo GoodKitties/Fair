@@ -17,6 +17,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.kanedias.dybr.fair.dto.Authored
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.misc.getTopFragment
+import com.kanedias.dybr.fair.themes.showThemed
 import com.kanedias.dybr.fair.ui.showToastAtView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -90,7 +91,7 @@ abstract class UserContentViewHolder<T: Authored>(iv: View, val parentFragment: 
                 .message(R.string.loading_profile)
 
         parentFragment.lifecycleScope.launch {
-            dialog.show()
+            dialog.showThemed(parentFragment.styleLevel)
 
             try {
                 val prof = withContext(Dispatchers.IO) { Network.loadProfile(partialProf.id) }

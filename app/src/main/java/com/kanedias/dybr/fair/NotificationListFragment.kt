@@ -91,7 +91,7 @@ open class NotificationListFragment: UserContentListFragment() {
                 .message(R.string.mark_all_notifications_read)
                 .negativeButton(android.R.string.cancel)
                 .positiveButton(android.R.string.yes, click = { markRoutine() })
-                .show()
+                .showThemed(styleLevel)
     }
 
     open fun setupUI() {

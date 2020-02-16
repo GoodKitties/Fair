@@ -5,7 +5,6 @@ import android.content.SharedPreferences
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.os.Bundle
-import android.preference.PreferenceManager
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
@@ -23,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cursoradapter.widget.SimpleCursorAdapter
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import butterknife.BindView
@@ -327,8 +327,8 @@ class MainActivity : AppCompatActivity() {
         return cursor
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
             R.id.menu_donate -> donateHelper.donate()
             R.id.menu_settings -> startActivity(Intent(this, SettingsActivity::class.java))
             R.id.menu_about -> showFullscreenFragment(AboutFragment())
@@ -376,7 +376,7 @@ class MainActivity : AppCompatActivity() {
                     .cancelable(false)
                     .title(R.string.please_wait)
                     .message(R.string.logging_in)
-            progressDialog.show()
+            progressDialog.showThemed(styleLevel)
             try {
                 // login with this account and reset profile/blog links
                 withContext(Dispatchers.IO) { Network.login(acc) }
@@ -456,7 +456,7 @@ class MainActivity : AppCompatActivity() {
                             .message(R.string.return_to_notifications)
                             .negativeButton(android.R.string.cancel)
                             .positiveButton(android.R.string.ok, click = { backToNotifications() })
-                            .show()
+                            .showThemed(styleLevel)
                 } else {
                     backToNotifications()
                 }
@@ -540,7 +540,7 @@ class MainActivity : AppCompatActivity() {
                     .title(R.string.switch_profile)
                     .message(R.string.no_profiles_create_one)
                     .positiveButton(R.string.create_new, click = { addProfile() })
-                    .show()
+                    .showThemed(styleLevel)
             return
         }
 
@@ -775,7 +775,7 @@ class MainActivity : AppCompatActivity() {
                             .positiveButton(R.string.confirm, click = {
                                 removeItem(pos)
                                 deleteProfile(prof)
-                            }).show()
+                            }).showThemed(styleLevel)
                 }
 
                 itemView.setOnClickListener {

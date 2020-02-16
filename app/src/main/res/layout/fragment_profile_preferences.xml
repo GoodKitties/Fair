@@ -44,7 +44,7 @@
             android:layout_margin="8dp"
             android:padding="4dp">
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/new_posts_in_favorites_switch"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
@@ -55,7 +55,7 @@
                 android:text="@string/new_posts_in_favorites"
                 android:textSize="14sp"/>
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/new_comments_in_subscribed_switch"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
@@ -85,7 +85,7 @@
             android:layout_margin="8dp"
             android:padding="4dp">
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/participate_in_feed_switch"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
@@ -117,7 +117,7 @@
             android:layout_margin="8dp"
             android:padding="4dp">
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/reactions_global_switch"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
@@ -130,7 +130,7 @@
                 android:textOff="@string/disable_everywhere"
                 android:textSize="14sp"/>
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/reactions_in_blog_switch"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"

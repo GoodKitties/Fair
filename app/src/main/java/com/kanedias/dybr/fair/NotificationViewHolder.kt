@@ -14,8 +14,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import com.kanedias.dybr.fair.dto.Notification
 import com.kanedias.dybr.fair.dto.NotificationRequest
+import com.kanedias.dybr.fair.markdown.handleMarkdown
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
-import com.kanedias.dybr.fair.misc.styleLevel
 import com.kanedias.dybr.fair.scheduling.SyncNotificationsWorker
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.*

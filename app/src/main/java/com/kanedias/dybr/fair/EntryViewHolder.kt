@@ -12,7 +12,7 @@ import butterknife.BindViews
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
-import com.kanedias.dybr.fair.ui.handleMarkdown
+import com.kanedias.dybr.fair.markdown.handleMarkdown
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableStringBuilder
@@ -270,7 +270,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
                 .message(R.string.are_you_sure)
                 .negativeButton(android.R.string.no)
                 .positiveButton(android.R.string.yes, click = { delete() })
-                .show()
+                .showThemed(parentFragment.styleLevel)
     }
 
     @OnClick(R.id.entry_more_options)
@@ -281,7 +281,9 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
                 ctx.getString(R.string.share)
         )
 
-        if (parentFragment is EntryListFragment && parentFragment.profile === Auth.worldMarker) {
+        if (parentFragment is EntryListFragment
+                && Auth.user != Auth.guest
+                && parentFragment.profile === Auth.worldMarker) {
             // show hide-from-feed option
             items.add(ctx.getString(R.string.hide_author_from_feed))
         }
@@ -383,7 +385,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
             // disabled globally by current user
             Auth.profile?.settings?.reactions?.disable == true -> reactionButton.visibility = View.GONE
             // disabled in current blog by owner
-            profile.settings.reactions.disableInBlog -> reactionButton.visibility = View.GONE
+            profile.settings.reactions.disabledInBlog -> reactionButton.visibility = View.GONE
             // not authorized, can't add reactions
             Auth.profile == null -> reactionButton.visibility = View.GONE
             // enabled, show the button
@@ -463,7 +465,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
         reactionArea.removeAllViews()
 
         val reactionsDisabled = Auth.profile?.settings?.reactions?.disable == true
-        val reactionsDisabledInThisBlog = profile.settings.reactions.disableInBlog
+        val reactionsDisabledInThisBlog = profile.settings.reactions.disabledInBlog
 
         if (reactions.isEmpty() || reactionsDisabled || reactionsDisabledInThisBlog) {
             // no reactions for this entry or reactions disabled

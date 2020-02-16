@@ -45,10 +45,10 @@ fun String.colorFromCss() : Int? {
     if (!searcher.find()) {
         return null
     }
-    val rr = searcher.group(1).toInt()
-    val gg = searcher.group(2).toInt()
-    val bb = searcher.group(3).toInt()
-    val aa = (searcher.group(4).toFloat() * 255).toInt()
+    val rr = searcher.group(1)!!.toInt()
+    val gg = searcher.group(2)!!.toInt()
+    val bb = searcher.group(3)!!.toInt()
+    val aa = (searcher.group(4)!!.toFloat() * 255).toInt()
     return Color.argb(aa, rr, gg, bb)
 }
 

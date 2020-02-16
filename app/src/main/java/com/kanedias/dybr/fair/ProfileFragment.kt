@@ -7,19 +7,29 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import android.text.Html
+import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import butterknife.BindView
+import butterknife.BindViews
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
+import com.afollestad.materialdialogs.internal.button.DialogActionButton
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
+import com.ftinc.scoop.Scoop
+import com.ftinc.scoop.StyleLevel
+import com.ftinc.scoop.adapters.TextViewColorAdapter
 import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.dto.OwnProfile
 import com.kanedias.dybr.fair.misc.idMatches
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
+import com.kanedias.dybr.fair.themes.*
 import kotlinx.coroutines.*
 import okhttp3.HttpUrl
 import okhttp3.Request
@@ -49,12 +59,21 @@ class ProfileFragment: DialogFragment() {
     @BindView(R.id.author_add_to_favorites)
     lateinit var favoritesToggle: ImageView
 
+    @BindViews(
+            R.id.author_name_label,
+            R.id.author_registration_date_label,
+            R.id.author_blog_label
+    )
+    lateinit var labels: List<@JvmSuppressWildcards TextView>
+
     lateinit var profile: OwnProfile
 
     private lateinit var filledStar: Drawable
     private lateinit var emptyStar: Drawable
 
     private lateinit var activity: MainActivity
+
+    private lateinit var styleLevel: StyleLevel
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         savedInstanceState?.getSerializable("profile")?.let { profile = it as OwnProfile }
@@ -69,6 +88,31 @@ class ProfileFragment: DialogFragment() {
                 .title(R.string.view_profile)
                 .customView(view = view, scrollable = true)
                 .positiveButton(android.R.string.ok)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setupTheming(dialog as MaterialDialog)
+    }
+
+    private fun setupTheming(dialog: MaterialDialog) {
+        styleLevel = Scoop.getInstance().addStyleLevel()
+        lifecycle.addObserver(styleLevel)
+
+        val dialogTitle = dialog.view.titleLayout.findViewById(R.id.md_text_title) as TextView
+        val okButton = dialog.view.buttonsLayout!!.findViewById(R.id.md_button_positive) as DialogActionButton
+
+        styleLevel.bind(TEXT_BLOCK, dialog.view, BackgroundNoAlphaAdapter())
+        styleLevel.bind(TEXT_HEADERS, dialogTitle, TextViewColorAdapter())
+        styleLevel.bind(TEXT_LINKS, okButton, MaterialDialogButtonAdapter())
+
+        styleLevel.bind(TEXT, authorName)
+        styleLevel.bind(TEXT, registrationDate)
+        styleLevel.bind(TEXT, authorBlog)
+        styleLevel.bind(TEXT_LINKS, authorBlog, TextViewLinksAdapter())
+        styleLevel.bind(TEXT_LINKS, favoritesToggle)
+
+        labels.forEach { styleLevel.bind(TEXT, it) }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -96,22 +140,13 @@ class ProfileFragment: DialogFragment() {
         val avatarUrl = profile.settings.avatar
         if (!avatarUrl.isNullOrBlank()) {
             // resolve URL if it's not absolute
-            val base = HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT) ?: return
-            val resolved = base.resolve(avatarUrl) ?: return
+            val resolved = Network.resolve(avatarUrl) ?: return
 
             // load avatar asynchronously
-            lifecycleScope.launch {
-                try {
-                    val req = Request.Builder().url(resolved).build()
-                    val bitmap = withContext(Dispatchers.IO) {
-                        val resp = Network.httpClient.newCall(req).execute()
-                        BitmapFactory.decodeStream(resp.body()?.byteStream())
-                    }
-                    authorAvatar.setImageBitmap(bitmap)
-                } catch (ioex: IOException) {
-                    Network.reportErrors(context, ioex)
-                }
-            }
+            Glide.with(authorAvatar)
+                    .load(resolved.toString())
+                    .apply(RequestOptions().centerInside())
+                    .into(authorAvatar)
         } else {
             authorAvatar.setImageDrawable(ColorDrawable(activity.resources.getColor(R.color.md_grey_600)))
         }

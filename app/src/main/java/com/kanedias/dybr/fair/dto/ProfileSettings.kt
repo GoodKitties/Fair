@@ -91,14 +91,14 @@ data class NotificationConfig(
  * ```
  */
 data class ReactionConfig(
-        @field:Json(name = "disable")
+        @field:Json(name = "hide")
         var disable: Boolean = false,
 
         @field:Json(name = "use-images")
         var useImages: Boolean = false,
 
-        @field:Json(name = "disable-in-blog")
-        var disableInBlog: Boolean = false
+        @field:Json(name = "disabled-in-blog")
+        var disabledInBlog: Boolean = false
 ) : Serializable
 
 /**

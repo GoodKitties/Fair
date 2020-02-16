@@ -2,6 +2,7 @@ package com.kanedias.dybr.fair.themes
 
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.TransitionDrawable
@@ -17,12 +18,12 @@ import androidx.appcompat.widget.AppCompatSpinner
 import androidx.cardview.widget.CardView
 import androidx.appcompat.widget.Toolbar
 import android.view.View
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.widget.SearchView
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.view.MenuItemCompat
+import androidx.core.widget.TextViewCompat
+import com.afollestad.materialdialogs.internal.button.DialogActionButton
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.CustomViewTarget
@@ -35,7 +36,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import okhttp3.HttpUrl
 
 /**
  * @author Kanedias
@@ -64,11 +64,11 @@ class BackgroundDelayedAdapter(private val url: String): ColorAdapter<View> {
     }
 
     override fun applyColor(view: View, @ColorInt color: Int) {
-        if (url.isBlank() || view.background is TransitionDrawable)
+        // don't apply if we're already in progress or have bg set
+        if (url.isBlank() || view.background is BitmapDrawable || view.background is TransitionDrawable)
             return
 
-        val base = HttpUrl.parse(Network.MAIN_DYBR_API_ENDPOINT) ?: return
-        val resolved = base.resolve(url) ?: return
+        val resolved = Network.resolve(url) ?: return
 
         Glide.with(view)
                 .load(resolved.toString())
@@ -91,7 +91,6 @@ class BackgroundDelayedAdapter(private val url: String): ColorAdapter<View> {
         }
 
         override fun onLoadFailed(errorDrawable: Drawable?) {
-
         }
 
         override fun onResourceCleared(placeholder: Drawable?) {
@@ -382,6 +381,88 @@ class BackgroundNoAlphaAdapter: ColorAdapter<View> {
         val bg = view.background
         return (bg as? ColorDrawable)?.color ?: Color.TRANSPARENT
     }
+}
+
+class SwitchDrawableColorAdapter: ColorAdapter<SwitchCompat> {
+
+    override fun applyColor(view: SwitchCompat, color: Int) {
+        TextViewCompat.setCompoundDrawableTintList(view,
+            ColorStateList(
+                arrayOf(
+                        intArrayOf(-android.R.attr.state_enabled),
+                        intArrayOf(-android.R.attr.state_checked),
+                        intArrayOf()
+                ),
+                intArrayOf(
+                        ColorUtils.setAlphaComponent(color, 127),
+                        ColorUtils.blendARGB(color, Color.BLACK, 0.5f),
+                        color
+                )
+            )
+        )
+    }
+
+    override fun getColor(view: SwitchCompat): Int {
+        return TextViewCompat.getCompoundDrawableTintList(view)?.defaultColor ?: Color.TRANSPARENT
+    }
+}
+
+class SwitchColorThumbAdapter: ColorAdapter<SwitchCompat> {
+
+    override fun applyColor(view: SwitchCompat, color: Int) {
+        view.thumbTintList = ColorStateList(
+                arrayOf(
+                        intArrayOf(-android.R.attr.state_enabled),
+                        intArrayOf(-android.R.attr.state_checked),
+                        intArrayOf()
+                ),
+                intArrayOf(
+                        ColorUtils.setAlphaComponent(color, 127),
+                        ColorUtils.blendARGB(color, Color.BLACK, 0.5f),
+                        color
+                )
+        )
+    }
+
+    override fun getColor(view: SwitchCompat): Int {
+        return view.thumbTintList?.defaultColor ?: Color.TRANSPARENT
+    }
+}
+
+class SwitchColorAdapter: ColorAdapter<SwitchCompat> {
+
+    override fun applyColor(view: SwitchCompat, color: Int) {
+        view.trackTintList = ColorStateList(
+                arrayOf(
+                        intArrayOf(-android.R.attr.state_checked),
+                        intArrayOf(-android.R.attr.state_enabled),
+                        intArrayOf()
+                ),
+                intArrayOf(
+                        ColorUtils.blendARGB(color, Color.BLACK, 0.5f),
+                        ColorUtils.blendARGB(color, Color.BLACK, 0.5f),
+                        color
+                )
+        )
+    }
+
+    override fun getColor(view: SwitchCompat): Int {
+        return view.trackTintList?.defaultColor ?: Color.TRANSPARENT
+    }
+}
+
+/**
+ * Material dialog button gains color on measure, we have to delay our own color set
+ */
+class MaterialDialogButtonAdapter: ColorAdapter<DialogActionButton> {
+
+    override fun applyColor(view: DialogActionButton, color: Int) {
+        // TODO: hack, better make animation duration more usable in scoop
+        view.postDelayed({ view.updateTextColor(color) }, 100)
+        view.updateTextColor(color)
+    }
+
+    override fun getColor(view: DialogActionButton) = view.textColors.defaultColor
 }
 
 class TabLayoutTextAdapter: ColorAdapter<TabLayout> {
