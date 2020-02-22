@@ -1,5 +1,6 @@
 package com.kanedias.dybr.fair.dto
 
+import com.kanedias.dybr.fair.Network
 import com.squareup.moshi.Json
 import moe.banana.jsonapi2.*
 
@@ -169,13 +170,37 @@ class EntryResponse: Authored() {
  * e.g. number of comments and commenting participants
  */
 class EntryMeta {
+    @field:Json(name = "commenters")
     var commenters = 0
+
+    @field:Json(name = "comments")
     var comments = 0
+
+    @field:Json(name = "pinned")
+    var pinned: Boolean? = null
+
+    @field:Json(name = "can-comment")
+    var canComment: Boolean? = null
+
+    @field:Json(name = "subscribed")
     var subscribed: Boolean? = null
+
+    @field:Json(name = "bookmark")
     var bookmark: Boolean? = null
 }
 
 typealias Entry = EntryResponse
 
-val Entry?.writable: Boolean
-    get() = Auth.profile != null
+fun isEntryWritable(entry: Entry?): Boolean {
+    if (entry == null)
+        return false
+
+    if (Auth.profile == null)
+        return false
+
+    val meta = Network.bufferToObject<EntryMeta>(entry.meta)
+    if (meta?.canComment == false)
+        return false
+
+    return true
+}

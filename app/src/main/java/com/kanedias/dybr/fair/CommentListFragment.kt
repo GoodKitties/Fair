@@ -14,10 +14,7 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.ftinc.scoop.Scoop
-import com.kanedias.dybr.fair.dto.Auth
-import com.kanedias.dybr.fair.dto.Comment
-import com.kanedias.dybr.fair.dto.Entry
-import com.kanedias.dybr.fair.dto.writable
+import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.misc.getTopFragment
@@ -88,7 +85,7 @@ class CommentListFragment : UserContentListFragment() {
         ribbonRefresher.setOnRefreshListener { loadMore(reset = true) }
         commentRibbon.adapter = commentAdapter
 
-        if (!entry.writable) // guests can't post comments
+        if (!isEntryWritable(entry))
             addCommentButton.visibility = View.GONE
     }
 
@@ -144,10 +141,10 @@ class CommentListFragment : UserContentListFragment() {
                     // we changed notifications, update fragment with them if present
                     val notifFragment = activity.getTopFragment(NotificationListFragment::class)
                     notifFragment?.loadMore(reset = true)
-
-                    // update android notifications
-                    SyncNotificationsWorker.markReadFor(activity, entry!!.id)
                 }
+
+                // update android notifications
+                SyncNotificationsWorker.markReadFor(activity, entry!!.id)
             } catch (ex: Exception) {
                 Network.reportErrors(context, ex)
             }
