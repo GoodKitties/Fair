@@ -69,6 +69,13 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/prof_community_marker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:text="@string/profile_belongs_to_community"/>
+
     <Button
         android:id="@+id/prof_create_button"
         android:layout_width="match_parent"

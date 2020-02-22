@@ -54,6 +54,13 @@ class ProfileCreateRequest: Resource() {
     var blogTitle: String? = null
 
     /**
+     * Community marker. If true, the profile belongs to a community,
+     * and anyone participating can post there.
+     */
+    @field:Json(name = "is-community")
+    var isCommunity: Boolean = false
+
+    /**
      * Preferences structure for this profile
      */
     @field:Json(name = "settings")
@@ -149,6 +156,13 @@ class ProfileResponse : Dated() {
     var readers = HasMany<OwnProfile>()
 
     /**
+     * Community marker. If true, the profile belongs to a community,
+     * and anyone participating can post there.
+     */
+    @field:Json(name = "is-community")
+    var isCommunity: Boolean = false
+
+    /**
      * Link to the subscribers of this profile
      */
     @field:Json(name = "favorites")
@@ -162,5 +176,17 @@ data class Tag(
 
 typealias OwnProfile = ProfileResponse
 
-fun isBlogWritable(profile: OwnProfile?) = profile?.blogSlug != null && profile == Auth.profile
+fun isBlogWritable(profile: OwnProfile?): Boolean {
+    if (profile?.blogSlug == null)
+        return false
+
+    if (profile == Auth.profile)
+        return true
+
+    if (profile.isCommunity)
+        return true
+
+    return false
+}
+
 fun isMarkerBlog(profile: OwnProfile?) = profile == Auth.favoritesMarker || profile == Auth.worldMarker

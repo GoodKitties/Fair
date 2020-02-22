@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
@@ -34,6 +35,9 @@ class AddProfileFragment: Fragment() {
     @BindView(R.id.prof_description_input)
     lateinit var descInput: EditText
 
+    @BindView(R.id.prof_community_marker)
+    lateinit var communityMarker: CheckBox
+
     private lateinit var activity: MainActivity
 
     private lateinit var progressDialog: MaterialDialog
@@ -56,6 +60,7 @@ class AddProfileFragment: Fragment() {
             nickname = nicknameInput.text.toString()
             birthday = birthdayInput.text.toString()
             description = descInput.text.toString()
+            isCommunity = communityMarker.isChecked
         }
 
         lifecycleScope.launch {

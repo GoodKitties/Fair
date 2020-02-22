@@ -231,4 +231,5 @@
     <string name="hide_author_from_feed">Скрыть этого автора из ленты</string>
     <string name="author_hidden_from_feed">Автор скрыт из ленты</string>
     <string name="reason">Причина</string>
+    <string name="profile_belongs_to_community">Профиль принадлежит сообществу</string>
 </resources>
