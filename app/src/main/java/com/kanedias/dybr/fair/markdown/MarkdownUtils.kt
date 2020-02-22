@@ -136,7 +136,7 @@ val MORE_TAG_START_REGEX = Regex(MORE_TAG_START_PATTERN, RegexOption.DOT_MATCHES
 val MORE_TAG_END_REGEX = Regex(MORE_TAG_END_PATTERN, RegexOption.DOT_MATCHES_ALL)
 
 // starting ,* is required to capture only inner MORE, see https://regex101.com/r/zbpWUK/1
-val MORE_FULL_REGEX = Regex("($MORE_START_PATTERN(.*?)$MORE_END_PATTERN)", RegexOption.DOT_MATCHES_ALL)
+val MORE_FULL_REGEX = Regex(".*($MORE_START_PATTERN(.*?)$MORE_END_PATTERN)", RegexOption.DOT_MATCHES_ALL)
 
 /**
  * Post-process spans like MORE or image loading
