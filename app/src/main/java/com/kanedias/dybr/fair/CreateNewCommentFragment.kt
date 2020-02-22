@@ -188,8 +188,14 @@ class CreateNewCommentFragment : Fragment() {
 
         val comment = CreateCommentRequest().apply { content = markdownToHtml(contentInput.text.toString()) }
 
+        val progressDialog = MaterialDialog(requireContext())
+                .title(R.string.please_wait)
+                .message(R.string.submitting)
+
         // make http request
         lifecycleScope.launch {
+            progressDialog.showThemed(styleLevel)
+
             try {
                 // if we have current comment list, refresh it
                 val frgPredicate = { it: Fragment -> it is UserContentListFragment }
@@ -216,6 +222,8 @@ class CreateNewCommentFragment : Fragment() {
                     Network.reportErrors(context, ex)
                 }
             }
+
+            progressDialog.dismiss()
         }
     }
 

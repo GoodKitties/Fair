@@ -16,6 +16,7 @@ import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.database.entities.Account
 import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.dto.RegisterRequest
+import com.kanedias.dybr.fair.themes.showThemed
 import com.kanedias.dybr.fair.ui.Sidebar
 import kotlinx.coroutines.*
 
@@ -61,22 +62,14 @@ class AddAccountFragment : Fragment() {
     @BindViews(R.id.acc_email, R.id.acc_password)
     lateinit var loginInputs: List<@JvmSuppressWildcards View>
 
-    private lateinit var progressDialog: MaterialDialog
+    private lateinit var activity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = inflater.inflate(R.layout.fragment_create_account, container, false)
         ButterKnife.bind(this, view)
-
-        progressDialog = MaterialDialog(requireContext())
-                .title(R.string.please_wait)
-                .message(R.string.checking_in_progress)
+        activity = context as MainActivity
 
         return view
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        progressDialog.dismiss()
     }
 
     /**
@@ -127,8 +120,12 @@ class AddAccountFragment : Fragment() {
             current = true
         }
 
+        val progressDialog = MaterialDialog(requireContext())
+                .title(R.string.please_wait)
+                .message(R.string.checking_in_progress)
+
         lifecycleScope.launch {
-            progressDialog.show()
+            progressDialog.showThemed(activity.styleLevel)
 
             try {
                 withContext(Dispatchers.IO) { Network.login(acc) }
@@ -136,7 +133,7 @@ class AddAccountFragment : Fragment() {
                 Toast.makeText(requireContext(), R.string.login_successful, Toast.LENGTH_SHORT).show()
                 if (Auth.user.lastProfileId.isNullOrBlank() || Auth.user.lastProfileId == "0") {
                     // user doesn't have active profile, select one
-                    (activity as MainActivity).startProfileSelector() // shows profile selection dialog
+                    activity.startProfileSelector() // shows profile selection dialog
                 }
 
                 //we logged in successfully, return to main activity
@@ -153,7 +150,7 @@ class AddAccountFragment : Fragment() {
                 Network.reportErrors(ctx = context, ex = ex, detailMapping = errorMap)
             }
 
-            progressDialog.hide()
+            progressDialog.dismiss()
         }
     }
 
@@ -170,8 +167,12 @@ class AddAccountFragment : Fragment() {
             isAdult = isAdultSwitch.isChecked
         }
 
+        val progressDialog = MaterialDialog(requireContext())
+                .title(R.string.please_wait)
+                .message(R.string.checking_in_progress)
+
         lifecycleScope.launch {
-            progressDialog.show()
+            progressDialog.showThemed(activity.styleLevel)
 
             try {
                 val response = withContext(Dispatchers.IO) { Network.createAccount(req) }
@@ -210,7 +211,7 @@ class AddAccountFragment : Fragment() {
                 Network.reportErrors(ctx = requireContext(), ex = ex, detailMapping = errorMap)
             }
 
-            progressDialog.hide()
+            progressDialog.dismiss()
         }
     }
 
@@ -219,6 +220,6 @@ class AddAccountFragment : Fragment() {
      */
     private fun handleSuccess() {
         requireFragmentManager().popBackStack()
-        (activity as MainActivity).refresh()
+        activity.refresh()
     }
 }

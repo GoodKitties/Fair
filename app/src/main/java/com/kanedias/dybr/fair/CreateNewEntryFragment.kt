@@ -299,8 +299,14 @@ class CreateNewEntryFragment : Fragment() {
             settings = RecordSettings(permissions = RecordPermissions(listOfNotNull(access)))
         }
 
+        val progressDialog = MaterialDialog(requireContext())
+                .title(R.string.please_wait)
+                .message(R.string.submitting)
+
         // make http request
         lifecycleScope.launch {
+            progressDialog.showThemed(styleLevel)
+
             try {
                 if (editMode) {
                     // alter existing entry
@@ -345,6 +351,8 @@ class CreateNewEntryFragment : Fragment() {
                     Network.reportErrors(context, ex)
                 }
             }
+
+            progressDialog.dismiss()
         }
     }
 

@@ -67,6 +67,7 @@
     <string name="login_successful">Успешный вход</string>
     <string name="profile_not_found">Профиль не найден</string>
     <string name="loading">Загрузка…</string>
+    <string name="submitting">Отправка…</string>
     <string name="loading_profile">Загрузка профиля…</string>
     <string name="please_wait">Пожалуйста, подождите</string>
     <string name="logging_in">Вход…</string>
@@ -232,4 +233,5 @@
     <string name="author_hidden_from_feed">Автор скрыт из ленты</string>
     <string name="reason">Причина</string>
     <string name="profile_belongs_to_community">Профиль принадлежит сообществу</string>
+
 </resources>

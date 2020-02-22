@@ -15,6 +15,7 @@ import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.dto.ProfileCreateRequest
+import com.kanedias.dybr.fair.themes.showThemed
 import kotlinx.coroutines.*
 
 /**
@@ -40,16 +41,10 @@ class AddProfileFragment: Fragment() {
 
     private lateinit var activity: MainActivity
 
-    private lateinit var progressDialog: MaterialDialog
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = inflater.inflate(R.layout.fragment_create_profile, container, false)
         ButterKnife.bind(this, view)
         activity = context as MainActivity
-
-        progressDialog = MaterialDialog(activity)
-                .title(R.string.please_wait)
-                .message(R.string.checking_in_progress)
 
         return view
     }
@@ -63,8 +58,12 @@ class AddProfileFragment: Fragment() {
             isCommunity = communityMarker.isChecked
         }
 
+        val progressDialog = MaterialDialog(requireContext())
+                .title(R.string.please_wait)
+                .message(R.string.checking_in_progress)
+
         lifecycleScope.launch {
-            progressDialog.show()
+            progressDialog.showThemed(activity.styleLevel)
 
             try {
                 val profile = withContext(Dispatchers.IO) { Network.createProfile(profReq) }
@@ -77,7 +76,7 @@ class AddProfileFragment: Fragment() {
                 Network.reportErrors(context, ex, mapOf(422 to R.string.invalid_credentials))
             }
 
-            progressDialog.hide()
+            progressDialog.dismiss()
         }
     }
 

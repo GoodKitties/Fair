@@ -14,6 +14,7 @@ import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
 import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.dto.ProfileCreateRequest
+import com.kanedias.dybr.fair.themes.showThemed
 import kotlinx.coroutines.*
 
 /**
@@ -31,15 +32,12 @@ class AddBlogFragment: Fragment() {
     @BindView(R.id.blog_title_input)
     lateinit var titleInput: EditText
 
-    private lateinit var progressDialog: MaterialDialog
+    private lateinit var activity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = inflater.inflate(R.layout.fragment_create_blog, container, false)
         ButterKnife.bind(this, view)
-
-        progressDialog = MaterialDialog(requireContext())
-                .title(R.string.please_wait)
-                .message(R.string.checking_in_progress)
+        activity = context as MainActivity
 
         return view
     }
@@ -52,8 +50,12 @@ class AddBlogFragment: Fragment() {
             blogTitle = titleInput.text.toString()
         }
 
+        val progressDialog = MaterialDialog(requireContext())
+                .title(R.string.please_wait)
+                .message(R.string.checking_in_progress)
+
         lifecycleScope.launch {
-            progressDialog.show()
+            progressDialog.showThemed(activity.styleLevel)
 
             try {
                 val updated = withContext(Dispatchers.IO) { Network.updateProfile(profReq) }
@@ -66,7 +68,7 @@ class AddBlogFragment: Fragment() {
                 Network.reportErrors(context, ex)
             }
 
-            progressDialog.hide()
+            progressDialog.dismiss()
         }
     }
 
@@ -75,6 +77,6 @@ class AddBlogFragment: Fragment() {
      */
     private fun handleSuccess() {
         requireFragmentManager().popBackStack()
-        (activity as MainActivity).refresh()
+        activity.refresh()
     }
 }
