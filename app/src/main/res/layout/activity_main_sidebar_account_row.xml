@@ -17,6 +17,9 @@
         android:gravity="center_vertical"
         android:layout_alignParentBottom="true"
         android:text="@string/placeholder_short"
+        android:maxLines="1"
+        android:maxEms="10"
+        android:ellipsize="end"
         android:textSize="18sp"
         android:textStyle="bold" />
 
