@@ -23,8 +23,10 @@ import java.io.IOException
 import java.util.*
 import java.net.HttpURLConnection.*
 import okhttp3.RequestBody
+import okhttp3.internal.http.HttpMethod
 import org.json.JSONObject
 import java.lang.IllegalStateException
+import kotlin.random.Random
 
 
 /**
@@ -87,6 +89,7 @@ object Network {
     lateinit var PROFILES_ENDPOINT: String
     lateinit var BLOGS_ENDPOINT: String
     lateinit var ENTRIES_ENDPOINT: String
+    lateinit var FAVORITES_ENDPOINT: String
     lateinit var COMMENTS_ENDPOINT: String
     lateinit var NOTIFICATIONS_ENDPOINT: String
     lateinit var BOOKMARKS_ENDPOINT: String
@@ -141,6 +144,22 @@ object Network {
         return@Interceptor chain.proceed(authorisedReq)
     }
 
+    private val nonceHandler = Interceptor { chain ->
+        val origRequest = chain.request()
+        val alreadyHasNonce = origRequest.url().queryParameterNames().contains("nonce")
+
+        // skip if we already have auth header in request
+        if (alreadyHasNonce || !HttpMethod.requiresRequestBody(origRequest.method()))
+            return@Interceptor chain.proceed(origRequest)
+
+        val nonce = Random.nextInt().toString()
+        val enrichedReq  = origRequest.newBuilder()
+                .url(origRequest.url().newBuilder().addQueryParameter("nonce", nonce).build())
+                .build()
+
+        return@Interceptor chain.proceed(enrichedReq)
+    }
+
     private val userAgent = Interceptor { chain ->
         chain.proceed(chain
                 .request()
@@ -169,6 +188,7 @@ object Network {
                 .connectionPool(ConnectionPool())
                 .dispatcher(Dispatcher())
                 .addInterceptor(authorizer)
+                .addInterceptor(nonceHandler)
                 .addInterceptor(userAgent)
                 .build()
     }
@@ -195,6 +215,7 @@ object Network {
         PROFILES_ENDPOINT = resolve("profiles")!!.toString()
         BLOGS_ENDPOINT = resolve("blogs")!!.toString()
         ENTRIES_ENDPOINT = resolve("entries")!!.toString()
+        FAVORITES_ENDPOINT = resolve("favorites")!!.toString()
         COMMENTS_ENDPOINT = resolve("comments")!!.toString()
         NOTIFICATIONS_ENDPOINT = resolve("notifications")!!.toString()
         BOOKMARKS_ENDPOINT = resolve("bookmarks")!!.toString()
@@ -532,18 +553,8 @@ object Network {
                     starter: Long = System.currentTimeMillis() / 1000): ArrayDocument<Entry> {
         // handle special case when we selected tab with favorites
         val builder = when (prof) {
-            Auth.favoritesMarker -> { // workaround, filter entries by profile ids
-                val favProfiles = Auth.profile?.favorites?.joinToString(separator = ",", transform = { res -> res.id })
-                if (favProfiles.isNullOrBlank()) {
-                    HttpUrl.parse(ENTRIES_ENDPOINT)!!.newBuilder().addQueryParameter("filters[profile_id]", "0")
-                } else {
-                    HttpUrl.parse(ENTRIES_ENDPOINT)!!.newBuilder().addQueryParameter("filters[profile_id]", favProfiles)
-                }
-            }
-
-            Auth.worldMarker -> HttpUrl.parse(ENTRIES_ENDPOINT)!!.newBuilder()
-                    .addQueryParameter("filters[feed]", "1")
-
+            Auth.favoritesMarker -> HttpUrl.parse("$FAVORITES_ENDPOINT/${Auth.profile?.id}/entries")!!.newBuilder()
+            Auth.worldMarker -> HttpUrl.parse(ENTRIES_ENDPOINT)!!.newBuilder().addQueryParameter("filters[feed]", "1")
             null -> HttpUrl.parse(ENTRIES_ENDPOINT)!!.newBuilder()
             else -> HttpUrl.parse("$BLOGS_ENDPOINT/${prof.id}/entries")!!.newBuilder()
         }
