@@ -118,6 +118,12 @@ class ActionListResponse: Resource() {
     lateinit var kind: String
 
     /**
+     * Scope of the action
+     */
+    @field:Json(name = "scope")
+    lateinit var scope: String
+
+    /**
      * Name of this list item
      */
     @field:Json(name = "name")

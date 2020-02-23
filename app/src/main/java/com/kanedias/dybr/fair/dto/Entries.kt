@@ -57,7 +57,7 @@ class EntryCreateRequest : Resource() {
      * State of this entry. Variants: "draft", "published"
      */
     @field:Json(name = "state")
-    lateinit var state: String
+    var state: String = "published"
 
     /**
      * Settings for publishing this entry. Include feed settings, privacy controls
@@ -71,6 +71,13 @@ class EntryCreateRequest : Resource() {
     /**
      * Profile with blog this entry belongs to.
      * Must be set if it's new entry.
+     */
+    @field:Json(name = "profile")
+    var profile: HasOne<OwnProfile>? = null
+
+    /**
+     * Profile with blog this entry is posted to.
+     * Equals to [profile] if null.
      */
     @field:Json(name = "blog")
     var blog: HasOne<OwnProfile>? = null
@@ -163,6 +170,13 @@ class EntryResponse: Authored() {
      */
     @field:Json(name = "settings")
     var settings: RecordSettings? = null
+
+    /**
+     * Profile with blog this entry is posted to.
+     * Equals to [profile] if null.
+     */
+    @field:Json(name = "blog")
+    var blog: HasOne<OwnProfile>? = null
 }
 
 /**

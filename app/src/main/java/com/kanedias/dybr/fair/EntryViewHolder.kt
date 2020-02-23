@@ -303,6 +303,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
             val activity = itemView.context as AppCompatActivity
 
             val listItem = ActionListRequest().apply {
+                action = "hide"
                 scope = "feed"
                 name = reason
                 profiles.add(profile)
@@ -310,7 +311,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
 
             parentFragment.lifecycleScope.launch {
                 try {
-                    withContext(Dispatchers.IO) { Network.createActionList(listItem) }
+                    withContext(Dispatchers.IO) { Network.addToActionList(listItem) }
                     Toast.makeText(activity, R.string.author_hidden_from_feed, Toast.LENGTH_SHORT).show()
                     parentFragment.loadMore(reset = true)
                 } catch (ex: Exception) {

@@ -201,11 +201,17 @@
     <string name="world">World</string>
     <string name="user_avatar">User\'s avatar</string>
     <string name="author_name_label">Name:</string>
+    <string name="subtext">Subtext:</string>
     <string name="registration_date_label">Registration date:</string>
     <string name="blog_label">Blog:</string>
     <string name="view_profile">View profile</string>
     <string name="removed_from_favorites">Removed from favorites</string>
+    <string name="add_to_favorites">Add to favorites</string>
     <string name="added_to_favorites">Added to favorites</string>
+    <string name="ban_from_feed">Ban from feed</string>
+    <string name="unbanned_from_feed">Unbanned from feed</string>
+    <string name="banned_from_feed">Banned from feed</string>
+    <string name="ban">Ban</string>
     <string name="apply_blog_theme">Apply blog theme</string>
     <string name="apply_blog_theme_on">The application will take blog theme if it\'s available</string>
     <string name="apply_blog_theme_off">The application won\'t change its theme</string>
@@ -295,4 +301,6 @@
     <string name="author_hidden_from_feed">This author is hidden from feed</string>
     <string name="reason">Reason</string>
     <string name="profile_belongs_to_community">This profile belongs to community</string>
+    <string name="unbanned">Unbanned</string>
+    <string name="banned">Banned</string>
 </resources>

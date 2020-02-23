@@ -158,10 +158,16 @@
     <string name="user_avatar">Аватар пользователя</string>
     <string name="author_name_label">Имя:</string>
     <string name="registration_date_label">Дата регистрации:</string>
+    <string name="subtext">Подпись:</string>
     <string name="blog_label">Дневник:</string>
     <string name="view_profile">Посмотреть профиль</string>
     <string name="removed_from_favorites">Удалить из Избранного</string>
+    <string name="add_to_favorites">Добавить в избранное</string>
     <string name="added_to_favorites">Добавлено в Избранное</string>
+    <string name="ban_from_feed">Ban from feed</string>
+    <string name="unbanned_from_feed">Профиль возвращен в общую ленту</string>
+    <string name="banned_from_feed">Профиль убран из общей ленты</string>
+    <string name="ban">Ban</string>
     <string name="apply_blog_theme">Применить тему оформления дневника</string>
     <string name="apply_blog_theme_on">Приложение применит тему, если это возможно</string>
     <string name="apply_blog_theme_off">Приложение не будет изменять тему</string>
@@ -233,5 +239,6 @@
     <string name="author_hidden_from_feed">Автор скрыт из ленты</string>
     <string name="reason">Причина</string>
     <string name="profile_belongs_to_community">Профиль принадлежит сообществу</string>
+    <string name="unbanned">Unbanned</string>
 
 </resources>

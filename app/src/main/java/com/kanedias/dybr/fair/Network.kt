@@ -15,6 +15,8 @@ import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.misc.HttpApiException
 import com.kanedias.dybr.fair.misc.HttpException
 import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import moe.banana.jsonapi2.*
 import okhttp3.*
 import okio.BufferedSource
@@ -122,6 +124,7 @@ object Network {
             .add(Date::class.java, Rfc3339DateJsonAdapter())
             .build()
 
+    private lateinit var appCtx: Context
     private lateinit var prefChangeListener: OnSharedPreferenceChangeListener
 
     /**
@@ -172,6 +175,7 @@ object Network {
 
     @UiThread
     fun init(ctx: Context) {
+        appCtx = ctx
 
         // reinitialize endpoints
         val pref = PreferenceManager.getDefaultSharedPreferences(ctx)
@@ -914,8 +918,31 @@ object Network {
             throw extractErrors(resp, "Can't delete reaction ${myReaction.id}")
     }
 
-    fun createActionList(listItem: ActionListRequest): ActionListResponse {
+    fun removeFromActionList(list: ActionList, prof: OwnProfile) {
+        val req = Request.Builder()
+                .delete()
+                .url("$ACTION_LISTS_ENDPOINT/${list.id}/relationships/profiles/${prof.id}")
+                .build()
+
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful) {
+            throw extractErrors(resp, "Can't remove profile ${prof.id} from action list ${list.id}")
+        }
+    }
+
+    fun addToActionList(listItem: ActionListRequest): ActionListResponse {
         return createEntity(ACTION_LISTS_ENDPOINT, listItem)
+    }
+
+    fun loadActionLists(): MutableList<ActionList> {
+        val req = Request.Builder().url(ACTION_LISTS_ENDPOINT).build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful) {
+            throw extractErrors(resp, "Can't load action lists")
+        }
+
+        // response is returned after execute call, body is not null
+        return fromWrappedListJson(resp.body()!!.source(), ActionList::class.java)
     }
 
     private inline fun <reified S: ResourceIdentifier, reified R: ResourceIdentifier> createEntity(endpoint: String, entity: S): R {
@@ -952,6 +979,21 @@ object Network {
         // if response is successful we should have login response in body
         val respJson = JSONObject(resp.body()!!.string())
         return respJson.get("link") as String
+    }
+
+    /**
+     * Helper function to avoid long `try { ... } catch(...) { report }` blocks in code.
+     *
+     * @param networkAction action to be performed in background thread
+     * @param uiAction action to be performed after [networkAction], in UI thread
+     */
+    suspend fun <T> perform(networkAction: () -> T, uiAction: (input: T) -> Unit = {}) {
+        try {
+            val result = withContext(Dispatchers.IO) { networkAction() }
+            uiAction(result)
+        } catch (ex: Exception) {
+            reportErrors(appCtx, ex)
+        }
     }
 
     /**

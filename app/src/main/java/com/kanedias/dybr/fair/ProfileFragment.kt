@@ -1,14 +1,12 @@
 package com.kanedias.dybr.fair
 
 import android.app.Dialog
-import android.graphics.BitmapFactory
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import android.text.Html
 import android.view.View
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -25,14 +23,15 @@ import com.bumptech.glide.request.RequestOptions
 import com.ftinc.scoop.Scoop
 import com.ftinc.scoop.StyleLevel
 import com.ftinc.scoop.adapters.TextViewColorAdapter
+import com.kanedias.dybr.fair.dto.ActionList
+import com.kanedias.dybr.fair.dto.ActionListRequest
 import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.dto.OwnProfile
 import com.kanedias.dybr.fair.misc.idMatches
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.*
 import kotlinx.coroutines.*
-import okhttp3.HttpUrl
-import okhttp3.Request
+import moe.banana.jsonapi2.HasMany
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -50,6 +49,9 @@ class ProfileFragment: DialogFragment() {
     @BindView(R.id.author_name)
     lateinit var authorName: TextView
 
+    @BindView(R.id.author_subtext)
+    lateinit var authorSubtext: TextView
+
     @BindView(R.id.author_registration_date)
     lateinit var registrationDate: TextView
 
@@ -59,17 +61,31 @@ class ProfileFragment: DialogFragment() {
     @BindView(R.id.author_add_to_favorites)
     lateinit var favoritesToggle: ImageView
 
+    @BindView(R.id.author_feed_ban)
+    lateinit var feedBanToggle: ImageView
+
+    @BindView(R.id.author_ban)
+    lateinit var banToggle: ImageView
+
     @BindViews(
             R.id.author_name_label,
+            R.id.author_subtext_label,
             R.id.author_registration_date_label,
             R.id.author_blog_label
     )
     lateinit var labels: List<@JvmSuppressWildcards TextView>
 
     lateinit var profile: OwnProfile
+    var actionLists: MutableList<ActionList> = mutableListOf()
 
-    private lateinit var filledStar: Drawable
-    private lateinit var emptyStar: Drawable
+    private lateinit var accountFavorited: Drawable
+    private lateinit var accountUnfavorited: Drawable
+
+    private lateinit var accountFeedBanned: Drawable
+    private lateinit var accountFeedUnbanned: Drawable
+
+    private lateinit var accountBanned: Drawable
+    private lateinit var accountUnbanned: Drawable
 
     private lateinit var activity: MainActivity
 
@@ -107,10 +123,13 @@ class ProfileFragment: DialogFragment() {
         styleLevel.bind(TEXT_LINKS, okButton, MaterialDialogButtonAdapter())
 
         styleLevel.bind(TEXT, authorName)
+        styleLevel.bind(TEXT, authorSubtext)
         styleLevel.bind(TEXT, registrationDate)
         styleLevel.bind(TEXT, authorBlog)
         styleLevel.bind(TEXT_LINKS, authorBlog, TextViewLinksAdapter())
         styleLevel.bind(TEXT_LINKS, favoritesToggle)
+        styleLevel.bind(TEXT_LINKS, feedBanToggle)
+        styleLevel.bind(TEXT_LINKS, banToggle)
 
         labels.forEach { styleLevel.bind(TEXT, it) }
     }
@@ -122,11 +141,16 @@ class ProfileFragment: DialogFragment() {
 
     @Suppress("DEPRECATION") // we need to support API < 24 in Html.fromHtml and setImageDrawable
     private fun setupUI() {
-        filledStar = activity.resources.getDrawable(R.drawable.star_filled)
-        emptyStar = activity.resources.getDrawable(R.drawable.star_border)
+        accountFavorited = activity.resources.getDrawable(R.drawable.account_favorited)
+        accountUnfavorited = activity.resources.getDrawable(R.drawable.account_unfavorited)
+        accountFeedBanned = activity.resources.getDrawable(R.drawable.account_feed_banned)
+        accountFeedUnbanned = activity.resources.getDrawable(R.drawable.account_feed_unbanned)
+        accountBanned = activity.resources.getDrawable(R.drawable.account_banned)
+        accountUnbanned = activity.resources.getDrawable(R.drawable.account_unbanned)
 
         // set names and dates
         authorName.text = profile.nickname
+        authorSubtext.text = profile.settings.subtext
         registrationDate.text = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(profile.createdAt)
 
         if (profile.blogSlug != null) {
@@ -153,21 +177,151 @@ class ProfileFragment: DialogFragment() {
 
         // set favorite status
         when {
-            Auth.profile?.favorites?.any { it.idMatches(profile) } == true -> favoritesToggle.setImageDrawable(filledStar)
-            else -> favoritesToggle.setImageDrawable(emptyStar)
+            Auth.profile?.favorites?.any { it.idMatches(profile) } == true -> favoritesToggle.setImageDrawable(accountFavorited)
+            else -> favoritesToggle.setImageDrawable(accountUnfavorited)
+        }
+
+        // set feed banned status
+        lifecycleScope.launch {
+            Network.perform(
+                networkAction = { Network.loadActionLists() },
+                uiAction = { loaded ->
+                    actionLists = loaded
+                    setupActionLists()
+                }
+            )
+        }
+    }
+
+    private fun setupActionLists() {
+        val feedBanned = actionLists.filter { it.action == "hide" && it.scope == "feed" }
+                .flatMap { list -> list.profiles.get() }
+                .any { prof -> prof.idMatches(profile) }
+
+        feedBanToggle.visibility = View.VISIBLE
+        when {
+            feedBanned -> feedBanToggle.setImageDrawable(accountFeedBanned)
+            else -> feedBanToggle.setImageDrawable(accountFeedUnbanned)
+        }
+
+        val accBanned = actionLists.filter { it.action == "ban" && it.scope == "blog" }
+                .flatMap { list -> list.profiles.get() }
+                .any { prof -> prof.idMatches(profile) }
+
+        banToggle.visibility = View.VISIBLE
+        when {
+            accBanned -> banToggle.setImageDrawable(accountBanned)
+            else -> banToggle.setImageDrawable(accountUnbanned)
+        }
+    }
+
+    @OnClick(R.id.author_feed_ban)
+    fun toggleFeedBan() {
+        val feedBanned = actionLists.filter { it.action == "hide" && it.scope == "feed" }
+                                    .flatMap { list -> list.profiles.get() }
+                                    .any { prof -> prof.idMatches(profile) }
+
+        lifecycleScope.launch {
+            if (feedBanned) {
+                // remove from feed bans
+                val feedBanList = actionLists.first { it.action == "hide" && it.scope == "feed" }
+                Network.perform(
+                    networkAction = { Network.removeFromActionList(feedBanList, profile) },
+                    uiAction = {
+                        feedBanList.profiles.remove(profile)
+                        feedBanToggle.setImageDrawable(accountFeedUnbanned)
+                        Toast.makeText(activity, R.string.unbanned_from_feed, Toast.LENGTH_SHORT).show()
+                    }
+                )
+            } else {
+                // add to feed bans
+                val feedBanList = actionLists.firstOrNull { it.action == "hide" && it.scope == "feed" }
+                val feedBanReq = ActionListRequest().apply {
+                    kind = "profile"
+                    action = "hide"
+                    scope = "feed"
+                    profiles.add(profile)
+                }
+
+                Network.perform(
+                    networkAction = { Network.addToActionList(feedBanReq) },
+                    uiAction = {
+                        if (feedBanList != null) {
+                            feedBanList.profiles.add(profile)
+                        } else {
+                            actionLists.add(ActionList().apply {
+                                kind = "profile"
+                                action = "hide"
+                                scope = "feed"
+                                profiles = HasMany(profile)
+                            })
+                        }
+                        feedBanToggle.setImageDrawable(accountFeedBanned)
+                        Toast.makeText(activity, R.string.banned_from_feed, Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
+        }
+    }
+
+    @OnClick(R.id.author_ban)
+    fun toggleBan() {
+        val accBanned = actionLists.filter { it.action == "ban" && it.scope == "blog" }
+                .flatMap { list -> list.profiles.get() }
+                .any { prof -> prof.idMatches(profile) }
+
+        lifecycleScope.launch {
+            if (accBanned) {
+                // remove from bans
+                val banList = actionLists.first { it.action == "ban" && it.scope == "blog" }
+                Network.perform(
+                        networkAction = { Network.removeFromActionList(banList, profile) },
+                        uiAction = {
+                            banList.profiles.remove(profile)
+                            banToggle.setImageDrawable(accountUnbanned)
+                            Toast.makeText(activity, R.string.unbanned, Toast.LENGTH_SHORT).show()
+                        }
+                )
+            } else {
+                // add to bans
+                val banList = actionLists.firstOrNull { it.action == "ban" && it.scope == "blog" }
+                val banReq = ActionListRequest().apply {
+                    kind = "profile"
+                    action = "ban"
+                    scope = "blog"
+                    profiles.add(profile)
+                }
+
+                Network.perform(
+                        networkAction = { Network.addToActionList(banReq) },
+                        uiAction = {
+                            if (banList != null) {
+                                banList.profiles.add(profile)
+                            } else {
+                                actionLists.add(ActionList().apply {
+                                    kind = "profile"
+                                    action = "ban"
+                                    scope = "blog"
+                                    profiles = HasMany(profile)
+                                })
+                            }
+                            banToggle.setImageDrawable(accountBanned)
+                            Toast.makeText(activity, R.string.banned, Toast.LENGTH_SHORT).show()
+                        }
+                )
+            }
         }
     }
 
     @OnClick(R.id.author_add_to_favorites)
     fun toggleFavorite() {
-        // if it's clicked then it's visible
         lifecycleScope.launch {
             try {
                 if (Auth.profile?.favorites?.any { it.idMatches(profile) } == true) {
                     // remove from favorites
                     withContext(Dispatchers.IO) { Network.removeFavorite(profile) }
                     Auth.profile?.favorites?.remove(profile)
-                    favoritesToggle.setImageDrawable(emptyStar)
+                    favoritesToggle.setImageDrawable(accountUnfavorited)
                     Toast.makeText(activity, R.string.removed_from_favorites, Toast.LENGTH_SHORT).show()
                 } else {
                     // add to favorites
@@ -176,7 +330,7 @@ class ProfileFragment: DialogFragment() {
                         favorites.add(profile)
                         document.addInclude(profile)
                     }
-                    favoritesToggle.setImageDrawable(filledStar)
+                    favoritesToggle.setImageDrawable(accountFavorited)
                     Toast.makeText(activity, R.string.added_to_favorites, Toast.LENGTH_SHORT).show()
                 }
             } catch (ioex: IOException) {
