@@ -152,7 +152,7 @@ object Network {
         if (alreadyHasNonce || !HttpMethod.requiresRequestBody(origRequest.method()))
             return@Interceptor chain.proceed(origRequest)
 
-        val nonce = Random.nextInt().toString()
+        val nonce = Random.nextInt(0, Int.MAX_VALUE).toString()
         val enrichedReq  = origRequest.newBuilder()
                 .url(origRequest.url().newBuilder().addQueryParameter("nonce", nonce).build())
                 .build()
