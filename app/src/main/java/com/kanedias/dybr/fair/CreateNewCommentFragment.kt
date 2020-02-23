@@ -215,7 +215,7 @@ class CreateNewCommentFragment : Fragment() {
                     Toast.makeText(activity, R.string.comment_created, Toast.LENGTH_SHORT).show()
                     curFrg?.loadMore()
                 }
-                requireFragmentManager().popBackStack()
+                fragmentManager?.popBackStack()
             } catch (ex: Exception) {
                 // don't close the fragment, just report errors
                 if (isActive) {

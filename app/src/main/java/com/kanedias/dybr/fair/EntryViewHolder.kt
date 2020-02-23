@@ -385,7 +385,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
             // disabled globally by current user
             Auth.profile?.settings?.reactions?.disable == true -> reactionButton.visibility = View.GONE
             // disabled in current blog by owner
-            profile.settings.reactions.disabledInBlog -> reactionButton.visibility = View.GONE
+            profile.settings.reactions.disableInBlog -> reactionButton.visibility = View.GONE
             // not authorized, can't add reactions
             Auth.profile == null -> reactionButton.visibility = View.GONE
             // enabled, show the button
@@ -465,7 +465,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
         reactionArea.removeAllViews()
 
         val reactionsDisabled = Auth.profile?.settings?.reactions?.disable == true
-        val reactionsDisabledInThisBlog = profile.settings.reactions.disabledInBlog
+        val reactionsDisabledInThisBlog = profile.settings.reactions.disableInBlog
 
         if (reactions.isEmpty() || reactionsDisabled || reactionsDisabledInThisBlog) {
             // no reactions for this entry or reactions disabled

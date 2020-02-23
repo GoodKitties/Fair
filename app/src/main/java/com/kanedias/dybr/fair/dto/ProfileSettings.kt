@@ -97,8 +97,8 @@ data class ReactionConfig(
         @field:Json(name = "use-images")
         var useImages: Boolean = false,
 
-        @field:Json(name = "disabled-in-blog")
-        var disabledInBlog: Boolean = false
+        @field:Json(name = "disable-in-blog")
+        var disableInBlog: Boolean = false
 ) : Serializable
 
 /**

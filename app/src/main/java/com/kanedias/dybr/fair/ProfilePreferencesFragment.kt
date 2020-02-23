@@ -142,10 +142,10 @@ class ProfilePreferencesFragment: Fragment() {
             applySettings(view)
         }
 
-        reactionsInBlog.isChecked = !profile.settings.reactions.disabledInBlog
+        reactionsInBlog.isChecked = !profile.settings.reactions.disableInBlog
         reactionsInBlog.isEnabled = reactionsGlobal.isChecked
         reactionsInBlog.setOnCheckedChangeListener { view, isChecked ->
-            profile.settings.reactions.disabledInBlog = !isChecked
+            profile.settings.reactions.disableInBlog = !isChecked
             applySettings(view)
         }
     }
