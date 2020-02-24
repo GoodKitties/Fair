@@ -303,4 +303,5 @@
     <string name="profile_belongs_to_community">This profile belongs to community</string>
     <string name="unbanned">Unbanned</string>
     <string name="banned">Banned</string>
+    <string name="community_colon">Community:</string>
 </resources>

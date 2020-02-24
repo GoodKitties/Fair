@@ -110,7 +110,8 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:background="?android:selectableItemBackground"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:clipChildren="false">
 
             <TextView
                 android:id="@+id/my_profile"
@@ -146,6 +147,7 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:padding="14dp"
+                    android:foreground="?android:attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/swap"
                     android:contentDescription="@string/switch_profile"/>
 

@@ -175,8 +175,9 @@ class EntryResponse: Authored() {
      * Profile with blog this entry is posted to.
      * Equals to [profile] if null.
      */
-    @field:Json(name = "blog")
-    var blog: HasOne<OwnProfile>? = null
+    @field:Json(name = "blog-profile") // TODO: community
+    var community: HasOne<OwnProfile>? = null
+
 }
 
 /**

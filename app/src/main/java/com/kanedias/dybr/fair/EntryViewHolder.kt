@@ -28,6 +28,8 @@ import androidx.lifecycle.lifecycleScope
 import com.afollestad.materialdialogs.input.getInputField
 import com.afollestad.materialdialogs.input.input
 import com.afollestad.materialdialogs.list.listItems
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.misc.idMatches
 import com.kanedias.dybr.fair.misc.onClickSingleOnly
@@ -36,6 +38,7 @@ import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.openUrlExternally
 import com.kanedias.dybr.fair.ui.showToastAtView
 import kotlinx.coroutines.*
+import okhttp3.HttpUrl
 
 /**
  * View holder for showing regular entries in blog view.
@@ -48,17 +51,38 @@ import kotlinx.coroutines.*
 class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private val allowSelection: Boolean = false)
     : UserContentViewHolder<Entry>(iv, parentFragment) {
 
+    @BindView(R.id.top_indicators_row)
+    lateinit var topIndicatorsArea: RelativeLayout
+
+    @BindView(R.id.community_row)
+    lateinit var communityProfileArea: RelativeLayout
+
+    @BindView(R.id.entry_community_avatar)
+    lateinit var communityAvatarView: ImageView
+
+    @BindView(R.id.entry_community_profile)
+    lateinit var communityView: TextView
+
+    @BindView(R.id.entry_community_profile_subtext)
+    lateinit var communitySubtextView: TextView
+
+    @BindView(R.id.profile_row)
+    lateinit var profileRowArea: RelativeLayout
+
     @BindView(R.id.entry_avatar)
     lateinit var avatarView: ImageView
 
     @BindView(R.id.entry_author)
     lateinit var authorView: TextView
 
-    @BindView(R.id.entry_title)
-    lateinit var titleView: TextView
+    @BindView(R.id.entry_author_subtext)
+    lateinit var authorSubtextView: TextView
 
     @BindView(R.id.entry_date)
     lateinit var dateView: TextView
+
+    @BindView(R.id.entry_title)
+    lateinit var titleView: TextView
 
     @BindView(R.id.entry_message)
     lateinit var bodyView: TextView
@@ -111,6 +135,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
      * Blog this entry belongs to
      */
     private lateinit var profile: OwnProfile
+    private var community: OwnProfile? = null
 
     override fun getCreationDateView() = dateView
     override fun getProfileAvatarView() = avatarView
@@ -139,8 +164,11 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
 
         styleLevel.bind(TEXT_BLOCK, itemView, CardViewColorAdapter())
         styleLevel.bind(TEXT_HEADERS, titleView)
-        styleLevel.bind(TEXT, authorView)
         styleLevel.bind(TEXT, dateView)
+        styleLevel.bind(TEXT, authorView)
+        styleLevel.bind(TEXT, authorSubtextView)
+        styleLevel.bind(TEXT, communityView)
+        styleLevel.bind(TEXT, communitySubtextView)
         styleLevel.bind(TEXT, bodyView)
         styleLevel.bind(TEXT_LINKS, bodyView, TextViewLinksAdapter())
         styleLevel.bind(TEXT_LINKS, tagsView, TextViewLinksAdapter())
@@ -404,10 +432,35 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
         this.entry = entity
         this.metadata = Network.bufferToObject<EntryMeta>(entry.meta)
         this.profile = entity.profile.get(entity.document)
+        this.community = entity.community?.get(entity.document)
         this.reactions = entity.reactions?.get(entity.document) ?: mutableListOf()
+
+        // setup profile info
+        authorSubtextView.text = profile.settings.subtext
+
+        // setup community info
+        if (community == null || community!!.idMatches(profile)) {
+            // default, no community row
+            communityProfileArea.visibility = View.GONE
+        } else {
+            // community exists
+            communityProfileArea.visibility = View.VISIBLE
+
+            val avatar = community?.settings?.avatar
+            if (avatar != null && HttpUrl.parse(avatar) != null) {
+                Glide.with(communityAvatarView).load(avatar)
+                        .apply(RequestOptions().centerInside().circleCrop())
+                        .into(communityAvatarView)
+            } else {
+                communityAvatarView.setImageDrawable(null)
+            }
+            communityView.text = community!!.nickname
+            communitySubtextView.text = community!!.settings.subtext
+        }
 
         // setup text views from entry data
         titleView.text = entry.title
+        titleView.visibility = if (entry.title.isNullOrEmpty()) { View.GONE } else { View.VISIBLE }
         draftStateView.visibility = if (entry.state == "published") { View.GONE } else { View.VISIBLE }
 
         // setup permission icon

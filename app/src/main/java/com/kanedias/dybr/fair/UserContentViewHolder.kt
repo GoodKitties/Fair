@@ -48,10 +48,10 @@ abstract class UserContentViewHolder<T: Authored>(iv: View, val parentFragment: 
         getCreationDateView().text = DateUtils.getRelativeTimeSpanString(entity.createdAt.time)
         getCreationDateView().setOnClickListener { showFullDate(entity) }
 
-        val avatar = profile.settings.avatar
-        if (avatar != null && HttpUrl.parse(avatar) != null) {
-            Glide.with(getProfileAvatarView()).load(avatar)
-                    .apply(RequestOptions().centerInside())
+        val avatar = Network.resolve(profile.settings.avatar)
+        if (avatar != null) {
+            Glide.with(getProfileAvatarView()).load(avatar.toString())
+                    .apply(RequestOptions().centerInside().circleCrop())
                     .into(getProfileAvatarView())
         } else {
             getProfileAvatarView().setImageDrawable(null)

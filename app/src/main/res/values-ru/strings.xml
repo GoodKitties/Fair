@@ -239,6 +239,8 @@
     <string name="author_hidden_from_feed">Автор скрыт из ленты</string>
     <string name="reason">Причина</string>
     <string name="profile_belongs_to_community">Профиль принадлежит сообществу</string>
-    <string name="unbanned">Unbanned</string>
+    <string name="unbanned">Профиль разбанен</string>
+    <string name="banned">Профиль забанен</string>
+    <string name="community_colon">Сообщество:</string>
 
 </resources>
