@@ -76,7 +76,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignTop="@id/entry_avatar"
                 android:layout_toEndOf="@id/entry_avatar"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="8dp"
                 android:text="@string/placeholder_long"
                 android:textStyle="bold"/>
 
@@ -123,7 +123,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignTop="@id/entry_community_avatar"
                 android:layout_toEndOf="@id/entry_community_avatar"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="8dp"
                 android:text="@string/community_colon"
                 android:textStyle="bold"/>
 

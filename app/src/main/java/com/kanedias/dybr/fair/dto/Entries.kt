@@ -79,7 +79,7 @@ class EntryCreateRequest : Resource() {
      * Profile with blog this entry is posted to.
      * Equals to [profile] if null.
      */
-    @field:Json(name = "blog")
+    @field:Json(name = "community")
     var blog: HasOne<OwnProfile>? = null
 }
 
@@ -175,7 +175,7 @@ class EntryResponse: Authored() {
      * Profile with blog this entry is posted to.
      * Equals to [profile] if null.
      */
-    @field:Json(name = "blog-profile") // TODO: community
+    @field:Json(name = "community")
     var community: HasOne<OwnProfile>? = null
 
 }
