@@ -2,13 +2,16 @@ package com.kanedias.dybr.fair.markdown
 
 import android.Manifest
 import android.app.Activity
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
+import android.provider.MediaStore
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.CharacterStyle
@@ -49,7 +52,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.HttpUrl
 import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
 import org.commonmark.ext.gfm.tables.TablesExtension
 import org.commonmark.parser.Parser
@@ -374,16 +376,27 @@ class ImageShowOverlay(ctx: Context,
             Glide.with(it).asFile().load(resolved.toString()).into(object: SimpleTarget<File>() {
 
                 override fun onResourceReady(resource: File, transition: Transition<in File>?) {
-                    val downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                    val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(getMimeTypeOfFile(resource))
-                    var name = resolved.pathSegments().last()
-                    if (ext!= null && !name.endsWith(ext)) {
-                        name += ".$ext"
-                    }
-                    val downloadedFile = File(downloads, name)
-                    downloadedFile.writeBytes(resource.readBytes())
+                    val downloadDir = Environment.DIRECTORY_DOWNLOADS
+                    val filename = resolved.pathSegments().last()
 
-                    val report = context.getString(R.string.image_saved_as) + " ${downloadedFile.absolutePath}"
+                    // on API >= 29 we must use media store API, direct access to SD-card is no longer available
+                    val ostream = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        val resolver = context.contentResolver
+                        val contentValues = ContentValues()
+                        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+                        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/*")
+                        contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, downloadDir)
+                        val imageUri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)!!
+                        resolver.openOutputStream(imageUri)!!
+                    } else {
+                        @Suppress("DEPRECATION") // should work on API < 29
+                        val downloads = Environment.getExternalStoragePublicDirectory(downloadDir)
+                        File(downloads, filename).outputStream()
+                    }
+
+                    ostream.write(resource.readBytes())
+
+                    val report = context.getString(R.string.image_saved_as) + " $downloadDir/$filename"
                     Toast.makeText(context, report, Toast.LENGTH_SHORT).show()
                 }
 
