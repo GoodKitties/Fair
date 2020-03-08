@@ -439,14 +439,16 @@ class MainActivity : AppCompatActivity() {
 
                 // we don't have entry or notification, open notifications tab
                 val backToNotifications = {
-                    for (i in 0..supportFragmentManager.backStackEntryCount) {
-                        supportFragmentManager.popBackStack()
-                    }
-                    pager.setCurrentItem(NOTIFICATIONS_TAB, true)
+                    lifecycleScope.launchWhenResumed {
+                        for (i in 0..supportFragmentManager.backStackEntryCount) {
+                            supportFragmentManager.popBackStack()
+                        }
+                        pager.setCurrentItem(NOTIFICATIONS_TAB, true)
 
-                    // if the fragment is already loaded, try to refresh it
-                    val notifFragment = getTopFragment(NotificationListFragment::class)
-                    notifFragment?.loadMore(reset = true)
+                        // if the fragment is already loaded, try to refresh it
+                        val notifFragment = getTopFragment(NotificationListFragment::class)
+                        notifFragment?.loadMore(reset = true)
+                    }
                 }
 
                 if (supportFragmentManager.backStackEntryCount > 0) {
@@ -676,8 +678,14 @@ class MainActivity : AppCompatActivity() {
             else -> actionButton.show()
         }
 
-        when (Auth.user) {
-            Auth.guest -> pager.adapter = GuestTabAdapter()
+        when {
+            // browsing as guest
+            Auth.user === Auth.guest -> pager.adapter = GuestTabAdapter()
+
+            // profile not yet created
+            Auth.profile === null -> pager.adapter = GuestTabAdapter()
+
+            // have account and profile
             else -> pager.adapter = TabAdapter(Auth.profile)
         }
     }

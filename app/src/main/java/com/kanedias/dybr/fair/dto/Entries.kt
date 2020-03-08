@@ -80,7 +80,7 @@ class EntryCreateRequest : Resource() {
      * Equals to [profile] if null.
      */
     @field:Json(name = "community")
-    var blog: HasOne<OwnProfile>? = null
+    var community: HasOne<OwnProfile>? = null
 }
 
 /**

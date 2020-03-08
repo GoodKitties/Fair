@@ -48,12 +48,16 @@ val View.styleLevel : StyleLevel?
         for (fragment in fm.fragments) {
             val styled = fragment as? UserContentListFragment ?: continue
 
-            var parent = this
-            while (parent.parent != null && parent.parent is View) {
-                if (parent.parent === fragment.view)
+            var view = this
+            while (true) {
+                val parent = view.parent
+                if (parent === fragment.view)
                     return styled.styleLevel
 
-                parent = parent.parent as View
+                if (parent == null || parent !is View)
+                    break
+
+                view = parent
             }
         }
 

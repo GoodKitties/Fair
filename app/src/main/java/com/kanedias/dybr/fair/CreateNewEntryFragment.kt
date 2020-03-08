@@ -295,8 +295,6 @@ class CreateNewEntryFragment : Fragment() {
             title = titleInput.text.toString()
             state = if (draftSwitch.isChecked) { "published" } else { "draft" }
             content = markdownToHtml(contentInput.text.toString())
-            profile = HasOne(Auth.profile!!)
-            blog = HasOne(this@CreateNewEntryFragment.profile)
             tags = tagList
             settings = RecordSettings(permissions = RecordPermissions(listOfNotNull(access)))
         }
@@ -317,7 +315,8 @@ class CreateNewEntryFragment : Fragment() {
                     Toast.makeText(activity, R.string.entry_updated, Toast.LENGTH_SHORT).show()
                 } else {
                     // create new
-                    entry.blog = HasOne(profile)
+                    entry.profile = HasOne(Auth.profile!!)
+                    entry.community = HasOne(this@CreateNewEntryFragment.profile)
                     entry.id = withContext(Dispatchers.IO) { Network.createEntry(entry) }.id
                     Toast.makeText(activity, R.string.entry_created, Toast.LENGTH_SHORT).show()
                 }
