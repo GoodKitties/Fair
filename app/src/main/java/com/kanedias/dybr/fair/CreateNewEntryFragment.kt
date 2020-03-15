@@ -2,6 +2,8 @@ package com.kanedias.dybr.fair
 
 import android.content.Context
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import androidx.fragment.app.Fragment
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.appcompat.widget.AppCompatSpinner
@@ -154,15 +156,29 @@ class CreateNewEntryFragment : Fragment() {
 
         // tags autocompletion
         val tags = profile.tags.map { "#${it.name}" }
-        val adapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_dropdown_item_1line, tags)
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, tags)
         tagsInput.setTokenizer(MultiAutoCompleteTextView.CommaTokenizer())
         tagsInput.threshold = 1
         tagsInput.onFocusChangeListener = View.OnFocusChangeListener { _, focused ->
             if (focused && tagsInput.text.isNullOrBlank()) {
-                tagsInput.setText("#")
                 tagsInput.showDropDown()
             }
         }
+        tagsInput.addTextChangedListener(object: TextWatcher {
+            override fun afterTextChanged(content: Editable?) {
+                if (!tagsInput.isFocused || content == null)
+                    return
+
+                if (content.endsWith(", ")) {
+                    tagsInput.postDelayed({ tagsInput.showDropDown() }, 150)
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+        })
         tagsInput.setAdapter(adapter)
     }
 
