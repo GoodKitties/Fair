@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit.*
 class SyncNotificationsWorker(val ctx: Context, params: WorkerParameters): Worker(ctx, params) {
 
     override fun doWork(): Result {
+        Log.d(LOG_TAG, "Executing notification sync job")
 
         // from now on please keep in mind that website notifications != android notifications
         // website notifications represent what comment was left where and by whom
@@ -44,11 +45,13 @@ class SyncNotificationsWorker(val ctx: Context, params: WorkerParameters): Worke
             Network.loadNotifications(pageSize = 100, onlyNew = true)
         } catch (ex: Exception) {
             Network.reportErrors(ctx, ex)
+            Log.w(LOG_TAG, "Notification sync job failed", ex)
             return Result.retry()
         }
 
         // check if any android notification currently shows outdated info
         val markReadPending = currentlyShown - nonRead
+        Log.v(LOG_TAG, "${markReadPending.size} previously shown notifications are now read, removing from status")
         markReadPending.forEach { markRead(ctx, it) }
 
         // filter others them so we only process non-read and non-skipped ones
@@ -56,10 +59,11 @@ class SyncNotificationsWorker(val ctx: Context, params: WorkerParameters): Worke
         val nonSkippedAndNew = nonSkipped - currentlyShown
 
         if (nonSkippedAndNew.isEmpty()) {
-            // cancel all android notifications if there's nothing to display
-            NotificationManagerCompat.from(ctx).cancel(NEW_COMMENTS_NOTIFICATION)
+            Log.v(LOG_TAG, "No new notifications to process, returning...")
             return Result.success()
         }
+
+        Log.v(LOG_TAG, "Processing ${nonSkippedAndNew.size} non-skipped and new notifications")
 
         // what to do on group notification click - open notifications tab
         val openTabIntent = Intent(ctx, MainActivity::class.java).apply {
@@ -169,12 +173,14 @@ class SyncNotificationsWorker(val ctx: Context, params: WorkerParameters): Worke
                     .load(prof.settings?.avatar).submit().get(5, SECONDS)
             IconCompat.createWithBitmap(bitmap)
         } catch (ex: Exception) {
-            Log.e("SyncJob", "Couldn't load avatar for profile ${prof.nickname}")
+            Log.w(LOG_TAG, "Couldn't load avatar for profile ${prof.nickname}")
             null
         }
     }
 
     companion object {
+        const val LOG_TAG = "SyncJob"
+
         /**
          * This set always represents what website notifications ids are currently shown in status bar.
          */
@@ -221,6 +227,8 @@ class SyncNotificationsWorker(val ctx: Context, params: WorkerParameters): Worke
          * @param ctx context to use when injecting [NotificationManagerCompat]
          */
         fun markRead(ctx: Context, notif: Notification) {
+            Log.v(LOG_TAG, "Marking ${notif.id} as read")
+
             val nm = NotificationManagerCompat.from(ctx)
 
             nm.cancel(notif.id, NEW_COMMENTS_NOTIFICATION)
@@ -233,6 +241,8 @@ class SyncNotificationsWorker(val ctx: Context, params: WorkerParameters): Worke
         }
 
         fun markReadFor(ctx: Context, entryId: String) {
+            Log.v(LOG_TAG, "Marking all notifications for $entryId as read")
+
             val shownForEntry = currentlyShown.filter { it.entryId == entryId }
             shownForEntry.forEach { markRead(ctx, it) }
         }
@@ -245,6 +255,8 @@ class SyncNotificationsWorker(val ctx: Context, params: WorkerParameters): Worke
          * @param ctx context to use when injecting [NotificationManagerCompat]
          */
         fun markSkipped(ctx: Context, notif: Notification) {
+            Log.v(LOG_TAG, "Marking ${notif.id} as skipped")
+
             val nm = NotificationManagerCompat.from(ctx)
 
             skipped.add(notif)
