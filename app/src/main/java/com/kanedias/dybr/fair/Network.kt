@@ -691,7 +691,7 @@ object Network {
     /**
      * Loads notifications for current profile
      */
-    fun loadNotifications(pageSize: Int = PAGE_SIZE, pageNum: Int = 1) : ArrayDocument<Notification> {
+    fun loadNotifications(pageSize: Int = PAGE_SIZE, pageNum: Int = 1, onlyNew: Boolean = false) : ArrayDocument<Notification> {
         if (Auth.profile == null)
             return ArrayDocument()
 
@@ -700,6 +700,10 @@ object Network {
                 .addQueryParameter("page[size]", pageSize.toString())
                 .addQueryParameter("include", "comments,profiles")
                 .addQueryParameter("sort", "state,-comment_id")
+
+        if (onlyNew) {
+            builder.addQueryParameter("filters[state]", "new")
+        }
 
         val req = Request.Builder().url(builder.build()).build()
         val resp = httpClient.newCall(req).execute()

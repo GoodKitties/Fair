@@ -40,15 +40,18 @@ class SyncNotificationsWorker(val ctx: Context, params: WorkerParameters): Worke
         // and Android notifications are used to make a status update so it will be visible on the screen
 
         // retrieve website notifications
-        val notifications = try {
-            Network.loadNotifications()
+        val nonRead = try {
+            Network.loadNotifications(pageSize = 100, onlyNew = true)
         } catch (ex: Exception) {
             Network.reportErrors(ctx, ex)
-            emptyList<Notification>()
+            return Result.retry()
         }
 
-        // filter them so we only process non-read and non-skipped ones
-        val nonRead = notifications.filter { it.state == "new" }
+        // check if any android notification currently shows outdated info
+        val markReadPending = currentlyShown - nonRead
+        markReadPending.forEach { markRead(ctx, it) }
+
+        // filter others them so we only process non-read and non-skipped ones
         val nonSkipped = nonRead - skipped
         val nonSkippedAndNew = nonSkipped - currentlyShown
 
@@ -253,7 +256,5 @@ class SyncNotificationsWorker(val ctx: Context, params: WorkerParameters): Worke
                 nm.cancel(NEW_COMMENTS_NOTIFICATION_SUMMARY_TAG, NEW_COMMENTS_NOTIFICATION)
             }
         }
-
     }
-
 }
