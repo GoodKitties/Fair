@@ -382,10 +382,11 @@ class ImageShowOverlay(ctx: Context,
                     // on API >= 29 we must use media store API, direct access to SD-card is no longer available
                     val ostream = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                         val resolver = context.contentResolver
-                        val contentValues = ContentValues()
-                        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
-                        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/*")
-                        contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, downloadDir)
+                        val contentValues = ContentValues().apply {
+                            put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+                            put(MediaStore.MediaColumns.MIME_TYPE, "image/*")
+                            put(MediaStore.MediaColumns.RELATIVE_PATH, downloadDir)
+                        }
                         val imageUri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)!!
                         resolver.openOutputStream(imageUri)!!
                     } else {
@@ -402,22 +403,6 @@ class ImageShowOverlay(ctx: Context,
 
             })
         }
-    }
-
-    /**
-     * Decode the file as bitmap and retrieve its mime type, if it's an image
-     * @param file input file to parse
-     * @return string-represented mime type of this file
-     */
-    private fun getMimeTypeOfFile(file: File): String? {
-        val opt = BitmapFactory.Options()
-        opt.inJustDecodeBounds = true
-
-        FileInputStream(file).use {
-            BitmapFactory.decodeStream(it, null, opt)
-        }
-
-        return opt.outMimeType
     }
 
     /**
