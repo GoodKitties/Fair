@@ -2,7 +2,6 @@ package com.kanedias.dybr.fair
 
 import android.os.Bundle
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import android.view.*
 import androidx.lifecycle.lifecycleScope
@@ -11,6 +10,7 @@ import butterknife.ButterKnife
 import com.afollestad.materialdialogs.MaterialDialog
 import com.ftinc.scoop.Scoop
 import com.kanedias.dybr.fair.dto.*
+import com.kanedias.dybr.fair.scheduling.SyncNotificationsWorker
 import com.kanedias.dybr.fair.themes.*
 import kotlinx.coroutines.*
 import moe.banana.jsonapi2.ArrayDocument
@@ -97,6 +97,13 @@ open class NotificationListFragment: UserContentListFragment() {
     open fun setupUI() {
         ribbonRefresher.setOnRefreshListener { loadMore(true) }
         notifRibbon.adapter = notifAdapter
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        // hide all notifications if this fragment is resumed
+        SyncNotificationsWorker.hideNotifications(requireContext())
     }
 
     open fun setupTheming() {

@@ -76,7 +76,29 @@ class SyncNotificationsWorker(val ctx: Context, params: WorkerParameters): Worke
         val userProfile = Auth.profile ?: return Result.success() // shouldn't happen
         val userPerson = Person.Builder().setName(userProfile.nickname).setIcon(loadAvatar(userProfile)).build()
 
-        // convert each website notification to android notification
+        // create grouping android notification
+        val groupStyle = NotificationCompat.InboxStyle()
+        nonSkippedAndNew.forEach { msgNotif ->
+            val author = msgNotif.profile.get(msgNotif.document) ?: return@forEach
+            val source = msgNotif.source.get(msgNotif.document)
+            groupStyle.addLine("${author.nickname} · ${source.blogTitle}")
+        }
+
+        val groupNotif = NotificationCompat.Builder(ctx, NC_SYNC_NOTIFICATIONS)
+                .setSmallIcon(R.drawable.app_icon)
+                .setContentTitle(ctx.getString(R.string.new_comments))
+                .setContentText(ctx.getString(R.string.youve_received_new_comments))
+                .setGroup(ctx.getString(R.string.notifications))
+                .setGroupSummary(true)
+                .setOnlyAlertOnce(true)
+                .setCategory(NotificationCompat.CATEGORY_SOCIAL)
+                .setStyle(groupStyle)
+                .setContentIntent(openTabPI)
+                .build()
+
+        NotificationManagerCompat.from(ctx).notify(NEW_COMMENTS_NOTIFICATION_SUMMARY_TAG, NEW_COMMENTS_NOTIFICATION, groupNotif)
+
+        // convert each website notification to android notification under the group
         for (msgNotif in nonSkippedAndNew) {
             val comment = msgNotif.comment.get(msgNotif.document) ?: continue // comment itself
             val author = msgNotif.profile.get(msgNotif.document) ?: continue // comment author profile
@@ -134,28 +156,6 @@ class SyncNotificationsWorker(val ctx: Context, params: WorkerParameters): Worke
             NotificationManagerCompat.from(ctx).notify(msgNotif.id, NEW_COMMENTS_NOTIFICATION, statusUpdate)
         }
 
-        // create grouping android notification
-        val groupStyle = NotificationCompat.InboxStyle()
-        nonSkippedAndNew.forEach { msgNotif ->
-            val author = msgNotif.profile.get(msgNotif.document) ?: return@forEach
-            val source = msgNotif.source.get(msgNotif.document)
-            groupStyle.addLine("${author.nickname} · ${source.blogTitle}")
-        }
-
-        val groupNotif = NotificationCompat.Builder(ctx, NC_SYNC_NOTIFICATIONS)
-                .setSmallIcon(R.drawable.app_icon)
-                .setContentTitle(ctx.getString(R.string.new_comments))
-                .setContentText(ctx.getString(R.string.youve_received_new_comments))
-                .setGroup(ctx.getString(R.string.notifications))
-                .setGroupSummary(true)
-                .setOnlyAlertOnce(true)
-                .setCategory(NotificationCompat.CATEGORY_SOCIAL)
-                .setStyle(groupStyle)
-                .setContentIntent(openTabPI)
-                .build()
-
-        NotificationManagerCompat.from(ctx).notify(NEW_COMMENTS_NOTIFICATION_SUMMARY_TAG, NEW_COMMENTS_NOTIFICATION, groupNotif)
-
         // track what's shown currently in status bar
         // Keep in mind that this is a set so duplicates will be skipped
         currentlyShown += nonSkippedAndNew
@@ -184,13 +184,13 @@ class SyncNotificationsWorker(val ctx: Context, params: WorkerParameters): Worke
         /**
          * This set always represents what website notifications ids are currently shown in status bar.
          */
-        val currentlyShown: MutableSet<Notification> = Collections.synchronizedSet(mutableSetOf<Notification>())
+        private val currentlyShown: MutableSet<Notification> = Collections.synchronizedSet(mutableSetOf<Notification>())
 
         /**
          * This set keeps track of skipped website notification ids. These notifications will never be
          * again shown to the user.
          */
-        val skipped: MutableSet<Notification> = Collections.synchronizedSet(mutableSetOf<Notification>())
+        private val skipped: MutableSet<Notification> = Collections.synchronizedSet(mutableSetOf<Notification>())
 
         /**
          * Called on application/activity start. Schedules periodic job executions
@@ -267,6 +267,17 @@ class SyncNotificationsWorker(val ctx: Context, params: WorkerParameters): Worke
             if (currentlyShown.isEmpty()) {
                 nm.cancel(NEW_COMMENTS_NOTIFICATION_SUMMARY_TAG, NEW_COMMENTS_NOTIFICATION)
             }
+        }
+
+        /**
+         * Temporarily hide all notifications. They will be shown
+         * again after [scheduleJob] is called.
+         */
+        fun hideNotifications(ctx: Context) {
+            Log.v(LOG_TAG, "Hiding shown notifications")
+
+            val nm = NotificationManagerCompat.from(ctx)
+            nm.cancel(NEW_COMMENTS_NOTIFICATION_SUMMARY_TAG, NEW_COMMENTS_NOTIFICATION)
         }
     }
 }
