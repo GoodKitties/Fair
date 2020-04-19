@@ -446,9 +446,9 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
             // community exists
             communityProfileArea.visibility = View.VISIBLE
 
-            val avatar = community?.settings?.avatar
-            if (avatar != null && HttpUrl.parse(avatar) != null) {
-                Glide.with(communityAvatarView).load(avatar)
+            val avatar = Network.resolve(community?.settings?.avatar)
+            if (avatar != null) {
+                Glide.with(communityAvatarView).load(avatar.toString())
                         .apply(RequestOptions().centerInside().circleCrop())
                         .into(communityAvatarView)
             } else {

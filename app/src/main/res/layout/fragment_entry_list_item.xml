@@ -56,12 +56,62 @@
         </RelativeLayout>
 
         <RelativeLayout
+            android:id="@+id/community_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:layout_marginBottom="4dp"
+            android:layout_below="@+id/top_indicators_row">
+
+            <ImageView
+                android:id="@+id/entry_community_avatar"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentStart="true"
+                android:contentDescription="@string/user_avatar" />
+
+            <TextView
+                android:id="@+id/entry_community_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/entry_community_avatar"
+                android:layout_toEndOf="@id/entry_community_avatar"
+                android:layout_marginStart="8dp"
+                android:textSize="12sp"
+                android:text="@string/community_colon"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/entry_community_profile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/entry_community_avatar"
+                android:layout_toEndOf="@id/entry_community_label"
+                android:layout_marginStart="4dp"
+                android:textSize="12sp"
+                android:text="@string/placeholder_long"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/entry_community_profile_subtext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/entry_community_profile"
+                android:layout_alignStart="@id/entry_community_label"
+                android:text="@string/placeholder_short"
+                android:textSize="10sp"
+                android:alpha="0.5"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
             android:id="@+id/profile_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="4dp"
             android:paddingBottom="4dp"
-            android:layout_below="@+id/top_indicators_row">
+            android:layout_below="@+id/community_row">
 
             <ImageView
                 android:id="@+id/entry_avatar"
@@ -101,59 +151,11 @@
 
         </RelativeLayout>
 
-        <RelativeLayout
-            android:id="@+id/community_row"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"
-            android:layout_marginBottom="4dp"
-            android:layout_below="@+id/profile_row">
-
-            <ImageView
-                android:id="@+id/entry_community_avatar"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_alignParentStart="true"
-                android:contentDescription="@string/user_avatar" />
-
-            <TextView
-                android:id="@+id/entry_community_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@id/entry_community_avatar"
-                android:layout_toEndOf="@id/entry_community_avatar"
-                android:layout_marginStart="8dp"
-                android:text="@string/community_colon"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:id="@+id/entry_community_profile"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@id/entry_community_avatar"
-                android:layout_toEndOf="@id/entry_community_label"
-                android:layout_marginStart="4dp"
-                android:text="@string/placeholder_long"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:id="@+id/entry_community_profile_subtext"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/entry_community_profile"
-                android:layout_alignStart="@id/entry_community_label"
-                android:text="@string/placeholder_short"
-                android:textSize="12sp"
-                android:alpha="0.5"/>
-
-        </RelativeLayout>
-
         <TextView
             android:id="@+id/entry_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/community_row"
+            android:layout_below="@+id/profile_row"
             android:layout_alignParentStart="true"
             android:padding="5dp"
             android:textAppearance="?android:attr/textAppearanceMedium"
