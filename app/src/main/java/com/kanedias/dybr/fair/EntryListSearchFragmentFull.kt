@@ -14,7 +14,7 @@ import moe.banana.jsonapi2.ArrayDocument
  *
  * Created on 23.06.18
  */
-class EntryListSearchTagFragmentFull: EntryListFragmentFull() {
+class EntryListSearchFragmentFull: EntryListFragmentFull() {
 
     /**
      * Filters for search query

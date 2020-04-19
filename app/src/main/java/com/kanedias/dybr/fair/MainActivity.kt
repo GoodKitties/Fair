@@ -45,6 +45,7 @@ import com.kanedias.dybr.fair.misc.getTopFragment
 import com.kanedias.dybr.fair.scheduling.SyncNotificationsWorker
 import kotlinx.coroutines.*
 import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * Main activity with drawer and sliding tabs where most of user interaction happens.
@@ -263,17 +264,23 @@ class MainActivity : AppCompatActivity() {
                     try {
                         when (type) {
                             EntityType.PROFILE -> {
-                                val prof = withContext(Dispatchers.IO) { Network.loadProfileByNickname(name) }
-                                val fragment = ProfileFragment().apply { profile = prof }
-                                fragment.show(supportFragmentManager, "Showing search-requested profile fragment")
+                                val fragment = ProfileListSearchFragment().apply {
+                                    arguments = Bundle().apply {
+                                        putSerializable("filters", HashMap(mapOf("nickname|contains" to name)))
+                                    }
+                                }
+                                showFullscreenFragment(fragment)
                             }
                             EntityType.BLOG -> {
-                                val prof = withContext(Dispatchers.IO) { Network.loadProfileBySlug(name) }
-                                val fragment = EntryListFragmentFull().apply { this.profile = prof }
+                                val fragment = ProfileListSearchFragment().apply {
+                                    arguments = Bundle().apply {
+                                        putSerializable("filters", HashMap(mapOf("blog-slug|contains" to name)))
+                                    }
+                                }
                                 showFullscreenFragment(fragment)
                             }
                             EntityType.TAG -> {
-                                val searchFragment = EntryListSearchTagFragmentFull().apply {
+                                val searchFragment = EntryListSearchFragmentFull().apply {
                                     arguments = Bundle().apply {
                                         putSerializable("filters", hashMapOf("tag" to name))
                                     }
@@ -315,8 +322,8 @@ class MainActivity : AppCompatActivity() {
         val cursor = MatrixCursor(arrayOf("_id", "name", "type", "source"), suitableFavs.size)
         if (prefix.isNotEmpty()) {
             // add two service rows with just prefix
-            cursor.addRow(arrayOf(++counter, prefix, EntityType.BLOG.name, getString(R.string.direct_jump)))
-            cursor.addRow(arrayOf(++counter, prefix, EntityType.PROFILE.name, getString(R.string.direct_jump)))
+            cursor.addRow(arrayOf(++counter, prefix, EntityType.BLOG.name, getString(R.string.search_by_substring)))
+            cursor.addRow(arrayOf(++counter, prefix, EntityType.PROFILE.name, getString(R.string.search_by_substring)))
             cursor.addRow(arrayOf(++counter, prefix, EntityType.TAG.name, getString(R.string.direct_jump)))
         }
 

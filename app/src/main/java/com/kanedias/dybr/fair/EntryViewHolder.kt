@@ -618,7 +618,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
         override fun onClick(widget: View) {
             val activity = itemView.context as AppCompatActivity
 
-            val searchFragment = EntryListSearchTagFragmentFull().apply {
+            val searchFragment = EntryListSearchFragmentFull().apply {
                 arguments = Bundle().apply {
                     putSerializable("filters", hashMapOf(
                             "tag" to tagValue,

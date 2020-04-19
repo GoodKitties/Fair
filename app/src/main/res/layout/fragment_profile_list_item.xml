@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/comment_card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:layout_marginBottom="1dp"
+    app:cardCornerRadius="32dp"
+    app:cardElevation="4dp"
+    app:cardMaxElevation="8dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp">
+
+        <ImageView
+            android:id="@+id/profile_avatar"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_alignParentStart="true"
+            android:contentDescription="@string/user_avatar" />
+
+        <TextView
+            android:id="@+id/profile_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/profile_avatar"
+            android:padding="8dp"
+            android:textStyle="bold"
+            android:text="@string/placeholder_long"
+            android:maxEms="20"/>
+
+        <TextView
+            android:id="@+id/profile_registration_date_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/profile_avatar"
+            android:layout_below="@id/profile_name"
+            android:padding="5dp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/registration_date_label"/>
+
+        <TextView
+            android:id="@+id/profile_registration_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/profile_registration_date_label"
+            android:layout_below="@id/profile_name"
+            android:padding="5dp"
+            android:text="@string/placeholder_short"/>
+
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>

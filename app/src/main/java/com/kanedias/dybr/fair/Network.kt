@@ -344,7 +344,7 @@ object Network {
         if (buffer == null)
             return null
 
-        val mapAdapter = Moshi.Builder().build().adapter<T>(T::class.java)
+        val mapAdapter = Moshi.Builder().build().adapter(T::class.java)
         return buffer.get<T>(mapAdapter)
     }
 
@@ -432,6 +432,27 @@ object Network {
             throw HttpException(404, "", "")
 
         return filtered[0]
+    }
+
+    fun searchProfiles(filters: Map<String, String>,
+                       pageNum: Int = 1): ArrayDocument<OwnProfile> {
+        val builder = HttpUrl.parse(PROFILES_ENDPOINT)!!.newBuilder()
+        builder.addQueryParameter("page[number]", pageNum.toString())
+                .addQueryParameter("page[size]", PAGE_SIZE.toString())
+                .addQueryParameter("sort", "-created-at")
+
+        for ((type, value) in filters) {
+            builder.addQueryParameter("filters[$type]", value)
+        }
+
+        val req = Request.Builder().url(builder.build()).build()
+        val resp = httpClient.newCall(req).execute()
+        if (!resp.isSuccessful) {
+            throw extractErrors(resp, "Can't perform profile search for $filters")
+        }
+
+        // response is returned after execute call, body is not null
+        return fromWrappedListJson(resp.body()!!.source(), OwnProfile::class.java)
     }
 
     /**

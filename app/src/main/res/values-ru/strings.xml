@@ -177,6 +177,7 @@
     <string name="offline_draft_loaded">Оффлайн-черновик загружен</string>
     <string name="select_offline_draft">Выбрать оффлайн-черновик</string>
     <string name="direct_jump">Прямой переход</string>
+    <string name="search_by_substring">Поиск по подстроке</string>
     <string name="from_profile_favorites">Из вашего Избранного</string>
     <string name="from_saved_searches">Из сохранённых запросов</string>
     <string name="not_found">Не найдено</string>
