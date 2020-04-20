@@ -30,6 +30,7 @@
         android:layout_alignParentEnd="true"
         android:padding="6dp"
         android:layout_centerVertical="true"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
         android:src="@drawable/close"
         android:tint="#fff"
         android:contentDescription="@string/remove_profile"/>

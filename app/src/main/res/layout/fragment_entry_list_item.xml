@@ -15,6 +15,14 @@
         android:layout_height="wrap_content"
         android:padding="8dp">
 
+        <TextView
+            android:id="@+id/entry_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:textSize="12sp"
+            android:text="@string/placeholder_date"/>
+
         <RelativeLayout
             android:id="@+id/top_indicators_row"
             android:layout_width="match_parent"
@@ -37,7 +45,7 @@
                 android:id="@+id/entry_pinned"
                 android:layout_height="28dp"
                 android:layout_width="28dp"
-                android:layout_alignParentEnd="true"
+                android:layout_toEndOf="@+id/entry_permissions"
                 android:padding="8dp"
                 android:src="@drawable/pin"
                 android:contentDescription="@string/entry_pinned_status"/>
@@ -46,12 +54,10 @@
                 android:id="@+id/entry_permissions"
                 android:layout_height="28dp"
                 android:layout_width="28dp"
-                android:layout_toStartOf="@id/entry_pinned"
-                android:layout_alignWithParentIfMissing="true"
+                android:layout_toEndOf="@+id/entry_draft_state"
                 android:padding="8dp"
                 android:src="@drawable/lock"
                 android:contentDescription="@string/entry_access_permissions"/>
-
 
         </RelativeLayout>
 
@@ -66,42 +72,41 @@
 
             <ImageView
                 android:id="@+id/entry_community_avatar"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:layout_alignParentStart="true"
                 android:contentDescription="@string/user_avatar" />
 
-            <TextView
-                android:id="@+id/entry_community_label"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_vertical"
                 android:layout_alignTop="@id/entry_community_avatar"
                 android:layout_toEndOf="@id/entry_community_avatar"
-                android:layout_marginStart="8dp"
-                android:textSize="12sp"
-                android:text="@string/community_colon"
-                android:textStyle="bold"/>
+                android:layout_alignBottom="@id/entry_community_avatar">
 
-            <TextView
-                android:id="@+id/entry_community_profile"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@id/entry_community_avatar"
-                android:layout_toEndOf="@id/entry_community_label"
-                android:layout_marginStart="4dp"
-                android:textSize="12sp"
-                android:text="@string/placeholder_long"
-                android:textStyle="bold"/>
+                <TextView
+                    android:id="@+id/entry_community_profile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:textSize="12sp"
+                    android:text="@string/placeholder_long"
+                    android:textStyle="bold"/>
 
-            <TextView
-                android:id="@+id/entry_community_profile_subtext"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/entry_community_profile"
-                android:layout_alignStart="@id/entry_community_label"
-                android:text="@string/placeholder_short"
-                android:textSize="10sp"
-                android:alpha="0.5"/>
+                <TextView
+                    android:id="@+id/entry_community_profile_subtext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/placeholder_short"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:textSize="10sp"
+                    android:alpha="0.5"/>
+
+            </LinearLayout>
 
         </RelativeLayout>
 
@@ -139,15 +144,6 @@
                 android:text="@string/placeholder_short"
                 android:textSize="12sp"
                 android:alpha="0.5"/>
-
-            <TextView
-                android:id="@+id/entry_date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/entry_author"
-                android:layout_alignParentEnd="true"
-                android:textSize="12sp"
-                android:text="@string/placeholder_date"/>
 
         </RelativeLayout>
 

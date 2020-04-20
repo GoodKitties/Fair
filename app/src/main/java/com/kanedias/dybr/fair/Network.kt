@@ -84,20 +84,20 @@ object Network {
     private const val USER_AGENT = "Fair ${BuildConfig.VERSION_NAME}"
     private const val DEFAULT_DYBR_API_ENDPOINT = "https://dybr.ru/v2/"
 
-    lateinit var MAIN_DYBR_API_ENDPOINT: HttpUrl
-    lateinit var IMG_UPLOAD_ENDPOINT: String
-    lateinit var USERS_ENDPOINT: String
-    lateinit var SESSIONS_ENDPOINT: String
-    lateinit var PROFILES_ENDPOINT: String
-    lateinit var BLOGS_ENDPOINT: String
-    lateinit var ENTRIES_ENDPOINT: String
-    lateinit var FAVORITES_ENDPOINT: String
-    lateinit var COMMENTS_ENDPOINT: String
-    lateinit var NOTIFICATIONS_ENDPOINT: String
-    lateinit var BOOKMARKS_ENDPOINT: String
-    lateinit var REACTIONS_ENDPOINT: String
-    lateinit var REACTION_SETS_ENDPOINT: String
-    lateinit var ACTION_LISTS_ENDPOINT: String
+    private lateinit var MAIN_DYBR_API_ENDPOINT: HttpUrl
+    private lateinit var IMG_UPLOAD_ENDPOINT: String
+    private lateinit var USERS_ENDPOINT: String
+    private lateinit var SESSIONS_ENDPOINT: String
+    private lateinit var PROFILES_ENDPOINT: String
+    private lateinit var BLOGS_ENDPOINT: String
+    private lateinit var ENTRIES_ENDPOINT: String
+    private lateinit var FAVORITES_ENDPOINT: String
+    private lateinit var COMMENTS_ENDPOINT: String
+    private lateinit var NOTIFICATIONS_ENDPOINT: String
+    private lateinit var BOOKMARKS_ENDPOINT: String
+    private lateinit var REACTIONS_ENDPOINT: String
+    private lateinit var REACTION_SETS_ENDPOINT: String
+    private lateinit var ACTION_LISTS_ENDPOINT: String
 
     private val MIME_JSON_API = MediaType.parse("application/vnd.api+json")
 
@@ -234,6 +234,10 @@ object Network {
             return null
 
         return MAIN_DYBR_API_ENDPOINT.resolve(url)
+    }
+
+    fun defaultAvatar(): HttpUrl {
+        return resolve("/static/media/default_ava.9b2e26d5.jpg")!!
     }
 
     /**
@@ -563,6 +567,8 @@ object Network {
 
         return filtered[0]
     }
+
+    // TODO: empty list mark with sad cloud
 
     /**
      * Pull diary entries from blog denoted by [prof]. Includes profiles and blog for returned entry list.

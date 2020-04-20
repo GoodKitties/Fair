@@ -446,16 +446,19 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
             // community exists
             communityProfileArea.visibility = View.VISIBLE
 
-            val avatar = Network.resolve(community?.settings?.avatar)
-            if (avatar != null) {
+            val avatar = Network.resolve(community?.settings?.avatar) ?: Network.defaultAvatar()
                 Glide.with(communityAvatarView).load(avatar.toString())
                         .apply(RequestOptions().centerInside().circleCrop())
                         .into(communityAvatarView)
-            } else {
-                communityAvatarView.setImageDrawable(null)
-            }
             communityView.text = community!!.nickname
-            communitySubtextView.text = community!!.settings.subtext
+
+            val communitySubtext = community!!.settings.subtext
+            if (communitySubtext.isNullOrEmpty()) {
+                communitySubtextView.visibility = View.GONE
+            } else {
+                communitySubtextView.visibility = View.VISIBLE
+                communitySubtextView.text = communitySubtext
+            }
         }
 
         // setup text views from entry data

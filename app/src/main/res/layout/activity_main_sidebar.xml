@@ -139,6 +139,7 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:padding="14dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/settings"
                     android:contentDescription="@string/settings"/>
 
@@ -147,8 +148,8 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:padding="14dp"
-                    android:foreground="?android:attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/swap"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/profile_switch"
                     android:contentDescription="@string/switch_profile"/>
 
                 <ImageView
@@ -156,6 +157,7 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:padding="14dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/add_box"
                     android:contentDescription="@string/add_profile"/>
 
@@ -199,6 +201,7 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:padding="14dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/add_box"
                     android:contentDescription="@string/add_blog"/>
 

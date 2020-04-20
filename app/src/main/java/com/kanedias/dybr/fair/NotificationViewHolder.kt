@@ -24,7 +24,9 @@ import kotlinx.coroutines.*
 /**
  * View holder for showing notifications in main tab.
  * @param iv inflated view to be used by this holder
+ *
  * @see NotificationListFragment.notifRibbon
+ *
  * @author Kanedias
  */
 class NotificationViewHolder(iv: View, val parentFragment: UserContentListFragment) : RecyclerView.ViewHolder(iv) {

@@ -243,5 +243,6 @@
     <string name="unbanned">Профиль разбанен</string>
     <string name="banned">Профиль забанен</string>
     <string name="community_colon">Сообщество:</string>
+    <string name="community_marker">Если видите этот значок, профиль является сообществом</string>
 
 </resources>

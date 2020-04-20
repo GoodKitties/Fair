@@ -243,7 +243,7 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
         profSwap.onClickSingleOnly {
             val swapAnim = ValueAnimator.ofFloat(1f, -1f, 1f)
             swapAnim.interpolator = FastOutSlowInInterpolator()
-            swapAnim.addUpdateListener { profSwap.scaleY = swapAnim.animatedValue as Float }
+            swapAnim.addUpdateListener { profSwap.scaleX = swapAnim.animatedValue as Float }
             swapAnim.duration = 1_000
             swapAnim.repeatCount = ValueAnimator.INFINITE
             swapAnim.start()

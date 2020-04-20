@@ -24,11 +24,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * Fragment which displays selected entry and its comments below.
+ * Fragment which displays profile lists. Needed mostly for showing search results
  *
  * @author Kanedias
  *
- * Created on 01.04.18
+ * Created on 2020-04-20
  */
 class ProfileListSearchFragment : UserContentListFragment() {
 
@@ -58,7 +58,7 @@ class ProfileListSearchFragment : UserContentListFragment() {
     private lateinit var activity: MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        filters = arguments!!.getSerializable("filters") as Map<String, String>
+        filters = requireArguments().getSerializable("filters") as Map<String, String>
 
         val view = inflater.inflate(R.layout.fragment_profile_list_fullscreen, container, false)
         activity = context as MainActivity
@@ -97,6 +97,10 @@ class ProfileListSearchFragment : UserContentListFragment() {
         Auth.profile?.let { applyTheme(activity, it, styleLevel, backgrounds) }
     }
 
+    /**
+     * Main adapter of this fragment's recycler view. Shows profiles and handles
+     * refreshing and page loading.
+     */
     inner class ProfileListAdapter : UserContentListFragment.LoadMoreAdapter() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -111,6 +115,14 @@ class ProfileListSearchFragment : UserContentListFragment() {
         }
     }
 
+    /**
+     * View holder for showing profiles as list.
+     *
+     * @param iv inflated view to be used by this holder
+     * @param parentFragment fragment in which this holder is shown
+     *
+     * @author Kanedias
+     */
     class ProfileViewHolder(iv: View, private val parentFragment: UserContentListFragment) : RecyclerView.ViewHolder(iv) {
         @BindView(R.id.profile_avatar)
         lateinit var profileAvatar: ImageView
@@ -121,6 +133,9 @@ class ProfileListSearchFragment : UserContentListFragment() {
         @BindView(R.id.profile_registration_date)
         lateinit var registrationDate: TextView
 
+        @BindView(R.id.profile_community_marker)
+        lateinit var communityIcon: ImageView
+
         init {
             ButterKnife.bind(this, iv)
             setupTheming()
@@ -130,11 +145,12 @@ class ProfileListSearchFragment : UserContentListFragment() {
             parentFragment.styleLevel.bind(TEXT_BLOCK, itemView, CardViewColorAdapter())
             parentFragment.styleLevel.bind(TEXT, profileName)
             parentFragment.styleLevel.bind(TEXT, registrationDate)
+            parentFragment.styleLevel.bind(TEXT_LINKS, communityIcon)
         }
 
         private fun showProfile(profile: OwnProfile) {
             val profShow = ProfileFragment().apply { this.profile = profile }
-            profShow.show(parentFragment.fragmentManager!!, "Showing user profile fragment")
+            profShow.show(parentFragment.parentFragmentManager, "Showing user profile fragment")
         }
 
         private fun showBlog(profile: OwnProfile) {
@@ -148,21 +164,14 @@ class ProfileListSearchFragment : UserContentListFragment() {
 
             profileName.text = profile.nickname
             registrationDate.text = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(profile.createdAt)
+            communityIcon.visibility = if (profile.isCommunity) { View.VISIBLE } else { View.GONE }
 
             // set avatar
-            val avatarUrl = profile.settings.avatar
-            if (!avatarUrl.isNullOrBlank()) {
-                // resolve URL if it's not absolute
-                val resolved = Network.resolve(avatarUrl) ?: return
-
-                // load avatar asynchronously
-                Glide.with(profileAvatar)
-                        .load(resolved.toString())
-                        .apply(RequestOptions().centerInside().circleCrop())
-                        .into(profileAvatar)
-            } else {
-                profileAvatar.setImageDrawable(ColorDrawable(parentFragment.resources.getColor(R.color.md_grey_600)))
-            }
+            val avatar = Network.resolve(profile.settings.avatar) ?: Network.defaultAvatar()
+            Glide.with(profileAvatar)
+                    .load(avatar.toString())
+                    .apply(RequestOptions().centerInside().circleCrop())
+                    .into(profileAvatar)
         }
     }
 

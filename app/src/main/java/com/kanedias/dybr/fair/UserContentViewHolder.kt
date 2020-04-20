@@ -48,14 +48,10 @@ abstract class UserContentViewHolder<T: Authored>(iv: View, val parentFragment: 
         getCreationDateView().text = DateUtils.getRelativeTimeSpanString(entity.createdAt.time)
         getCreationDateView().setOnClickListener { showFullDate(entity) }
 
-        val avatar = Network.resolve(profile.settings.avatar)
-        if (avatar != null) {
-            Glide.with(getProfileAvatarView()).load(avatar.toString())
-                    .apply(RequestOptions().centerInside().circleCrop())
-                    .into(getProfileAvatarView())
-        } else {
-            getProfileAvatarView().setImageDrawable(null)
-        }
+        val avatar = Network.resolve(profile.settings.avatar) ?: Network.defaultAvatar()
+        Glide.with(getProfileAvatarView()).load(avatar.toString())
+                .apply(RequestOptions().centerInside().circleCrop())
+                .into(getProfileAvatarView())
         getProfileAvatarView().setOnClickListener { showProfile(entity) }
 
         getAuthorNameView().text = profile.nickname

@@ -305,4 +305,5 @@
     <string name="unbanned">Unbanned</string>
     <string name="banned">Banned</string>
     <string name="community_colon">Community:</string>
+    <string name="community_marker">If shown, means this profile is a community</string>
 </resources>

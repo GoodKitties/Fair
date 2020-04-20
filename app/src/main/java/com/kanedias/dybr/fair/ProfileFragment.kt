@@ -161,19 +161,12 @@ class ProfileFragment: DialogFragment() {
         }
 
         // set avatar
-        val avatarUrl = profile.settings.avatar
-        if (!avatarUrl.isNullOrBlank()) {
-            // resolve URL if it's not absolute
-            val resolved = Network.resolve(avatarUrl) ?: return
-
+        val avatar = Network.resolve(profile.settings.avatar) ?: Network.defaultAvatar()
             // load avatar asynchronously
-            Glide.with(authorAvatar)
-                    .load(resolved.toString())
-                    .apply(RequestOptions().centerInside())
-                    .into(authorAvatar)
-        } else {
-            authorAvatar.setImageDrawable(ColorDrawable(activity.resources.getColor(R.color.md_grey_600)))
-        }
+        Glide.with(authorAvatar)
+                .load(avatar.toString())
+                .apply(RequestOptions().centerInside())
+                .into(authorAvatar)
 
         // set favorite status
         when {
