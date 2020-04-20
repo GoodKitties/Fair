@@ -168,6 +168,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
         styleLevel.bind(TEXT, authorView)
         styleLevel.bind(TEXT, authorSubtextView)
         styleLevel.bind(TEXT, communityView)
+        styleLevel.bind(TEXT, communityView, TextViewDrawableAdapter())
         styleLevel.bind(TEXT, communitySubtextView)
         styleLevel.bind(TEXT, bodyView)
         styleLevel.bind(TEXT_LINKS, bodyView, TextViewLinksAdapter())

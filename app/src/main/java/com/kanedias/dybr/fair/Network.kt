@@ -568,7 +568,7 @@ object Network {
         return filtered[0]
     }
 
-    // TODO: empty list mark with sad cloud
+    // TODO: empty list mark with sad cloud, "my subs", "my favs", "my bans"
 
     /**
      * Pull diary entries from blog denoted by [prof]. Includes profiles and blog for returned entry list.
@@ -615,7 +615,7 @@ object Network {
      * @param id identifier of requested entry
      */
     fun loadEntry(id: String): Entry {
-        val req = Request.Builder().url("$ENTRIES_ENDPOINT/$id?include=profiles,reactions").build()
+        val req = Request.Builder().url("$ENTRIES_ENDPOINT/$id?include=profiles,reactions,community").build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful) {
             throw extractErrors(resp, "Can't load entry $id")

@@ -1,6 +1,5 @@
 package com.kanedias.dybr.fair
 
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
@@ -133,9 +132,6 @@ class ProfileListSearchFragment : UserContentListFragment() {
         @BindView(R.id.profile_registration_date)
         lateinit var registrationDate: TextView
 
-        @BindView(R.id.profile_community_marker)
-        lateinit var communityIcon: ImageView
-
         init {
             ButterKnife.bind(this, iv)
             setupTheming()
@@ -144,8 +140,8 @@ class ProfileListSearchFragment : UserContentListFragment() {
         fun setupTheming() {
             parentFragment.styleLevel.bind(TEXT_BLOCK, itemView, CardViewColorAdapter())
             parentFragment.styleLevel.bind(TEXT, profileName)
+            parentFragment.styleLevel.bind(TEXT, profileName, TextViewDrawableAdapter())
             parentFragment.styleLevel.bind(TEXT, registrationDate)
-            parentFragment.styleLevel.bind(TEXT_LINKS, communityIcon)
         }
 
         private fun showProfile(profile: OwnProfile) {
@@ -163,8 +159,12 @@ class ProfileListSearchFragment : UserContentListFragment() {
             itemView.setOnClickListener { showBlog(profile) }
 
             profileName.text = profile.nickname
+            when (profile.isCommunity) {
+                true -> profileName.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.community, 0, 0, 0)
+                false -> profileName.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, 0, 0)
+            }
             registrationDate.text = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(profile.createdAt)
-            communityIcon.visibility = if (profile.isCommunity) { View.VISIBLE } else { View.GONE }
+
 
             // set avatar
             val avatar = Network.resolve(profile.settings.avatar) ?: Network.defaultAvatar()

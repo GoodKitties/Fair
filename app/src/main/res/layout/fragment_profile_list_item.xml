@@ -29,20 +29,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toEndOf="@id/profile_avatar"
+            android:drawablePadding="4dp"
             android:padding="8dp"
             android:textStyle="bold"
             android:text="@string/placeholder_long"
             android:maxEms="12"/>
-
-        <ImageView
-            android:id="@+id/profile_community_marker"
-            android:layout_width="34dp"
-            android:layout_height="34dp"
-            android:layout_toEndOf="@id/profile_name"
-            android:padding="4dp"
-            android:src="@drawable/community"
-            android:contentDescription="@string/community_marker"
-            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/profile_registration_date_label"
