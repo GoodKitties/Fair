@@ -16,20 +16,20 @@ class ReactionSetResponse: Resource() {
     /**
      * Name of this reaction set
      */
-    @field:Json(name = "name")
+    @Json(name = "name")
     lateinit var name: String
 
     /**
      * Person who created this reaction set
      */
-    @field:Json(name = "image-url")
+    @Json(name = "image-url")
     var author: HasOne<OwnProfile>? = null
 
 
     /**
      * Person who created this reaction set
      */
-    @field:Json(name = "reaction-types")
+    @Json(name = "reaction-types")
     var reactionTypes: HasMany<ReactionType>? = null
 }
 
@@ -40,20 +40,20 @@ class ReactionTypeResponse: Resource() {
     /**
      * Name of this reaction type
      */
-    @field:Json(name = "emoji")
+    @Json(name = "emoji")
     lateinit var emoji: String
 
     /**
      * Person who created this reaction set
      */
-    @field:Json(name = "image-url")
+    @Json(name = "image-url")
     var imageUrl: String? = null
 
 
     /**
      * Person who created this reaction set
      */
-    @field:Json(name = "reaction-set")
+    @Json(name = "reaction-set")
     var reactionSet: HasOne<ReactionSet>? = null
 }
 
@@ -66,25 +66,25 @@ class CreateReactionRequest: Resource() {
     /**
      * Person who created this reaction
      */
-    @field:Json(name = "author")
+    @Json(name = "author")
     lateinit var author: HasOne<OwnProfile>
 
     /**
      * Reaction type (emoji) for this reaction
      */
-    @field:Json(name = "reaction-type")
+    @Json(name = "reaction-type")
     lateinit var reactionType: HasOne<ReactionType>
 
     /**
      * Entry this reaction attached to (choice, 1/2)
      */
-    @field:Json(name = "entry")
+    @Json(name = "entry")
     var entry: HasOne<Entry>? = null
 
     /**
      * Comment this reaction attached to (choice, 2/2)
      */
-    @field:Json(name = "comment")
+    @Json(name = "comment")
     var comment: HasOne<Comment>? = null
 
 }
@@ -95,25 +95,25 @@ class ReactionResponse: Resource() {
     /**
      * Person who created this reaction
      */
-    @field:Json(name = "author")
+    @Json(name = "author")
     lateinit var author: HasOne<OwnProfile>
 
     /**
      * Person who created this reaction
      */
-    @field:Json(name = "reaction-type")
+    @Json(name = "reaction-type")
     lateinit var reactionType: HasOne<ReactionType>
 
     /**
      * Entry this reaction attached to (choice, 1/2)
      */
-    @field:Json(name = "entry")
+    @Json(name = "entry")
     var entry: HasOne<Entry>? = null
 
     /**
      * Comment this reaction attached to (choice, 2/2)
      */
-    @field:Json(name = "comment")
+    @Json(name = "comment")
     var comment: HasOne<Comment>? = null
 
 }

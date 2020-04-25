@@ -11,7 +11,7 @@ import java.io.Serializable
  * (Don't confuse this class with [ProfileSettings] which are linked to [OwnProfile] instead)
  */
 data class RecordSettings (
-    @field:Json(name = "permissions")
+    @Json(name = "permissions")
     val permissions: RecordPermissions
 ) : Serializable
 
@@ -29,7 +29,7 @@ data class RecordPermissions (
          *
          * The items are applied from first to last for more complex scenarios.
          */
-        @field:Json(name = "access")
+        @Json(name = "access")
         val access: List<RecordAccessItem>? = null
 ) : Serializable
 
@@ -49,7 +49,7 @@ data class RecordAccessItem (
         /**
          * type of access item. Can be "private", "registered", "favorites"
          */
-        @field:Json(name = "type")
+        @Json(name = "type")
         val type: String
 ) : Serializable
 

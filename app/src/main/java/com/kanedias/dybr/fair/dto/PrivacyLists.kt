@@ -23,18 +23,18 @@ import java.io.Serializable
 @JsonApi(type = "profile-list", policy = Policy.DESERIALIZATION_ONLY)
 class PrivacyEntryResponse: Resource(), Serializable {
 
-    @field:Json(name = "action")
+    @Json(name = "action")
     lateinit var action: String
 
-    @field:Json(name = "kind")
+    @Json(name = "kind")
     lateinit var kind: String
 
-    @field:Json(name = "name")
+    @Json(name = "name")
     lateinit var name: String
 
-    @field:Json(name = "scope")
+    @Json(name = "scope")
     lateinit var scope: String
 
-    @field:Json(name = "profiles")
+    @Json(name = "profiles")
     var profiles = HasMany<OwnProfile>()
 }

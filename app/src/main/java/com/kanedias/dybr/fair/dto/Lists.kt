@@ -41,31 +41,31 @@ class ActionListRequest: Resource() {
     /**
      * Action that should be performed on the target
      */
-    @field:Json(name = "action")
+    @Json(name = "action")
     var action = "hide"
 
     /**
      * Scope of the action
      */
-    @field:Json(name = "scope")
+    @Json(name = "scope")
     lateinit var scope: String
 
     /**
      * Type of the target
      */
-    @field:Json(name = "kind")
+    @Json(name = "kind")
     var kind = "profile"
 
     /**
      * Reason for creating this list item
      */
-    @field:Json(name = "name")
+    @Json(name = "name")
     var name: String = ""
 
     /**
      * Target profiles
      */
-    @field:Json(name = "profiles")
+    @Json(name = "profiles")
     val profiles = HasMany<OwnProfile>()
 }
 
@@ -108,31 +108,31 @@ class ActionListResponse: Resource() {
     /**
      * Type of list action to perform
      */
-    @field:Json(name = "action")
+    @Json(name = "action")
     lateinit var action: String
 
     /**
      * Type of entity that this action affects
      */
-    @field:Json(name = "kind")
+    @Json(name = "kind")
     lateinit var kind: String
 
     /**
      * Scope of the action
      */
-    @field:Json(name = "scope")
+    @Json(name = "scope")
     lateinit var scope: String
 
     /**
      * Name of this list item
      */
-    @field:Json(name = "name")
+    @Json(name = "name")
     lateinit var name: String
 
     /**
      * Profile that this action affects
      */
-    @field:Json(name = "profiles")
+    @Json(name = "profiles")
     var profiles = HasMany<OwnProfile>()
 }
 

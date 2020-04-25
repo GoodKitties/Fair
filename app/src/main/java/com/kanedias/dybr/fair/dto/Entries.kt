@@ -16,10 +16,16 @@ import moe.banana.jsonapi2.*
  *       "content": "Iste sint tempore eveniet omnis."
  *     },
  *     "relationships": {
- *       "blog": {
+ *       "profile": {
  *         "data": {
- *           "type": "blogs",
+ *           "type": "profiles",
  *           "id": 30
+ *         }
+ *       },
+ *       "community": {
+ *         "data": {
+ *           "type": "profiles",
+ *           "id": 32
  *         }
  *       }
  *     }
@@ -38,25 +44,25 @@ class EntryCreateRequest : Resource() {
      * Title of a new entry, plaintext.
      * Not always present
      */
-    @field:Json(name = "title")
+    @Json(name = "title")
     var title: String? = null
 
     /**
      * Content of a new entry, in HTML format
      */
-    @field:Json(name = "content")
+    @Json(name = "content")
     var content: String = ""
 
     /**
      * Tags of this entry
      */
-    @field:Json(name = "tags")
+    @Json(name = "tags")
     var tags = listOf<String>()
 
     /**
      * State of this entry. Variants: "draft", "published"
      */
-    @field:Json(name = "state")
+    @Json(name = "state")
     var state: String = "published"
 
     /**
@@ -65,21 +71,21 @@ class EntryCreateRequest : Resource() {
      *
      * If null, defaults are applied (visible for all and in feed)
      */
-    @field:Json(name = "settings")
+    @Json(name = "settings")
     var settings: RecordSettings? = null
 
     /**
      * Profile with blog this entry belongs to.
      * Must be set if it's new entry.
      */
-    @field:Json(name = "profile")
+    @Json(name = "profile")
     var profile: HasOne<OwnProfile>? = null
 
     /**
      * Profile with blog this entry is posted to.
      * Equals to [profile] if null.
      */
-    @field:Json(name = "community")
+    @Json(name = "community")
     var community: HasOne<OwnProfile>? = null
 }
 
@@ -106,7 +112,7 @@ class EntryCreateRequest : Resource() {
  *       "reactions" : {
  *         "data": [ ... ]
  *       }
- *       "blog": {
+ *       "profile": {
  *         "links": {
  *           "self": "http://www.example.com/v1/entries/16/relationships/blog",
  *           "related": "http://www.example.com/v1/entries/16/blog"
@@ -134,33 +140,33 @@ class EntryResponse: Authored() {
      * Title of this entry, plaintext.
      * Not always present
      */
-    @field:Json(name = "title")
+    @Json(name = "title")
     var title: String? = null
 
     /**
      * Content of this entry, in html format
      */
-    @field:Json(name = "content")
+    @Json(name = "content")
     var content = ""
 
     /**
      * Tags of this entry
      */
-    @field:Json(name = "tags")
+    @Json(name = "tags")
     var tags = mutableListOf<String>()
 
     /**
      * State of this entry. May be "published" or "draft"
      * @see EntryCreateRequest.state
      */
-    @field:Json(name = "state")
+    @Json(name = "state")
     var state = "published"
 
     /**
      * Reactions that are attached to this entry
      * @see Reaction
      */
-    @field:Json(name = "reactions")
+    @Json(name = "reactions")
     var reactions: HasMany<Reaction>? = null
 
     /**
@@ -168,14 +174,14 @@ class EntryResponse: Authored() {
      * and so on.
      *
      */
-    @field:Json(name = "settings")
+    @Json(name = "settings")
     var settings: RecordSettings? = null
 
     /**
      * Profile with blog this entry is posted to.
      * Equals to [profile] if null.
      */
-    @field:Json(name = "community")
+    @Json(name = "community")
     var community: HasOne<OwnProfile>? = null
 
 }
@@ -185,22 +191,22 @@ class EntryResponse: Authored() {
  * e.g. number of comments and commenting participants
  */
 class EntryMeta {
-    @field:Json(name = "commenters")
+    @Json(name = "commenters")
     var commenters = 0
 
-    @field:Json(name = "comments")
+    @Json(name = "comments")
     var comments = 0
 
-    @field:Json(name = "pinned")
+    @Json(name = "pinned")
     var pinned: Boolean? = null
 
-    @field:Json(name = "can-comment")
+    @Json(name = "can-comment")
     var canComment: Boolean? = null
 
-    @field:Json(name = "subscribed")
+    @Json(name = "subscribed")
     var subscribed: Boolean? = null
 
-    @field:Json(name = "bookmark")
+    @Json(name = "bookmark")
     var bookmark: Boolean? = null
 }
 
@@ -213,7 +219,7 @@ fun isEntryWritable(entry: Entry?): Boolean {
     if (Auth.profile == null)
         return false
 
-    val meta = Network.bufferToObject<EntryMeta>(entry.meta)
+    val meta = Network.bufferToObject(entry.meta, EntryMeta::class.java)
     if (meta?.canComment == false)
         return false
 

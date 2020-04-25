@@ -22,28 +22,28 @@ import moe.banana.jsonapi2.Resource
  */
 @JsonApi(type = "sessions", policy = Policy.SERIALIZATION_ONLY)
 class LoginRequest : Resource() {
-        @field:Json(name = "action")
+        @Json(name = "action")
         lateinit var action: String
 
-        @field:Json(name = "email")
+        @Json(name = "email")
         lateinit var email: String
 
-        @field:Json(name = "password")
+        @Json(name = "password")
         lateinit var password: String
 
         /**
          * Needed only in confirmation request
          */
-        @field:Json(name = "confirmation-token")
+        @Json(name = "confirmation-token")
         var confirmToken: String? = null
 }
 
 @JsonApi(type = "sessions", policy = Policy.DESERIALIZATION_ONLY)
 class LoginResponse : Resource() {
-        @field:Json(name = "action")
+        @Json(name = "action")
         lateinit var action: String
 
-        @field:Json(name = "access-token")
+        @Json(name = "access-token")
         lateinit var accessToken: String
 }
 

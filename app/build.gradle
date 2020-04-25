@@ -21,8 +21,8 @@ android {
         applicationId "com.kanedias.dybr.fair"
         targetSdkVersion 29 // device you test on
         minSdkVersion 21    // device you allow your users to be on :)
-        versionCode 75
-        versionName "1.16.4"
+        versionCode 76
+        versionName "1.16.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -128,8 +128,8 @@ dependencies {
     implementation 'com.afollestad.material-dialogs:input:3.1.1'
     implementation 'com.github.Adonai:Scoops:1.4.2'                             // theming engine
     implementation 'moe.banana:moshi-jsonapi:3.5.0'                             // JSON-API parser
-    implementation 'com.squareup.moshi:moshi-kotlin:1.6.0'                      // Moshi Kotlin support
-    implementation 'com.squareup.moshi:moshi-adapters:1.6.0'                    // Moshi serializers collection
+    implementation 'com.squareup.moshi:moshi-kotlin:1.9.2'                      // Moshi Kotlin support
+    implementation 'com.squareup.moshi:moshi-adapters:1.9.2'                    // Moshi serializers collection
     implementation "io.noties.markwon:core:$markwonVersion"                     // markdown rendering
     implementation "io.noties.markwon:editor:$markwonVersion"                   // markdown editor
     implementation "io.noties.markwon:image-glide:$markwonVersion"

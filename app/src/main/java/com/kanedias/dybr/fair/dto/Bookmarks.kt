@@ -37,7 +37,7 @@ class CreateBookmarkRequest: Resource() {
      * Entry this bookmark points to.
      * Must be set.
      */
-    @field:Json(name = "entry")
+    @Json(name = "entry")
     lateinit var entry: HasOne<Entry>
 
 }

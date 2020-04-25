@@ -29,7 +29,7 @@ import java.util.*
  *
  * Created on 2020-04-20
  */
-class ProfileListSearchFragment : UserContentListFragment() {
+open class ProfileListSearchFragment : UserContentListFragment() {
 
     @BindView(R.id.profile_list_toolbar)
     lateinit var toolbar: Toolbar
@@ -50,7 +50,7 @@ class ProfileListSearchFragment : UserContentListFragment() {
     /**
      * Filters for search query
      */
-    private lateinit var filters: Map<String, String>
+    lateinit var filters: Map<String, String>
 
     private lateinit var profileAdapter: LoadMoreAdapter
 

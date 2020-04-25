@@ -4,10 +4,8 @@
     android:id="@+id/comment_card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginLeft="5dp"
-    android:layout_marginRight="5dp"
+    android:layout_margin="4dp"
     android:foreground="?android:attr/selectableItemBackground"
-    android:layout_marginBottom="1dp"
     app:cardCornerRadius="32dp"
     app:cardElevation="4dp"
     app:cardMaxElevation="8dp">

@@ -44,19 +44,19 @@ class CreateCommentRequest: Resource() {
     /**
      * Content of this comment. Represented in HTML format
      */
-    @field:Json(name = "content")
+    @Json(name = "content")
     lateinit var content: String
 
     /**
      * Entry for which this comment is being created for
      */
-    @field:Json(name = "entry")
+    @Json(name = "entry")
     var entry : HasOne<Entry>? = null
 
     /**
      * Profile this comment is being created with
      */
-    @field:Json(name = "profile")
+    @Json(name = "profile")
     var profile : HasOne<OwnProfile>? = null
 }
 
@@ -113,13 +113,13 @@ class CommentResponse: Authored() {
     /**
      * Text of this comment in HTML format
      */
-    @field:Json(name = "content")
+    @Json(name = "content")
     lateinit var content: String
 
     /**
      * Entry this comment was posted for
      */
-    @field:Json(name = "entry")
+    @Json(name = "entry")
     val entry = HasOne<Entry>()
 }
 

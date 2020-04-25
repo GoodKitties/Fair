@@ -26,44 +26,44 @@ class ProfileCreateRequest: Resource() {
     /**
      * Chosen nickname
      */
-    @field:Json(name = "nickname")
+    @Json(name = "nickname")
     var nickname: String? = null
 
     /**
      * Birthday in DD-MM format
      */
-    @field:Json(name = "birthday")
+    @Json(name = "birthday")
     var birthday: String? = null
 
     /**
      * Description of this profile (multiline text)
      */
-    @field:Json(name = "description")
+    @Json(name = "description")
     var description: String? = null
 
     /**
      * Slug of the blog associated with this profile
      */
-    @field:Json(name = "blog-slug")
+    @Json(name = "blog-slug")
     var blogSlug: String? = null
 
     /**
      * Title of the blog associated with this profile
      */
-    @field:Json(name = "blog-title")
+    @Json(name = "blog-title")
     var blogTitle: String? = null
 
     /**
      * Community marker. If true, the profile belongs to a community,
      * and anyone participating can post there.
      */
-    @field:Json(name = "is-community")
+    @Json(name = "is-community")
     var isCommunity: Boolean = false
 
     /**
      * Preferences structure for this profile
      */
-    @field:Json(name = "settings")
+    @Json(name = "settings")
     var settings: ProfileSettings? = null
 }
 
@@ -110,62 +110,62 @@ class ProfileResponse : Dated() {
     /**
      * Chosen nickname
      */
-    @field:Json(name = "nickname")
+    @Json(name = "nickname")
     lateinit var nickname: String
 
     /**
      * Birthday in DD-MM format
      */
-    @field:Json(name = "birthday")
+    @Json(name = "birthday")
     lateinit var birthday: String
 
     /**
      * Slug of the blog associated with this profile
      */
-    @field:Json(name = "blog-slug")
+    @Json(name = "blog-slug")
     var blogSlug: String? = null
 
     /**
      * Title of the blog associated with this profile
      */
-    @field:Json(name = "blog-title")
+    @Json(name = "blog-title")
     var blogTitle: String? = null
 
     /**
      * Preferences structure for this profile
      */
-    @field:Json(name = "settings")
+    @Json(name = "settings")
     var settings: ProfileSettings = ProfileSettings()
 
     /**
      * Tags that this profile is using
      */
-    @field:Json(name = "tags")
+    @Json(name = "tags")
     var tags = mutableSetOf<Tag>()
 
     /**
      * Link to the user this profile belongs to
      */
-    @field:Json(name = "user")
+    @Json(name = "user")
     var user = HasOne<User>()
 
     /**
      * Link to the readers of this profile
      */
-    @field:Json(name = "readers")
+    @Json(name = "readers")
     var readers = HasMany<OwnProfile>()
 
     /**
      * Community marker. If true, the profile belongs to a community,
      * and anyone participating can post there.
      */
-    @field:Json(name = "is-community")
+    @Json(name = "is-community")
     var isCommunity: Boolean = false
 
     /**
      * Link to the subscribers of this profile
      */
-    @field:Json(name = "favorites")
+    @Json(name = "favorites")
     var favorites = HasMany<OwnProfile>()
 }
 

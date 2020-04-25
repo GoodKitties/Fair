@@ -36,44 +36,44 @@ class RegisterRequest : Resource() {
     /**
      * Email to register. This will be used in later login requests
      */
-    @field:Json(name = "email")
+    @Json(name = "email")
     lateinit var email: String
 
     /**
      * Password for this email. API endpoints are HTTPS so we don't afraid of leakage
      */
-    @field:Json(name = "password")
+    @Json(name = "password")
     lateinit var password: String
 
     /**
      * Confirmation for [password]
      */
-    @field:Json(name = "password-confirmation")
+    @Json(name = "password-confirmation")
     lateinit var confirmPassword: String
 
     /**
      * Currently active profile for this user. Usually used in PATCH requests
      * after user is already created
      */
-    @field:Json(name = "active-profile")
+    @Json(name = "active-profile")
     var activeProfile: String? = null
 
     /**
      * If this is unchecked server throws error that ToS are not accepted
      */
-    @field:Json(name = "terms-of-service")
+    @Json(name = "terms-of-service")
     var termsOfService: Boolean? = null
 
     /**
      * Whether to show non-SFW content
      */
-    @field:Json(name = "is-adult")
+    @Json(name = "is-adult")
     var isAdult: Boolean? = null
 
     /**
      * Timezone like 'Europe/Moscow', optional
      */
-    @field:Json(name = "timezone")
+    @Json(name = "timezone")
     var timezone: String? = null
 }
 
@@ -108,26 +108,26 @@ class RegisterResponse : Dated() {
     /**
      * Email used when registering, see [RegisterRequest.email]
      */
-    @field:Json(name = "email")
+    @Json(name = "email")
     lateinit var email: String
 
     /**
      * if checked - show non-SFW content
      */
-    @field:Json(name = "is-adult")
+    @Json(name = "is-adult")
     var isAdult: Boolean = false
 
     /**
      * Currently active profile for this user.
      * Can be null if user was just created and doesn't have any profile.
      */
-    @field:Json(name = "active-profile")
+    @Json(name = "active-profile")
     var activeProfile: String? = null
 
     /**
      * Available when requested with `include=profiles`
      */
-    @field:Json(name = "profiles")
+    @Json(name = "profiles")
     var profiles = HasMany<OwnProfile>()
 }
 

@@ -13,7 +13,7 @@ class DesignResponse: Resource() {
         /**
          * Actual nested design data
          */
-        @field:Json(name = "data")
+        @Json(name = "data")
         lateinit var data: DesignStyle
 }
 
@@ -93,7 +93,7 @@ data class DesignColors(
 
         val borders: String?,
 
-        @field:Json(name = "button-text")
+        @Json(name = "button-text")
         val buttonText: String?,
 
         val buttons: String?,
@@ -102,7 +102,7 @@ data class DesignColors(
 
         val elements: String?,
 
-        @field:Json(name = "elements-back")
+        @Json(name = "elements-back")
         val elementsBack: String?,
 
         val headers: String?,

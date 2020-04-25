@@ -431,7 +431,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
 
         // bind variables
         this.entry = entity
-        this.metadata = Network.bufferToObject<EntryMeta>(entry.meta)
+        this.metadata = Network.bufferToObject(entry.meta, EntryMeta::class.java)
         this.profile = entity.profile.get(entity.document)
         this.community = entity.community?.get(entity.document)
         this.reactions = entity.reactions?.get(entity.document) ?: mutableListOf()

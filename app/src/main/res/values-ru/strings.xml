@@ -244,5 +244,9 @@
     <string name="banned">Профиль забанен</string>
     <string name="community_colon">Сообщество:</string>
     <string name="community_marker">Если видите этот значок, профиль является сообществом</string>
+    <string name="my_favorites">Мои избранные</string>
+    <string name="my_readers">Мои читатели</string>
+    <string name="my_banned">Мои забаненные</string>
+    <string name="my_communities">Мои сообщества</string>
 
 </resources>

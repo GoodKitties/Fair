@@ -14,7 +14,9 @@ import com.squareup.moshi.Types
 import com.kanedias.dybr.fair.dto.*
 import com.kanedias.dybr.fair.misc.HttpApiException
 import com.kanedias.dybr.fair.misc.HttpException
+import com.squareup.moshi.Json
 import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import moe.banana.jsonapi2.*
@@ -29,6 +31,8 @@ import okhttp3.internal.http.HttpMethod
 import org.json.JSONObject
 import java.lang.IllegalStateException
 import kotlin.random.Random
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.jvm.kotlinProperty
 
 
 /**
@@ -117,10 +121,12 @@ object Network {
             .add(ReactionSetResponse::class.java)
             .add(CreateReactionRequest::class.java)
             .add(ReactionResponse::class.java)
+            .setJsonNameMapping { it.kotlinProperty?.findAnnotation<Json>()?.name ?: it.name }
             .build()
 
     private val jsonConverter = Moshi.Builder()
             .add(jsonApiAdapter)
+            .add(KotlinJsonAdapterFactory())
             .add(Date::class.java, Rfc3339DateJsonAdapter())
             .build()
 
@@ -344,11 +350,11 @@ object Network {
      * @param buffer Json-API buffer containing map-like structure
      * @return string<->string map or empty if buffer is null
      */
-    inline fun <reified T> bufferToObject(buffer: JsonBuffer<Any>?): T? {
+    fun <T> bufferToObject(buffer: JsonBuffer<Any>?, type: Class<T>): T? {
         if (buffer == null)
             return null
 
-        val mapAdapter = Moshi.Builder().build().adapter(T::class.java)
+        val mapAdapter = jsonConverter.adapter(type)
         return buffer.get<T>(mapAdapter)
     }
 

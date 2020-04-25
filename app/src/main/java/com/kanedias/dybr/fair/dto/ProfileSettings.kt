@@ -27,28 +27,28 @@ import java.io.Serializable
  * Created on 28.07.18
  */
 data class ProfileSettings(
-        @field:Json(name = "avatar")
+        @Json(name = "avatar")
         val avatar: String? = null,
 
-        @field:Json(name = "subtext")
+        @Json(name = "subtext")
         val subtext: String? = null,
 
-        @field:Json(name = "current-design")
+        @Json(name = "current-design")
         val currentDesign: String? = null,
 
-        @field:Json(name = "notifications")
+        @Json(name = "notifications")
         var notifications: NotificationsSettings = NotificationsSettings(),
 
-        @field:Json(name = "privacy")
+        @Json(name = "privacy")
         var privacy: PrivacySettings = PrivacySettings(),
 
-        @field:Json(name = "permissions")
+        @Json(name = "permissions")
         var permissions: RecordPermissions = RecordPermissions(),
 
-        @field:Json(name = "pinned-entries")
+        @Json(name = "pinned-entries")
         var pinnedEntries: MutableSet<String> = mutableSetOf(),
 
-        @field:Json(name = "reactions")
+        @Json(name = "reactions")
         var reactions: ReactionConfig = ReactionConfig()
 ) : Serializable
 
@@ -91,13 +91,13 @@ data class NotificationConfig(
  * ```
  */
 data class ReactionConfig(
-        @field:Json(name = "hide")
+        @Json(name = "hide")
         var disable: Boolean = false,
 
-        @field:Json(name = "use-images")
+        @Json(name = "use-images")
         var useImages: Boolean = false,
 
-        @field:Json(name = "disable-in-blog")
+        @Json(name = "disable-in-blog")
         var disableInBlog: Boolean = false
 ) : Serializable
 

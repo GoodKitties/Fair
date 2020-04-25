@@ -18,13 +18,13 @@ open class Dated: Resource() {
      * Date this entity was created at.
      * Immutable
      */
-    @field:Json(name = "created-at")
+    @Json(name = "created-at")
     lateinit var createdAt: Date
 
     /**
      * Date this entity was last modified at
      */
-    @field:Json(name = "updated-at")
+    @Json(name = "updated-at")
     lateinit var updatedAt: Date
 
 }
@@ -41,6 +41,6 @@ open class Authored: Dated() {
     /**
      * Profile this entity was created by
      */
-    @field:Json(name = "profile")
+    @Json(name = "profile")
     val profile = HasOne<OwnProfile>()
 }

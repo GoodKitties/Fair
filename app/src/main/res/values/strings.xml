@@ -306,4 +306,8 @@
     <string name="banned">Banned</string>
     <string name="community_colon">Community:</string>
     <string name="community_marker">If shown, means this profile is a community</string>
+    <string name="my_favorites">My favorites</string>
+    <string name="my_readers">My readers</string>
+    <string name="my_banned">My banned</string>
+    <string name="my_communities">My communities</string>
 </resources>

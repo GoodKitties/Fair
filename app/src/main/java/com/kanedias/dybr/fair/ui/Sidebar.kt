@@ -4,11 +4,13 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Intent
+import android.os.Bundle
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import android.view.View
 import android.widget.*
 import androidx.lifecycle.lifecycleScope
 import butterknife.BindView
+import butterknife.BindViews
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.afollestad.materialdialogs.MaterialDialog
@@ -16,11 +18,12 @@ import com.kanedias.dybr.fair.*
 import com.kanedias.dybr.fair.database.DbProvider
 import com.kanedias.dybr.fair.dto.Auth
 import com.kanedias.dybr.fair.database.entities.Account
+import com.kanedias.dybr.fair.dto.OwnProfile
 import com.kanedias.dybr.fair.misc.onClickSingleOnly
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.themes.showThemed
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.*
+import moe.banana.jsonapi2.ArrayDocument
 
 /**
  * Sidebar views and controls.
@@ -60,10 +63,10 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
     lateinit var blogArea: RelativeLayout
 
     /**
-     * "My Bookmarks" row
+     * "My bookmarks", "My favorites", "My readers", "My banned", "My communities" rows
      */
-    @BindView(R.id.bookmarks_area)
-    lateinit var bookmarksArea: RelativeLayout
+    @BindViews(R.id.my_bookmarks, R.id.my_favorites, R.id.my_readers, R.id.my_banned, R.id.my_communities)
+    lateinit var profileListRows: List<@JvmSuppressWildcards TextView>
 
     /**
      * Label that shows current username near welcome text
@@ -100,8 +103,85 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
         activity.showFullscreenFragment(AddAccountFragment())
     }
 
-    @OnClick(R.id.settings_area)
+    @OnClick(R.id.my_bookmarks)
+    fun goToBookmarks() {
+        drawer.closeDrawers()
+        activity.showFullscreenFragment(BookmarkListFragmentFull())
+    }
+
+    @OnClick(R.id.my_favorites)
+    fun goToFavorites() {
+        class ProfileListFavFragment: ProfileListSearchFragment() {
+
+            override fun retrieveData(pageNum: Int, starter: Long): () -> ArrayDocument<OwnProfile> = {
+                val prof = Network.loadProfile(filters.getValue("profileId"))
+                val favs = prof.favorites.get(prof.document)
+                val from = (pageNum - 1) * 20
+                val to = minOf(pageNum * 20, favs.size)
+                ArrayDocument<OwnProfile>().apply { addAll(favs.subList(from, to)) }
+            }
+        }
+
+        val authenticated = Auth.profile ?: return
+        val frag = ProfileListFavFragment().apply {
+            arguments = Bundle().apply { putSerializable("filters", HashMap(mapOf("profileId" to authenticated.id))) }
+        }
+
+        drawer.closeDrawers()
+        activity.showFullscreenFragment(frag)
+    }
+
+    @OnClick(R.id.my_readers)
+    fun goToReaders() {
+        class ProfileListReadersFragment: ProfileListSearchFragment() {
+
+            override fun retrieveData(pageNum: Int, starter: Long): () -> ArrayDocument<OwnProfile> = {
+                val prof = Network.loadProfile(filters.getValue("profileId"))
+                val readers = prof.readers.get(prof.document)
+                val from = (pageNum - 1) * 20
+                val to = minOf(pageNum * 20, readers.size)
+                ArrayDocument<OwnProfile>().apply { addAll(readers.subList(from, to)) }
+            }
+        }
+
+        val authenticated = Auth.profile ?: return
+        val frag = ProfileListReadersFragment().apply {
+            arguments = Bundle().apply { putSerializable("filters", HashMap(mapOf("profileId" to authenticated.id))) }
+        }
+
+        drawer.closeDrawers()
+        activity.showFullscreenFragment(frag)
+    }
+
+    @OnClick(R.id.my_banned)
+    fun goToBanned() {
+        class ProfileListBannedFragment: ProfileListSearchFragment() {
+
+            override fun retrieveData(pageNum: Int, starter: Long): () -> ArrayDocument<OwnProfile> = {
+                val actionLists = Network.loadActionLists()
+                val banned = actionLists
+                        .filter { it.action == "ban" && it.scope == "blog" }
+                        .flatMap { list -> list.profiles.get(list.document) }
+                        .toList()
+                val from = (pageNum - 1) * 20
+                val to = minOf(pageNum * 20, banned.size)
+                ArrayDocument<OwnProfile>().apply { addAll(banned.subList(from, to)) }
+            }
+        }
+
+        val authenticated = Auth.profile ?: return
+        val frag = ProfileListBannedFragment().apply {
+            // not needed here but kept for consistency
+            arguments = Bundle().apply { putSerializable("filters", HashMap(mapOf("profileId" to authenticated.id))) }
+        }
+
+        drawer.closeDrawers()
+        activity.showFullscreenFragment(frag)
+    }
+
+    @OnClick(R.id.my_settings)
     fun goToSettings() {
+        drawer.closeDrawers()
         activity.startActivity(Intent(activity, SettingsActivity::class.java))
     }
 
@@ -137,7 +217,7 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
         updateAccountsArea()
         updateProfileRow()
         updateBlogRow()
-        updateBookmarksRow()
+        updateProfileListRows()
     }
 
     /**
@@ -307,17 +387,10 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
         }
     }
 
-    private fun updateBookmarksRow() {
-        val bookmarksIcon = bookmarksArea.findViewById<TextView>(R.id.my_bookmarks)
-
+    private fun updateProfileListRows() {
         when (Auth.profile) {
-            null -> bookmarksIcon.isEnabled = false
-            else -> bookmarksIcon.isEnabled = true
-        }
-
-        bookmarksIcon.setOnClickListener {
-            drawer.closeDrawers()
-            activity.showFullscreenFragment(BookmarkListFragmentFull())
+            null -> profileListRows.forEach { it.isEnabled = false }
+            else -> profileListRows.forEach { it.isEnabled = true }
         }
     }
 
