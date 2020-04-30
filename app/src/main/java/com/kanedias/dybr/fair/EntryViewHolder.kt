@@ -38,7 +38,6 @@ import com.kanedias.dybr.fair.themes.*
 import com.kanedias.dybr.fair.ui.openUrlExternally
 import com.kanedias.dybr.fair.ui.showToastAtView
 import kotlinx.coroutines.*
-import okhttp3.HttpUrl
 
 /**
  * View holder for showing regular entries in blog view.
@@ -145,7 +144,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
     /**
      * Listener to show comments of this entry
      */
-    private val commentShow  = View.OnClickListener {
+    private val commentShow = View.OnClickListener {
         val activity = it.context as AppCompatActivity
         val commentsPage = CommentListFragment().apply { entry = this@EntryViewHolder.entry }
         activity.showFullscreenFragment(commentsPage)
@@ -319,11 +318,13 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
 
         MaterialDialog(itemView.context)
                 .title(R.string.entry_menu)
-                .listItems(items = items, selection = {_, index, _ ->  when (index) {
-                    0 -> showInWebView()
-                    1 -> sharePost()
-                    2 -> hideFromFeed()
-                }}).show()
+                .listItems(items = items, selection = { _, index, _ ->
+                    when (index) {
+                        0 -> showInWebView()
+                        1 -> sharePost()
+                        2 -> hideFromFeed()
+                    }
+                }).show()
     }
 
     private fun hideFromFeed() {
@@ -446,12 +447,14 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
         } else {
             // community exists
             communityProfileArea.visibility = View.VISIBLE
+            communityView.text = community!!.nickname
+            communityView.setOnClickListener { showProfile(community!!) }
 
             val avatar = Network.resolve(community?.settings?.avatar) ?: Network.defaultAvatar()
-                Glide.with(communityAvatarView).load(avatar.toString())
-                        .apply(RequestOptions().centerInside().circleCrop())
-                        .into(communityAvatarView)
-            communityView.text = community!!.nickname
+            Glide.with(communityAvatarView).load(avatar.toString())
+                    .apply(RequestOptions().centerInside().circleCrop())
+                    .into(communityAvatarView)
+            communityAvatarView.setOnClickListener { showProfile(community!!) }
 
             val communitySubtext = community!!.settings.subtext
             if (communitySubtext.isNullOrEmpty()) {
@@ -617,7 +620,7 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
     /**
      * Clickable tag span. Don't make it look like a URL link but make it clickable nevertheless.
      */
-    inner class ClickableTag(private val tagValue: String): ClickableSpan() {
+    inner class ClickableTag(private val tagValue: String) : ClickableSpan() {
 
         override fun onClick(widget: View) {
             val activity = itemView.context as AppCompatActivity

@@ -14,13 +14,12 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.TintableBackgroundView
 import androidx.core.widget.CompoundButtonCompat
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
-import androidx.appcompat.widget.AppCompatSpinner
 import androidx.cardview.widget.CardView
-import androidx.appcompat.widget.Toolbar
 import android.view.View
 import android.widget.*
+import androidx.appcompat.widget.*
 import androidx.appcompat.widget.SearchView
-import androidx.appcompat.widget.SwitchCompat
+import androidx.appcompat.widget.Toolbar
 import androidx.core.view.MenuItemCompat
 import androidx.core.widget.TextViewCompat
 import com.afollestad.materialdialogs.internal.button.DialogActionButton
@@ -298,18 +297,12 @@ class TextViewDisableAwareColorAdapter : ColorAdapter<TextView> {
 
 class TextViewDrawableAdapter: ColorAdapter<TextView> {
 
-    private var color = Color.TRANSPARENT
-
     override fun applyColor(view: TextView, color: Int) {
-        this.color = color
-
-        for (drawable in view.compoundDrawables.filterNotNull()) {
-            DrawableCompat.setTint(drawable, color)
-        }
+        TextViewCompat.setCompoundDrawableTintList(view, ColorStateList.valueOf(color))
     }
 
     override fun getColor(view: TextView): Int {
-        return color
+        return TextViewCompat.getCompoundDrawableTintList(view)?.defaultColor ?: Color.TRANSPARENT
     }
 }
 

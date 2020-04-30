@@ -105,7 +105,8 @@ class CommentListFragment : UserContentListFragment() {
         styleLevel.bindStatusBar(activity, STATUS_BAR)
 
         val backgrounds = mapOf<View, Int>(commentRibbon to BACKGROUND/*, toolbar to TOOLBAR*/)
-        entry?.profile?.get(entry?.document)?.let { applyTheme(activity, it, styleLevel, backgrounds) }
+
+        (entry?.community ?: entry?.profile)?.get(entry?.document)?.let { applyTheme(activity, it, styleLevel, backgrounds) }
     }
 
     override fun handleLoadSkip(): Boolean {

@@ -15,6 +15,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.kanedias.dybr.fair.dto.Authored
+import com.kanedias.dybr.fair.dto.OwnProfile
 import com.kanedias.dybr.fair.misc.showFullscreenFragment
 import com.kanedias.dybr.fair.misc.getTopFragment
 import com.kanedias.dybr.fair.themes.showThemed
@@ -78,9 +79,12 @@ abstract class UserContentViewHolder<T: Authored>(iv: View, val parentFragment: 
      * @param entity entity to show author from
      */
     private fun showProfile(entity: T) {
-        val activity = itemView.context as AppCompatActivity
         val partialProf = entity.profile.get(entity.document)
+        showProfile(partialProf)
+    }
 
+    open fun showProfile(partialProf: OwnProfile) {
+        val activity = itemView.context as AppCompatActivity
         val dialog = MaterialDialog(activity)
                 .cancelable(false)
                 .title(R.string.please_wait)
@@ -89,13 +93,13 @@ abstract class UserContentViewHolder<T: Authored>(iv: View, val parentFragment: 
         parentFragment.lifecycleScope.launch {
             dialog.showThemed(parentFragment.styleLevel)
 
-            try {
-                val prof = withContext(Dispatchers.IO) { Network.loadProfile(partialProf.id) }
-                val profShow = ProfileFragment().apply { profile = prof }
-                profShow.show(activity.supportFragmentManager, "Showing user profile fragment")
-            } catch (ex: Exception) {
-                Network.reportErrors(itemView.context, ex)
-            }
+            Network.perform(
+                    networkAction = { Network.loadProfile(partialProf.id) },
+                    uiAction = { prof ->
+                        val profShow = ProfileFragment().apply { profile = prof }
+                        profShow.show(activity.supportFragmentManager, "Showing user profile fragment")
+                    }
+            )
 
             dialog.dismiss()
         }
