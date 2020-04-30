@@ -59,6 +59,7 @@ infix fun RecordAccessItem?.toDescription(ctx: Context) : String {
         RecordAccessItem("private") -> descArray[0]
         RecordAccessItem("registered") -> descArray[1]
         RecordAccessItem("favorites") -> descArray[2]
-        else -> descArray[3] // visible for all
+        RecordAccessItem("subscribers") -> descArray[3]
+        else -> descArray[4] // visible for all
     }
 }

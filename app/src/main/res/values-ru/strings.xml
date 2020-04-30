@@ -10,10 +10,11 @@
     </string-array>
 
     <string-array name="permission_types">
-        <item>Не видно никому, кроме вас</item>  <!-- 0 -->
+        <item>Не видно никому, кроме вас</item>                  <!-- 0 -->
         <item>Видно зарегистрированным пользователям</item>      <!-- 1 -->
-        <item>Видно вашему Избранному</item>       <!-- 2 -->
-        <item>Видно всем</item>             <!-- 3 -->
+        <item>Видно вашему избранному</item>                     <!-- 2 -->
+        <item>Видно вашим читателям</item>                       <!-- 3 -->
+        <item>Видно всем</item>                                  <!-- 4 -->
     </string-array>
 
     <string-array name="notification_intervals_desc">

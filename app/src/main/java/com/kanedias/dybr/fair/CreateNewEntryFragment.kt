@@ -151,8 +151,9 @@ class CreateNewEntryFragment : Fragment() {
                 RecordAccessItem("private"),
                 RecordAccessItem("registered"),
                 RecordAccessItem("favorites"),
+                RecordAccessItem("subscribers"),
                 null /* visible for all */))
-        permissionSpinner.setSelection(3) // select "Visible for all" by default
+        permissionSpinner.setSelection(4) // select "Visible for all" by default
 
         // tags autocompletion
         val tags = profile.tags.map { "#${it.name}" }
@@ -230,7 +231,8 @@ class CreateNewEntryFragment : Fragment() {
             RecordAccessItem("private") -> permissionSpinner.setSelection(0)
             RecordAccessItem("registered") -> permissionSpinner.setSelection(1)
             RecordAccessItem("favorites") -> permissionSpinner.setSelection(2)
-            else -> permissionSpinner.setSelection(3) // visible for all
+            RecordAccessItem("subscribers") -> permissionSpinner.setSelection(3)
+            else -> permissionSpinner.setSelection(4) // visible for all
         }
     }
 
@@ -297,12 +299,13 @@ class CreateNewEntryFragment : Fragment() {
     fun submit() {
         // hide keyboard
         val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(view!!.windowToken, 0)
+        imm.hideSoftInputFromWindow(requireView().windowToken, 0)
 
         val access = when(permissionSpinner.selectedItemPosition) {
             0 -> RecordAccessItem("private")
             1 -> RecordAccessItem("registered")
             2 -> RecordAccessItem("favorites")
+            3 -> RecordAccessItem("subscribers")
             else -> null // visible for all
         }
 
@@ -528,7 +531,8 @@ class CreateNewEntryFragment : Fragment() {
                 val accessDrawableRes = when(item) {
                     RecordAccessItem("private") -> R.drawable.eye_crossed
                     RecordAccessItem("registered") -> R.drawable.portrait
-                    RecordAccessItem("favorites") -> R.drawable.star_filled
+                    RecordAccessItem("favorites") -> R.drawable.account_favorited
+                    RecordAccessItem("subscribers") -> R.drawable.account_liked
                     else -> R.drawable.earth
                 }
 
