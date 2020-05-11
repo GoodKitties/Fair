@@ -343,7 +343,6 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
                 try {
                     withContext(Dispatchers.IO) { Network.addToActionList(listItem) }
                     Toast.makeText(activity, R.string.author_hidden_from_feed, Toast.LENGTH_SHORT).show()
-                    parentFragment.loadMore(reset = true)
                 } catch (ex: Exception) {
                     Network.reportErrors(itemView.context, ex)
                 }
