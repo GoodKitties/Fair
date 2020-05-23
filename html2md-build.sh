@@ -13,7 +13,7 @@ mkdir -pv $JNI_LIBS/{armeabi-v7a,arm64-v8a,x86,x86_64}
 cd $PWD/html2md
 
 echo "Setting up cargo configuration"
-mkdir -v .cargo
+mkdir -pv .cargo
 cat <<EOF > .cargo/config
 [target.aarch64-linux-android]
 ar = "$NDK_PATH/aarch64-linux-android-ar"

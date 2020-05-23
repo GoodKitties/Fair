@@ -43,6 +43,7 @@ import com.kanedias.html2md.Html2Markdown
 import com.stfalcon.imageviewer.StfalconImageViewer
 import io.noties.markwon.Markwon
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
+import io.noties.markwon.ext.tables.TablePlugin
 import io.noties.markwon.html.HtmlPlugin
 import io.noties.markwon.image.AsyncDrawableScheduler
 import io.noties.markwon.image.AsyncDrawableSpan
@@ -85,6 +86,7 @@ fun mdRendererFrom(txt: TextView): Markwon {
             .usePlugin(HtmlPlugin.create())
             .usePlugin(GlideImagesPlugin.create(GlideGifSupportStore(txt)))
             .usePlugin(StrikethroughPlugin.create())
+            .usePlugin(TablePlugin.create(txt.context))
             .build()
 }
 
