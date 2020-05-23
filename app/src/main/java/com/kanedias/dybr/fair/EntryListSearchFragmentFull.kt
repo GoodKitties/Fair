@@ -22,7 +22,7 @@ class EntryListSearchFragmentFull: EntryListFragmentFull() {
     private lateinit var filters: Map<String, String>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        filters = arguments!!.getSerializable("filters") as Map<String, String>
+        filters = requireArguments().getSerializable("filters") as Map<String, String>
 
         return super.onCreateView(inflater, container, savedInstanceState)
     }
