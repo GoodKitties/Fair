@@ -6,7 +6,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
@@ -14,13 +13,14 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.text.SpannableStringBuilder
 import android.text.Spanned
+import android.text.TextPaint
 import android.text.style.CharacterStyle
 import android.text.style.ClickableSpan
 import android.text.style.ImageSpan
+import android.text.style.MetricAffectingSpan
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
-import android.webkit.MimeTypeMap
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
@@ -28,6 +28,7 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.preference.PreferenceManager
 import butterknife.BindView
@@ -42,9 +43,17 @@ import com.kanedias.dybr.fair.R
 import com.kanedias.html2md.Html2Markdown
 import com.stfalcon.imageviewer.StfalconImageViewer
 import io.noties.markwon.Markwon
+import io.noties.markwon.MarkwonConfiguration
+import io.noties.markwon.MarkwonVisitor
+import io.noties.markwon.RenderProps
+import io.noties.markwon.core.spans.EmphasisSpan
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.noties.markwon.ext.tables.TablePlugin
 import io.noties.markwon.html.HtmlPlugin
+import io.noties.markwon.html.HtmlTag
+import io.noties.markwon.html.MarkwonHtmlRenderer
+import io.noties.markwon.html.TagHandler
+import io.noties.markwon.html.tag.SimpleTagHandler
 import io.noties.markwon.image.AsyncDrawableScheduler
 import io.noties.markwon.image.AsyncDrawableSpan
 import io.noties.markwon.image.glide.GlideImagesPlugin
@@ -55,10 +64,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
 import org.commonmark.ext.gfm.tables.TablesExtension
+import org.commonmark.node.Emphasis
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
 import java.lang.ref.WeakReference
 import java.util.*
@@ -83,11 +92,38 @@ fun mdRendererFrom(ctx: Context): Markwon {
  */
 fun mdRendererFrom(txt: TextView): Markwon {
     return Markwon.builder(txt.context)
-            .usePlugin(HtmlPlugin.create())
+            .usePlugin(HtmlPlugin.create().addHandler(OfftopSpanHandler()))
             .usePlugin(GlideImagesPlugin.create(GlideGifSupportStore(txt)))
             .usePlugin(StrikethroughPlugin.create())
             .usePlugin(TablePlugin.create(txt.context))
             .build()
+}
+
+/**
+ * Handle `<span class="offtop">` text. Basically just make it a bit less visible than surroundings.
+ */
+class OfftopSpanHandler : SimpleTagHandler() {
+
+    override fun getSpans(configuration: MarkwonConfiguration, renderProps: RenderProps, tag: HtmlTag): Any? {
+        if (tag.attributes()["class"] == "offtop") {
+            return object: MetricAffectingSpan() {
+                override fun updateMeasureState(tp: TextPaint) {
+                    tp.color = ColorUtils.setAlphaComponent(tp.color, 128)
+                }
+
+                override fun updateDrawState(tp: TextPaint) {
+                    tp.color = ColorUtils.setAlphaComponent(tp.color, 128)
+                }
+            }
+        }
+
+        return null
+    }
+
+    override fun supportedTags(): Collection<String> {
+        return listOf("span")
+    }
+
 }
 
 /**
@@ -102,7 +138,7 @@ infix fun TextView.handleMarkdown(html: String) {
     GlobalScope.launch(Dispatchers.Main) {
         // this is computation-intensive task, better do it smoothly
         val span = withContext(Dispatchers.IO) {
-            val mdContent = Html2Markdown().parse(html)
+            val mdContent = Html2Markdown().parseExtended(html)
             val spanned = mdRendererFrom(label).toMarkdown(mdContent) as SpannableStringBuilder
             postProcessSpans(spanned, label)
 
@@ -223,7 +259,7 @@ fun postProcessMore(spanned: SpannableStringBuilder, view: TextView) {
         val innerSpanned = spanned.subSequence(innerRange.first, innerRange.first + innerText.length) // contains all spans there
 
         // content of opening tag may be HTML
-        val auxMd = Html2Markdown().parse(moreText)
+        val auxMd = Html2Markdown().parseExtended(moreText)
         val auxSpanned = mdRendererFrom(view).toMarkdown(auxMd)
 
         spanned.replace(outerRange.first, outerRange.last + 1, auxSpanned) // replace it just with text
@@ -239,7 +275,8 @@ fun postProcessMore(spanned: SpannableStringBuilder, view: TextView) {
                 spanned.removeSpan(this)
                 spanned.replace(start, end, innerSpanned)
 
-                view.text = spanned
+                val textView = widget as TextView
+                textView.text = spanned
                 AsyncDrawableScheduler.schedule(view)
             }
         }

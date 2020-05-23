@@ -18,4 +18,9 @@ class Html2Markdown {
      */
     external fun parse(html: String): String
 
+    /**
+     * Parse with `span` tags intact
+     */
+    external fun parseExtended(html: String): String
+
 }

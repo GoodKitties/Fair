@@ -131,7 +131,7 @@ class CreateNewCommentFragment : Fragment() {
      */
     private fun populateUI() {
         // need to convert entry content (html) to Markdown somehow...
-        val markdown = Html2Markdown().parse(editComment.content)
+        val markdown = Html2Markdown().parseExtended(editComment.content)
         contentInput.setText(markdown)
     }
 

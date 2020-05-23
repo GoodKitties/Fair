@@ -222,7 +222,7 @@ class CreateNewEntryFragment : Fragment() {
         draftSwitch.isChecked = editEntry.state == "published"
         pinSwitch.isChecked = profile.settings.pinnedEntries.contains(editEntry.id)
         // need to convert entry content (html) to Markdown somehow...
-        val markdown = Html2Markdown().parse(editEntry.content)
+        val markdown = Html2Markdown().parseExtended(editEntry.content)
         contentInput.setText(markdown)
         tagsInput.setText(editEntry.tags.joinToString(transform = { "#$it" }, separator = ", "))
 
