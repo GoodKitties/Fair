@@ -1,5 +1,6 @@
 package com.kanedias.dybr.fair
 
+import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import android.view.View
@@ -67,17 +68,22 @@ class NotificationViewHolder(iv: View, val parentFragment: UserContentListFragme
         val activity = it.context as AppCompatActivity
 
         parentFragment.lifecycleScope.launch {
-            try {
-                val linkedEntry = withContext(Dispatchers.IO) { Network.loadEntry(notification.entryId) }
-                val commentsPage = CommentListFragment().apply { entry = linkedEntry }
-                activity.showFullscreenFragment(commentsPage)
+            Network.perform(
+                networkAction = { Network.loadEntry(notification.entryId) },
+                uiAction = { entry ->
+                    val commentsPage = CommentListFragment().apply {
+                        arguments = Bundle().apply {
+                            putSerializable(CommentListFragment.ENTRY_ARG, entry)
+                            putString(CommentListFragment.COMMENT_ID_ARG, notification.comment.get().id)
+                        }
+                    }
+                    activity.showFullscreenFragment(commentsPage)
 
-                if (notification.state == "new") {
-                    switchRead()
+                    if (notification.state == "new") {
+                        switchRead()
+                    }
                 }
-            } catch (ex: Exception) {
-                Network.reportErrors(itemView.context, ex)
-            }
+            )
         }
 
     }

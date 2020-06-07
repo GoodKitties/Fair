@@ -146,7 +146,9 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
      */
     private val commentShow = View.OnClickListener {
         val activity = it.context as AppCompatActivity
-        val commentsPage = CommentListFragment().apply { entry = this@EntryViewHolder.entry }
+        val commentsPage = CommentListFragment().apply {
+            arguments = Bundle().apply { putSerializable(CommentListFragment.ENTRY_ARG, this@EntryViewHolder.entry) }
+        }
         activity.showFullscreenFragment(commentsPage)
     }
 

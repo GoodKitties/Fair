@@ -432,7 +432,9 @@ class MainActivity : AppCompatActivity() {
                             val entry = withContext(Dispatchers.IO) { Network.loadEntry(notification.entryId) }
 
                             // launch comment list
-                            val frag = CommentListFragment().apply { this.entry = entry }
+                            val frag = CommentListFragment().apply {
+                                arguments = Bundle().apply { putSerializable(CommentListFragment.ENTRY_ARG, entry) }
+                            }
                             showFullscreenFragment(frag)
 
                             // mark notification read
@@ -498,7 +500,9 @@ class MainActivity : AppCompatActivity() {
                         }
                         3 -> { // the case for /blog/<slug>/<entry>
                             val entry = withContext(Dispatchers.IO) { Network.loadEntry(address[2]) }
-                            CommentListFragment().apply { this.entry = entry }
+                            CommentListFragment().apply {
+                                arguments = Bundle().apply { putSerializable(CommentListFragment.ENTRY_ARG, entry) }
+                            }
                         }
                         else -> return
                     }

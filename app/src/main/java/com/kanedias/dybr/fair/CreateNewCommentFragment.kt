@@ -43,6 +43,8 @@ import java.util.*
 class CreateNewCommentFragment : Fragment() {
 
     companion object {
+        const val ENTRY_ARG = "entry"
+
         const val AUTHOR_LINK = "author-link"
         const val REPLY_TEXT = "reply-text"
     }

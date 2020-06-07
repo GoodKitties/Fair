@@ -1,5 +1,6 @@
 package com.kanedias.dybr.fair.misc
 
+import android.util.TypedValue
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -90,4 +91,15 @@ fun View.onClickSingleOnly(action: suspend (View) -> Unit) {
     setOnClickListener {
         eventActor.offer(it)
     }
+}
+
+/**
+ * Resolve attribute effectively
+ * @param attr attribute, for example [R.attr.toolbarPopupOverrideStyle]
+ * @return resolved reference
+ */
+fun View.resolveAttr(attr: Int): Int {
+    val typedValue = TypedValue()
+    this.context.theme.resolveAttribute(attr, typedValue, true)
+    return typedValue.data
 }

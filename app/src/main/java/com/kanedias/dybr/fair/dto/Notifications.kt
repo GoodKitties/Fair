@@ -10,7 +10,7 @@ import moe.banana.jsonapi2.Resource
  * Request to create notification. Not used as-is as notifications are usually created on server,
  * from the client side only PATCH requests updating the state will follow.
  */
-@JsonApi(type = "notifications", policy = Policy.DESERIALIZATION_ONLY)
+@JsonApi(type = "notifications", policy = Policy.SERIALIZATION_ONLY)
 class NotificationRequest : Resource() {
 
     @Json(name = "state")

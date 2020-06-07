@@ -34,7 +34,7 @@ abstract class UserContentListFragment : Fragment() {
     abstract fun getRibbonAdapter(): LoadMoreAdapter
     abstract fun retrieveData(pageNum: Int, starter: Long) : () -> List<Resource>
 
-    private var pageStarter = System.currentTimeMillis() / 1000
+    protected var pageStarter = System.currentTimeMillis() / 1000
     protected var allLoaded = false
 
     lateinit var styleLevel: StyleLevel
@@ -75,9 +75,7 @@ abstract class UserContentListFragment : Fragment() {
                 }
                 onMoreDataLoaded(success)
             } catch (ex: Exception) {
-                if (isActive) {
-                    Network.reportErrors(context, ex)
-                }
+                Network.reportErrors(context, ex)
             }
 
             getRefresher().isRefreshing = false
@@ -88,7 +86,7 @@ abstract class UserContentListFragment : Fragment() {
      * Update notification ribbon with newly loaded values.
      * @param loaded document with notifications for active profile and links to pages that was loaded
      */
-    private fun onMoreDataLoaded(loaded: List<Resource>) {
+    open fun onMoreDataLoaded(loaded: List<Resource>) {
         if (loaded.size < PAGE_SIZE) {
             allLoaded = true
         }
@@ -163,30 +161,30 @@ abstract class UserContentListFragment : Fragment() {
             return object: RecyclerView.ViewHolder(pbar) {}
         }
 
-        fun removeItem(position: Int) {
+        open fun removeItem(position: Int) {
             items.removeAt(position)
             notifyItemRemoved(position)
         }
 
-        fun addItem(item: Resource) {
+        open fun addItem(item: Resource) {
             val insertionPoint = itemCount
             items.add(item)
             notifyItemInserted(insertionPoint)
         }
 
-        fun addItems(list: List<Resource>) {
+        open fun addItems(list: List<Resource>) {
             val insertionPoint = itemCount
             items.addAll(list)
             notifyItemRangeInserted(insertionPoint, list.size)
         }
 
-        fun clearItems() {
+        open fun clearItems() {
             val itemsCleared = items.size
             items.clear()
             notifyItemRangeRemoved(headers.size, itemsCleared)
         }
 
-        fun replaceHeader(pos: Int, entity: Authored) {
+        open fun replaceHeader(pos: Int, entity: Authored) {
             headers[pos] = entity
             notifyItemChanged(pos)
         }

@@ -8,6 +8,7 @@ import android.os.Bundle
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import android.view.View
 import android.widget.*
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import butterknife.BindView
 import butterknife.BindViews
@@ -34,7 +35,7 @@ import moe.banana.jsonapi2.ArrayDocument
  *
  * Created on 05.11.17
  */
-class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, private val activity: MainActivity) {
+class Sidebar(private val drawer: DrawerLayout, private val activity: MainActivity) {
 
     private val fragManager = activity.supportFragmentManager
 
@@ -86,12 +87,20 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
     @OnClick(R.id.sidebar_header_area)
     fun toggleHeader() {
         if (accountsArea.visibility == View.GONE) {
-            expand(accountsArea)
-            flipAnimator(false, headerFlip).start()
+            showHeader()
         } else {
-            collapse(accountsArea)
-            flipAnimator(true, headerFlip).start()
+            hideHeader()
         }
+    }
+
+    fun showHeader() {
+        expand(accountsArea)
+        flipAnimator(false, headerFlip).start()
+    }
+
+    fun hideHeader() {
+        collapse(accountsArea)
+        flipAnimator(true, headerFlip).start()
     }
 
     /**
@@ -283,6 +292,12 @@ class Sidebar(private val drawer: androidx.drawerlayout.widget.DrawerLayout, pri
             activity.reLogin(Auth.guest)
         }
         accountsArea.addView(guestRow)
+
+        // if we are logged in there's no point in showing accounts row
+        // unless we are specifically asked to
+        if (Auth.profile != null) {
+            hideHeader()
+        }
     }
 
     /**
