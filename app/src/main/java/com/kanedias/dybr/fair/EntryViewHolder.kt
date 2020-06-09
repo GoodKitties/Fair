@@ -625,14 +625,17 @@ class EntryViewHolder(iv: View, parentFragment: UserContentListFragment, private
 
         override fun onClick(widget: View) {
             val activity = itemView.context as AppCompatActivity
+            val filters = hashMapOf("tag" to tagValue)
+
+            val insideBlog = parentFragment is EntryListFragmentFull
+            val tagInOurBlog = parentFragment is EntryListFragment && parentFragment.profile == Auth.profile
+            if (insideBlog || tagInOurBlog) {
+                // we're browsing one person's blog, show only their entries
+                filters["profile_id"] = this@EntryViewHolder.profile.id
+            }
 
             val searchFragment = EntryListSearchFragmentFull().apply {
-                arguments = Bundle().apply {
-                    putSerializable("filters", hashMapOf(
-                            "tag" to tagValue,
-                            "profile_id" to this@EntryViewHolder.profile.id)
-                    )
-                }
+                arguments = Bundle().apply { putSerializable("filters", filters) }
             }
             activity.showFullscreenFragment(searchFragment)
         }

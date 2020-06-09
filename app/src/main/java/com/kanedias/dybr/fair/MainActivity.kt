@@ -372,7 +372,8 @@ class MainActivity : AppCompatActivity() {
 
         // skip re-login if it's the same profile, our token is still valid and we have profile loaded
         if (acc == Auth.user && Auth.user.accessToken != null && Auth.profile != null) {
-            if (JWT(Auth.user.accessToken!!).expiresAt!! > Date()) {
+            val currentToken = JWT(Auth.user.accessToken!!)
+            if (currentToken.expiresAt!! > Date()) {
                 refresh()
                 return
             }
@@ -433,7 +434,10 @@ class MainActivity : AppCompatActivity() {
 
                             // launch comment list
                             val frag = CommentListFragment().apply {
-                                arguments = Bundle().apply { putSerializable(CommentListFragment.ENTRY_ARG, entry) }
+                                arguments = Bundle().apply {
+                                    putSerializable(CommentListFragment.ENTRY_ARG, entry)
+                                    putString(CommentListFragment.COMMENT_ID_ARG, notification.comment.get().id)
+                                }
                             }
                             showFullscreenFragment(frag)
 
@@ -491,6 +495,7 @@ class MainActivity : AppCompatActivity() {
     private suspend fun consumeCallingUrl(cause: Intent) {
         try {
             val address = cause.data?.pathSegments ?: return // it's in the form of /blog/<slug>/[<entry>]
+            val commentId = cause.data?.fragment
             when(address[0]) {
                 "blog" -> {
                     val fragment = when (address.size) {
@@ -501,7 +506,10 @@ class MainActivity : AppCompatActivity() {
                         3 -> { // the case for /blog/<slug>/<entry>
                             val entry = withContext(Dispatchers.IO) { Network.loadEntry(address[2]) }
                             CommentListFragment().apply {
-                                arguments = Bundle().apply { putSerializable(CommentListFragment.ENTRY_ARG, entry) }
+                                arguments = Bundle().apply {
+                                    putSerializable(CommentListFragment.ENTRY_ARG, entry)
+                                    putString(CommentListFragment.COMMENT_ID_ARG, commentId)
+                                }
                             }
                         }
                         else -> return

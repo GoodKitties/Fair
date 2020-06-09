@@ -174,12 +174,16 @@ class CommentListFragment : UserContentListFragment() {
                     }
 
                     // should be lower than comment index search, or last comments won't be found
-                    if (allLoaded)
+                    if (allLoaded) {
                         break
+                    }
                 }
 
             } catch (ex: Exception) {
                 Network.reportErrors(context, ex)
+            } finally {
+                // we don't need to highlight the comment every time
+                requireArguments().remove(COMMENT_ID_ARG)
             }
 
             getRefresher().isRefreshing = false
